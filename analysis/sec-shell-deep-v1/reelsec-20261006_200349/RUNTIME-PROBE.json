@@ -1,0 +1,16 @@
+{
+  "events": [],
+  "manifest": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/AndroidManifest.xml",
+  "missing_requirements": [
+    "adb",
+    "frida_cli"
+  ],
+  "module": "libsaasCorePlayer.so",
+  "package": "com.newleaf.app.android.victor",
+  "reason": "missing: adb,frida_cli",
+  "status": "RUNTIME_ENVIRONMENT_UNAVAILABLE",
+  "tooling": {
+    "adb": null,
+    "frida": null
+  }
+}
