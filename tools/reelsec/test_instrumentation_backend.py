@@ -58,6 +58,34 @@ class InstrumentationBackendTests(unittest.TestCase):
             self.assertEqual(result["target"], str(target.resolve()))
             self.assertEqual(result["discovery"], "STRUCTURAL_CONTENT")
 
+    def test_real_secshell_shape_is_discovered(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            target = root / "smali" / "com" / "SecShell" / "SecShell" / "ApplicationC0043AW.smali"
+            target.parent.mkdir(parents=True)
+            (root / "AndroidManifest.xml").write_text(
+                '<manifest package="com.newleaf.app.android.victor">\\n'
+                '  <application android:name="com.SecShell.SecShell.ApplicationC0043AW"/>\\n'
+                '</manifest>\\n',
+                encoding="utf-8",
+            )
+            target.write_text(
+                ".class public Lcom/SecShell/SecShell/ApplicationC0043AW;\\n"
+                ".super Landroid/app/Application;\\n"
+                ".method protected attachBaseContext(Landroid/content/Context;)V\\n"
+                "    .locals 6\\n"
+                "    const-string v0, \"SecShell\"\\n"
+                "    invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\\n"
+                "    invoke-super {p0, p1}, Landroid/app/Application;->attachBaseContext(Landroid/content/Context;)V\\n"
+                "    return-void\\n"
+                ".end method\\n",
+                encoding="utf-8",
+            )
+            result = plan_secshell_injection(root)
+            self.assertEqual(result["status"], INSTRUMENTATION_READY)
+            self.assertEqual(result["class_name"], "com/SecShell/SecShell/ApplicationC0043AW")
+            self.assertTrue(result["candidates"])
+
     def test_missing_anchor_is_blocked(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
