@@ -1,0 +1,407 @@
+
+===== EXACT STRING XREF =====
+STRING: enableProjection
+TARGET: 0x5a42a6
+ADRP:   0xe2f88  adrp	x10, 0x5a4000
+ADD:    0xe2f90  add	x10, x10, #0x2a6
+FINAL:  0x5a42a6
+  000e2f4c: add	x13, x20, #0x831
+  000e2f50: add	x8, x8, #0xa50
+  000e2f54: ldr	q0, [x12]
+  000e2f58: add	x9, x20, #0x840
+  000e2f5c: str	w10, [x13]
+  000e2f60: add	x10, x20, #0x881
+  000e2f64: mov	w13, #0x6576            // =25974
+  000e2f68: add	x8, x8, #0x10
+  000e2f6c: strb	wzr, [sp, #0x895]
+  000e2f70: str	x8, [sp, #0x8a0]
+  000e2f74: str	x9, [sp, #0x8c0]
+  000e2f78: str	xzr, [sp, #0x8e0]
+  000e2f7c: str	q1, [sp, #0x8d0]
+  000e2f80: strb	w22, [sp, #0x8d0]
+  000e2f84: strh	w13, [x10]
+  000e2f88: adrp	x10, 0x5a4000
+  000e2f8c: add	x11, x20, #0x871
+  000e2f90: add	x10, x10, #0x2a6
+  000e2f94: str	q0, [x11]
+  000e2f98: ldr	q0, [x10]
+  000e2f9c: add	x12, x20, #0x890
+  000e2fa0: adrp	x8, 0x710000 <_ZTV8VodAsset+0xdc0>
+  000e2fa4: add	x8, x8, #0xaa8
+  000e2fa8: str	x12, [sp, #0x910]
+  000e2fac: adrp	x12, 0x5a4000
+  000e2fb0: add	x9, x20, #0x8c1
+  000e2fb4: adrp	x11, 0x710000 <_ZTV8VodAsset+0xdc0>
+  000e2fb8: add	x8, x8, #0x10
+  000e2fbc: add	x12, x12, #0x2b7
+  000e2fc0: add	x11, x11, #0xb00
+  000e2fc4: strb	wzr, [sp, #0x8e3]
+  000e2fc8: str	x8, [sp, #0x8f0]
+  000e2fcc: str	q1, [sp, #0x920]
+  000e2fd0: strb	w24, [sp, #0x920]
+  000e2fd4: str	xzr, [sp, #0x930]
+  000e2fd8: str	q0, [x9]
+  000e2fdc: ldr	q0, [x12]
+
+
+===== EXACT STRING XREF =====
+STRING: mEnableProjection
+TARGET: 0x59da85
+ADRP:   0xfc90c  adrp	x2, 0x59d000 <__cxa_demangle+0x182b4>
+ADD:    0xfc910  add	x2, x2, #0xa85
+FINAL:  0x59da85
+  000fc8d0: mov	x0, x19
+  000fc8d4: mov	x3, x21
+  000fc8d8: blr	x8
+  000fc8dc: str	x0, [x24, #0xb8]
+  000fc8e0: ldr	x8, [x19]
+  000fc8e4: ldr	x1, [x23, #0xcd0]
+  000fc8e8: adrp	x2, 0x59d000 <__cxa_demangle+0x182b4>
+  000fc8ec: add	x2, x2, #0xa6f
+  000fc8f0: ldr	x8, [x8, #0x2f0]
+  000fc8f4: mov	x0, x19
+  000fc8f8: mov	x3, x21
+  000fc8fc: blr	x8
+  000fc900: str	x0, [x24, #0xc0]
+  000fc904: ldr	x8, [x19]
+  000fc908: ldr	x1, [x23, #0xcd0]
+  000fc90c: adrp	x2, 0x59d000 <__cxa_demangle+0x182b4>
+  000fc910: add	x2, x2, #0xa85
+  000fc914: ldr	x8, [x8, #0x2f0]
+  000fc918: mov	x0, x19
+  000fc91c: mov	x3, x21
+  000fc920: blr	x8
+  000fc924: str	x0, [x24, #0xc8]
+  000fc928: ldr	x8, [x19]
+  000fc92c: ldr	x1, [x23, #0xcd0]
+  000fc930: adrp	x2, 0x59d000 <__cxa_demangle+0x182b4>
+  000fc934: add	x2, x2, #0xa97
+  000fc938: ldr	x8, [x8, #0x2f0]
+  000fc93c: mov	x0, x19
+  000fc940: mov	x3, x21
+  000fc944: blr	x8
+  000fc948: str	x0, [x24, #0xd0]
+  000fc94c: ldr	x8, [x19]
+  000fc950: ldr	x1, [x23, #0xcd0]
+  000fc954: adrp	x2, 0x59d000 <__cxa_demangle+0x182b4>
+  000fc958: add	x2, x2, #0xaa4
+  000fc95c: ldr	x8, [x8, #0x2f0]
+
+
+===== EXACT STRING XREF =====
+STRING: CaptureScreen
+TARGET: 0x5a3059
+ADRP:   0x130438  adrp	x10, 0x5a3000
+ADD:    0x130440  add	x10, x10, #0x59
+FINAL:  0x5a3059
+  001303fc: bl	0xf8614 <.text+0x17d54>
+  00130400: ldr	x8, [x20, #0x28]
+  00130404: ldr	x9, [sp, #0x18]
+  00130408: cmp	x8, x9
+  0013040c: b.ne	0x130424 <_ZN6Cicada18MediaPreloadConfigaSEOS0_+0x4130>
+  00130410: and	w0, w19, #0x1
+  00130414: ldp	x29, x30, [sp, #0x30]
+  00130418: ldp	x20, x19, [sp, #0x20]
+  0013041c: add	sp, sp, #0x40
+  00130420: ret
+  00130424: bl	0xd8b00 <__stack_chk_fail@plt>
+  00130428: sub	sp, sp, #0x40
+  0013042c: str	x19, [sp, #0x20]
+  00130430: stp	x29, x30, [sp, #0x30]
+  00130434: add	x29, sp, #0x30
+  00130438: adrp	x10, 0x5a3000
+  0013043c: mrs	x19, TPIDR_EL0
+  00130440: add	x10, x10, #0x59
+  00130444: ldr	x9, [x19, #0x28]
+  00130448: ldr	x11, [x10]
+  0013044c: ldur	x10, [x10, #0x5]
+  00130450: mov	w8, #0x1a               // =26
+  00130454: mov	x1, sp
+  00130458: str	x9, [sp, #0x18]
+  0013045c: stp	xzr, xzr, [sp]
+  00130460: str	xzr, [sp, #0x10]
+  00130464: strb	w8, [sp]
+  00130468: stur	x11, [sp, #0x1]
+  0013046c: stur	x10, [sp, #0x6]
+  00130470: strb	wzr, [sp, #0xe]
+  00130474: bl	0x12e368 <_ZN6Cicada18MediaPreloadConfigaSEOS0_+0x2074>
+  00130478: mov	x0, sp
+  0013047c: bl	0xf8614 <.text+0x17d54>
+  00130480: ldr	x8, [x19, #0x28]
+  00130484: ldr	x9, [sp, #0x18]
+  00130488: cmp	x8, x9
+  0013048c: b.ne	0x1304a0 <_ZN6Cicada18MediaPreloadConfigaSEOS0_+0x41ac>
+
+
+===== EXACT STRING XREF =====
+STRING: apsaraCaptureScreen
+TARGET: 0x5a611f
+ADRP:   0x1467cc  adrp	x3, 0x5a6000
+ADD:    0x1467dc  add	x3, x3, #0x11f
+FINAL:  0x5a611f
+  00146790: ldr	x21, [sp], #0x30
+  00146794: b	0x14c104 <_ZN13SaasMediaInfoaSERKS_+0x1ed0>
+  00146798: ldp	x29, x30, [sp, #0x20]
+  0014679c: ldp	x20, x19, [sp, #0x10]
+  001467a0: ldr	x21, [sp], #0x30
+  001467a4: ret
+  001467a8: stp	x22, x21, [sp, #-0x30]!
+  001467ac: stp	x20, x19, [sp, #0x10]
+  001467b0: stp	x29, x30, [sp, #0x20]
+  001467b4: add	x29, sp, #0x20
+  001467b8: mov	x21, x3
+  001467bc: mov	x19, x2
+  001467c0: mov	x20, x1
+  001467c4: adrp	x1, 0x5a4000
+  001467c8: adrp	x2, 0x5a5000
+  001467cc: adrp	x3, 0x5a6000
+  001467d0: mov	x22, x0
+  001467d4: add	x1, x1, #0x3b0
+  001467d8: add	x2, x2, #0x32
+  001467dc: add	x3, x3, #0x11f
+  001467e0: orr	w0, wzr, #0x20
+  001467e4: mov	x4, x21
+  001467e8: bl	0xdde80 <__log_print@plt>
+  001467ec: ldr	x8, [x21, #0x910]
+  001467f0: cbz	x8, 0x146814 <_ZN17AvaliablePlayInfoaSEOS_+0x79f4>
+  001467f4: mov	x2, x20
+  001467f8: mov	x3, x19
+  001467fc: ldp	x29, x30, [sp, #0x20]
+  00146800: ldp	x20, x19, [sp, #0x10]
+  00146804: add	x0, x21, #0x8f0
+  00146808: mov	x1, x22
+  0014680c: ldp	x22, x21, [sp], #0x30
+  00146810: b	0x14bbdc <_ZN13SaasMediaInfoaSERKS_+0x19a8>
+  00146814: ldp	x29, x30, [sp, #0x20]
+  00146818: ldp	x20, x19, [sp, #0x10]
+  0014681c: ldp	x22, x21, [sp], #0x30
+  00146820: ret
+  00146824: sub	sp, sp, #0x90
+  00146828: stp	x24, x23, [sp, #0x50]
+
+
+===== EXACT STRING XREF =====
+STRING: CaptureScreen
+TARGET: 0x5a3059
+ADRP:   0x14bb7c  adrp	x3, 0x5a3000
+ADD:    0x14bb88  add	x3, x3, #0x59
+FINAL:  0x5a3059
+  0014bb40: ldp	x29, x30, [sp, #0x20]
+  0014bb44: ldp	x20, x19, [sp, #0x10]
+  0014bb48: adrp	x1, 0x5a4000
+  0014bb4c: adrp	x2, 0x5a4000
+  0014bb50: add	x1, x1, #0x3b0
+  0014bb54: add	x2, x2, #0xeec
+  0014bb58: orr	w0, wzr, #0x10
+  0014bb5c: ldr	x21, [sp], #0x30
+  0014bb60: b	0xdde80 <__log_print@plt>
+  0014bb64: str	x19, [sp, #-0x20]!
+  0014bb68: stp	x29, x30, [sp, #0x10]
+  0014bb6c: add	x29, sp, #0x10
+  0014bb70: mov	x19, x0
+  0014bb74: adrp	x1, 0x5a4000
+  0014bb78: adrp	x2, 0x5a3000
+  0014bb7c: adrp	x3, 0x5a3000
+  0014bb80: add	x1, x1, #0x3b0
+  0014bb84: add	x2, x2, #0x493
+  0014bb88: add	x3, x3, #0x59
+  0014bb8c: orr	w0, wzr, #0x20
+  0014bb90: mov	x4, x19
+  0014bb94: bl	0xdde80 <__log_print@plt>
+  0014bb98: ldr	x0, [x19, #0x9b0]
+  0014bb9c: cbz	x0, 0x14bbac <_ZN13SaasMediaInfoaSERKS_+0x1978>
+  0014bba0: ldp	x29, x30, [sp, #0x10]
+  0014bba4: ldr	x19, [sp], #0x20
+  0014bba8: b	0x1f8b30 <_ZN6Cicada14globalSettings16getIpResolveTypeEv+0x47ac>
+  0014bbac: ldr	x8, [x19, #0x910]
+  0014bbb0: cbz	x8, 0x14bbd0 <_ZN13SaasMediaInfoaSERKS_+0x199c>
+  0014bbb4: ldp	x29, x30, [sp, #0x10]
+  0014bbb8: add	x0, x19, #0x8f0
+  0014bbbc: mov	x1, xzr
+  0014bbc0: mov	x2, xzr
+  0014bbc4: mov	x3, xzr
+  0014bbc8: ldr	x19, [sp], #0x20
+  0014bbcc: b	0x14bbdc <_ZN13SaasMediaInfoaSERKS_+0x19a8>
+  0014bbd0: ldp	x29, x30, [sp, #0x10]
+  0014bbd4: ldr	x19, [sp], #0x20
+
+
+===== EXACT STRING XREF =====
+STRING: enableProjection
+TARGET: 0x5a42a6
+ADRP:   0x1fc3b0  adrp	x1, 0x5a4000
+ADD:    0x1fc3b4  add	x1, x1, #0x2a6
+FINAL:  0x5a42a6
+  001fc374: add	x1, x1, #0x291
+  001fc378: add	x0, sp, #0x8
+  001fc37c: mov	w2, #0x14               // =20
+  001fc380: stp	xzr, xzr, [sp, #0x8]
+  001fc384: str	xzr, [sp, #0x18]
+  001fc388: bl	0xf92d8 <JNI_OnUnload+0x974>
+  001fc38c: ldr	x8, [x21]
+  001fc390: ldrb	w2, [x20, #0xd7]
+  001fc394: add	x1, sp, #0x8
+  001fc398: mov	x0, x21
+  001fc39c: ldr	x8, [x8, #0x28]
+  001fc3a0: blr	x8
+  001fc3a4: add	x0, sp, #0x8
+  001fc3a8: bl	0xf8614 <.text+0x17d54>
+  001fc3ac: ldr	x21, [sp, #0x20]
+  001fc3b0: adrp	x1, 0x5a4000
+  001fc3b4: add	x1, x1, #0x2a6
+  001fc3b8: add	x0, sp, #0x8
+  001fc3bc: orr	w2, wzr, #0x10
+  001fc3c0: stp	xzr, xzr, [sp, #0x8]
+  001fc3c4: str	xzr, [sp, #0x18]
+  001fc3c8: bl	0xf92d8 <JNI_OnUnload+0x974>
+  001fc3cc: ldr	x8, [x21]
+  001fc3d0: ldrb	w2, [x20, #0xd9]
+  001fc3d4: add	x1, sp, #0x8
+  001fc3d8: mov	x0, x21
+  001fc3dc: ldr	x8, [x8, #0x28]
+  001fc3e0: blr	x8
+  001fc3e4: add	x0, sp, #0x8
+  001fc3e8: bl	0xf8614 <.text+0x17d54>
+  001fc3ec: ldr	x21, [sp, #0x20]
+  001fc3f0: adrp	x1, 0x5a4000
+  001fc3f4: add	x1, x1, #0x2b7
+  001fc3f8: add	x0, sp, #0x8
+  001fc3fc: mov	w2, #0x12               // =18
+  001fc400: stp	xzr, xzr, [sp, #0x8]
+
+
+===== EXACT STRING XREF =====
+STRING: enableProjection
+TARGET: 0x5a42a6
+ADRP:   0x1fcdd8  adrp	x1, 0x5a4000
+ADD:    0x1fcddc  add	x1, x1, #0x2a6
+FINAL:  0x5a42a6
+  001fcd9c: mov	x0, sp
+  001fcda0: mov	w2, #0x14               // =20
+  001fcda4: stp	xzr, xzr, [sp]
+  001fcda8: str	xzr, [sp, #0x10]
+  001fcdac: bl	0xf92d8 <JNI_OnUnload+0x974>
+  001fcdb0: ldrb	w2, [x21, #0xd7]
+  001fcdb4: mov	x1, sp
+  001fcdb8: mov	x0, x19
+  001fcdbc: bl	0xde670 <_ZN14CicadaJSONItem8addValueERKNSt6__ndk112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEEb@plt>
+  001fcdc0: mov	x0, sp
+  001fcdc4: bl	0xf8614 <.text+0x17d54>
+  001fcdc8: ldrb	w8, [x20, #0xd9]
+  001fcdcc: ldrb	w9, [x21, #0xd9]
+  001fcdd0: cmp	w8, w9
+  001fcdd4: b.eq	0x1fce0c <_ZN6Cicada17MediaPlayerConfig15getModifyConfigERKS0_S2_+0x88c>
+  001fcdd8: adrp	x1, 0x5a4000
+  001fcddc: add	x1, x1, #0x2a6
+  001fcde0: mov	x0, sp
+  001fcde4: orr	w2, wzr, #0x10
+  001fcde8: stp	xzr, xzr, [sp]
+  001fcdec: str	xzr, [sp, #0x10]
+  001fcdf0: bl	0xf92d8 <JNI_OnUnload+0x974>
+  001fcdf4: ldrb	w2, [x21, #0xd9]
+  001fcdf8: mov	x1, sp
+  001fcdfc: mov	x0, x19
+  001fce00: bl	0xde670 <_ZN14CicadaJSONItem8addValueERKNSt6__ndk112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEEb@plt>
+  001fce04: mov	x0, sp
+  001fce08: bl	0xf8614 <.text+0x17d54>
+  001fce0c: ldr	x8, [x20, #0xe0]
+  001fce10: ldr	x9, [x21, #0xe0]
+  001fce14: cmp	x8, x9
+  001fce18: b.eq	0x1fce54 <_ZN6Cicada17MediaPlayerConfig15getModifyConfigERKS0_S2_+0x8d4>
+  001fce1c: adrp	x1, 0x5a4000
+  001fce20: add	x1, x1, #0x2b7
+  001fce24: mov	x0, sp
+  001fce28: mov	w2, #0x12               // =18
+
+
+===== EXACT STRING XREF =====
+STRING: ContentProtection
+TARGET: 0x5bb312
+ADRP:   0x25e1a0  adrp	x1, 0x5bb000
+ADD:    0x25e1ac  add	x1, x1, #0x312
+FINAL:  0x5bb312
+  0025e164: ldr	x1, [x23]
+  0025e168: add	x3, sp, #0x60
+  0025e16c: mov	x0, x21
+  0025e170: mov	x2, x27
+  0025e174: bl	0x25ea94 <_ZN6Cicada12avAESEncrypt7encryptEPhPKhiS1_+0x147a0>
+  0025e178: ldr	x22, [x23]
+  0025e17c: adrp	x5, 0x5bb000
+  0025e180: orr	w0, wzr, #0x30
+  0025e184: mov	w4, #0x116              // =278
+  0025e188: mov	x1, x25
+  0025e18c: mov	x2, x24
+  0025e190: mov	x3, x25
+  0025e194: add	x5, x5, #0x2e4
+  0025e198: bl	0xdde80 <__log_print@plt>
+  0025e19c: cbz	x22, 0x25e3b0 <_ZN6Cicada12avAESEncrypt7encryptEPhPKhiS1_+0x140bc>
+  0025e1a0: adrp	x1, 0x5bb000
+  0025e1a4: sub	x0, x29, #0x90
+  0025e1a8: mov	w2, #0x11               // =17
+  0025e1ac: add	x1, x1, #0x312
+  0025e1b0: stp	xzr, xzr, [x29, #-0x90]
+  0025e1b4: stur	xzr, [x29, #-0x80]
+  0025e1b8: bl	0xf92d8 <JNI_OnUnload+0x974>
+  0025e1bc: sub	x8, x29, #0x78
+  0025e1c0: sub	x1, x29, #0x90
+  0025e1c4: mov	x0, x22
+  0025e1c8: mov	w2, wzr
+  0025e1cc: bl	0x2eea9c <_ZN12TextureFrameD0Ev+0x4c>
+  0025e1d0: sub	x0, x29, #0x90
+  0025e1d4: bl	0xf8614 <.text+0x17d54>
+  0025e1d8: ldp	x20, x8, [x29, #-0x78]
+  0025e1dc: b	0x25e200 <_ZN6Cicada12avAESEncrypt7encryptEPhPKhiS1_+0x13f0c>
+  0025e1e0: add	x0, sp, #0x80
+  0025e1e4: bl	0xf8614 <.text+0x17d54>
+  0025e1e8: add	x0, sp, #0x98
+  0025e1ec: bl	0xf8614 <.text+0x17d54>
+  0025e1f0: sub	x0, x29, #0x90
+  0025e1f4: bl	0xf8614 <.text+0x17d54>
+  0025e1f8: ldur	x8, [x29, #-0x70]
+
+
+===== EXACT STRING XREF =====
+STRING: setForceInsecureDecoder
+TARGET: 0x5bc62e
+ADRP:   0x27af94  adrp	x2, 0x5bc000
+ADD:    0x27afa0  add	x2, x2, #0x62e
+FINAL:  0x5bc62e
+  0027af58: adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  0027af5c: str	x0, [x8, #0x270]
+  0027af60: ldr	x8, [x19]
+  0027af64: ldr	x1, [x22, #0x260]
+  0027af68: adrp	x2, 0x5bc000
+  0027af6c: adrp	x3, 0x5bc000
+  0027af70: ldr	x8, [x8, #0x108]
+  0027af74: add	x2, x2, #0x60b
+  0027af78: add	x3, x3, #0x616
+  0027af7c: mov	x0, x19
+  0027af80: blr	x8
+  0027af84: adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  0027af88: str	x0, [x8, #0x278]
+  0027af8c: ldr	x8, [x19]
+  0027af90: ldr	x1, [x22, #0x260]
+  0027af94: adrp	x2, 0x5bc000
+  0027af98: adrp	x3, 0x59d000 <__cxa_demangle+0x182b4>
+  0027af9c: ldr	x8, [x8, #0x108]
+  0027afa0: add	x2, x2, #0x62e
+  0027afa4: add	x3, x3, #0xe71
+  0027afa8: mov	x0, x19
+  0027afac: blr	x8
+  0027afb0: adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  0027afb4: str	x0, [x8, #0x280]
+  0027afb8: ldr	x8, [x19]
+  0027afbc: ldr	x1, [x22, #0x260]
+  0027afc0: adrp	x2, 0x5bc000
+  0027afc4: adrp	x3, 0x5bc000
+  0027afc8: ldr	x8, [x8, #0x108]
+  0027afcc: add	x2, x2, #0x646
+  0027afd0: add	x3, x3, #0x655
+  0027afd4: mov	x0, x19
+  0027afd8: blr	x8
+  0027afdc: adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  0027afe0: str	x0, [x8, #0x288]
+  0027afe4: ldr	x8, [x19]
+  0027afe8: ldr	x1, [x22, #0x260]
+  0027afec: adrp	x2, 0x5bc000
+
