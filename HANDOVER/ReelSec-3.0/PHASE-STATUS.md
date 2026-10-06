@@ -176,3 +176,14 @@ The next campaign run is therefore the first meaningful test of the actual Apkto
 `DECODE_FAILED_RAW_FALLBACK` -> Apktool has a genuine compatibility/input problem, and the raw fallback becomes the honest native-only path.
 
 The previous raw-only run also showed 3885 extracted files, one DEX, and 50 native libraries bound to the supplied APK SHA-256. Runtime package discovery remains enhanced by binary AXML parsing plus an installed SDK-tool fallback.
+## Long-operation observability correction — 2026-10-06
+
+The 23:32 phone run exposed a UX gap: Apktool remained at `APK decode RUNNING` with no terminal output for more than five minutes. This did not prove a crash; the command wrapper buffered child output until process completion, so a live process looked identical to a hang.
+
+ReelSec main now includes `run_with_heartbeat()` for long operations. Apktool decode writes its live output to an isolated log while ReelSec emits a 10-second heartbeat containing elapsed time, process liveness, and log size. The CLI therefore shows ongoing activity until completion, failure, or the 300-second timeout.
+
+The progress renderer also computes percentage from completed stages, not from the stage currently running.
+
+Latest source commit: 7f621067d11f2dce22997259cfcea83d11a0bb91.
+
+Next validation: rerun the campaign. During APK decode there should now be periodic `[apktool] RUNNING elapsed=... process=alive ...` lines. A 300-second timeout will become an explicit failure instead of a silent wait.
