@@ -37,6 +37,8 @@ def _positive_int_env(name, default):
 # Keep the campaign alive long enough to distinguish slow work from a real
 # process failure; operators can override this per run without changing code.
 APKTOOL_DECODE_TIMEOUT = _positive_int_env("REELSEC_APKTOOL_TIMEOUT", 900)
+APKTOOL_FULL_DECODE_TIMEOUT = _positive_int_env("REELSEC_APKTOOL_FULL_TIMEOUT", 180)
+APKTOOL_RECOVERY_TIMEOUT = _positive_int_env("REELSEC_APKTOOL_RECOVERY_TIMEOUT", 180)
 
 PROBES = [
     "elf",
@@ -114,7 +116,7 @@ def run_apktool_decode(selection, apk, output_dir, timeout=None):
         recovery_dir = output_dir.parent / (output_dir.name + "-no-res")
         recovery = run_apktool_no_resources_decode(
             selection, apk, recovery_dir,
-            timeout=min(timeout, 180) if timeout else 180,
+            timeout=APKTOOL_RECOVERY_TIMEOUT,
         )
         if recovery.get("status") == "DECODED_NO_RES":
             return recovery
@@ -2354,7 +2356,8 @@ def main():
                         "decoding original.apk into isolated campaign workspace")
         decoded_dir = output / "decoded-apk"
         decode_result = run_apktool_decode(
-            apktool_backend, input_apk, decoded_dir
+            apktool_backend, input_apk, decoded_dir,
+            timeout=APKTOOL_FULL_DECODE_TIMEOUT,
         )
         if decode_result.get("status") in ("FAILED", "FAILED_VALIDATION", "FAILED_OUTPUT_EXISTS"):
             raw_dir = output / "raw-apk"
@@ -2372,10 +2375,12 @@ def main():
     )
     _progress_stage(
         progress, output, 4, "APK decode",
-        "PASS" if decode_result and decode_result.get("status") == "DECODED" else "FAIL",
+        "PASS" if decode_result and decode_result.get("status") in ("DECODED", "DECODED_NO_RES") else "FAIL",
         (
             "decoded successfully"
             if decode_result and decode_result.get("status") == "DECODED"
+            else "decoded with resources disabled (instrumentable Smali)"
+            if decode_result and decode_result.get("status") == "DECODED_NO_RES"
             else (decode_result or {}).get("status", "NOT_RUN")
         ),
     )
@@ -2383,8 +2388,15 @@ def main():
     _progress_stage(progress, output, 5, "Input inventory", "RUNNING",
                     "inventorying manifest, Smali, DEX and native libraries")
     decoded_inventory = None
-    if decode_result and decode_result.get("status") == "DECODED":
+    if decode_result and decode_result.get("status") in ("DECODED", "DECODED_NO_RES"):
         decoded_inventory = inventory_decoded_apk(decode_result["output_dir"])
+        if decoded_inventory and decode_result.get("status") == "DECODED_NO_RES":
+            decoded_inventory["decode_mode"] = "APKTOOL_NO_RES"
+            decoded_inventory["resources_decoded"] = False
+            (output / "DECODED-INPUT-INVENTORY.json").write_text(
+                json.dumps(decoded_inventory, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
     elif decode_result and decode_result.get("status") == "DECODE_FAILED_RAW_FALLBACK":
         decoded_inventory = inventory_decoded_apk(
             decode_result["raw_fallback"]["output_dir"]
@@ -2641,7 +2653,11 @@ def main():
     )
     target = find_target(args.elf, analysis_root)
     if decoded_inventory and decoded_inventory.get("status") == "READY":
-        target_source = "decoded-apk"
+        target_source = (
+            "decoded-apk-no-res"
+            if decoded_inventory.get("decode_mode") == "APKTOOL_NO_RES"
+            else "decoded-apk"
+        )
     elif decoded_inventory and decoded_inventory.get("status") == "READY_NATIVE_ONLY":
         target_source = "raw-apk-extract"
     else:
