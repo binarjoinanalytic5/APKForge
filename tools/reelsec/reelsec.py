@@ -345,7 +345,7 @@ def write_target_provenance_audit(output,data,symbols_text,ptr):
     (output/"TARGET-PROVENANCE-AUDIT.md").write_text("\\n".join(lines)+"\\n",encoding="utf-8")
     return payload
 
-def write_vtable_object_proof(output, data=None, symbols_text="")
+def write_vtable_object_proof(output, data=None, symbols_text=""):
     p = output / "ActiveDecoder-constructor.txt"
     text = p.read_text(encoding="utf-8", errors="replace") if p.exists() else ""
     has_base_ctor = bool(re.search(r"bl\s+0xdfbd0\s+<.*ActiveDecoderC2Ev", text))
@@ -371,7 +371,7 @@ def write_vtable_object_proof(output, data=None, symbols_text="")
     (output / "VTABLE-OBJECT-PROOF.md").write_text("\n".join(out) + "\n", encoding="utf-8")
     return proven
 
-def write_vtable_class_correlation(output, data, symbols_text="")
+def write_vtable_class_correlation(output, data, symbols_text=""):
     """Correlate RTTI, vtable entries, and constructor/destructor evidence."""
     address_point = 0x717E60
     first = read_pointer(data, address_point)[0]
