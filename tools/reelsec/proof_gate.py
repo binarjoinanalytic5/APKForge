@@ -109,3 +109,21 @@ def build_evidence_ledger(artifact, target_observation, dispatch_observation,
     ):
         ledger["evidence_state"] = "TARGET_AND_DISPATCH_OBSERVED"
     return ledger
+
+
+def finalize_instrumented_proof(provenance, target_observation, dispatch_observation, behavioral_correlation=None):
+    """Conservative final classifier for an instrumented runtime campaign."""
+    result = build_instrumented_runtime_proof(
+        provenance, target_observation, dispatch_observation,
+        behavioral_correlation,
+    )
+    if result.get("state") != PROVEN_ON_INSTRUMENTED_BUILD:
+        return result
+    if not (behavioral_correlation and behavioral_correlation.get("correlated") is True):
+        result["state"] = OBSERVED
+        result["reason"] = "runtime target and dispatch observed without behavioral correlation"
+        return result
+    result["state"] = PROVEN_ON_INSTRUMENTED_BUILD
+    result["reason"] = "artifact, target execution, dispatch, and bounded behavioral correlation observed"
+    result["causal_proof"] = False
+    return result
