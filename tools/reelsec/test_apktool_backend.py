@@ -5,7 +5,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from apktool_backend import ApktoolBackendError, select_apktool_backend
+from apktool_backend import ApktoolBackendError, select_apktool_backend, decode_command
 
 
 class ApktoolBackendTests(unittest.TestCase):
@@ -27,6 +27,12 @@ class ApktoolBackendTests(unittest.TestCase):
         self.assertEqual(result["name"], "apktool-standalone")
         self.assertEqual(result["backend"], "java-classpath")
 
+
+
+    def test_cli_decode_command(self):
+        selection = {"backend": "cli", "path": "/usr/bin/apktool"}
+        command = decode_command(selection, "/tmp/original.apk", "/tmp/decoded")
+        self.assertEqual(command, ["/usr/bin/apktool", "d", "/tmp/original.apk", "-o", "/tmp/decoded"])
 
     def test_standalone_decode_command(self):
         env = {"tools": {"apktool": {
