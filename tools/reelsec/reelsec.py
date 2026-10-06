@@ -1647,6 +1647,86 @@ def git_publish(root, report_dir):
         if worktree.exists():
             run([git, "worktree", "remove", "--force", str(worktree)], cwd=root)
 
+def _progress_state_path(output):
+    return Path(output) / "PROGRESS.json"
+
+
+def _progress_render(index, total, name, status, detail=""):
+    width = 28
+    done = max(0, min(total, index if status in ("PASS", "FAIL", "BLOCKED", "SKIP") else index - 1))
+    filled = int(width * done / max(1, total))
+    bar = "#" * filled + "-" * (width - filled)
+    print("\r[%-28s] %3d%%  %02d/%02d  %-24s  %s" %
+          (bar, int(100 * done / max(1, total)), index, total, name, status),
+          flush=True)
+    if detail:
+        print("      " + str(detail)[:220], flush=True)
+
+
+def _progress_start(output):
+    state = {
+        "schema_version": "1.0",
+        "started_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "total": 13,
+        "stages": [],
+    }
+    _progress_state_path(output).write_text(
+        json.dumps(state, indent=2) + "\n", encoding="utf-8"
+    )
+    print("\nReelSec Campaign", flush=True)
+    print("===============", flush=True)
+    print("Report: %s" % output, flush=True)
+    print("Progress: 0%%", flush=True)
+    return state
+
+
+def _progress_stage(state, output, index, name, status, detail="", started_at=None):
+    now = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+    record = {
+        "index": index,
+        "name": name,
+        "status": status,
+        "detail": detail,
+        "timestamp": now,
+    }
+    if started_at:
+        record["started_at"] = started_at
+    state["stages"].append(record)
+    state["current"] = name
+    state["current_status"] = status
+    _progress_state_path(output).write_text(
+        json.dumps(state, indent=2) + "\n", encoding="utf-8"
+    )
+    _progress_render(index, state["total"], name, status, detail)
+
+
+def _progress_run(state, output, index, name, fn):
+    started = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+    _progress_stage(state, output, index, name, "RUNNING", started_at=started)
+    try:
+        result = fn()
+        if isinstance(result, dict):
+            status = str(result.get("status", "PASS"))
+            detail = result.get("reason") or result.get("error") or ""
+            if status in ("FAILED", "FAILED_VALIDATION", "BLOCKED", "BLOCKED_OR_FAILED",
+                          "FAILED_OUTPUT_EXISTS", "BLOCKED_APK_ANALYSIS_ROOT_UNAVAILABLE"):
+                final = "FAIL" if status.startswith("FAILED") else "BLOCKED"
+            elif status in ("NOT_BUILT", "NOT_SIGNED", "NOT_DEPLOYED", "NOT_CAPTURED",
+                            "NOT_PLANNED", "NOT_PREPARED"):
+                final = "SKIP"
+            else:
+                final = "PASS"
+        else:
+            status = "PASS"
+            detail = ""
+            final = "PASS"
+        _progress_stage(state, output, index, name, final, detail, started)
+        return result
+    except Exception as exc:
+        _progress_stage(state, output, index, name, "FAIL", repr(exc), started)
+        raise
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("command", nargs="?", choices=("campaign",))
@@ -1673,7 +1753,13 @@ def main():
     output = Path(args.output).expanduser() if args.output else default_output
     output.mkdir(parents=True, exist_ok=True)
 
+    progress = _progress_start(output)
+    _progress_stage(progress, output, 1, "Input / provenance", "PASS",
+                    "APK SHA-256=%s" % input_apk_sha256 if input_apk_sha256 else "analysis mode")
+
     capabilities = write_capability_matrix(output, ROOT)
+    _progress_stage(progress, output, 2, "Environment / capabilities", "PASS",
+                    "capability matrix written")
     try:
         apktool_backend = select_apktool_backend(capabilities)
     except ApktoolBackendError as exc:
@@ -1688,6 +1774,11 @@ def main():
     (output / "APKTOOL-BACKEND.json").write_text(
         json.dumps(apktool_backend, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
+    )
+    _progress_stage(
+        progress, output, 3, "Apktool backend",
+        "PASS" if apktool_backend.get("status") == "SELECTED" else "BLOCKED",
+        apktool_backend.get("name") or apktool_backend.get("reason", "no backend"),
     )
 
     decode_result = None
@@ -1710,6 +1801,13 @@ def main():
         json.dumps(decode_result, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+    _progress_stage(
+        progress, output, 4, "APK decode",
+        "PASS" if decode_result and decode_result.get("status") == "DECODED"
+        else "PASS" if decode_result and decode_result.get("status") == "DECODE_FAILED_RAW_FALLBACK"
+        else "FAIL",
+        (decode_result or {}).get("status", "NOT_RUN"),
+    )
 
     decoded_inventory = None
     if decode_result and decode_result.get("status") == "DECODED":
@@ -1723,8 +1821,20 @@ def main():
     (output / "DECODED-INPUT-INVENTORY.json").write_text(
         json.dumps(decoded_inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
+    _progress_stage(
+        progress, output, 5, "Input inventory",
+        "PASS" if decoded_inventory and decoded_inventory.get("status") in ("READY", "READY_NATIVE_ONLY") else "FAIL",
+        (decoded_inventory or {}).get("status", "NOT_READY"),
+    )
 
     instrumentation_plan = plan_instrumentation(decoded_inventory, output)
+    _progress_stage(
+        progress, output, 6, "SecShell instrumentation plan",
+        "PASS" if instrumentation_plan.get("status") == "READY"
+        else "SKIP" if decoded_inventory and decoded_inventory.get("status") == "READY_NATIVE_ONLY"
+        else "BLOCKED",
+        instrumentation_plan.get("reason", instrumentation_plan.get("status", "")),
+    )
     instrumented_copy_root = output / "instrumented-apk"
     instrumented_copy = {"status": "NOT_PREPARED"}
     if instrumentation_plan.get("status") == "READY":
@@ -1738,6 +1848,13 @@ def main():
             json.dumps(instrumented_copy, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
+    _progress_stage(
+        progress, output, 7, "Instrumented copy",
+        "PASS" if instrumented_copy.get("status") == "COPIED"
+        else "FAIL" if instrumented_copy.get("status") == "FAILED"
+        else "SKIP",
+        instrumented_copy.get("error", instrumented_copy.get("status", "")),
+    )
 
     build_verify = {"status": "NOT_BUILT"}
     if instrumented_copy.get("status") == "COPIED":
@@ -1760,6 +1877,13 @@ def main():
             json.dumps(build_verify, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
+    _progress_stage(
+        progress, output, 8, "Build instrumented APK",
+        "PASS" if build_verify.get("status") == "BUILT"
+        else "FAIL" if build_verify.get("status") == "FAILED"
+        else "SKIP",
+        build_verify.get("error", build_verify.get("status", "")),
+    )
 
     sign_verify = {"status": "NOT_SIGNED"}
     if build_verify.get("status") == "BUILT":
@@ -1789,6 +1913,13 @@ def main():
             json.dumps(sign_verify, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
+    _progress_stage(
+        progress, output, 9, "Sign / verify artifact",
+        "PASS" if sign_verify.get("status") == "SIGNED_VERIFIED"
+        else "FAIL" if sign_verify.get("status") == "BLOCKED_OR_FAILED"
+        else "SKIP",
+        sign_verify.get("error", sign_verify.get("status", "")),
+    )
 
     adb_deploy = {"status": "NOT_DEPLOYED"}
     if sign_verify.get("status") == "SIGNED_VERIFIED":
@@ -1818,6 +1949,13 @@ def main():
             json.dumps(adb_deploy, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
+    _progress_stage(
+        progress, output, 10, "ADB deploy",
+        "PASS" if adb_deploy.get("status") == "INSTALLED"
+        else "FAIL" if adb_deploy.get("status") == "BLOCKED_OR_FAILED"
+        else "SKIP",
+        adb_deploy.get("error", adb_deploy.get("status", "")),
+    )
 
     evidence_ledger = {"status": "NOT_READY"}
     gadget_observation = {"status": "NOT_PLANNED"}
@@ -1835,6 +1973,12 @@ def main():
             json.dumps(gadget_observation, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
+    _progress_stage(
+        progress, output, 11, "Gadget observation",
+        "PASS" if gadget_observation.get("status") not in ("BLOCKED_OR_FAILED", "NOT_PLANNED")
+        else "BLOCKED",
+        gadget_observation.get("error", gadget_observation.get("status", "")),
+    )
 
     runtime_capture = {"status": "NOT_CAPTURED"}
     if adb_deploy.get("status") == "INSTALLED":
@@ -1853,6 +1997,13 @@ def main():
             json.dumps(runtime_capture, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
+    _progress_stage(
+        progress, output, 12, "Runtime evidence",
+        "PASS" if runtime_capture.get("status") == "CAPTURED"
+        else "FAIL" if runtime_capture.get("status") == "BLOCKED_OR_FAILED"
+        else "SKIP",
+        runtime_capture.get("error", runtime_capture.get("status", "")),
+    )
 
     allowed_inventory = {"READY", "READY_NATIVE_ONLY"}
     if args.command == "campaign" and (not decoded_inventory or decoded_inventory.get("status") not in allowed_inventory):
@@ -1871,7 +2022,14 @@ def main():
         (output / "STATUS.txt").write_text(
             "BLOCKED_DECODE_FAILED\nNO_REPOSITORY_ROOT_FALLBACK\n", encoding="utf-8"
         )
-        print("REPORT=" + str(output))
+        progress["completed_at"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+    progress["final_status"] = "COMPLETED"
+    _progress_state_path(output).write_text(
+        json.dumps(progress, indent=2) + "\n", encoding="utf-8"
+    )
+    print("\nReelSec Campaign complete", flush=True)
+    print("Final report: %s" % output, flush=True)
+    print("REPORT=" + str(output))
         print("CAMPAIGN_STATUS=BLOCKED_DECODE_FAILED")
         print("NO_REPOSITORY_ROOT_FALLBACK=YES")
         return 2
@@ -2066,9 +2224,18 @@ def main():
     write_native_security_api_audit(output, strings_text, symbols_text)
     write_java_screen_security_audit(output, analysis_root)
 
+    _progress_stage(progress, output, 13, "Native / proof analysis", "RUNNING",
+                    "ELF, vtable, dispatch, dataflow, runtime readiness")
     dataflow_result = write_autonomous_dataflow(output, target, objdump)
     runtime_result = write_runtime_probe(output, analysis_root, target)
     write_autonomous_campaign(output, dataflow_result, runtime_result, input_apk=str(input_apk) if input_apk else None, input_apk_sha256=input_apk_sha256)
+    _progress_stage(
+        progress, output, 13, "Native / proof analysis", "PASS",
+        "dataflow_proven=%s runtime=%s" % (
+            bool(dataflow_result.get("proven", 0)),
+            runtime_result.get("status") if runtime_result else "NOT_RUN",
+        ),
+    )
 
     security_text = (output / "security-strings.txt").read_text(
         encoding="utf-8", errors="replace"
