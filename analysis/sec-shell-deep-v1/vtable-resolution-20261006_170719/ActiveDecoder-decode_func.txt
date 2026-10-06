@@ -1,0 +1,295 @@
+
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/lib/arm64-v8a/libsaasCorePlayer.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+000000000027d304 <_ZN13ActiveDecoder11decode_funcEv>:
+  27d304: d10243ff     	sub	sp, sp, #0x90
+  27d308: a9036ffc     	stp	x28, x27, [sp, #0x30]
+  27d30c: a90467fa     	stp	x26, x25, [sp, #0x40]
+  27d310: a9055ff8     	stp	x24, x23, [sp, #0x50]
+  27d314: a90657f6     	stp	x22, x21, [sp, #0x60]
+  27d318: a9074ff4     	stp	x20, x19, [sp, #0x70]
+  27d31c: a9087bfd     	stp	x29, x30, [sp, #0x80]
+  27d320: 910203fd     	add	x29, sp, #0x80
+  27d324: d53bd058     	mrs	x24, TPIDR_EL0
+  27d328: f9401708     	ldr	x8, [x24, #0x28]
+  27d32c: aa0003f3     	mov	x19, x0
+  27d330: f90017e8     	str	x8, [sp, #0x28]
+  27d334: 9102ec08     	add	x8, x0, #0xbb
+  27d338: 08dffd08     	ldarb	w8, [x8]
+  27d33c: 37001fa8     	tbnz	w8, #0x0, 0x27d730 <_ZN13ActiveDecoder11decode_funcEv+0x42c>
+  27d340: f9407a68     	ldr	x8, [x19, #0xf0]
+  27d344: f9409a69     	ldr	x9, [x19, #0x130]
+  27d348: 2a1f03fb     	mov	w27, wzr
+  27d34c: 91074275     	add	x21, x19, #0x1d0
+  27d350: 9102f274     	add	x20, x19, #0xbc
+  27d354: eb09011f     	cmp	x8, x9
+  27d358: 54001760     	b.eq	0x27d644 <_ZN13ActiveDecoder11decode_funcEv+0x340>
+  27d35c: 2a1f03fb     	mov	w27, wzr
+  27d360: 9103c276     	add	x22, x19, #0xf0
+  27d364: 9107e277     	add	x23, x19, #0x1f8
+  27d368: b24103f9     	orr	x25, xzr, #0x8000000000000000
+  27d36c: 91052269     	add	x9, x19, #0x148
+  27d370: f940ca68     	ldr	x8, [x19, #0x190]
+  27d374: c8dffd29     	ldar	x9, [x9]
+  27d378: f940c66a     	ldr	x10, [x19, #0x188]
+  27d37c: b981a26b     	ldrsw	x11, [x19, #0x1a0]
+  27d380: eb0a0129     	subs	x9, x9, x10
+  27d384: 9a9f3108     	csel	x8, x8, xzr, lo
+  27d388: 8b080128     	add	x8, x9, x8
+  27d38c: eb0b011f     	cmp	x8, x11
+  27d390: 540015a2     	b.hs	0x27d644 <_ZN13ActiveDecoder11decode_funcEv+0x340>
+  27d394: 9102e268     	add	x8, x19, #0xb8
+  27d398: 08dffd08     	ldarb	w8, [x8]
+  27d39c: 36001548     	tbz	w8, #0x0, 0x27d644 <_ZN13ActiveDecoder11decode_funcEv+0x340>
+  27d3a0: aa1303e0     	mov	x0, x19
+  27d3a4: 2a1f03e1     	mov	w1, wzr
+  27d3a8: 97f98a42     	bl	0xdfcb0 <_ZN13ActiveDecoder15extract_decoderEb@plt>
+  27d3ac: 2a0003fa     	mov	w26, w0
+  27d3b0: 34000200     	cbz	w0, 0x27d3f0 <_ZN13ActiveDecoder11decode_funcEv+0xec>
+  27d3b4: 2a1f03fb     	mov	w27, wzr
+  27d3b8: 36f801fa     	tbz	w26, #0x1f, 0x27d3f4 <_ZN13ActiveDecoder11decode_funcEv+0xf0>
+  27d3bc: f00019e1     	adrp	x1, 0x5bc000
+  27d3c0: f00019e2     	adrp	x2, 0x5bc000
+  27d3c4: 321d07e0     	orr	w0, wzr, #0x18
+  27d3c8: 9126a421     	add	x1, x1, #0x9a9
+  27d3cc: 9127e842     	add	x2, x2, #0x9fa
+  27d3d0: 2a1a03e3     	mov	w3, w26
+  27d3d4: 97f982ab     	bl	0xdde80 <__log_print@plt>
+  27d3d8: aa1303e0     	mov	x0, x19
+  27d3dc: 2a1a03e1     	mov	w1, w26
+  27d3e0: aa1903e2     	mov	x2, x25
+  27d3e4: 97f98a37     	bl	0xdfcc0 <_ZN13ActiveDecoder12enqueueErrorEil@plt>
+  27d3e8: 2a1f03fb     	mov	w27, wzr
+  27d3ec: 14000002     	b	0x27d3f4 <_ZN13ActiveDecoder11decode_funcEv+0xf0>
+  27d3f0: 320003fb     	orr	w27, wzr, #0x1
+  27d3f4: f940a268     	ldr	x8, [x19, #0x140]
+  27d3f8: f9409a69     	ldr	x9, [x19, #0x130]
+  27d3fc: f869791a     	ldr	x26, [x8, x9, lsl #3]
+  27d400: b4000b5a     	cbz	x26, 0x27d568 <_ZN13ActiveDecoder11decode_funcEv+0x264>
+  27d404: f9400348     	ldr	x8, [x26]
+  27d408: aa1a03e0     	mov	x0, x26
+  27d40c: f9403508     	ldr	x8, [x8, #0x68]
+  27d410: d63f0100     	blr	x8
+  27d414: f9400819     	ldr	x25, [x0, #0x10]
+  27d418: aa1903e0     	mov	x0, x25
+  27d41c: 9401a6be     	bl	0x2e6f14 <_ZN21SerializeToJSONString9serializeEv+0x3cc>
+  27d420: d0002668     	adrp	x8, 0x74b000 <_ZN19dataSourcePrototype9_nextSlotE+0x98>
+  27d424: 91360108     	add	x8, x8, #0xd80
+  27d428: b9405508     	ldr	w8, [x8, #0x54]
+  27d42c: f90007fa     	str	x26, [sp, #0x8]
+  27d430: 34000508     	cbz	w8, 0x27d4d0 <_ZN13ActiveDecoder11decode_funcEv+0x1cc>
+  27d434: f9400348     	ldr	x8, [x26]
+  27d438: aa1a03e0     	mov	x0, x26
+  27d43c: f9403508     	ldr	x8, [x8, #0x68]
+  27d440: d63f0100     	blr	x8
+  27d444: f94007e8     	ldr	x8, [sp, #0x8]
+  27d448: b940081a     	ldr	w26, [x0, #0x8]
+  27d44c: f9400109     	ldr	x9, [x8]
+  27d450: aa0803e0     	mov	x0, x8
+  27d454: f9401129     	ldr	x9, [x9, #0x20]
+  27d458: d63f0120     	blr	x9
+  27d45c: f94007e8     	ldr	x8, [sp, #0x8]
+  27d460: aa0003fc     	mov	x28, x0
+  27d464: f9400109     	ldr	x9, [x8]
+  27d468: aa0803e0     	mov	x0, x8
+  27d46c: f9403529     	ldr	x9, [x9, #0x68]
+  27d470: d63f0120     	blr	x9
+  27d474: 9103c269     	add	x9, x19, #0xf0
+  27d478: f9400805     	ldr	x5, [x0, #0x10]
+  27d47c: f9409e68     	ldr	x8, [x19, #0x138]
+  27d480: 9105226a     	add	x10, x19, #0x148
+  27d484: c8dffd29     	ldar	x9, [x9]
+  27d488: f9409a6b     	ldr	x11, [x19, #0x130]
+  27d48c: f940ca6c     	ldr	x12, [x19, #0x190]
+  27d490: c8dffd4a     	ldar	x10, [x10]
+  27d494: f940c66d     	ldr	x13, [x19, #0x188]
+  27d498: eb0b0129     	subs	x9, x9, x11
+  27d49c: 9a9f3108     	csel	x8, x8, xzr, lo
+  27d4a0: 8b080126     	add	x6, x9, x8
+  27d4a4: eb0d014a     	subs	x10, x10, x13
+  27d4a8: 9a9f3188     	csel	x8, x12, xzr, lo
+  27d4ac: f00019e1     	adrp	x1, 0x5bc000
+  27d4b0: f00019e2     	adrp	x2, 0x5bc000
+  27d4b4: 8b080147     	add	x7, x10, x8
+  27d4b8: 321d0be0     	orr	w0, wzr, #0x38
+  27d4bc: 9126a421     	add	x1, x1, #0x9a9
+  27d4c0: 91289842     	add	x2, x2, #0xa26
+  27d4c4: 2a1a03e3     	mov	w3, w26
+  27d4c8: aa1c03e4     	mov	x4, x28
+  27d4cc: 97f9826d     	bl	0xdde80 <__log_print@plt>
+  27d4d0: f9400268     	ldr	x8, [x19]
+  27d4d4: 910023e1     	add	x1, sp, #0x8
+  27d4d8: aa1303e0     	mov	x0, x19
+  27d4dc: f9406d08     	ldr	x8, [x8, #0xd8]
+  27d4e0: d63f0100     	blr	x8
+  27d4e4: 2a0003fa     	mov	w26, w0
+  27d4e8: 31002c1f     	cmn	w0, #0xb
+  27d4ec: 54000501     	b.ne	0x27d58c <_ZN13ActiveDecoder11decode_funcEv+0x288>
+  27d4f0: f90007ff     	str	xzr, [sp, #0x8]
+  27d4f4: 340009db     	cbz	w27, 0x27d62c <_ZN13ActiveDecoder11decode_funcEv+0x328>
+  27d4f8: 320003e8     	orr	w8, wzr, #0x1
+  27d4fc: aa1503e0     	mov	x0, x21
+  27d500: 1100077b     	add	w27, w27, #0x1
+  27d504: f9000ff5     	str	x21, [sp, #0x18]
+  27d508: 390083e8     	strb	w8, [sp, #0x20]
+  27d50c: 97f96da5     	bl	0xd8ba0 <_ZNSt6__ndk15mutex4lockEv@plt>
+  27d510: 97f96e94     	bl	0xd8f60 <_ZNSt6__ndk16chrono12steady_clock3nowEv@plt>
+  27d514: 52896808     	mov	w8, #0x4b40             // =19264
+  27d518: 72a00988     	movk	w8, #0x4c, lsl #16
+  27d51c: 1b087f68     	mul	w8, w27, w8
+  27d520: 8b080008     	add	x8, x0, x8
+  27d524: f9000be8     	str	x8, [sp, #0x10]
+  27d528: 9102e268     	add	x8, x19, #0xb8
+  27d52c: 08dffd08     	ldarb	w8, [x8]
+  27d530: 36000128     	tbz	w8, #0x0, 0x27d554 <_ZN13ActiveDecoder11decode_funcEv+0x250>
+  27d534: 910063e1     	add	x1, sp, #0x18
+  27d538: 910043e2     	add	x2, sp, #0x10
+  27d53c: aa1403e0     	mov	x0, x20
+  27d540: 97fc5197     	bl	0x191b9c <_ZN11FfmpegMuxer14addSourceMetasENSt6__ndk13mapINS0_12basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES7_NS0_4lessIS7_EENS5_INS0_4pairIKS7_S7_EEEEEE+0x3cbc>
+  27d544: 7100041f     	cmp	w0, #0x1
+  27d548: 54ffff01     	b.ne	0x27d528 <_ZN13ActiveDecoder11decode_funcEv+0x224>
+  27d54c: 9102e268     	add	x8, x19, #0xb8
+  27d550: 08dffd1f     	ldarb	wzr, [x8]
+  27d554: 394083e8     	ldrb	w8, [sp, #0x20]
+  27d558: 340005c8     	cbz	w8, 0x27d610 <_ZN13ActiveDecoder11decode_funcEv+0x30c>
+  27d55c: f9400fe0     	ldr	x0, [sp, #0x18]
+  27d560: 97f96d94     	bl	0xd8bb0 <_ZNSt6__ndk15mutex6unlockEv@plt>
+  27d564: 1400002b     	b	0x27d610 <_ZN13ActiveDecoder11decode_funcEv+0x30c>
+  27d568: f00019e1     	adrp	x1, 0x5bc000
+  27d56c: f00019e2     	adrp	x2, 0x5bc000
+  27d570: 321d07e0     	orr	w0, wzr, #0x18
+  27d574: 9126a421     	add	x1, x1, #0x9a9
+  27d578: 91285042     	add	x2, x2, #0xa14
+  27d57c: 97f98241     	bl	0xdde80 <__log_print@plt>
+  27d580: aa1603e0     	mov	x0, x22
+  27d584: 97ffff3e     	bl	0x27d27c <_ZN13ActiveDecoder5closeEv+0x140>
+  27d588: 1400002b     	b	0x27d634 <_ZN13ActiveDecoder11decode_funcEv+0x330>
+  27d58c: aa1603e0     	mov	x0, x22
+  27d590: 97ffff3b     	bl	0x27d27c <_ZN13ActiveDecoder5closeEv+0x140>
+  27d594: b902027f     	str	wzr, [x19, #0x200]
+  27d598: 885ffee8     	ldaxr	w8, [x23]
+  27d59c: 11000508     	add	w8, w8, #0x1
+  27d5a0: 8809fee8     	stlxr	w9, w8, [x23]
+  27d5a4: 35ffffa9     	cbnz	w9, 0x27d598 <_ZN13ActiveDecoder11decode_funcEv+0x294>
+  27d5a8: 7100235f     	cmp	w26, #0x8
+  27d5ac: 540000a1     	b.ne	0x27d5c0 <_ZN13ActiveDecoder11decode_funcEv+0x2bc>
+  27d5b0: 9102ee68     	add	x8, x19, #0xbb
+  27d5b4: 320003e9     	orr	w9, wzr, #0x1
+  27d5b8: 089ffd09     	stlrb	w9, [x8]
+  27d5bc: 1400000d     	b	0x27d5f0 <_ZN13ActiveDecoder11decode_funcEv+0x2ec>
+  27d5c0: 36f8019a     	tbz	w26, #0x1f, 0x27d5f0 <_ZN13ActiveDecoder11decode_funcEv+0x2ec>
+  27d5c4: f00019e1     	adrp	x1, 0x5bc000
+  27d5c8: f00019e2     	adrp	x2, 0x5bc000
+  27d5cc: 321d07e0     	orr	w0, wzr, #0x18
+  27d5d0: 9126a421     	add	x1, x1, #0x9a9
+  27d5d4: 912a7042     	add	x2, x2, #0xa9c
+  27d5d8: 2a1a03e3     	mov	w3, w26
+  27d5dc: 97f98229     	bl	0xdde80 <__log_print@plt>
+  27d5e0: aa1303e0     	mov	x0, x19
+  27d5e4: 2a1a03e1     	mov	w1, w26
+  27d5e8: aa1903e2     	mov	x2, x25
+  27d5ec: 97f989b5     	bl	0xdfcc0 <_ZN13ActiveDecoder12enqueueErrorEil@plt>
+  27d5f0: 39481268     	ldrb	w8, [x19, #0x204]
+  27d5f4: 340000e8     	cbz	w8, 0x27d610 <_ZN13ActiveDecoder11decode_funcEv+0x30c>
+  27d5f8: 340000db     	cbz	w27, 0x27d610 <_ZN13ActiveDecoder11decode_funcEv+0x30c>
+  27d5fc: b9402268     	ldr	w8, [x19, #0x20]
+  27d600: 35000088     	cbnz	w8, 0x27d610 <_ZN13ActiveDecoder11decode_funcEv+0x30c>
+  27d604: 88dffee8     	ldar	w8, [x23]
+  27d608: 7100151f     	cmp	w8, #0x5
+  27d60c: 1a9bb3fb     	csel	w27, wzr, w27, lt
+  27d610: f94007e0     	ldr	x0, [sp, #0x8]
+  27d614: f90007ff     	str	xzr, [sp, #0x8]
+  27d618: b40000e0     	cbz	x0, 0x27d634 <_ZN13ActiveDecoder11decode_funcEv+0x330>
+  27d61c: f9400008     	ldr	x8, [x0]
+  27d620: f9400508     	ldr	x8, [x8, #0x8]
+  27d624: d63f0100     	blr	x8
+  27d628: 14000003     	b	0x27d634 <_ZN13ActiveDecoder11decode_funcEv+0x330>
+  27d62c: f90007ff     	str	xzr, [sp, #0x8]
+  27d630: 320003fb     	orr	w27, wzr, #0x1
+  27d634: f9407a68     	ldr	x8, [x19, #0xf0]
+  27d638: f9409a69     	ldr	x9, [x19, #0x130]
+  27d63c: eb09011f     	cmp	x8, x9
+  27d640: 54ffe961     	b.ne	0x27d36c <_ZN13ActiveDecoder11decode_funcEv+0x68>
+  27d644: 9102e668     	add	x8, x19, #0xb9
+  27d648: 08dffd08     	ldarb	w8, [x8]
+  27d64c: 360003c8     	tbz	w8, #0x0, 0x27d6c4 <_ZN13ActiveDecoder11decode_funcEv+0x3c0>
+  27d650: f9407a68     	ldr	x8, [x19, #0xf0]
+  27d654: f9409a69     	ldr	x9, [x19, #0x130]
+  27d658: eb09011f     	cmp	x8, x9
+  27d65c: 54000341     	b.ne	0x27d6c4 <_ZN13ActiveDecoder11decode_funcEv+0x3c0>
+  27d660: 3942ea68     	ldrb	w8, [x19, #0xba]
+  27d664: 350002a8     	cbnz	w8, 0x27d6b8 <_ZN13ActiveDecoder11decode_funcEv+0x3b4>
+  27d668: f9000fff     	str	xzr, [sp, #0x18]
+  27d66c: f9400268     	ldr	x8, [x19]
+  27d670: 910063e1     	add	x1, sp, #0x18
+  27d674: aa1303e0     	mov	x0, x19
+  27d678: f9406d08     	ldr	x8, [x8, #0xd8]
+  27d67c: d63f0100     	blr	x8
+  27d680: 31002c1f     	cmn	w0, #0xb
+  27d684: 540000e0     	b.eq	0x27d6a0 <_ZN13ActiveDecoder11decode_funcEv+0x39c>
+  27d688: 320003e8     	orr	w8, wzr, #0x1
+  27d68c: 7100201f     	cmp	w0, #0x8
+  27d690: 3902ea68     	strb	w8, [x19, #0xba]
+  27d694: 54000061     	b.ne	0x27d6a0 <_ZN13ActiveDecoder11decode_funcEv+0x39c>
+  27d698: 9102ee69     	add	x9, x19, #0xbb
+  27d69c: 089ffd28     	stlrb	w8, [x9]
+  27d6a0: f9400fe0     	ldr	x0, [sp, #0x18]
+  27d6a4: f9000fff     	str	xzr, [sp, #0x18]
+  27d6a8: b4000080     	cbz	x0, 0x27d6b8 <_ZN13ActiveDecoder11decode_funcEv+0x3b4>
+  27d6ac: f9400008     	ldr	x8, [x0]
+  27d6b0: f9400508     	ldr	x8, [x8, #0x8]
+  27d6b4: d63f0100     	blr	x8
+  27d6b8: 320003e1     	orr	w1, wzr, #0x1
+  27d6bc: aa1303e0     	mov	x0, x19
+  27d6c0: 97f9897c     	bl	0xdfcb0 <_ZN13ActiveDecoder15extract_decoderEb@plt>
+  27d6c4: 350003bb     	cbnz	w27, 0x27d738 <_ZN13ActiveDecoder11decode_funcEv+0x434>
+  27d6c8: 320003e8     	orr	w8, wzr, #0x1
+  27d6cc: aa1503e0     	mov	x0, x21
+  27d6d0: f9000ff5     	str	x21, [sp, #0x18]
+  27d6d4: 390083e8     	strb	w8, [sp, #0x20]
+  27d6d8: 97f96d32     	bl	0xd8ba0 <_ZNSt6__ndk15mutex4lockEv@plt>
+  27d6dc: 97f96e21     	bl	0xd8f60 <_ZNSt6__ndk16chrono12steady_clock3nowEv@plt>
+  27d6e0: 52896808     	mov	w8, #0x4b40             // =19264
+  27d6e4: 72a00988     	movk	w8, #0x4c, lsl #16
+  27d6e8: 8b080008     	add	x8, x0, x8
+  27d6ec: f9000be8     	str	x8, [sp, #0x10]
+  27d6f0: 9102e268     	add	x8, x19, #0xb8
+  27d6f4: 08dffd08     	ldarb	w8, [x8]
+  27d6f8: 36000128     	tbz	w8, #0x0, 0x27d71c <_ZN13ActiveDecoder11decode_funcEv+0x418>
+  27d6fc: 910063e1     	add	x1, sp, #0x18
+  27d700: 910043e2     	add	x2, sp, #0x10
+  27d704: aa1403e0     	mov	x0, x20
+  27d708: 97fc5125     	bl	0x191b9c <_ZN11FfmpegMuxer14addSourceMetasENSt6__ndk13mapINS0_12basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEES7_NS0_4lessIS7_EENS5_INS0_4pairIKS7_S7_EEEEEE+0x3cbc>
+  27d70c: 7100041f     	cmp	w0, #0x1
+  27d710: 54ffff01     	b.ne	0x27d6f0 <_ZN13ActiveDecoder11decode_funcEv+0x3ec>
+  27d714: 9102e268     	add	x8, x19, #0xb8
+  27d718: 08dffd1f     	ldarb	wzr, [x8]
+  27d71c: 394083e8     	ldrb	w8, [sp, #0x20]
+  27d720: 340000c8     	cbz	w8, 0x27d738 <_ZN13ActiveDecoder11decode_funcEv+0x434>
+  27d724: f9400fe0     	ldr	x0, [sp, #0x18]
+  27d728: 97f96d22     	bl	0xd8bb0 <_ZNSt6__ndk15mutex6unlockEv@plt>
+  27d72c: 14000003     	b	0x27d738 <_ZN13ActiveDecoder11decode_funcEv+0x434>
+  27d730: 5284e200     	mov	w0, #0x2710             // =10000
+  27d734: 97f988e7     	bl	0xdfad0 <af_usleep@plt>
+  27d738: f9401708     	ldr	x8, [x24, #0x28]
+  27d73c: f94017e9     	ldr	x9, [sp, #0x28]
+  27d740: eb09011f     	cmp	x8, x9
+  27d744: 54000141     	b.ne	0x27d76c <_ZN13ActiveDecoder11decode_funcEv+0x468>
+  27d748: a9487bfd     	ldp	x29, x30, [sp, #0x80]
+  27d74c: a9474ff4     	ldp	x20, x19, [sp, #0x70]
+  27d750: a94657f6     	ldp	x22, x21, [sp, #0x60]
+  27d754: a9455ff8     	ldp	x24, x23, [sp, #0x50]
+  27d758: a94467fa     	ldp	x26, x25, [sp, #0x40]
+  27d75c: a9436ffc     	ldp	x28, x27, [sp, #0x30]
+  27d760: 2a1f03e0     	mov	w0, wzr
+  27d764: 910243ff     	add	sp, sp, #0x90
+  27d768: d65f03c0     	ret
+  27d76c: 97f96ce5     	bl	0xd8b00 <__stack_chk_fail@plt>
+
+000000000027d770 <_ZN13ActiveDecoder15extract_decoderEb>:
+  27d770: d10203ff     	sub	sp, sp, #0x80
+  27d774: a9026ffc     	stp	x28, x27, [sp, #0x20]
+  27d778: a90367fa     	stp	x26, x25, [sp, #0x30]
+  27d77c: a9045ff8     	stp	x24, x23, [sp, #0x40]

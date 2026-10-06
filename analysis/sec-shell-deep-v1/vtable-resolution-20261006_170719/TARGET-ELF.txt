@@ -1,0 +1,1 @@
+TARGET=/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/lib/arm64-v8a/libsaasCorePlayer.so

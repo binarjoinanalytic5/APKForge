@@ -1,0 +1,187 @@
+
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/lib/arm64-v8a/libsaasCorePlayer.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+000000000027dcf4 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE>:
+  27dcf4: d10183ff     	sub	sp, sp, #0x60
+  27dcf8: f9000bf9     	str	x25, [sp, #0x10]
+  27dcfc: a9025ff8     	stp	x24, x23, [sp, #0x20]
+  27dd00: a90357f6     	stp	x22, x21, [sp, #0x30]
+  27dd04: a9044ff4     	stp	x20, x19, [sp, #0x40]
+  27dd08: a9057bfd     	stp	x29, x30, [sp, #0x50]
+  27dd0c: 910143fd     	add	x29, sp, #0x50
+  27dd10: d53bd059     	mrs	x25, TPIDR_EL0
+  27dd14: f9401728     	ldr	x8, [x25, #0x28]
+  27dd18: aa0003f4     	mov	x20, x0
+  27dd1c: aa0103f5     	mov	x21, x1
+  27dd20: f90007e8     	str	x8, [sp, #0x8]
+  27dd24: 9102e408     	add	x8, x0, #0xb9
+  27dd28: 08dffd08     	ldarb	w8, [x8]
+  27dd2c: 370004c8     	tbnz	w8, #0x0, 0x27ddc4 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0xd0>
+  27dd30: f94002a8     	ldr	x8, [x21]
+  27dd34: b40004c8     	cbz	x8, 0x27ddcc <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0xd8>
+  27dd38: 9106a293     	add	x19, x20, #0x1a8
+  27dd3c: aa1303e0     	mov	x0, x19
+  27dd40: 97f96b98     	bl	0xd8ba0 <_ZNSt6__ndk15mutex4lockEv@plt>
+  27dd44: 91081688     	add	x8, x20, #0x205
+  27dd48: 08dffd08     	ldarb	w8, [x8]
+  27dd4c: 370004e8     	tbnz	w8, #0x0, 0x27dde8 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0xf4>
+  27dd50: 9103c280     	add	x0, x20, #0xf0
+  27dd54: f9409e88     	ldr	x8, [x20, #0x138]
+  27dd58: c8dffc09     	ldar	x9, [x0]
+  27dd5c: f9409a8a     	ldr	x10, [x20, #0x130]
+  27dd60: b981a68b     	ldrsw	x11, [x20, #0x1a4]
+  27dd64: eb0a0129     	subs	x9, x9, x10
+  27dd68: 9a9f3108     	csel	x8, x8, xzr, lo
+  27dd6c: 8b080128     	add	x8, x9, x8
+  27dd70: eb0b011f     	cmp	x8, x11
+  27dd74: 540004a2     	b.hs	0x27de08 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x114>
+  27dd78: 91052288     	add	x8, x20, #0x148
+  27dd7c: f940ca89     	ldr	x9, [x20, #0x190]
+  27dd80: c8dffd08     	ldar	x8, [x8]
+  27dd84: f940c68a     	ldr	x10, [x20, #0x188]
+  27dd88: b981a28b     	ldrsw	x11, [x20, #0x1a0]
+  27dd8c: eb0a0108     	subs	x8, x8, x10
+  27dd90: 9a9f3129     	csel	x9, x9, xzr, lo
+  27dd94: 8b090108     	add	x8, x8, x9
+  27dd98: eb0b011f     	cmp	x8, x11
+  27dd9c: 54000362     	b.hs	0x27de08 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x114>
+  27dda0: f94002a8     	ldr	x8, [x21]
+  27dda4: 910003e1     	mov	x1, sp
+  27dda8: f90002bf     	str	xzr, [x21]
+  27ddac: f90003e8     	str	x8, [sp]
+  27ddb0: 9400056f     	bl	0x27f36c <_ZN13ActiveDecoder9resetInitEv+0x86c>
+  27ddb4: 9102f280     	add	x0, x20, #0xbc
+  27ddb8: 97f97b8e     	bl	0xdcbf0 <_ZNSt6__ndk118condition_variable10notify_oneEv@plt>
+  27ddbc: 2a1f03f5     	mov	w21, wzr
+  27ddc0: 14000013     	b	0x27de0c <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x118>
+  27ddc4: 128002b5     	mov	w21, #-0x16             // =-22
+  27ddc8: 1400006e     	b	0x27df80 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x28c>
+  27ddcc: 9102e688     	add	x8, x20, #0xb9
+  27ddd0: 320003e9     	orr	w9, wzr, #0x1
+  27ddd4: 9102f280     	add	x0, x20, #0xbc
+  27ddd8: 089ffd09     	stlrb	w9, [x8]
+  27dddc: 97f97b85     	bl	0xdcbf0 <_ZNSt6__ndk118condition_variable10notify_oneEv@plt>
+  27dde0: 2a1f03f5     	mov	w21, wzr
+  27dde4: 14000067     	b	0x27df80 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x28c>
+  27dde8: f94002a0     	ldr	x0, [x21]
+  27ddec: f9400008     	ldr	x8, [x0]
+  27ddf0: f9403508     	ldr	x8, [x8, #0x68]
+  27ddf4: d63f0100     	blr	x8
+  27ddf8: 39408008     	ldrb	w8, [x0, #0x20]
+  27ddfc: 37000348     	tbnz	w8, #0x0, 0x27de64 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x170>
+  27de00: 91082296     	add	x22, x20, #0x208
+  27de04: 14000054     	b	0x27df54 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x260>
+  27de08: 321f03f5     	orr	w21, wzr, #0x2
+  27de0c: a9452688     	ldp	x8, x9, [x20, #0x50]
+  27de10: eb09011f     	cmp	x8, x9
+  27de14: 54000b20     	b.eq	0x27df78 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x284>
+  27de18: 321c02aa     	orr	w10, w21, #0x10
+  27de1c: eb08013f     	cmp	x9, x8
+  27de20: 54000a40     	b.eq	0x27df68 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x274>
+  27de24: b940010b     	ldr	w11, [x8]
+  27de28: 4b0b03ec     	neg	w12, w11
+  27de2c: 53083d8c     	ubfx	w12, w12, #8, #8
+  27de30: 7100119f     	cmp	w12, #0x4
+  27de34: 540009e0     	b.eq	0x27df70 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x27c>
+  27de38: 3100317f     	cmn	w11, #0xc
+  27de3c: 91004108     	add	x8, x8, #0x10
+  27de40: 54fffee1     	b.ne	0x27de1c <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x128>
+  27de44: f00019e1     	adrp	x1, 0x5bc000
+  27de48: f00019e2     	adrp	x2, 0x5bc000
+  27de4c: 9126a421     	add	x1, x1, #0x9a9
+  27de50: 912e0042     	add	x2, x2, #0xb80
+  27de54: 321d07e0     	orr	w0, wzr, #0x18
+  27de58: 97f9800a     	bl	0xdde80 <__log_print@plt>
+  27de5c: 52804208     	mov	w8, #0x210              // =528
+  27de60: 14000045     	b	0x27df74 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x280>
+  27de64: f9411a88     	ldr	x8, [x20, #0x230]
+  27de68: 91082296     	add	x22, x20, #0x208
+  27de6c: b40006c8     	cbz	x8, 0x27df44 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x250>
+  27de70: f9411688     	ldr	x8, [x20, #0x228]
+  27de74: f9410a89     	ldr	x9, [x20, #0x210]
+  27de78: d346fd0a     	lsr	x10, x8, #6
+  27de7c: 927dd94a     	and	x10, x10, #0x3fffffffffffff8
+  27de80: f86a6929     	ldr	x9, [x9, x10]
+  27de84: 92402108     	and	x8, x8, #0x1ff
+  27de88: f8687920     	ldr	x0, [x9, x8, lsl #3]
+  27de8c: f9400008     	ldr	x8, [x0]
+  27de90: f9403508     	ldr	x8, [x8, #0x68]
+  27de94: d63f0100     	blr	x8
+  27de98: b9405008     	ldr	w8, [x0, #0x50]
+  27de9c: 7100051f     	cmp	w8, #0x1
+  27dea0: 540004ab     	b.lt	0x27df34 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x240>
+  27dea4: f94002a0     	ldr	x0, [x21]
+  27dea8: f9400008     	ldr	x8, [x0]
+  27deac: f9403508     	ldr	x8, [x8, #0x68]
+  27deb0: d63f0100     	blr	x8
+  27deb4: b9405008     	ldr	w8, [x0, #0x50]
+  27deb8: 7100011f     	cmp	w8, #0x0
+  27debc: 540003cc     	b.gt	0x27df34 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x240>
+  27dec0: f9411688     	ldr	x8, [x20, #0x228]
+  27dec4: f9410a89     	ldr	x9, [x20, #0x210]
+  27dec8: f94002b7     	ldr	x23, [x21]
+  27decc: d346fd0a     	lsr	x10, x8, #6
+  27ded0: 927dd94a     	and	x10, x10, #0x3fffffffffffff8
+  27ded4: f86a6929     	ldr	x9, [x9, x10]
+  27ded8: 92402108     	and	x8, x8, #0x1ff
+  27dedc: f8687920     	ldr	x0, [x9, x8, lsl #3]
+  27dee0: f9400008     	ldr	x8, [x0]
+  27dee4: f9403508     	ldr	x8, [x8, #0x68]
+  27dee8: d63f0100     	blr	x8
+  27deec: f9411688     	ldr	x8, [x20, #0x228]
+  27def0: f9410a89     	ldr	x9, [x20, #0x210]
+  27def4: f9402418     	ldr	x24, [x0, #0x48]
+  27def8: d346fd0a     	lsr	x10, x8, #6
+  27defc: 927dd94a     	and	x10, x10, #0x3fffffffffffff8
+  27df00: f86a6929     	ldr	x9, [x9, x10]
+  27df04: 92402108     	and	x8, x8, #0x1ff
+  27df08: f8687928     	ldr	x8, [x9, x8, lsl #3]
+  27df0c: f9400109     	ldr	x9, [x8]
+  27df10: aa0803e0     	mov	x0, x8
+  27df14: f9403529     	ldr	x9, [x9, #0x68]
+  27df18: d63f0120     	blr	x9
+  27df1c: f94002e8     	ldr	x8, [x23]
+  27df20: b9405002     	ldr	w2, [x0, #0x50]
+  27df24: aa1703e0     	mov	x0, x23
+  27df28: aa1803e1     	mov	x1, x24
+  27df2c: f9403908     	ldr	x8, [x8, #0x70]
+  27df30: d63f0100     	blr	x8
+  27df34: aa1603e0     	mov	x0, x22
+  27df38: 97fe77e9     	bl	0x21bedc <_ZN6Cicada21CicadaPlayerPrototype6createEPKNS_7optionsE+0x181f0>
+  27df3c: f9411a88     	ldr	x8, [x20, #0x230]
+  27df40: b5fff988     	cbnz	x8, 0x27de70 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x17c>
+  27df44: f9400288     	ldr	x8, [x20]
+  27df48: aa1403e0     	mov	x0, x20
+  27df4c: f9407d08     	ldr	x8, [x8, #0xf8]
+  27df50: d63f0100     	blr	x8
+  27df54: aa1603e0     	mov	x0, x22
+  27df58: aa1503e1     	mov	x1, x21
+  27df5c: 97fe6e11     	bl	0x2197a0 <_ZN6Cicada21CicadaPlayerPrototype6createEPKNS_7optionsE+0x15ab4>
+  27df60: 2a1f03f5     	mov	w21, wzr
+  27df64: 14000005     	b	0x27df78 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x284>
+  27df68: 2a0a03f5     	mov	w21, w10
+  27df6c: 14000003     	b	0x27df78 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x284>
+  27df70: 52802208     	mov	w8, #0x110              // =272
+  27df74: 2a0802b5     	orr	w21, w21, w8
+  27df78: aa1303e0     	mov	x0, x19
+  27df7c: 97f96b0d     	bl	0xd8bb0 <_ZNSt6__ndk15mutex6unlockEv@plt>
+  27df80: f9401728     	ldr	x8, [x25, #0x28]
+  27df84: f94007e9     	ldr	x9, [sp, #0x8]
+  27df88: eb09011f     	cmp	x8, x9
+  27df8c: 54000121     	b.ne	0x27dfb0 <_ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE+0x2bc>
+  27df90: 2a1503e0     	mov	w0, w21
+  27df94: a9457bfd     	ldp	x29, x30, [sp, #0x50]
+  27df98: a9444ff4     	ldp	x20, x19, [sp, #0x40]
+  27df9c: a94357f6     	ldp	x22, x21, [sp, #0x30]
+  27dfa0: a9425ff8     	ldp	x24, x23, [sp, #0x20]
+  27dfa4: f9400bf9     	ldr	x25, [sp, #0x10]
+  27dfa8: 910183ff     	add	sp, sp, #0x60
+  27dfac: d65f03c0     	ret
+  27dfb0: 97f96ad4     	bl	0xd8b00 <__stack_chk_fail@plt>
+
+000000000027dfb4 <_ZN13ActiveDecoder23get_decoded_frame_countEv>:
+  27dfb4: d10083ff     	sub	sp, sp, #0x20
+  27dfb8: a9017bfd     	stp	x29, x30, [sp, #0x10]
+  27dfbc: 910043fd     	add	x29, sp, #0x10

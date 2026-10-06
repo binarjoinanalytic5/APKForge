@@ -1,0 +1,173 @@
+
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/lib/arm64-v8a/libsaasCorePlayer.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+00000000002777f4 <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE>:
+  2777f4: d101c3ff     	sub	sp, sp, #0x70
+  2777f8: f90013f9     	str	x25, [sp, #0x20]
+  2777fc: a9035ff8     	stp	x24, x23, [sp, #0x30]
+  277800: a90457f6     	stp	x22, x21, [sp, #0x40]
+  277804: a9054ff4     	stp	x20, x19, [sp, #0x50]
+  277808: a9067bfd     	stp	x29, x30, [sp, #0x60]
+  27780c: 910183fd     	add	x29, sp, #0x60
+  277810: d53bd059     	mrs	x25, TPIDR_EL0
+  277814: f9401728     	ldr	x8, [x25, #0x28]
+  277818: aa0103f3     	mov	x19, x1
+  27781c: aa0003f4     	mov	x20, x0
+  277820: f9000fe8     	str	x8, [sp, #0x18]
+  277824: f9400036     	ldr	x22, [x1]
+  277828: b4000bb6     	cbz	x22, 0x27799c <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE+0x1a8>
+  27782c: 900025e1     	adrp	x1, 0x733000
+  277830: 900025e2     	adrp	x2, 0x733000
+  277834: f9472c21     	ldr	x1, [x1, #0xe58]
+  277838: f9473042     	ldr	x2, [x2, #0xe60]
+  27783c: aa1603e0     	mov	x0, x22
+  277840: aa1f03e3     	mov	x3, xzr
+  277844: 97f99587     	bl	0xdce60 <__dynamic_cast@plt>
+  277848: b4000aa0     	cbz	x0, 0x27799c <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE+0x1a8>
+  27784c: f94002c8     	ldr	x8, [x22]
+  277850: f9403415     	ldr	x21, [x0, #0x68]
+  277854: aa1603e0     	mov	x0, x22
+  277858: f9403508     	ldr	x8, [x8, #0x68]
+  27785c: d63f0100     	blr	x8
+  277860: f9400808     	ldr	x8, [x0, #0x10]
+  277864: f90006a8     	str	x8, [x21, #0x8]
+  277868: f9400260     	ldr	x0, [x19]
+  27786c: f9400008     	ldr	x8, [x0]
+  277870: f9403508     	ldr	x8, [x8, #0x68]
+  277874: d63f0100     	blr	x8
+  277878: f9400c08     	ldr	x8, [x0, #0x18]
+  27787c: f9000aa8     	str	x8, [x21, #0x10]
+  277880: b40008f5     	cbz	x21, 0x27799c <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE+0x1a8>
+  277884: f9000bff     	str	xzr, [sp, #0x10]
+  277888: b9000fff     	str	wzr, [sp, #0xc]
+  27788c: f9400260     	ldr	x0, [x19]
+  277890: f9400008     	ldr	x8, [x0]
+  277894: f9403508     	ldr	x8, [x8, #0x68]
+  277898: d63f0100     	blr	x8
+  27789c: f9401802     	ldr	x2, [x0, #0x30]
+  2778a0: f0001921     	adrp	x1, 0x59e000
+  2778a4: 91288421     	add	x1, x1, #0xa21
+  2778a8: 910043e0     	add	x0, sp, #0x10
+  2778ac: 2a1f03e3     	mov	w3, wzr
+  2778b0: 97f99d20     	bl	0xded30 <av_dict_set_int@plt>
+  2778b4: f9400260     	ldr	x0, [x19]
+  2778b8: f9400008     	ldr	x8, [x0]
+  2778bc: f9403508     	ldr	x8, [x8, #0x68]
+  2778c0: d63f0100     	blr	x8
+  2778c4: f9401c02     	ldr	x2, [x0, #0x38]
+  2778c8: 90001a21     	adrp	x1, 0x5bb000
+  2778cc: 913d0821     	add	x1, x1, #0xf42
+  2778d0: 910043e0     	add	x0, sp, #0x10
+  2778d4: 2a1f03e3     	mov	w3, wzr
+  2778d8: 97f99d16     	bl	0xded30 <av_dict_set_int@plt>
+  2778dc: f9400be0     	ldr	x0, [sp, #0x10]
+  2778e0: 910033e1     	add	x1, sp, #0xc
+  2778e4: 97f9a0cf     	bl	0xdfc20 <av_packet_pack_dictionary@plt>
+  2778e8: aa0003f6     	mov	x22, x0
+  2778ec: 910043e0     	add	x0, sp, #0x10
+  2778f0: 97f99dec     	bl	0xdf0a0 <av_dict_free@plt>
+  2778f4: f9400260     	ldr	x0, [x19]
+  2778f8: f9400008     	ldr	x8, [x0]
+  2778fc: f9403508     	ldr	x8, [x8, #0x68]
+  277900: d63f0100     	blr	x8
+  277904: b9405008     	ldr	w8, [x0, #0x50]
+  277908: 7100051f     	cmp	w8, #0x1
+  27790c: 540003cb     	b.lt	0x277984 <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE+0x190>
+  277910: 320003e1     	orr	w1, wzr, #0x1
+  277914: 910023e2     	add	x2, sp, #0x8
+  277918: aa1503e0     	mov	x0, x21
+  27791c: 97f99d95     	bl	0xdef70 <av_packet_get_side_data@plt>
+  277920: b5000320     	cbnz	x0, 0x277984 <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE+0x190>
+  277924: f9400260     	ldr	x0, [x19]
+  277928: f9400008     	ldr	x8, [x0]
+  27792c: f9403508     	ldr	x8, [x8, #0x68]
+  277930: d63f0100     	blr	x8
+  277934: b9405002     	ldr	w2, [x0, #0x50]
+  277938: 320003e1     	orr	w1, wzr, #0x1
+  27793c: aa1503e0     	mov	x0, x21
+  277940: 97f9a0bc     	bl	0xdfc30 <av_packet_new_side_data@plt>
+  277944: aa0003f7     	mov	x23, x0
+  277948: b40001e0     	cbz	x0, 0x277984 <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE+0x190>
+  27794c: f9400260     	ldr	x0, [x19]
+  277950: f9400008     	ldr	x8, [x0]
+  277954: f9403508     	ldr	x8, [x8, #0x68]
+  277958: d63f0100     	blr	x8
+  27795c: f9400268     	ldr	x8, [x19]
+  277960: f9402418     	ldr	x24, [x0, #0x48]
+  277964: f9400109     	ldr	x9, [x8]
+  277968: aa0803e0     	mov	x0, x8
+  27796c: f9403529     	ldr	x9, [x9, #0x68]
+  277970: d63f0120     	blr	x9
+  277974: b9805002     	ldrsw	x2, [x0, #0x50]
+  277978: aa1703e0     	mov	x0, x23
+  27797c: aa1803e1     	mov	x1, x24
+  277980: 97f984dc     	bl	0xd8cf0 <memcpy@plt>
+  277984: b9800fe3     	ldrsw	x3, [sp, #0xc]
+  277988: 528001a1     	mov	w1, #0xd                // =13
+  27798c: aa1503e0     	mov	x0, x21
+  277990: aa1603e2     	mov	x2, x22
+  277994: 97f9a0ab     	bl	0xdfc40 <av_packet_add_side_data@plt>
+  277998: 1400000b     	b	0x2779c4 <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE+0x1d0>
+  27799c: 90001a21     	adrp	x1, 0x5bb000
+  2779a0: 90001a22     	adrp	x2, 0x5bb000
+  2779a4: 9135c421     	add	x1, x1, #0xd71
+  2779a8: 913d2842     	add	x2, x2, #0xf4a
+  2779ac: 321c07e0     	orr	w0, wzr, #0x30
+  2779b0: 97f99934     	bl	0xdde80 <__log_print@plt>
+  2779b4: aa1403e0     	mov	x0, x20
+  2779b8: 97f9a0a6     	bl	0xdfc50 <_ZN6Cicada14avcodecDecoder11canSendNullEv@plt>
+  2779bc: aa1f03f5     	mov	x21, xzr
+  2779c0: 36000280     	tbz	w0, #0x0, 0x277a10 <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE+0x21c>
+  2779c4: f9412a88     	ldr	x8, [x20, #0x250]
+  2779c8: aa1503e1     	mov	x1, x21
+  2779cc: f9400100     	ldr	x0, [x8]
+  2779d0: 97f9a0a4     	bl	0xdfc60 <avcodec_send_packet@plt>
+  2779d4: 52961768     	mov	w8, #0xb0bb             // =45243
+  2779d8: 72bbf728     	movk	w8, #0xdfb9, lsl #16
+  2779dc: 2a0003f4     	mov	w20, w0
+  2779e0: 6b08001f     	cmp	w0, w8
+  2779e4: 540002e0     	b.eq	0x277a40 <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE+0x24c>
+  2779e8: 31002e9f     	cmn	w20, #0xb
+  2779ec: 54000380     	b.eq	0x277a5c <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE+0x268>
+  2779f0: 35000134     	cbnz	w20, 0x277a14 <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE+0x220>
+  2779f4: f9400260     	ldr	x0, [x19]
+  2779f8: f900027f     	str	xzr, [x19]
+  2779fc: b40002e0     	cbz	x0, 0x277a58 <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE+0x264>
+  277a00: f9400008     	ldr	x8, [x0]
+  277a04: f9400508     	ldr	x8, [x8, #0x8]
+  277a08: d63f0100     	blr	x8
+  277a0c: 14000013     	b	0x277a58 <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE+0x264>
+  277a10: 321d03f4     	orr	w20, wzr, #0x8
+  277a14: 2a1403e0     	mov	w0, w20
+  277a18: 94019074     	bl	0x2dbbe8 <copyPCMData+0x1ec>
+  277a1c: 90001a21     	adrp	x1, 0x5bb000
+  277a20: 90001a22     	adrp	x2, 0x5bb000
+  277a24: aa0003e4     	mov	x4, x0
+  277a28: 9135c421     	add	x1, x1, #0xd71
+  277a2c: 913db042     	add	x2, x2, #0xf6c
+  277a30: 321c03e0     	orr	w0, wzr, #0x10
+  277a34: 2a1403e3     	mov	w3, w20
+  277a38: 97f99912     	bl	0xdde80 <__log_print@plt>
+  277a3c: 14000008     	b	0x277a5c <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE+0x268>
+  277a40: 90001a21     	adrp	x1, 0x5bb000
+  277a44: 90001a22     	adrp	x2, 0x5bb000
+  277a48: 9135c421     	add	x1, x1, #0xd71
+  277a4c: 913d8042     	add	x2, x2, #0xf60
+  277a50: 321c07e0     	orr	w0, wzr, #0x30
+  277a54: 97f9990b     	bl	0xdde80 <__log_print@plt>
+  277a58: 2a1f03f4     	mov	w20, wzr
+  277a5c: f9401728     	ldr	x8, [x25, #0x28]
+  277a60: f9400fe9     	ldr	x9, [sp, #0x18]
+  277a64: eb09011f     	cmp	x8, x9
+  277a68: 54000121     	b.ne	0x277a8c <_ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE+0x298>
+  277a6c: 2a1403e0     	mov	w0, w20
+  277a70: a9467bfd     	ldp	x29, x30, [sp, #0x60]
+  277a74: a9454ff4     	ldp	x20, x19, [sp, #0x50]
+  277a78: a94457f6     	ldp	x22, x21, [sp, #0x40]
+  277a7c: a9435ff8     	ldp	x24, x23, [sp, #0x30]
+  277a80: f94013f9     	ldr	x25, [sp, #0x20]
+  277a84: 9101c3ff     	add	sp, sp, #0x70
+  277a88: d65f03c0     	ret
+  277a8c: 97f9841d     	bl	0xd8b00 <__stack_chk_fail@plt>

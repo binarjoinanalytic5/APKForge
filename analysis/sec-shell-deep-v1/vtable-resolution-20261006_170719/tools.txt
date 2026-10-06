@@ -1,0 +1,5 @@
+strings   = /data/data/com.termux/files/usr/bin/strings
+file      = /data/data/com.termux/files/usr/bin/file
+readelf   = /data/data/com.termux/files/usr/bin/readelf
+objdump   = /data/data/com.termux/files/usr/bin/llvm-objdump
+git       = /data/data/com.termux/files/usr/bin/git

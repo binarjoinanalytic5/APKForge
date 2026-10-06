@@ -1,0 +1,2 @@
+origin	https://github.com/binarjoinanalytic5/ReelShort-v4.2.00-analysis.git (fetch)
+origin	https://github.com/binarjoinanalytic5/ReelShort-v4.2.00-analysis.git (push)

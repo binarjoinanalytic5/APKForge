@@ -1,0 +1,74 @@
+
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/lib/arm64-v8a/libsaasCorePlayer.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+000000000027d02c <_ZN13ActiveDecoder4openEPK11Stream_metaPvmPKN6Cicada7DrmInfoE>:
+  27d02c: d101c3ff     	sub	sp, sp, #0x70
+  27d030: a90457f6     	stp	x22, x21, [sp, #0x40]
+  27d034: a9054ff4     	stp	x20, x19, [sp, #0x50]
+  27d038: a9067bfd     	stp	x29, x30, [sp, #0x60]
+  27d03c: 910183fd     	add	x29, sp, #0x60
+  27d040: d53bd056     	mrs	x22, TPIDR_EL0
+  27d044: f94016c8     	ldr	x8, [x22, #0x28]
+  27d048: aa0003f3     	mov	x19, x0
+  27d04c: aa0103f5     	mov	x21, x1
+  27d050: f81d83a8     	stur	x8, [x29, #-0x28]
+  27d054: f9400008     	ldr	x8, [x0]
+  27d058: f9407508     	ldr	x8, [x8, #0xe8]
+  27d05c: d63f0100     	blr	x8
+  27d060: 2a0003f4     	mov	w20, w0
+  27d064: 37f80400     	tbnz	w0, #0x1f, 0x27d0e4 <_ZN13ActiveDecoder4openEPK11Stream_metaPvmPKN6Cicada7DrmInfoE+0xb8>
+  27d068: 9401546d     	bl	0x2d221c <_ZN6Cicada14globalSettings8propertyaSERKS1_+0x30>
+  27d06c: 97f989b9     	bl	0xdf750 <_ZN6Cicada14globalSettings27enableDecoderFastFirstFrameEv@plt>
+  27d070: 12000008     	and	w8, w0, #0x1
+  27d074: 9102e269     	add	x9, x19, #0xb8
+  27d078: 320003ea     	orr	w10, wzr, #0x1
+  27d07c: 9108f26b     	add	x11, x19, #0x23c
+  27d080: 39081268     	strb	w8, [x19, #0x204]
+  27d084: 089ffd2a     	stlrb	w10, [x9]
+  27d088: 089ffd6a     	stlrb	w10, [x11]
+  27d08c: b94012a8     	ldr	w8, [x21, #0x10]
+  27d090: 52802a00     	mov	w0, #0x150              // =336
+  27d094: b9023a68     	str	w8, [x19, #0x238]
+  27d098: 97f96eb6     	bl	0xd8b70 <_Znwm@plt>
+  27d09c: f00024c8     	adrp	x8, 0x718000 <_ZTVN6Cicada14avcodecDecoderE+0x320>
+  27d0a0: 91088108     	add	x8, x8, #0x220
+  27d0a4: f00019e2     	adrp	x2, 0x5bc000
+  27d0a8: 910003e9     	mov	x9, sp
+  27d0ac: 91004108     	add	x8, x8, #0x10
+  27d0b0: 9126a442     	add	x2, x2, #0x9a9
+  27d0b4: 910003e1     	mov	x1, sp
+  27d0b8: aa0003f4     	mov	x20, x0
+  27d0bc: a9004fe8     	stp	x8, x19, [sp]
+  27d0c0: f90013e9     	str	x9, [sp, #0x20]
+  27d0c4: 97f98653     	bl	0xdea10 <_ZN8afThreadC1ENSt6__ndk18functionIFivEEEPKc@plt>
+  27d0c8: 910003e0     	mov	x0, sp
+  27d0cc: f9005a74     	str	x20, [x19, #0xb0]
+  27d0d0: 97fb6d25     	bl	0x158564 <_ZN13SaasTrackInfoC2E17AvaliablePlayInfoi+0x3dc>
+  27d0d4: f9405a60     	ldr	x0, [x19, #0xb0]
+  27d0d8: 97f98656     	bl	0xdea30 <_ZN8afThread5startEv@plt>
+  27d0dc: 2a1f03f4     	mov	w20, wzr
+  27d0e0: 1400000c     	b	0x27d110 <_ZN13ActiveDecoder4openEPK11Stream_metaPvmPKN6Cicada7DrmInfoE+0xe4>
+  27d0e4: f00019e1     	adrp	x1, 0x5bc000
+  27d0e8: f00019e2     	adrp	x2, 0x5bc000
+  27d0ec: 9126a421     	add	x1, x1, #0x9a9
+  27d0f0: 9126e442     	add	x2, x2, #0x9b9
+  27d0f4: 321c03e0     	orr	w0, wzr, #0x10
+  27d0f8: 2a1403e3     	mov	w3, w20
+  27d0fc: 97f98361     	bl	0xdde80 <__log_print@plt>
+  27d100: f9400268     	ldr	x8, [x19]
+  27d104: aa1303e0     	mov	x0, x19
+  27d108: f9401908     	ldr	x8, [x8, #0x30]
+  27d10c: d63f0100     	blr	x8
+  27d110: f94016c8     	ldr	x8, [x22, #0x28]
+  27d114: f85d83a9     	ldur	x9, [x29, #-0x28]
+  27d118: eb09011f     	cmp	x8, x9
+  27d11c: 540000e1     	b.ne	0x27d138 <_ZN13ActiveDecoder4openEPK11Stream_metaPvmPKN6Cicada7DrmInfoE+0x10c>
+  27d120: 2a1403e0     	mov	w0, w20
+  27d124: a9467bfd     	ldp	x29, x30, [sp, #0x60]
+  27d128: a9454ff4     	ldp	x20, x19, [sp, #0x50]
+  27d12c: a94457f6     	ldp	x22, x21, [sp, #0x40]
+  27d130: 9101c3ff     	add	sp, sp, #0x70
+  27d134: d65f03c0     	ret
+  27d138: 97f96e72     	bl	0xd8b00 <__stack_chk_fail@plt>

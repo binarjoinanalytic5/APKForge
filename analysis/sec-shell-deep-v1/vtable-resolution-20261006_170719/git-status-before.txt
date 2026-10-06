@@ -1,0 +1,9 @@
+ M analysis/auto-deep-v2/metadata/full-run.log
+ M analysis/auto-deep-v3/metadata/run.log
+ M analysis/sec-shell-deep-v2/summary/execution.log
+?? .gitignore
+?? analysis-apktool.log
+?? analysis-jadx.log
+?? analysis/auto-deep-v2/metadata/commit.txt
+?? analysis/auto-deep-v2/metadata/git-status-after.txt
+?? analysis/sec-shell-deep-v1/
