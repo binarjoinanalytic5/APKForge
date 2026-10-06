@@ -1,0 +1,26 @@
+{
+  "attempted": true,
+  "branch": "reelsec/reports/20261006_190046-24159",
+  "details": "",
+  "remote": "origin/reelsec/reports/20261006_190046-24159",
+  "remote_verified": true,
+  "report_commit": "8a4bdda7f84adc3c3f85d242e32430eca8feed7a",
+  "report_path": "analysis/sec-shell-deep-v1/reelsec-20261006_190042",
+  "required_artifacts": [
+    "manifest.json",
+    "VTable-RESOLUTION-REPORT.md",
+    "PROTECTION-BRIDGE-AUDIT.md",
+    "JNI-SEMANTIC-ANALYSIS.md",
+    "VTABLE-ABI-ANALYSIS.md",
+    "CRITICAL-FUNCTION-BEHAVIOR.md",
+    "NATIVE-SECURITY-API-AUDIT.md",
+    "JAVA-SCREEN-SECURITY-AUDIT.md"
+  ],
+  "schema_version": "2.0",
+  "status": "REPORT_PUBLISHED;STATUS_COMMIT_FOLLOWS",
+  "status_commit": null,
+  "status_commit_note": "The SHA of the commit that contains this receipt cannot be embedded inside the same receipt without making the commit hash self-referential. The final status commit is verified separately by git ls-remote after push.",
+  "status_remote_verified": null,
+  "tool": "ReelSec",
+  "version": "2.0.0"
+}
