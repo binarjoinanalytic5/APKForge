@@ -14,7 +14,7 @@ from pathlib import Path
 from environment import write_capability_matrix
 from apktool_backend import ApktoolBackendError, select_apktool_backend, decode_command
 from instrumentation_backend import plan_secshell_injection
-from instrumented_copy import prepare_instrumented_copy
+from instrumented_copy import prepare_instrumented_copy, apply_text_probe
 from build_verify import apktool_build_command, verify_artifact
 from sign_verify import artifact_identity, sign_command, verify_command, run_checked
 from adb_deploy import install_command, device_check_command
@@ -2445,6 +2445,14 @@ def main():
             instrumented_copy = prepare_instrumented_copy(
                 decoded_inventory["root"], instrumented_copy_root
             )
+            source_root = Path(decoded_inventory["root"]).resolve()
+            source_target = Path(instrumentation_plan["target"]).resolve()
+            relative_target = source_target.relative_to(source_root)
+            copied_target = instrumented_copy_root / relative_target
+            instrumented_copy = apply_text_probe(
+                instrumented_copy_root, copied_target
+            )
+            instrumented_copy["instrumentation_target"] = str(copied_target)
         except Exception as exc:
             instrumented_copy = {"status": "FAILED", "error": str(exc)}
         (output / "INSTRUMENTED-COPY-MANIFEST.json").write_text(
@@ -2453,16 +2461,16 @@ def main():
         )
     _progress_stage(
         progress, output, 7, "Instrumented copy",
-        "PASS" if instrumented_copy.get("status") == "COPIED"
+        "PASS" if instrumented_copy.get("status") in ("COPIED", "MUTATED")
         else "FAIL" if instrumented_copy.get("status") == "FAILED"
         else "SKIP",
-        instrumented_copy.get("error", instrumented_copy.get("status", "")),
+        instrumented_copy.get("error", "telemetry probe applied" if instrumented_copy.get("status") == "MUTATED" else instrumented_copy.get("status", "")),
     )
 
     _progress_stage(progress, output, 8, "Build instrumented APK", "RUNNING",
                     "building only the isolated instrumented tree")
     build_verify = {"status": "NOT_BUILT"}
-    if instrumented_copy.get("status") == "COPIED":
+    if instrumented_copy.get("status") in ("COPIED", "MUTATED"):
         try:
             built_apk = output / "instrumented-unsigned.apk"
             build_cmd = apktool_build_command(apktool_backend, instrumented_copy_root, built_apk)
