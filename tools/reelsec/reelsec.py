@@ -150,12 +150,7 @@ def scan_security_indicators(strings_text):
     return "\n".join(line for line in strings_text.splitlines() if pattern.search(line))
 
 def git_publish(root, report_dir):
-    """Publish an immutable report from a clean worktree based on origin/main.
-
-    The investigation checkout is never committed, reset, rebased, stashed, or pushed.
-    Publication is transactional: report commit -> remote verification -> status commit
-    -> remote verification. The final PUBLISH-STATUS.json is copied back locally only.
-    """
+    """Publish from a clean worktree based on origin/main; never mutate the investigation checkout."""
     result = {
         "schema_version": "2.0",
         "tool": "ReelSec",
@@ -188,27 +183,24 @@ def git_publish(root, report_dir):
         return result
 
     required = ["manifest.json", "VTable-RESOLUTION-REPORT.md", "PROTECTION-BRIDGE-AUDIT.md"]
-    missing = [name for name in required if not (report_dir / name).is_file()]
     result["required_artifacts"] = required
     result["report_path"] = rel
+    missing = [name for name in required if not (report_dir / name).is_file()]
     if missing:
         result["status"] = "REQUIRED_ARTIFACTS_MISSING"
         result["details"] = "missing=" + ",".join(missing)
         return result
 
-    # Synchronize only the remote base ref; do not alter the user's checkout.
     rc, out = run([git, "fetch", "--quiet", "origin", "main"], cwd=root)
     if rc != 0:
         result["status"] = "FETCH_FAILED"
         result["details"] = out
         return result
-
     rc, base = run([git, "rev-parse", "origin/main"], cwd=root)
-    if rc != 0 or not base.strip():
+    if rc != 0:
         result["status"] = "BASE_RESOLUTION_FAILED"
         result["details"] = out + base
         return result
-    base = base.strip()
 
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     branch = "reelsec/reports/%s-%s" % (timestamp, os.getpid())
@@ -216,11 +208,9 @@ def git_publish(root, report_dir):
     result["remote"] = "origin/" + branch
 
     worktree = Path(tempfile.mkdtemp(prefix="reelsec-publish-"))
-    keep = False
     try:
-        # Replace the empty temp directory with a real detached worktree.
         shutil.rmtree(worktree, ignore_errors=True)
-        rc, out = run([git, "worktree", "add", "--detach", str(worktree), base], cwd=root)
+        rc, out = run([git, "worktree", "add", "--detach", str(worktree), base.strip()], cwd=root)
         if rc != 0:
             result["status"] = "WORKTREE_CREATE_FAILED"
             result["details"] = out
@@ -241,16 +231,15 @@ def git_publish(root, report_dir):
             result["status"] = "GIT_ADD_FAILED"
             result["details"] = out
             return result
-
         rc, staged = run([git, "diff", "--cached", "--name-only"], cwd=worktree)
         if rc != 0 or not staged.strip():
             result["status"] = "NOTHING_TO_PUBLISH"
             result["details"] = staged
             return result
 
-        rc, out = run([
-            git, "-c", "user.name=ReelSec", "-c",
-            "user.email=reelsec@users.noreply.github.com",
+        identity = [git, "-c", "user.name=ReelSec", "-c",
+                     "user.email=reelsec@users.noreply.github.com"]
+        rc, out = run(identity + [
             "commit", "--no-verify",
             "-m", "ReelSec: publish security analysis " + timestamp,
         ], cwd=worktree)
@@ -260,12 +249,7 @@ def git_publish(root, report_dir):
             return result
 
         rc, head = run([git, "rev-parse", "HEAD"], cwd=worktree)
-        if rc != 0:
-            result["status"] = "REPORT_HEAD_FAILED"
-            result["details"] = head
-            return result
         result["report_commit"] = head.strip()
-
         rc, out = run([git, "push", "origin", "HEAD:refs/heads/" + branch], cwd=worktree)
         if rc != 0:
             result["status"] = "REPORT_PUSH_FAILED"
@@ -273,29 +257,24 @@ def git_publish(root, report_dir):
             return result
 
         rc, remote_head = run([git, "ls-remote", "--heads", "origin", "refs/heads/" + branch], cwd=root)
-        expected = result["report_commit"]
-        verified = rc == 0 and expected in remote_head
-        result["remote_verified"] = verified
-        if not verified:
+        result["remote_verified"] = rc == 0 and result["report_commit"] in remote_head
+        if not result["remote_verified"]:
             result["status"] = "REPORT_REMOTE_VERIFY_FAILED"
             result["details"] = remote_head
             return result
 
-        # The status receipt is itself part of the published branch. It is generated
-        # after the report commit so it can contain the exact verified commit SHA.
-        result["status"] = "REPORT_PUBLISHED"
+        # The receipt is committed only after the report commit has been verified.
+        receipt = dict(result)
+        receipt["status"] = "PUBLISHED"
         status_path = publish_report / "PUBLISH-STATUS.json"
-        status_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        status_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
         rc, out = run([git, "add", "--", rel + "/PUBLISH-STATUS.json"], cwd=worktree)
         if rc != 0:
             result["status"] = "STATUS_ADD_FAILED"
             result["details"] = out
             return result
-
-        rc, out = run([
-            git, "-c", "user.name=ReelSec", "-c",
-            "user.email=reelsec@users.noreply.github.com",
+        rc, out = run(identity + [
             "commit", "--no-verify",
             "-m", "ReelSec: finalize publication receipt " + timestamp,
         ], cwd=worktree)
@@ -311,105 +290,22 @@ def git_publish(root, report_dir):
             return result
         result["status_commit"] = status_head.strip()
 
-        # Refresh the receipt with the final status commit and amend it, so the
-        # published JSON is self-consistent before the final push.
-        final_receipt = dict(result)
-        final_receipt["status"] = "PUBLISHED"
-        status_path.write_text(json.dumps(final_receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        rc, out = run([git, "add", "--", rel + "/PUBLISH-STATUS.json"], cwd=worktree)
-        if rc != 0:
-            result["status"] = "STATUS_FINALIZE_ADD_FAILED"
-            result["details"] = out
-            return result
-        rc, out = run([
-            git, "-c", "user.name=ReelSec", "-c",
-            "user.email=reelsec@users.noreply.github.com",
-            "commit", "--no-verify", "--amend", "--no-edit",
-        ], cwd=worktree)
-        if rc != 0:
-            result["status"] = "STATUS_AMEND_FAILED"
-            result["details"] = out
-            return result
-
-        rc, final_head = run([git, "rev-parse", "HEAD"], cwd=worktree)
-        if rc != 0:
-            result["status"] = "FINAL_HEAD_FAILED"
-            result["details"] = final_head
-            return result
-        result["status_commit"] = final_head.strip()
-
-        final_receipt["status_commit"] = result["status_commit"]
-        status_path.write_text(json.dumps(final_receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        rc, out = run([git, "add", "--", rel + "/PUBLISH-STATUS.json"], cwd=worktree)
-        if rc != 0:
-            result["status"] = "STATUS_RECEIPT_ADD_FAILED"
-            result["details"] = out
-            return result
-        rc, out = run([
-            git, "-c", "user.name=ReelSec", "-c",
-            "user.email=reelsec@users.noreply.github.com",
-            "commit", "--no-verify",
-            "-m", "ReelSec: record final publication receipt " + timestamp,
-        ], cwd=worktree)
-        if rc != 0:
-            result["status"] = "FINAL_STATUS_COMMIT_FAILED"
-            result["details"] = out
-            return result
-
-        rc, final_head = run([git, "rev-parse", "HEAD"], cwd=worktree)
-        if rc != 0:
-            result["status"] = "FINAL_HEAD_FAILED"
-            result["details"] = final_head
-            return result
-        result["status_commit"] = final_head.strip()
-
-        # Rewrite once more with the final commit hash, then commit. This bounded
-        # two-step receipt finalization is intentionally deterministic.
-        final_receipt["status_commit"] = result["status_commit"]
-        status_path.write_text(json.dumps(final_receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-        rc, out = run([git, "add", "--", rel + "/PUBLISH-STATUS.json"], cwd=worktree)
-        if rc != 0:
-            result["status"] = "FINAL_RECEIPT_ADD_FAILED"
-            result["details"] = out
-            return result
-        rc, out = run([
-            git, "-c", "user.name=ReelSec", "-c",
-            "user.email=reelsec@users.noreply.github.com",
-            "commit", "--no-verify",
-            "-m", "ReelSec: finalize immutable receipt " + timestamp,
-        ], cwd=worktree)
-        if rc != 0:
-            result["status"] = "FINAL_RECEIPT_COMMIT_FAILED"
-            result["details"] = out
-            return result
-
-        rc, final_head = run([git, "rev-parse", "HEAD"], cwd=worktree)
-        if rc != 0:
-            result["status"] = "FINAL_HEAD_FAILED"
-            result["details"] = final_head
-            return result
-        result["status_commit"] = final_head.strip()
-
         rc, out = run([git, "push", "origin", "HEAD:refs/heads/" + branch], cwd=worktree)
         if rc != 0:
-            result["status"] = "FINAL_PUSH_FAILED"
+            result["status"] = "STATUS_PUSH_FAILED"
             result["details"] = out
             return result
 
         rc, remote_head = run([git, "ls-remote", "--heads", "origin", "refs/heads/" + branch], cwd=root)
         result["status_remote_verified"] = rc == 0 and result["status_commit"] in remote_head
         if not result["status_remote_verified"]:
-            result["status"] = "FINAL_REMOTE_VERIFY_FAILED"
+            result["status"] = "STATUS_REMOTE_VERIFY_FAILED"
             result["details"] = remote_head
             return result
 
-        # Copy the exact final receipt back to the investigation checkout without
-        # staging or committing it there.
-        local_receipt = report_dir / "PUBLISH-STATUS.json"
-        shutil.copy2(status_path, local_receipt)
+        shutil.copy2(status_path, report_dir / "PUBLISH-STATUS.json")
         result["status"] = "PUBLISHED"
-        result["details"] = "clean-worktree publication and remote verification succeeded"
-        keep = True
+        result["details"] = "clean-worktree publication succeeded; report and final receipt verified remotely"
         return result
     except Exception as exc:
         result["status"] = "PUBLISH_EXCEPTION"
@@ -418,9 +314,6 @@ def git_publish(root, report_dir):
     finally:
         if worktree.exists():
             run([git, "worktree", "remove", "--force", str(worktree)], cwd=root)
-        if not keep:
-            # Nothing from the temporary publication tree is retained.
-            pass
 
 def main():
     parser = argparse.ArgumentParser()
