@@ -838,19 +838,78 @@ def _find_package_name(root):
 
 
 def write_runtime_toolchain_preflight(output):
-    """Bounded best-effort preparation of local Android/Frida clients."""
-    result={"schema_version":"1.1","attempted":True,"actions":[],"tooling":{},"status":"NOT_ATTEMPTED"}
+    """Bounded best-effort preparation of ADB + Frida clients.
+    
+    Termux does not currently ship frida-tools in the enabled repositories, and
+    its native Python may lack a compatible Frida wheel. Prefer a glibc-based
+    Debian PRoot environment where Frida's published Linux ARM64 wheels can be
+    installed without a local C/C++ build.
+    """
+    result={"schema_version":"1.2","attempted":True,"actions":[],"tooling":{},"status":"NOT_ATTEMPTED"}
     py=which("python","python3"); pkg=which("pkg"); adb=which("adb"); frida=which("frida")
-    result["tooling"].update(adb=adb,frida=frida,python=py,pkg=pkg)
+    pdist=which("proot-distro","pd")
+    result["tooling"].update(adb=adb,frida=frida,python=py,pkg=pkg,proot_distro=pdist)
+
     if not adb and pkg:
         rc,out=run([pkg,"install","-y","android-tools"],timeout=90)
         result["actions"].append({"action":"pkg_install_android_tools","returncode":rc,"output":out[-4000:]})
         adb=which("adb"); result["tooling"]["adb_after"]=adb
+
     if not frida and pkg:
         rc,out=run([pkg,"install","-y","frida-tools"],timeout=120)
         result["actions"].append({"action":"pkg_install_frida_tools","returncode":rc,"output":out[-4000:]})
         frida=which("frida")
         result["tooling"]["frida_after_pkg"]=frida
+
+    if not frida and pkg and not pdist:
+        rc,out=run([pkg,"install","-y","proot-distro"],timeout=120)
+        result["actions"].append({"action":"pkg_install_proot_distro","returncode":rc,"output":out[-4000:]})
+        pdist=which("proot-distro","pd")
+        result["tooling"]["proot_distro_after_pkg"]=pdist
+
+    if not frida and pdist:
+        test_rc,test_out=run([pdist,"login","debian","--","/bin/true"],timeout=45)
+        result["actions"].append({
+            "action":"proot_debian_probe",
+            "returncode":test_rc,
+            "output":test_out[-2000:]
+        })
+        if test_rc != 0:
+            rc,out=run([pdist,"install","debian"],timeout=300)
+            result["actions"].append({
+                "action":"proot_install_debian",
+                "returncode":rc,
+                "output":out[-4000:]
+            })
+        rc,out=run([
+            pdist,"login","debian","--","bash","-lc",
+            "export DEBIAN_FRONTEND=noninteractive; "
+            "apt-get update -y >/tmp/reelsec-apt-update.log 2>&1 && "
+            "apt-get install -y python3 python3-pip ca-certificates >/tmp/reelsec-apt-install.log 2>&1 && "
+            "python3 -m pip install --break-system-packages --disable-pip-version-check --no-cache-dir -U frida-tools"
+        ],timeout=360)
+        result["actions"].append({
+            "action":"proot_install_frida_tools",
+            "returncode":rc,
+            "output":out[-6000:]
+        })
+        wrapper_dir=Path.home()/".local"/"bin"
+        wrapper_dir.mkdir(parents=True,exist_ok=True)
+        wrapper=wrapper_dir/"frida"
+        wrapper.write_text(
+            "#!/system/bin/sh\n"
+            "exec "+pdist+" login debian -- /usr/local/bin/frida \"$@\"\n",
+            encoding="utf-8",
+        )
+        try:
+            wrapper.chmod(0o755)
+        except OSError:
+            pass
+        os.environ["PATH"]=str(wrapper_dir)+os.pathsep+os.environ.get("PATH","")
+        frida=which("frida")
+        result["tooling"]["frida_after_proot"]=frida
+        result["tooling"]["frida_wrapper"]=str(wrapper)
+
     if not frida and py:
         rc,out=run([py,"-m","pip","install","--user","--disable-pip-version-check","frida-tools"],timeout=120)
         result["actions"].append({"action":"pip_install_frida_tools","returncode":rc,"output":out[-4000:]})
@@ -859,6 +918,7 @@ def write_runtime_toolchain_preflight(output):
             p=Path.home()/".local"/"bin"/"frida"
             if p.is_file(): frida=str(p)
         result["tooling"]["frida_after"]=frida
+
     missing=[]
     if not adb: missing.append("adb")
     if not frida: missing.append("frida_cli")
@@ -866,8 +926,11 @@ def write_runtime_toolchain_preflight(output):
     result["status"]="CLIENTS_READY" if not missing else "RUNTIME_TOOLCHAIN_INCOMPLETE"
     (output/"RUNTIME-TOOLCHAIN-PREFLIGHT.json").write_text(json.dumps(result,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     (output/"RUNTIME-TOOLCHAIN-PREFLIGHT.md").write_text(
-        "# Runtime Toolchain Preflight\n\nStatus: "+result["status"]+
-        "\nMissing: "+(", ".join(missing) if missing else "NONE")+"\n",encoding="utf-8")
+        "# Runtime Toolchain Preflight\n\n"
+        "Status: "+result["status"]+"\n"
+        "Missing: "+(", ".join(missing) if missing else "NONE")+"\n\n"
+        "Frida installation preference: native Termux package, then Debian/PRoot glibc environment, then native pip fallback.\n",
+        encoding="utf-8")
     return result
 
 
