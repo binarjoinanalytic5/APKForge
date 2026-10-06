@@ -13,6 +13,7 @@ from pathlib import Path
 
 from environment import write_capability_matrix
 from apktool_backend import ApktoolBackendError, select_apktool_backend, decode_command
+from instrumentation_backend import plan_secshell_injection
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
 VERSION = "3.0.0"
@@ -88,6 +89,32 @@ def inventory_decoded_apk(output_dir):
     }
     (root.parent / "DECODED-INPUT-INVENTORY.json").write_text(json.dumps(inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return inventory
+
+def plan_instrumentation(decoded_inventory, output_dir):
+    """Locate the known SecShell Application anchor and emit a non-mutating plan."""
+    if not decoded_inventory or decoded_inventory.get("status") != "READY":
+        return {"status": "BLOCKED", "reason": "decoded APK inventory is not ready"}
+    root = Path(decoded_inventory["root"]).resolve()
+    candidates = sorted(root.rglob("AW.smali"))
+    for target in candidates:
+        result = plan_secshell_injection(root, target)
+        if result.get("status") == "READY":
+            result["candidate_count"] = len(candidates)
+            (Path(output_dir) / "INSTRUMENTATION-PLAN.json").write_text(
+                json.dumps(result, indent=2, sort_keys=True) + "\\n",
+                encoding="utf-8",
+            )
+            return result
+    result = {
+        "status": "BLOCKED",
+        "reason": "SecShell AW.smali anchor not found",
+        "candidate_count": len(candidates),
+    }
+    (Path(output_dir) / "INSTRUMENTATION-PLAN.json").write_text(
+        json.dumps(result, indent=2, sort_keys=True) + "\\n",
+        encoding="utf-8",
+    )
+    return result
 
 def run(cmd, cwd=None, timeout=None):
     try:
@@ -1562,6 +1589,8 @@ def main():
         json.dumps(decoded_inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
 
+    instrumentation_plan = plan_instrumentation(decoded_inventory, output)
+
     analysis_root = Path(decoded_inventory["root"]).resolve() if decoded_inventory and decoded_inventory.get("status") == "READY" else ROOT
     target = find_target(args.elf, analysis_root)
     target_source = "decoded-apk" if analysis_root != ROOT else "repository-root-fallback"
@@ -1583,6 +1612,7 @@ def main():
         "analysis_root": str(analysis_root),
         "target_source": target_source,
         "input_provenance": input_provenance,
+        "instrumentation_plan": instrumentation_plan,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
@@ -1812,6 +1842,7 @@ def main():
         analysis_root=str(analysis_root),
         target_source=target_source,
         input_provenance=input_provenance,
+        instrumentation_plan=instrumentation_plan,
     )
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
