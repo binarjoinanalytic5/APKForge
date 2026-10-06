@@ -72,14 +72,21 @@ def run_apktool_decode(selection, apk, output_dir, timeout=300):
     output_dir.parent.mkdir(parents=True, exist_ok=True)
     command = decode_command(selection, apk, output_dir)
     live_log_path = output_dir.parent / (output_dir.name + ".apktool-live.log")
+    total_classes = _apk_total_dex_classes(apk)
     print("      [apktool] timeout=%ss heartbeat=10s" % timeout, flush=True)
+    decode_started = time.monotonic()
     rc, log = run_with_heartbeat(
         command,
         timeout=timeout,
         heartbeat=10,
         label="apktool",
         log_path=live_log_path,
-        progress_probe=lambda lp: _apktool_progress(lp, output_dir, apk),
+        progress_probe=lambda lp: _apktool_progress(
+            lp, output_dir, apk, total_classes=total_classes,
+            elapsed=int(time.monotonic() - decode_started),
+        ),
+        stage_index=4,
+        total_stages=14,
     )
     log_path = (output_dir / "reelsec-apktool.log") if output_dir.is_dir() else live_log_path
     log_path.write_text(log, encoding="utf-8", errors="replace")
@@ -234,8 +241,26 @@ def plan_instrumentation(decoded_inventory, output_dir):
     return result
 
 
-def _apktool_progress(log_path, output_dir, apk_path):
-    """Estimate Apktool decode progress from observed work, never from elapsed time alone."""
+def _apk_total_dex_classes(apk_path):
+    """Read DEX class counts once so progress estimates stay cheap and reproducible."""
+    total = 0
+    try:
+        import zipfile
+        with zipfile.ZipFile(apk_path, "r") as zf:
+            for info in zf.infolist():
+                if not info.filename.endswith(".dex"):
+                    continue
+                with zf.open(info, "r") as fh:
+                    header = fh.read(0x64)
+                if len(header) >= 0x64 and header[:3] == b"dex":
+                    total += struct.unpack_from("<I", header, 0x60)[0]
+    except Exception:
+        return 0
+    return total
+
+
+def _apktool_progress(log_path, output_dir, apk_path, total_classes=0, elapsed=0):
+    """Estimate decode work from observable Apktool milestones and decoded class output."""
     log_text = ""
     try:
         log_text = Path(log_path).read_text(encoding="utf-8", errors="replace")
@@ -255,47 +280,32 @@ def _apktool_progress(log_path, output_dir, apk_path):
     ]
 
     phase = "STARTING"
-    base_percent = 2
-    for name, percent, needles in milestones:
-        hits = [needle for needle in needles if needle in upper]
-        if hits:
+    percent = 2.0
+    for name, value, needles in milestones:
+        if any(needle in upper for needle in needles):
             phase = name
-            base_percent = percent
+            percent = float(value)
 
-    detail = ""
-    percent = float(base_percent)
+    detail = phase.lower().replace("_", " ")
     eta = None
 
     if phase == "BAKSMALI":
-        total_classes = 0
-        try:
-            import zipfile
-            with zipfile.ZipFile(apk_path, "r") as zf:
-                for info in zf.infolist():
-                    name = info.filename
-                    if name.endswith(".dex"):
-                        data = zf.read(info)
-                        if len(data) >= 0x64 and data[:3] == b"dex":
-                            total_classes += struct.unpack_from("<I", data, 0x60)[0]
-        except Exception:
-            total_classes = 0
-
         produced = 0
         try:
-            produced = sum(
-                1 for p in Path(output_dir).glob("smali*/**/*.smali")
-            )
+            for p in Path(output_dir).glob("smali*/**/*.smali"):
+                produced += 1
         except OSError:
-            produced = 0
-
+            pass
         if total_classes > 0:
             ratio = min(1.0, produced / float(total_classes))
             percent = 40.0 + ratio * 38.0
             detail = "baksmali %d/%d classes" % (produced, total_classes)
+            if produced > 0 and elapsed > 5:
+                rate = produced / float(elapsed)
+                remaining = max(0, total_classes - produced)
+                eta = int(remaining / rate) if rate > 0 else None
         else:
             detail = "baksmali output growing; class total unavailable"
-    else:
-        detail = phase.lower().replace("_", " ")
 
     return {
         "mode": "ESTIMATE",
@@ -305,7 +315,8 @@ def _apktool_progress(log_path, output_dir, apk_path):
         "detail": detail,
     }
 
-def run_with_heartbeat(cmd, cwd=None, timeout=None, heartbeat=10, label="process", log_path=None, progress_probe=None):
+def run_with_heartbeat(cmd, cwd=None, timeout=None, heartbeat=10, label="process",
+                       log_path=None, progress_probe=None, stage_index=None, total_stages=None):
     """Run a long process with periodic liveness and optional progress estimates."""
     log_file = Path(log_path).expanduser().resolve() if log_path else None
     if log_file:
@@ -338,11 +349,23 @@ def run_with_heartbeat(cmd, cwd=None, timeout=None, heartbeat=10, label="process
                 probe = progress_probe(log_file) if progress_probe and log_file else None
                 if probe:
                     eta_text = (" eta=%ss" % probe["eta_seconds"]) if probe.get("eta_seconds") is not None else " eta=unknown"
+                    subpercent = probe.get("percent")
+                    if stage_index is not None and total_stages and subpercent is not None:
+                        overall_value = (
+                            ((stage_index - 1) + (float(subpercent) / 100.0))
+                            / float(total_stages)
+                        ) * 100.0
+                        overall_text = "%.1f%%" % overall_value
+                    else:
+                        overall_text = "?"
                     print(
-                        "      [%s] RUNNING elapsed=%ss process=alive log=%sB phase=%s progress=%s%% %s%s" %
+                        "      [%s] RUNNING elapsed=%ss process=alive log=%sB overall=%s "
+                        "phase=%s stage=%s%% detail=%s%s" %
                         (
-                            label, elapsed, size, probe.get("phase", "UNKNOWN"),
-                            probe.get("percent", "?"), probe.get("detail", ""), eta_text,
+                            label, elapsed, size, overall_text,
+                            probe.get("phase", "UNKNOWN"),
+                            probe.get("percent", "?"),
+                            probe.get("detail", ""), eta_text,
                         ),
                         flush=True,
                     )
@@ -2045,7 +2068,7 @@ def _progress_start(output):
     print("\nReelSec Campaign", flush=True)
     print("===============", flush=True)
     print("Report: %s" % output, flush=True)
-    print("Progress: 0%%", flush=True)
+    print("Progress: 0%", flush=True)
     return state
 
 
