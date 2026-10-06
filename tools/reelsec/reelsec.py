@@ -1667,7 +1667,7 @@ def _progress_start(output):
     state = {
         "schema_version": "1.0",
         "started_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-        "total": 13,
+        "total": 14,
         "stages": [],
     }
     _progress_state_path(output).write_text(
@@ -1803,10 +1803,12 @@ def main():
     )
     _progress_stage(
         progress, output, 4, "APK decode",
-        "PASS" if decode_result and decode_result.get("status") == "DECODED"
-        else "PASS" if decode_result and decode_result.get("status") == "DECODE_FAILED_RAW_FALLBACK"
-        else "FAIL",
-        (decode_result or {}).get("status", "NOT_RUN"),
+        "PASS" if decode_result and decode_result.get("status") == "DECODED" else "FAIL",
+        (
+            "decoded successfully"
+            if decode_result and decode_result.get("status") == "DECODED"
+            else (decode_result or {}).get("status", "NOT_RUN")
+        ),
     )
 
     decoded_inventory = None
@@ -2018,6 +2020,10 @@ def main():
         }
         (output / "CAMPAIGN-BLOCKER.json").write_text(
             json.dumps(blocker, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        _progress_stage(
+            progress, output, 13, "Campaign analysis gate", "BLOCKED",
+            "No valid decoded/raw analysis root; repository fallback forbidden"
         )
         (output / "STATUS.txt").write_text(
             "BLOCKED_DECODE_FAILED\nNO_REPOSITORY_ROOT_FALLBACK\n", encoding="utf-8"
@@ -2318,6 +2324,14 @@ def main():
     )
 
     publish = None if args.no_publish else git_publish(ROOT, output)
+    publish_status = "SKIP" if args.no_publish else (
+        "PASS" if publish and publish.get("status") == "PUBLISHED" else
+        "FAIL" if publish else "FAIL"
+    )
+    _progress_stage(
+        progress, output, 14, "Report publication", publish_status,
+        publish.get("status", "not published") if publish else "publication disabled or failed"
+    )
     if publish and not (output / "PUBLISH-STATUS.json").exists():
         (output / "PUBLISH-STATUS.json").write_text(
             json.dumps(publish, indent=2, sort_keys=True) + "\n",
