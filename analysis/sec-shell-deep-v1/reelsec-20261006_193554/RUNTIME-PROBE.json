@@ -1,0 +1,12 @@
+{
+  "events": [],
+  "manifest": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/AndroidManifest.xml",
+  "module": "libsaasCorePlayer.so",
+  "package": "com.newleaf.app.android.victor",
+  "reason": "requires package manifest, adb, and frida",
+  "status": "RUNTIME_ENVIRONMENT_UNAVAILABLE",
+  "tooling": {
+    "adb": null,
+    "frida": null
+  }
+}
