@@ -1489,6 +1489,21 @@ def main():
         encoding="utf-8",
     )
 
+    decode_result = None
+    if args.command == "campaign" and apktool_backend.get("status") == "SELECTED":
+        decoded_dir = output / "decoded-apk"
+        decode_result = run_apktool_decode(
+            apktool_backend, input_apk, decoded_dir
+        )
+    elif args.command == "campaign":
+        decode_result = {"status": "BLOCKED",
+                         "reason": apktool_backend.get("reason", "No usable Apktool backend")}
+
+    (output / "APKTOOL-DECODE.json").write_text(
+        json.dumps(decode_result, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
     target = find_target(args.elf)
     manifest = {
         "tool": "ReelSec",
@@ -1501,6 +1516,7 @@ def main():
         "input_apk_sha256": input_apk_sha256,
         "capabilities": capabilities,
         "apktool_backend": apktool_backend,
+        "apktool_decode": decode_result,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
