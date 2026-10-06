@@ -557,7 +557,8 @@ def main():
     if publish:
         print("PUBLISH_STATUS=" + publish["status"])
         print("PUBLISH_BRANCH=" + str(publish["branch"]))
-        print("PUBLISH_COMMIT=" + str(publish["commit"]))
+        print("PUBLISH_REPORT_COMMIT=" + str(publish["report_commit"]))
+        print("PUBLISH_STATUS_COMMIT=" + str(publish["status_commit"]))
 
 if __name__ == "__main__":
     main()
