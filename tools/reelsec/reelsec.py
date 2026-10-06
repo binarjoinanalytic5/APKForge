@@ -330,6 +330,63 @@ def write_vtable_object_proof(output):
     (output / "VTABLE-OBJECT-PROOF.md").write_text("\n".join(out) + "\n", encoding="utf-8")
     return proven
 
+def write_vtable_class_correlation(output, data):
+    """Correlate RTTI, vtable entries, and constructor/destructor evidence."""
+    address_point = 0x717E60
+    first = read_pointer(data, address_point)[0]
+    second = read_pointer(data, address_point + 0x8)[0]
+
+    ctor_path = output / "ActiveDecoder-constructor.txt"
+    text = ctor_path.read_text(encoding="utf-8", errors="replace") if ctor_path.exists() else ""
+
+    has_ctor = bool(re.search(r"bl\s+0xdfbd0\s+<.*ActiveDecoderC2Ev", text))
+    has_ctor_vptr = bool(re.search(
+        r"\bstr\s+x9,\s+\[x19\]|\bstr\s+x9,\s+\[x19\]",
+        text,
+    ))
+    has_dtor = bool(re.search(r"\bbl\s+0xddc20\s+<.*ActiveDecoderD2Ev", text))
+    has_dtor_vptr = bool(re.search(
+        r"\bf9000268\b.*\bstr\s+x8,\s+\[x19\]|\bstr\s+x8,\s+\[x19\]",
+        text,
+    ))
+    rtti = read_pointer(data, address_point - 0x8)[0]
+    name_ptr = read_pointer(data, rtti + 0x8)[0] if rtti else None
+    type_name = cstring_at(data, name_ptr) if name_ptr else None
+
+    evidence = [
+        ("RTTI type is mediaCodecDecoder", bool(type_name and "mediaCodecDecoder" in type_name)),
+        ("vtable entry[0] is destructor candidate 0x2785bc", first == 0x2785BC),
+        ("vtable entry[1] is destructor candidate 0x278768", second == 0x278768),
+        ("constructor calls ActiveDecoderC2Ev", has_ctor),
+        ("constructor stores vptr into [x19]", has_ctor_vptr),
+        ("destructor calls ActiveDecoderD2Ev", has_dtor),
+    ]
+    proven = all(ok for _, ok in evidence)
+
+    lines = [
+        "# VTable Class Correlation",
+        "",
+        "Address-point: 0x%X" % address_point,
+        "RTTI type name: %s" % (type_name or "UNRESOLVED"),
+        "vtable entry[0]: %s" % (hex(first) if first is not None else "UNRESOLVED"),
+        "vtable entry[1]: %s" % (hex(second) if second is not None else "UNRESOLVED"),
+        "",
+        "Evidence:",
+    ]
+    lines += ["- %s: %s" % (label, "YES" if ok else "NO") for label, ok in evidence]
+    lines += [
+        "",
+        "RESULT: " + (
+            "PROVEN_RTTI_VTABLE_CONSTRUCTOR_DESTRUCTOR_CORRELATION"
+            if proven else "NOT_PROVEN"
+        ),
+        "",
+        "Static slot mapping: 0x717f68 (+0x108) -> 0x27a510.",
+        "Runtime execution of that virtual slot remains a separate question; this report does not claim that the program actually invoked slot +0x108.",
+    ]
+    (output / "VTABLE-CLASS-CORRELATION.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return proven
+
 def write_native_security_api_audit(output, strings_text, symbols_text):
     keys = [
         "ANativeWindow_fromSurface",
@@ -431,6 +488,7 @@ def git_publish(root, report_dir):
         "JNI-SEMANTIC-ANALYSIS.md",
         "VTABLE-ABI-ANALYSIS.md",
         "CRITICAL-FUNCTION-BEHAVIOR.md",
+        "VTABLE-CLASS-CORRELATION.md",
         "NATIVE-SECURITY-API-AUDIT.md",
         "JAVA-SCREEN-SECURITY-AUDIT.md",
     ]
@@ -734,6 +792,7 @@ def main():
         jni_semantic_found = write_jni_semantic_analysis(output, dispatch_text)
         disassemble(objdump, target, 0x2783C0, 0x278500, output / "ActiveDecoder-constructor.txt")
         write_vtable_object_proof(output)
+        write_vtable_class_correlation(output, data)
         disassemble(objdump, target, 0x112E80, 0x113000, output / "onCaptureScreen-dispatch.txt")
 
         if ptr is not None:
