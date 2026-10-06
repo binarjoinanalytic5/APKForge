@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
-VERSION = "2.1.0"
+VERSION = "2.2.0"
 PROBES = [
     "elf",
     "symbols",
@@ -29,6 +29,8 @@ PROBES = [
     "autonomous-dataflow",
     "runtime-proof-readiness",
     "runtime-frida-probe",
+    "target-provenance",
+    "runtime-toolchain-preflight",
 ]
 
 def run(cmd, cwd=None, timeout=None):
@@ -777,7 +779,7 @@ def write_autonomous_dataflow(output, target, objdump):
     proven=[x for x in records if x["classification"] in
             ("PROVEN_STATIC_TARGET_SLOT_LOAD","PROVEN_TARGET_VTABLE_DATAFLOW")]
     cxx=[x for x in records if x["classification"]=="CXX_VPTR_DATAFLOW_UNRESOLVED"]
-    payload={"schema_version":"2.2","target_vtable":"0x717e60",
+    payload={"schema_version":"2.3","target_vtable":"0x717e60",
              "target_slot":"0x717f68","target_function":"0x27a510",
              "constructor_call_count":len(ctor_calls),
              "candidate_count":len(records),
@@ -813,6 +815,32 @@ def _find_package_name(root):
         if m:
             return m.group(1), str(path)
     return None, None
+
+
+def write_runtime_toolchain_preflight(output):
+    result={"schema_version":"1.1","attempted":True,"actions":[],"tooling":{},"status":"NOT_ATTEMPTED"}
+    py=which("python","python3"); pkg=which("pkg"); adb=which("adb"); frida=which("frida")
+    result["tooling"].update(adb=adb,frida=frida,python=py,pkg=pkg)
+    if not adb and pkg:
+        rc,out=run([pkg,"install","-y","android-tools"],timeout=90)
+        result["actions"].append({"action":"pkg_install_android_tools","returncode":rc,"output":out[-4000:]})
+        adb=which("adb"); result["tooling"]["adb_after"]=adb
+    if not frida and py:
+        rc,out=run([py,"-m","pip","install","--user","--disable-pip-version-check","frida-tools"],timeout=120)
+        result["actions"].append({"action":"pip_install_frida_tools","returncode":rc,"output":out[-4000:]})
+        frida=which("frida")
+        if not frida:
+            p=Path.home()/".local"/"bin"/"frida"
+            if p.is_file(): frida=str(p)
+        result["tooling"]["frida_after"]=frida
+    missing=[]
+    if not adb: missing.append("adb")
+    if not frida: missing.append("frida_cli")
+    result["missing_requirements"]=missing
+    result["status"]="CLIENTS_READY" if not missing else "RUNTIME_TOOLCHAIN_INCOMPLETE"
+    (output/"RUNTIME-TOOLCHAIN-PREFLIGHT.json").write_text(json.dumps(result,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+    (output/"RUNTIME-TOOLCHAIN-PREFLIGHT.md").write_text("# Runtime Toolchain Preflight\n\nStatus: "+result["status"]+"\nMissing: "+(", ".join(missing) if missing else "NONE")+"\n",encoding="utf-8")
+    return result
 
 
 def write_runtime_probe(output, root, target):
@@ -857,8 +885,10 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
     js = js.replace("PACKAGE_PLACEHOLDER", (package or "UNKNOWN").replace("\\", "\\\\").replace('"', '\\"'))
     script.write_text(js, encoding="utf-8")
 
+    preflight=write_runtime_toolchain_preflight(output)
     result = {"status":"NOT_ATTEMPTED","package":package,"manifest":manifest,
-              "module":module,"tooling":{},"events":[]}
+              "module":module,"tooling":preflight.get("tooling",{}),"events":[],
+              "preflight_status":preflight.get("status")}
     adb, frida = which("adb"), which("frida")
     result["tooling"].update(adb=adb, frida=frida)
 
@@ -945,7 +975,7 @@ def write_autonomous_campaign(output, dataflow, runtime):
 def git_publish(root, report_dir):
     """Publish from a clean worktree based on origin/main; never mutate the investigation checkout."""
     result = {
-        "schema_version": "2.1",
+        "schema_version": "2.3",
         "tool": "ReelSec",
         "version": VERSION,
         "attempted": True,
@@ -988,6 +1018,10 @@ def git_publish(root, report_dir):
         "JAVA-SCREEN-SECURITY-AUDIT.md",
         "AUTONOMOUS-DATAFLOW.md",
         "AUTONOMOUS-DATAFLOW.json",
+        "TARGET-PROVENANCE-AUDIT.md",
+        "TARGET-PROVENANCE-AUDIT.json",
+        "RUNTIME-TOOLCHAIN-PREFLIGHT.md",
+        "RUNTIME-TOOLCHAIN-PREFLIGHT.json",
         "RUNTIME-PROOF-READINESS.md",
         "RUNTIME-PROBE.json",
         "AUTONOMOUS-CAMPAIGN.md",
