@@ -39,6 +39,7 @@ def _positive_int_env(name, default):
 APKTOOL_DECODE_TIMEOUT = _positive_int_env("REELSEC_APKTOOL_TIMEOUT", 900)
 APKTOOL_FULL_DECODE_TIMEOUT = _positive_int_env("REELSEC_APKTOOL_FULL_TIMEOUT", 180)
 APKTOOL_RECOVERY_TIMEOUT = _positive_int_env("REELSEC_APKTOOL_RECOVERY_TIMEOUT", 180)
+APKTOOL_DECODE_STRATEGY = os.environ.get("REELSEC_DECODE_STRATEGY", "no-res-first").strip().lower()
 
 PROBES = [
     "elf",
@@ -86,6 +87,19 @@ def run_apktool_decode(selection, apk, output_dir, timeout=None):
                 "reason": "Refusing to reuse a non-empty decode directory; this protects prior campaign evidence.",
             }
         output_dir.rmdir()
+    # For instrumentation campaigns, resource decoding is not required to obtain
+    # Smali. Prefer the bounded no-resource decode to avoid spending many minutes
+    # in the resource phase on this APK. Full decode remains selectable via
+    # REELSEC_DECODE_STRATEGY=full-first.
+    if APKTOOL_DECODE_STRATEGY in ("no-res-first", "instrumentation-first"):
+        fast_dir = output_dir.parent / (output_dir.name + "-no-res")
+        fast = run_apktool_no_resources_decode(
+            selection, apk, fast_dir, timeout=APKTOOL_RECOVERY_TIMEOUT
+        )
+        if fast.get("status") == "DECODED_NO_RES":
+            fast["selection_strategy"] = "NO_RES_FIRST"
+            return fast
+
     # Apktool must create its own output directory; pre-creating it causes Apktool 2.7 to refuse the decode.
     output_dir.parent.mkdir(parents=True, exist_ok=True)
     command = decode_command(selection, apk, output_dir)
