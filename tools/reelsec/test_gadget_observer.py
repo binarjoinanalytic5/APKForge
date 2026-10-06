@@ -1,0 +1,44 @@
+import tempfile
+import unittest
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from gadget_observer import (
+    GadgetObserverError,
+    observation_record,
+    plan_gadget_observation,
+)
+
+
+class GadgetObserverTests(unittest.TestCase):
+    def test_plan_binds_artifact_and_is_observation_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            apk = Path(tmp) / "instrumented.apk"
+            apk.write_bytes(b"apk")
+            plan = plan_gadget_observation(
+                apk, "com.example.test", target_offset="0x27a510"
+            )
+            self.assertEqual(plan["status"], "READY")
+            self.assertEqual(plan["mode"], "OBSERVATION_ONLY")
+            self.assertTrue(plan["requires_gadget"])
+            self.assertFalse(plan["mutates_original_apk"])
+            self.assertFalse(plan["causal_proof"])
+
+    def test_observation_does_not_upgrade_to_causal_proof(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            apk = Path(tmp) / "instrumented.apk"
+            apk.write_bytes(b"apk")
+            plan = plan_gadget_observation(apk, "com.example.test")
+            result = observation_record(plan, {"target_hit": True})
+            self.assertEqual(result["proof_class"], "OBSERVED")
+            self.assertFalse(result["causal_proof"])
+
+    def test_missing_artifact_rejected(self):
+        with self.assertRaises(GadgetObserverError):
+            plan_gadget_observation("/missing.apk", "com.example.test")
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
