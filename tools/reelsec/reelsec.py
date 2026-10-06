@@ -2029,13 +2029,13 @@ def main():
             "BLOCKED_DECODE_FAILED\nNO_REPOSITORY_ROOT_FALLBACK\n", encoding="utf-8"
         )
         progress["completed_at"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
-    progress["final_status"] = "COMPLETED"
-    _progress_state_path(output).write_text(
-        json.dumps(progress, indent=2) + "\n", encoding="utf-8"
-    )
-    print("\nReelSec Campaign complete", flush=True)
-    print("Final report: %s" % output, flush=True)
-    print("REPORT=" + str(output))
+        progress["final_status"] = "BLOCKED"
+        _progress_state_path(output).write_text(
+            json.dumps(progress, indent=2) + "\n", encoding="utf-8"
+        )
+        print("\nReelSec Campaign blocked", flush=True)
+        print("Final report: %s" % output, flush=True)
+        print("REPORT=" + str(output))
         print("CAMPAIGN_STATUS=BLOCKED_DECODE_FAILED")
         print("NO_REPOSITORY_ROOT_FALLBACK=YES")
         return 2
