@@ -1,7 +1,9 @@
+import os
+import sys
 import tempfile
 import unittest
 from pathlib import Path
-import sys
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
@@ -10,10 +12,36 @@ from sign_verify import SignVerifyError, artifact_identity, sign_command, verify
 
 class SignVerifyTests(unittest.TestCase):
     def test_sign_command_isolated(self):
-        cmd = sign_command("/usr/bin/apksigner", "/tmp/u.apk", "/tmp/s.apk", "/tmp/test.jks", "test")
+        with mock.patch.dict(
+            os.environ,
+            {
+                "REELSEC_TEST_KEYSTORE_PASSWORD": "store-secret",
+                "REELSEC_TEST_KEY_PASSWORD": "key-secret",
+            },
+            clear=False,
+        ):
+            cmd = sign_command("/usr/bin/apksigner", "/tmp/u.apk", "/tmp/s.apk", "/tmp/test.jks", "test")
         self.assertEqual(cmd[0:2], ["/usr/bin/apksigner", "sign"])
         self.assertIn("/tmp/u.apk", cmd)
         self.assertIn("/tmp/s.apk", cmd)
+        self.assertIn("--ks-pass", cmd)
+        self.assertIn("env:REELSEC_TEST_KEYSTORE_PASSWORD", cmd)
+        self.assertIn("--key-pass", cmd)
+        self.assertIn("env:REELSEC_TEST_KEY_PASSWORD", cmd)
+        self.assertNotIn("store-secret", cmd)
+        self.assertNotIn("key-secret", cmd)
+
+    def test_sign_command_requires_password_environment(self):
+        with mock.patch.dict(
+            os.environ,
+            {
+                "REELSEC_TEST_KEYSTORE_PASSWORD": "",
+                "REELSEC_TEST_KEY_PASSWORD": "",
+            },
+            clear=False,
+        ):
+            with self.assertRaises(SignVerifyError):
+                sign_command("/usr/bin/apksigner", "/tmp/u.apk", "/tmp/s.apk", "/tmp/test.jks", "test")
 
     def test_verify_command(self):
         self.assertEqual(
