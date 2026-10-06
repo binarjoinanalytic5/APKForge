@@ -11,8 +11,10 @@ import time
 import tempfile
 from pathlib import Path
 
+from environment import write_capability_matrix
+
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
-VERSION = "2.2.3"
+VERSION = "3.0.0"
 PROBES = [
     "elf",
     "symbols",
@@ -31,6 +33,8 @@ PROBES = [
     "runtime-frida-probe",
     "target-provenance",
     "runtime-toolchain-preflight",
+    "environment-capability",
+    "campaign-cli",
 ]
 
 def run(cmd, cwd=None, timeout=None):
@@ -1172,10 +1176,12 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
     return result
 
 
-def write_autonomous_campaign(output, dataflow, runtime):
+def write_autonomous_campaign(output, dataflow, runtime, input_apk=None, input_apk_sha256=None):
     payload={"schema_version":"2.3","mode":"AUTONOMOUS",
              "static_dataflow":dataflow,
              "runtime_status":runtime.get("status") if runtime else "NOT_RUN",
+             "input_apk":input_apk,
+             "input_apk_sha256":input_apk_sha256,
              "truth_rules":{
                  "static_target_slot":"PROVEN",
                  "runtime_execution":"PROVEN only when target entry observes vptr=0x717e60 and slot=0x27a510",
@@ -1414,17 +1420,31 @@ def git_publish(root, report_dir):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("command", nargs="?", choices=("campaign",))
+    parser.add_argument("apk", nargs="?")
     parser.add_argument("--elf")
     parser.add_argument("--output")
     parser.add_argument("--no-publish", action="store_true")
     parser.add_argument("--version", action="version", version=VERSION)
     args = parser.parse_args()
 
+    input_apk = None
+    input_apk_sha256 = None
+    if args.command == "campaign":
+        if not args.apk:
+            parser.error("campaign mode requires an APK path")
+        input_apk = Path(args.apk).expanduser().resolve()
+        if not input_apk.is_file():
+            parser.error("APK not found: %s" % input_apk)
+        input_apk_sha256 = sha256_file(input_apk)
+
     default_output = ROOT / "analysis" / "sec-shell-deep-v1" / (
         "reelsec-" + time.strftime("%Y%m%d_%H%M%S")
     )
     output = Path(args.output).expanduser() if args.output else default_output
     output.mkdir(parents=True, exist_ok=True)
+
+    capabilities = write_capability_matrix(output, ROOT)
 
     target = find_target(args.elf)
     manifest = {
@@ -1433,6 +1453,10 @@ def main():
         "probes": PROBES,
         "target": str(target) if target else None,
         "created_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "mode": args.command or "analysis",
+        "input_apk": str(input_apk) if input_apk else None,
+        "input_apk_sha256": input_apk_sha256,
+        "capabilities": capabilities,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
@@ -1587,7 +1611,7 @@ def main():
 
     dataflow_result = write_autonomous_dataflow(output, target, objdump)
     runtime_result = write_runtime_probe(output, ROOT, target)
-    write_autonomous_campaign(output, dataflow_result, runtime_result)
+    write_autonomous_campaign(output, dataflow_result, runtime_result, input_apk=str(input_apk) if input_apk else None, input_apk_sha256=input_apk_sha256)
 
     security_text = (output / "security-strings.txt").read_text(
         encoding="utf-8", errors="replace"
