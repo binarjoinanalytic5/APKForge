@@ -42,6 +42,12 @@ A guarded ADB deployment gate is now present. Deployment requires a successfully
 
 The gate has no path that installs `original.apk`; it only accepts the signed artifact produced by the signing stage.
 
+## Completed in this stage
+
+A passive runtime evidence capture layer is now connected to the campaign. It records ADB state, package path, process observation, and a bounded logcat snapshot, all bound to the signed artifact SHA-256 and explicit device serial.
+
+Captured evidence is classified as `OBSERVED` with `causal_proof=false`. This is intentional: a logcat/process snapshot alone does not prove that the target native function executed or caused screenshot behavior.
+
 ## Next engineering gate
 
-Add the runtime observation/capture layer. It should collect passive device evidence (logcat/process/package state) first, then add controlled Frida Gadget observation when the instrumented build provides Gadget. Runtime classifications must remain separate for original and instrumented artifacts.
+Add controlled Frida Gadget observation for the instrumented build, with explicit target/package identity and evidence files that distinguish hook observation from causal proof. Keep the original APK runtime path separate.
