@@ -52,10 +52,35 @@ def prepare_instrumented_copy(decoded_root, work_dir):
     return manifest
 
 
-def apply_text_probe(work_dir, target_smali):
-    """Inject a harmless log marker immediately after SecShell loadLibrary.
+def _reserve_probe_registers(text, count=2):
+    """Reserve extra local registers without changing parameter registers."""
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped.startswith(".locals "):
+            try:
+                value = int(stripped.split()[1])
+            except (IndexError, ValueError):
+                raise InstrumentedCopyError("invalid .locals declaration")
+            base = value
+            lines[i] = line.replace(".locals " + str(value), ".locals " + str(value + count), 1)
+            return "\n".join(lines) + ("\n" if text.endswith("\n") else ""), base
+        if stripped.startswith(".registers "):
+            try:
+                total = int(stripped.split()[1])
+            except (IndexError, ValueError):
+                raise InstrumentedCopyError("invalid .registers declaration")
+            lines[i] = line.replace(".registers " + str(total), ".registers " + str(total + count), 1)
+            return "\n".join(lines) + ("\n" if text.endswith("\n") else ""), total
+    raise InstrumentedCopyError("method register declaration not found")
 
-    This is telemetry-only: it does not disable, bypass, or alter a security decision.
+
+def apply_text_probe(work_dir, target_smali):
+    """Inject a harmless Log.i telemetry marker immediately after SecShell loadLibrary.
+
+    The probe only records that the SecShell library-load point was reached in
+    the isolated artifact. It does not disable, bypass, or alter a security
+    decision and never mutates the original APK.
     """
     work = Path(work_dir).expanduser().resolve()
     target = Path(target_smali).expanduser().resolve()
@@ -68,14 +93,23 @@ def apply_text_probe(work_dir, target_smali):
 
     text = target.read_text(encoding="utf-8", errors="replace")
     anchor = 'invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V'
-    marker = 'const-string v0, "ReelSec-Instrumentation"\n'
-    if marker in text:
+    if "ReelSec-Instrumentation" in text:
         raise InstrumentedCopyError("instrumentation marker already present")
-    if anchor not in text:
+    pos = text.find(anchor)
+    if pos < 0:
         raise InstrumentedCopyError("expected SecShell loadLibrary anchor not found")
 
-    replacement = anchor + "\n    " + marker.rstrip() + "\n"
-    updated = text.replace(anchor, replacement, 1)
+    updated, register_base = _reserve_probe_registers(text, 2)
+    probe_v0 = register_base
+    probe_v1 = register_base + 1
+    replacement = (
+        anchor + "\n"
+        + "    const-string v%d, \"ReelSec-Instrumentation\"\n" % probe_v0
+        + "    const-string v%d, \"SecShell loadLibrary reached\"\n" % probe_v1
+        + "    invoke-static {v%d, v%d}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I\n"
+          % (probe_v0, probe_v1)
+    )
+    updated = updated.replace(anchor, replacement, 1)
     target.write_text(updated, encoding="utf-8")
 
     manifest_path = work / "INSTRUMENTED-COPY-MANIFEST.json"
@@ -85,9 +119,12 @@ def apply_text_probe(work_dir, target_smali):
     manifest["status"] = "MUTATED"
     manifest["mutations"].append({
         "file": str(target.relative_to(work)),
-        "type": "TEXT_MARKER",
+        "type": "LOG_I_PROBE",
         "anchor": "System.loadLibrary(SecShell)",
         "purpose": "telemetry_only",
+        "registers_added": 2,
+        "log_tag": "ReelSec-Instrumentation",
+        "log_message": "SecShell loadLibrary reached",
     })
     manifest_path.write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
