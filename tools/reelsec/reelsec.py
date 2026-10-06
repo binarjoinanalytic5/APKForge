@@ -269,9 +269,11 @@ def write_critical_behavior(output, ptr):
             if re.search(r"^\s*[0-9a-fA-F]+:\s*d65f03c0\s+ret(?:\s|$)", st, re.I):
                 break
 
+    if not body_lines:
+        raise RuntimeError("CRITICAL FUNCTION BOUNDARY VIOLATION: function start not found")
     calls = [x for x in body_lines if re.search(r"\b(bl|blr)\b", x)]
     # Defensive invariant: the extracted body must terminate at RET.
-    if body_lines and not re.search(r"^\s*[0-9a-fA-F]+:\s*d65f03c0\s+ret(?:\s|$)", body_lines[-1], re.I):
+    if not re.search(r"^\s*[0-9a-fA-F]+:\s*d65f03c0\s+ret(?:\s|$)", body_lines[-1], re.I):
         raise RuntimeError("CRITICAL FUNCTION BOUNDARY VIOLATION: body does not terminate at RET")
     security = [x for x in body_lines if re.search(
         r"surface|window|egl|secure|protect|gralloc|buffer|mediacodec|screenshot|record",
