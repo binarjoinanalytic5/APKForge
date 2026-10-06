@@ -1653,6 +1653,7 @@ def git_publish(root, report_dir):
         "RUNTIME-PROBE.json",
         "AUTONOMOUS-CAMPAIGN.md",
         "AUTONOMOUS-CAMPAIGN.json",
+        "PROGRESS.json",
     ]
     result["required_artifacts"] = required
     result["report_path"] = rel
@@ -1751,6 +1752,39 @@ def git_publish(root, report_dir):
             result["details"] = remote_head
             return result
 
+        # Finalize the published progress snapshot after the report commit is verified.
+        # The local campaign adds the same terminal stage independently after return.
+        progress_path = publish_report / "PROGRESS.json"
+        if progress_path.is_file():
+            try:
+                progress = json.loads(progress_path.read_text(encoding="utf-8"))
+                stages = progress.setdefault("stages", [])
+                stages = [s for s in stages if s.get("index") != 14]
+                stages.append({
+                    "index": 14,
+                    "name": "Report publication",
+                    "status": "PASS",
+                    "detail": "published and remotely verified",
+                    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+                })
+                progress["stages"] = stages
+                progress["current"] = "Report publication"
+                progress["current_status"] = "PASS"
+                progress["completed_at"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+                terminal_statuses = [s.get("status") for s in stages]
+                progress["final_status"] = (
+                    "COMPLETED_WITH_ISSUES"
+                    if any(s in ("FAIL", "BLOCKED") for s in terminal_statuses)
+                    else "COMPLETED"
+                )
+                progress_path.write_text(
+                    json.dumps(progress, indent=2) + "\n", encoding="utf-8"
+                )
+            except (OSError, ValueError, TypeError) as exc:
+                result["status"] = "PROGRESS_FINALIZATION_FAILED"
+                result["details"] = repr(exc)
+                return result
+
         # The receipt is committed only after the report commit has been verified.
         receipt = dict(result)
         receipt["status"] = "REPORT_PUBLISHED;STATUS_COMMIT_FOLLOWS"
@@ -1764,7 +1798,7 @@ def git_publish(root, report_dir):
         status_path = publish_report / "PUBLISH-STATUS.json"
         status_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
-        rc, out = run([git, "add", "--", rel + "/PUBLISH-STATUS.json"], cwd=worktree)
+        rc, out = run([git, "add", "--", rel + "/PUBLISH-STATUS.json", rel + "/PROGRESS.json"], cwd=worktree)
         if rc != 0:
             result["status"] = "STATUS_ADD_FAILED"
             result["details"] = out
