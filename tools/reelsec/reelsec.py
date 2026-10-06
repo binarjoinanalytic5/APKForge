@@ -14,6 +14,7 @@ from pathlib import Path
 from environment import write_capability_matrix
 from apktool_backend import ApktoolBackendError, select_apktool_backend, decode_command
 from instrumentation_backend import plan_secshell_injection
+from instrumented_copy import prepare_instrumented_copy
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
 VERSION = "3.0.0"
@@ -1590,6 +1591,19 @@ def main():
     )
 
     instrumentation_plan = plan_instrumentation(decoded_inventory, output)
+    instrumented_copy_root = output / "instrumented-apk"
+    instrumented_copy = {"status": "NOT_PREPARED"}
+    if instrumentation_plan.get("status") == "READY":
+        try:
+            instrumented_copy = prepare_instrumented_copy(
+                decoded_inventory["root"], instrumented_copy_root
+            )
+        except Exception as exc:
+            instrumented_copy = {"status": "FAILED", "error": str(exc)}
+        (output / "INSTRUMENTED-COPY-MANIFEST.json").write_text(
+            json.dumps(instrumented_copy, indent=2, sort_keys=True) + "\\n",
+            encoding="utf-8",
+        )
 
     analysis_root = Path(decoded_inventory["root"]).resolve() if decoded_inventory and decoded_inventory.get("status") == "READY" else ROOT
     target = find_target(args.elf, analysis_root)
@@ -1613,6 +1627,7 @@ def main():
         "target_source": target_source,
         "input_provenance": input_provenance,
         "instrumentation_plan": instrumentation_plan,
+        "instrumented_copy": instrumented_copy,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
