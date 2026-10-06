@@ -6,6 +6,7 @@ Only an explicit copied working tree may be changed.
 """
 import hashlib
 import json
+import re
 from pathlib import Path
 import shutil
 
@@ -92,24 +93,30 @@ def apply_text_probe(work_dir, target_smali):
         raise InstrumentedCopyError("instrumentation target is missing")
 
     text = target.read_text(encoding="utf-8", errors="replace")
-    anchor = 'invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V'
     if "ReelSec-Instrumentation" in text:
         raise InstrumentedCopyError("instrumentation marker already present")
-    pos = text.find(anchor)
-    if pos < 0:
-        raise InstrumentedCopyError("expected SecShell loadLibrary anchor not found")
+    pattern = re.compile(
+        r"^(?P<indent>\\s*)invoke-static\\s+\\{(?P<registers>[^}]+)\\},\\s*"
+        r"Ljava/lang/System;->loadLibrary\\(Ljava/lang/String;\\)V\\s*$",
+        re.MULTILINE,
+    )
+    match = pattern.search(text)
+    if not match:
+        raise InstrumentedCopyError("expected SecShell loadLibrary Smali invoke not found")
 
     updated, register_base = _reserve_probe_registers(text, 2)
     probe_v0 = register_base
     probe_v1 = register_base + 1
+    anchor = match.group(0).strip()
+    indent = match.group("indent")
     replacement = (
         anchor + "\n"
-        + "    const-string v%d, \"ReelSec-Instrumentation\"\n" % probe_v0
-        + "    const-string v%d, \"SecShell loadLibrary reached\"\n" % probe_v1
-        + "    invoke-static {v%d, v%d}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I\n"
+        + indent + "const-string v%d, \"ReelSec-Instrumentation\"\n" % probe_v0
+        + indent + "const-string v%d, \"SecShell loadLibrary reached\"\n" % probe_v1
+        + indent + "invoke-static {v%d, v%d}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I"
           % (probe_v0, probe_v1)
     )
-    updated = updated.replace(anchor, replacement, 1)
+    updated = text.replace(match.group(0), replacement, 1)
     target.write_text(updated, encoding="utf-8")
 
     manifest_path = work / "INSTRUMENTED-COPY-MANIFEST.json"
