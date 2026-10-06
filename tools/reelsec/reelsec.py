@@ -85,6 +85,82 @@ def run_apktool_decode(selection, apk, output_dir, timeout=300):
             "output_dir": str(output_dir),
             "log": str(output_dir / "reelsec-apktool.log")}
 
+
+def run_raw_apk_extract(apk, output_dir):
+    """Safely extract APK ZIP contents when resource decoding is unavailable.
+
+    This is NOT an Apktool decode. The resulting root is suitable for native
+    library extraction and static APK-content inspection only. It must never
+    be labeled as a fully decoded APK or used as build/instrumentation input
+    unless a later decoder produces a real decoded tree.
+    """
+    import zipfile
+    apk = Path(apk).expanduser().resolve()
+    output_dir = Path(output_dir).expanduser().resolve()
+    if not apk.is_file():
+        return {"status": "FAILED", "reason": "APK input does not exist"}
+    if output_dir.exists():
+        try:
+            if any(output_dir.iterdir()):
+                return {
+                    "status": "FAILED_OUTPUT_EXISTS",
+                    "output_dir": str(output_dir),
+                    "reason": "raw extraction directory is non-empty",
+                }
+        except OSError as exc:
+            return {"status": "FAILED", "reason": str(exc)}
+        output_dir.rmdir()
+    output_dir.mkdir(parents=True, exist_ok=False)
+
+    extracted = 0
+    skipped = []
+    try:
+        with zipfile.ZipFile(apk, "r") as zf:
+            for info in zf.infolist():
+                name = info.filename
+                if not name or name.endswith("/"):
+                    continue
+                member = Path(name)
+                if member.is_absolute() or ".." in member.parts:
+                    skipped.append(name)
+                    continue
+                dest = (output_dir / member).resolve()
+                try:
+                    dest.relative_to(output_dir)
+                except ValueError:
+                    skipped.append(name)
+                    continue
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                with zf.open(info, "r") as src, open(dest, "wb") as dst:
+                    shutil.copyfileobj(src, dst, 1024 * 1024)
+                extracted += 1
+    except (zipfile.BadZipFile, OSError, RuntimeError) as exc:
+        return {
+            "status": "FAILED",
+            "output_dir": str(output_dir),
+            "extracted_files": extracted,
+            "skipped_members": skipped,
+            "reason": str(exc),
+        }
+
+    manifest = {
+        "status": "RAW_EXTRACTED",
+        "mode": "RAW_APK_ZIP_EXTRACTION",
+        "input_apk": str(apk),
+        "input_apk_sha256": sha256_file(apk),
+        "output_dir": str(output_dir),
+        "extracted_files": extracted,
+        "skipped_members": skipped,
+        "decoded": False,
+        "instrumentable_smali": False,
+        "buildable_with_apktool": False,
+        "mutates_original_apk": False,
+    }
+    (output_dir / "REELSEC-RAW-EXTRACT-MANIFEST.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return manifest
+
 def inventory_decoded_apk(output_dir):
     """Create a deterministic inventory of decoded APK analysis inputs."""
     root = Path(output_dir).resolve()
@@ -97,8 +173,17 @@ def inventory_decoded_apk(output_dir):
     dex_files = sorted(p for p in root.rglob("*") if p.is_file() and p.suffix == ".dex")
     smali_files = sum(1 for d in smali_dirs for p in d.rglob("*.smali"))
     inventory = {
-        "schema_version": "1.0",
-        "status": "READY" if manifest.is_file() and smali_dirs else "INCOMPLETE",
+        "schema_version": "1.1",
+        "status": (
+            "READY" if manifest.is_file() and smali_dirs else
+            "READY_NATIVE_ONLY" if lib_files else
+            "INCOMPLETE"
+        ),
+        "analysis_mode": (
+            "DECODED_SMALI_NATIVE" if manifest.is_file() and smali_dirs else
+            "RAW_NATIVE_EXTRACTION" if lib_files else
+            "NONE"
+        ),
         "root": str(root),
         "manifest": str(manifest) if manifest.is_file() else None,
         "smali_roots": [str(p) for p in smali_dirs],
@@ -113,7 +198,7 @@ def inventory_decoded_apk(output_dir):
 
 def plan_instrumentation(decoded_inventory, output_dir):
     """Locate the known SecShell Application anchor and emit a non-mutating plan."""
-    if not decoded_inventory or decoded_inventory.get("status") != "READY":
+    if not decoded_inventory or decoded_inventory.get("status") not in ("READY", "READY_NATIVE_ONLY"):
         return {"status": "BLOCKED", "reason": "decoded APK inventory is not ready"}
     root = Path(decoded_inventory["root"]).resolve()
     candidates = sorted(root.rglob("AW.smali"))
@@ -304,12 +389,24 @@ def build_input_provenance(input_apk, input_apk_sha256, analysis_root, target):
         "input_apk": str(Path(input_apk).resolve()) if input_apk else None,
         "input_apk_sha256": input_apk_sha256,
         "analysis_root": str(root),
-        "analysis_root_kind": "decoded_apk_from_input" if input_apk and target_relative_path else "repository_or_external_root",
+        "analysis_root_kind": (
+            "decoded_apk_from_input"
+            if input_apk and target_relative_path and root.name == "decoded-apk"
+            else "raw_apk_extraction_from_input"
+            if input_apk and target_relative_path and root.name == "raw-apk"
+            else "repository_or_external_root"
+        ),
         "target": str(target_path) if target_path else None,
         "target_relative_path": target_relative_path,
         "target_sha256": target_sha256,
         "target_relation": relation,
-        "evidence_scope": "static-analysis-input-provenance",
+        "evidence_scope": (
+            "decoded-apk-static-analysis"
+            if root.name == "decoded-apk"
+            else "raw-apk-native-static-analysis"
+            if root.name == "raw-apk"
+            else "static-analysis-input-provenance"
+        ),
         "causality_proven": False,
     }
 
@@ -1599,6 +1696,12 @@ def main():
         decode_result = run_apktool_decode(
             apktool_backend, input_apk, decoded_dir
         )
+        if decode_result.get("status") in ("FAILED", "FAILED_VALIDATION", "FAILED_OUTPUT_EXISTS"):
+            raw_dir = output / "raw-apk"
+            raw_result = run_raw_apk_extract(input_apk, raw_dir)
+            decode_result["raw_fallback"] = raw_result
+            if raw_result.get("status") == "RAW_EXTRACTED":
+                decode_result["status"] = "DECODE_FAILED_RAW_FALLBACK"
     elif args.command == "campaign":
         decode_result = {"status": "BLOCKED",
                          "reason": apktool_backend.get("reason", "No usable Apktool backend")}
@@ -1611,8 +1714,12 @@ def main():
     decoded_inventory = None
     if decode_result and decode_result.get("status") == "DECODED":
         decoded_inventory = inventory_decoded_apk(decode_result["output_dir"])
+    elif decode_result and decode_result.get("status") == "DECODE_FAILED_RAW_FALLBACK":
+        decoded_inventory = inventory_decoded_apk(
+            decode_result["raw_fallback"]["output_dir"]
+        )
     elif args.command == "campaign":
-        decoded_inventory = {"status": "BLOCKED", "reason": "decoded APK is unavailable"}
+        decoded_inventory = {"status": "BLOCKED", "reason": "no usable APK analysis root is available"}
     (output / "DECODED-INPUT-INVENTORY.json").write_text(
         json.dumps(decoded_inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
@@ -1747,15 +1854,16 @@ def main():
             encoding="utf-8",
         )
 
-    if args.command == "campaign" and (not decoded_inventory or decoded_inventory.get("status") != "READY"):
+    allowed_inventory = {"READY", "READY_NATIVE_ONLY"}
+    if args.command == "campaign" and (not decoded_inventory or decoded_inventory.get("status") not in allowed_inventory):
         blocker = {
-            "schema_version": "1.0",
-            "status": "BLOCKED_DECODE_FAILED",
+            "schema_version": "1.1",
+            "status": "BLOCKED_APK_ANALYSIS_ROOT_UNAVAILABLE",
             "input_apk": str(input_apk) if input_apk else None,
             "input_apk_sha256": input_apk_sha256,
             "apktool_decode": decode_result,
             "decoded_input_inventory": decoded_inventory,
-            "rule": "campaign mode never falls back to repository-root static artifacts after decode failure",
+            "rule": "campaign mode never falls back to repository-root static artifacts; raw APK extraction is permitted only as explicitly labeled native/static fallback",
         }
         (output / "CAMPAIGN-BLOCKER.json").write_text(
             json.dumps(blocker, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -1768,9 +1876,18 @@ def main():
         print("NO_REPOSITORY_ROOT_FALLBACK=YES")
         return 2
 
-    analysis_root = Path(decoded_inventory["root"]).resolve() if decoded_inventory and decoded_inventory.get("status") == "READY" else ROOT
+    analysis_root = (
+        Path(decoded_inventory["root"]).resolve()
+        if decoded_inventory and decoded_inventory.get("status") in allowed_inventory
+        else ROOT
+    )
     target = find_target(args.elf, analysis_root)
-    target_source = "decoded-apk" if analysis_root != ROOT else "repository-root-fallback"
+    if decoded_inventory and decoded_inventory.get("status") == "READY":
+        target_source = "decoded-apk"
+    elif decoded_inventory and decoded_inventory.get("status") == "READY_NATIVE_ONLY":
+        target_source = "raw-apk-extract"
+    else:
+        target_source = "repository-root-fallback"
     input_provenance = build_input_provenance(input_apk, input_apk_sha256, analysis_root, target)
     (output / "INPUT-PROVENANCE.json").write_text(json.dumps(input_provenance, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     manifest = {
@@ -2054,4 +2171,4 @@ def main():
     print("RUNTIME_PROOF_STATUS=" + str(runtime_result.get("status") if runtime_result else "NOT_RUN"))
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
