@@ -47,12 +47,13 @@ def screenshot_blocking_claim_allowed(*, screenshot_event, relevant_path,
     ))
 
 
-def build_instrumented_runtime_proof(provenance, target_observation, dispatch_observation):
+def build_instrumented_runtime_proof(provenance, target_observation, dispatch_observation, behavioral_correlation=None):
     """Return a proof state only when artifact provenance and both runtime observations agree."""
     if not provenance or provenance.get("target_relation") != "WITHIN_ANALYSIS_ROOT":
         return {"state": BLOCKED, "causal_proof": False}
     target_ok = target_observation.get("runtime_observed") is True
     dispatch_ok = dispatch_observation.get("dispatch_relationship_observed") is True
+    behavior_ok = bool(behavioral_correlation and behavioral_correlation.get("correlated") is True)
     if target_ok and dispatch_ok:
         return {
             "state": PROVEN_ON_INSTRUMENTED_BUILD,
@@ -61,7 +62,7 @@ def build_instrumented_runtime_proof(provenance, target_observation, dispatch_ob
                 "artifact_provenance": True,
                 "target_execution": True,
                 "vtable_dispatch": True,
-                "behavioral_correlation": False,
+                "behavioral_correlation": behavior_ok,
             },
         }
     return {"state": UNPROVEN, "causal_proof": False}
