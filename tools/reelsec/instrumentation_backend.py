@@ -55,7 +55,7 @@ def _find_loadlibrary_anchor(text):
 def _is_android_application(text):
     """Recognize an Application subclass without depending on formatting."""
     return bool(re.search(
-        r"^\\.super\\s+Landroid/app/Application;",
+        r"^\.super\s+Landroid/app/Application;",
         text,
         re.M,
     ))
@@ -63,7 +63,7 @@ def _is_android_application(text):
 
 def _has_loadlibrary_invocation(text):
     return bool(re.search(
-        r"Ljava/lang/System;->loadLibrary\\s*\\(Ljava/lang/String;\\)V",
+        r"Ljava/lang/System;->loadLibrary\s*\(Ljava/lang/String;\)V",
         text,
         re.I,
     ))
