@@ -17,7 +17,7 @@ from instrumentation_backend import plan_secshell_injection, find_secshell_appli
 from instrumented_copy import prepare_instrumented_copy, apply_text_probe
 from build_verify import apktool_build_command, verify_artifact
 from sign_verify import artifact_identity, sign_command, verify_command, run_checked
-from adb_deploy import install_command, device_check_command
+from adb_deploy import install_command, device_check_command, resolve_test_device
 from runtime_capture import capture_snapshot, bind_artifact
 from gadget_observer import plan_gadget_observation
 from proof_gate import build_evidence_ledger
@@ -2534,20 +2534,26 @@ def main():
     if sign_verify.get("status") == "SIGNED_VERIFIED":
         try:
             adb = capabilities.get("tools", {}).get("adb", {}).get("path")
-            serial = os.environ.get("REELSEC_TEST_DEVICE")
-            if not adb or not serial:
-                raise RuntimeError("ADB or REELSEC_TEST_DEVICE unavailable")
+            configured_serial = os.environ.get("REELSEC_TEST_DEVICE")
+            if not adb:
+                raise RuntimeError("ADB unavailable")
+            resolution = resolve_test_device(adb, configured_serial)
+            serial = resolution["serial"]
             state_cmd = device_check_command(adb, serial)
             state_output = run_checked(state_cmd)
-            if "device" not in state_output.strip().splitlines()[-1:]:
-                raise RuntimeError("test device is not in adb device state")
+            if state_output.strip() != "device":
+                raise RuntimeError("resolved test device is not in adb device state")
             install_cmd = install_command(adb, serial, sign_verify["signed_path"])
             install_output = run_checked(install_cmd)
             adb_deploy = {
                 "status": "INSTALLED",
                 "serial": serial,
+                "requested_serial": resolution.get("requested_serial"),
+                "device_resolution": resolution.get("resolution"),
+                "online_devices": resolution.get("online_devices", []),
                 "artifact": sign_verify["signed_path"],
                 "artifact_sha256": sign_verify["signed_sha256"],
+                "device_inventory_command": resolution.get("inventory_command"),
                 "device_check_command": state_cmd,
                 "install_command": install_cmd,
                 "install_output_tail": install_output[-2000:],
