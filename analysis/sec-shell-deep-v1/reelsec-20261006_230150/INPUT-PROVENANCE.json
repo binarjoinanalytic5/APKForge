@@ -1,0 +1,10 @@
+{
+  "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00",
+  "causality_proven": false,
+  "evidence_scope": "static-analysis-input-provenance",
+  "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+  "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+  "schema_version": "1.0",
+  "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/lib/arm64-v8a/libsaasCorePlayer.so",
+  "target_relation": "WITHIN_ANALYSIS_ROOT"
+}

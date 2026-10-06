@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+    "-cp",
+    "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+    "brut.apktool.Main",
+    "d",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+    "-o",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261006_230150/decoded-apk"
+  ],
+  "log": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261006_230150/decoded-apk/reelsec-apktool.log",
+  "output_dir": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261006_230150/decoded-apk",
+  "returncode": 1,
+  "status": "FAILED"
+}
