@@ -122,7 +122,7 @@ def plan_instrumentation(decoded_inventory, output_dir):
         if result.get("status") == "READY":
             result["candidate_count"] = len(candidates)
             (Path(output_dir) / "INSTRUMENTATION-PLAN.json").write_text(
-                json.dumps(result, indent=2, sort_keys=True) + "\\n",
+                json.dumps(result, indent=2, sort_keys=True) + "\n",
                 encoding="utf-8",
             )
             return result
@@ -132,7 +132,7 @@ def plan_instrumentation(decoded_inventory, output_dir):
         "candidate_count": len(candidates),
     }
     (Path(output_dir) / "INSTRUMENTATION-PLAN.json").write_text(
-        json.dumps(result, indent=2, sort_keys=True) + "\\n",
+        json.dumps(result, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
     return result
@@ -560,11 +560,11 @@ def write_target_provenance_audit(output,data,symbols_text,ptr):
     rtti=read_pointer(data,ap-8)[0]; np=read_pointer(data,rtti+8)[0] if rtti else None
     typ=cstring_at(data,np) if np else None
     payload={"schema_version":"2.3","target":hex(ptr) if ptr else None,"address_point":"0x717e60","slot":"0x717f68","rtti":hex(rtti) if rtti else None,"type_name":typ,"target_symbol":containing[0] if containing else None,"previous_function":prev,"next_function":nxt,"active_decoder_base_vtable":base,"active_decoder_base_address_point":hex(base_ap) if base_ap is not None else None,"active_decoder_base_slot_pointer":hex(base_ptr) if base_ptr is not None else None,"base_relation":"DIFFERENT_ADDRESS_POINT" if base_ap is not None and base_ap!=ap else "UNRESOLVED_OR_SAME"}
-    (output/"TARGET-PROVENANCE-AUDIT.json").write_text(json.dumps(payload,indent=2)+"\\n",encoding="utf-8")
+    (output/"TARGET-PROVENANCE-AUDIT.json").write_text(json.dumps(payload,indent=2)+"\n",encoding="utf-8")
     lines=["# Target / VTable Provenance Audit","",f"Target: {hex(ptr) if ptr else 'UNRESOLVED'}",f"Target address-point: 0x{ap:x}",f"RTTI type: {typ or 'UNRESOLVED'}",f"Named ActiveDecoder base address-point: {hex(base_ap) if base_ap is not None else 'UNRESOLVED'}",f"Base relation: {payload['base_relation']}","","The target address-point is NOT automatically classified as the ActiveDecoder base vtable.","Constructor post-base vptr installation is evidence of object initialization, not by itself proof of complete-object class identity or runtime dispatch."]
     if containing: lines.append(f"Containing function: 0x{containing[0]['addr']:x} {containing[0]['name']}")
     else: lines += ["Containing function symbol: NONE",f"Previous symbol: {prev}",f"Next symbol: {nxt}","Target is an unnamed executable region between symbol boundaries."]
-    (output/"TARGET-PROVENANCE-AUDIT.md").write_text("\\n".join(lines)+"\\n",encoding="utf-8")
+    (output/"TARGET-PROVENANCE-AUDIT.md").write_text("\n".join(lines)+"\n",encoding="utf-8")
     return payload
 
 def write_vtable_object_proof(output, data=None, symbols_text=""):
@@ -1628,7 +1628,7 @@ def main():
         except Exception as exc:
             instrumented_copy = {"status": "FAILED", "error": str(exc)}
         (output / "INSTRUMENTED-COPY-MANIFEST.json").write_text(
-            json.dumps(instrumented_copy, indent=2, sort_keys=True) + "\\n",
+            json.dumps(instrumented_copy, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
 
@@ -1650,7 +1650,7 @@ def main():
         except Exception as exc:
             build_verify = {"status": "FAILED", "error": str(exc)}
         (output / "BUILD-VERIFY.json").write_text(
-            json.dumps(build_verify, indent=2, sort_keys=True) + "\\n",
+            json.dumps(build_verify, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
 
@@ -1679,7 +1679,7 @@ def main():
         except Exception as exc:
             sign_verify = {"status": "BLOCKED_OR_FAILED", "error": str(exc)}
         (output / "SIGN-VERIFY.json").write_text(
-            json.dumps(sign_verify, indent=2, sort_keys=True) + "\\n",
+            json.dumps(sign_verify, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
 
@@ -1708,7 +1708,7 @@ def main():
         except Exception as exc:
             adb_deploy = {"status": "BLOCKED_OR_FAILED", "error": str(exc)}
         (output / "ADB-DEPLOY.json").write_text(
-            json.dumps(adb_deploy, indent=2, sort_keys=True) + "\\n",
+            json.dumps(adb_deploy, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
 
@@ -1725,7 +1725,7 @@ def main():
         except Exception as exc:
             gadget_observation = {"status": "BLOCKED_OR_FAILED", "error": str(exc)}
         (output / "GADGET-OBSERVATION-PLAN.json").write_text(
-            json.dumps(gadget_observation, indent=2, sort_keys=True) + "\\n",
+            json.dumps(gadget_observation, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
 
@@ -1743,7 +1743,7 @@ def main():
         except Exception as exc:
             runtime_capture = {"status": "BLOCKED_OR_FAILED", "error": str(exc)}
         (output / "RUNTIME-EVIDENCE.json").write_text(
-            json.dumps(runtime_capture, indent=2, sort_keys=True) + "\\n",
+            json.dumps(runtime_capture, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
 
@@ -1947,10 +1947,10 @@ def main():
     )
 
     write_native_security_api_audit(output, strings_text, symbols_text)
-    write_java_screen_security_audit(output, ROOT)
+    write_java_screen_security_audit(output, analysis_root)
 
     dataflow_result = write_autonomous_dataflow(output, target, objdump)
-    runtime_result = write_runtime_probe(output, ROOT, target)
+    runtime_result = write_runtime_probe(output, analysis_root, target)
     write_autonomous_campaign(output, dataflow_result, runtime_result, input_apk=str(input_apk) if input_apk else None, input_apk_sha256=input_apk_sha256)
 
     security_text = (output / "security-strings.txt").read_text(
