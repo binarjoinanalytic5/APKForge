@@ -24,6 +24,20 @@ from proof_gate import build_evidence_ledger
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
 VERSION = "3.0.0"
+
+def _positive_int_env(name, default):
+    raw = os.environ.get(name)
+    try:
+        value = int(raw) if raw is not None else default
+    except (TypeError, ValueError):
+        return default
+    return value if value > 0 else default
+
+# Apktool can legitimately spend several minutes in a single internal phase.
+# Keep the campaign alive long enough to distinguish slow work from a real
+# process failure; operators can override this per run without changing code.
+APKTOOL_DECODE_TIMEOUT = _positive_int_env("REELSEC_APKTOOL_TIMEOUT", 900)
+
 PROBES = [
     "elf",
     "symbols",
@@ -46,8 +60,10 @@ PROBES = [
     "campaign-cli",
 ]
 
-def run_apktool_decode(selection, apk, output_dir, timeout=300):
+def run_apktool_decode(selection, apk, output_dir, timeout=None):
     """Decode APK into an isolated output directory and verify the result."""
+    if timeout is None:
+        timeout = APKTOOL_DECODE_TIMEOUT
     apk = Path(apk).expanduser().resolve()
     output_dir = Path(output_dir).expanduser().resolve()
     if not apk.is_file():
@@ -316,6 +332,31 @@ def _apktool_progress(log_path, output_dir, apk_path, total_classes=0, elapsed=0
         "detail": detail,
     }
 
+def _read_process_cpu_ticks(pid):
+    """Return Linux process CPU jiffies, or None when /proc is unavailable."""
+    try:
+        text = Path("/proc/%s/stat" % pid).read_text(encoding="utf-8", errors="replace")
+        closing = text.rfind(")")
+        if closing == -1:
+            return None
+        fields = text[closing + 2:].split()
+        if len(fields) < 13:
+            return None
+        return int(fields[11]) + int(fields[12])
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def _activity_signal(log_delta, cpu_delta):
+    """Classify observed process activity without pretending it is decode percent."""
+    signals = []
+    if cpu_delta is not None and cpu_delta > 0:
+        signals.append("CPU")
+    if log_delta > 0:
+        signals.append("LOG")
+    return "+".join(signals) if signals else "QUIET"
+
+
 def run_with_heartbeat(cmd, cwd=None, timeout=None, heartbeat=10, label="process",
                        log_path=None, progress_probe=None, stage_index=None,
                        total_stages=None, progress_path=None):
@@ -326,6 +367,8 @@ def run_with_heartbeat(cmd, cwd=None, timeout=None, heartbeat=10, label="process
 
     started = time.monotonic()
     next_heartbeat = started + heartbeat
+    last_log_size = 0
+    last_cpu_ticks = None
     handle = (
         open(log_file, "w", encoding="utf-8", errors="replace")
         if log_file
@@ -348,6 +391,17 @@ def run_with_heartbeat(cmd, cwd=None, timeout=None, heartbeat=10, label="process
                     size = log_file.stat().st_size if log_file else handle.tell()
                 except OSError:
                     size = 0
+                log_delta = max(0, size - last_log_size)
+                cpu_ticks = _read_process_cpu_ticks(proc.pid)
+                cpu_delta = (
+                    cpu_ticks - last_cpu_ticks
+                    if cpu_ticks is not None and last_cpu_ticks is not None
+                    else None
+                )
+                activity = _activity_signal(log_delta, cpu_delta)
+                last_log_size = size
+                if cpu_ticks is not None:
+                    last_cpu_ticks = cpu_ticks
                 probe = progress_probe(log_file) if progress_probe and log_file else None
                 if probe:
                     subpercent = probe.get("percent")
@@ -367,20 +421,20 @@ def run_with_heartbeat(cmd, cwd=None, timeout=None, heartbeat=10, label="process
                         overall_bar = "#" * overall_filled + "-" * (28 - overall_filled)
                         print(
                             "\r      [%s] [%-28s] %5.1f%% %02d/%02d %-16s RUNNING "
-                            "elapsed=%ss stage=%s%% phase=%s %s %s" %
+                            "elapsed=%ss stage=%s%% phase=%s %s activity=%s dlog=+%sB %s" %
                             (
                                 label, overall_bar, overall_value, stage_index, total_stages,
                                 "APK decode" if label == "apktool" else label,
                                 elapsed, probe.get("percent", "?"),
                                 probe.get("phase", "UNKNOWN"),
-                                probe.get("detail", ""), eta_text,
+                                probe.get("detail", ""), activity, log_delta, eta_text,
                             ),
                             flush=True,
                         )
                     else:
                         print(
-                            "      [%s] RUNNING elapsed=%ss process=alive log=%sB phase=%s %s" %
-                            (label, elapsed, size, probe.get("phase", "UNKNOWN"), eta_text),
+                            "      [%s] RUNNING elapsed=%ss process=alive log=%sB phase=%s activity=%s dlog=+%sB %s" %
+                            (label, elapsed, size, probe.get("phase", "UNKNOWN"), activity, log_delta, eta_text),
                             flush=True,
                         )
                     if progress_path:
@@ -391,6 +445,8 @@ def run_with_heartbeat(cmd, cwd=None, timeout=None, heartbeat=10, label="process
                             progress_state["current_phase"] = probe.get("phase")
                             progress_state["current_detail"] = probe.get("detail")
                             progress_state["current_eta_seconds"] = probe.get("eta_seconds")
+                            progress_state["current_activity"] = activity
+                            progress_state["current_log_delta_bytes"] = log_delta
                             progress_state["last_heartbeat"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
                             Path(progress_path).write_text(
                                 json.dumps(progress_state, indent=2) + "\n", encoding="utf-8"
