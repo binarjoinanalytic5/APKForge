@@ -209,13 +209,14 @@ def sha256_file(path):
             h.update(block)
     return h.hexdigest()
 
-def find_target(explicit):
+def find_target(explicit, search_root=None):
     if explicit:
         p = Path(explicit).expanduser().resolve()
         return p if p.is_file() else None
 
+    search_root = Path(search_root or ROOT).expanduser().resolve()
     strings_bin = which("strings")
-    candidates = sorted(ROOT.rglob("*.so"))
+    candidates = sorted(search_root.rglob("*.so"))
     needles = (
         "ActiveDecoder",
         "avcodecDecoder",
@@ -1539,7 +1540,9 @@ def main():
         json.dumps(decoded_inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
 
-    target = find_target(args.elf)
+    analysis_root = Path(decoded_inventory["root"]).resolve() if decoded_inventory and decoded_inventory.get("status") == "READY" else ROOT
+    target = find_target(args.elf, analysis_root)
+    target_source = "decoded-apk" if analysis_root != ROOT else "repository-root-fallback"
     manifest = {
         "tool": "ReelSec",
         "version": VERSION,
@@ -1553,6 +1556,8 @@ def main():
         "apktool_backend": apktool_backend,
         "apktool_decode": decode_result,
         "decoded_input_inventory": decoded_inventory,
+        "analysis_root": str(analysis_root),
+        "target_source": target_source,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
@@ -1779,6 +1784,8 @@ def main():
         autonomous_dataflow=dataflow_result,
         runtime_probe_status=(runtime_result.get("status") if runtime_result else "NOT_RUN"),
         decoded_input_inventory=decoded_inventory,
+        analysis_root=str(analysis_root),
+        target_source=target_source,
     )
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
