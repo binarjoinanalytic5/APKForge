@@ -454,14 +454,15 @@ def main():
 
         # Publish the status as a second ordinary commit. Never force-push.
         status_rel = (output / "PUBLISH-STATUS.json").relative_to(ROOT).as_posix()
-        run(["git", "add", "--", status_rel], cwd=ROOT)
+        git_bin = which("git")
+        run([git_bin, "add", "--", status_rel], cwd=ROOT)
         rc2, out2 = run([
-            git, "-c", "user.name=ReelSec", "-c", "user.email=reelsec@users.noreply.github.com",
+            git_bin, "-c", "user.name=ReelSec", "-c", "user.email=reelsec@users.noreply.github.com",
             "commit", "--no-verify",
             "-m", "ReelSec: record publication status " + time.strftime("%Y%m%d_%H%M%S"),
         ], cwd=ROOT)
         if rc2 == 0:
-            run(["git", "push", "origin", "HEAD:refs/heads/" + publish["branch"]], cwd=ROOT)
+            run([git_bin, "push", "origin", "HEAD:refs/heads/" + publish["branch"]], cwd=ROOT)
 
     print("REPORT=" + str(output))
     print("FUNCTION_POINTER=" + (hex(ptr) if ptr is not None else "NOT_RESOLVED"))
