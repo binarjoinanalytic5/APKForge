@@ -33,6 +33,7 @@ if [ -z "$STATUS" ] && [ "$AHEAD" = "0" ] && [ "$BEHIND" != "0" ]; then
 fi
 
 # Clean and already synchronized: run the checked-out tool.
+# The Python entrypoint must propagate its main() return code via SystemExit.
 if [ "$LOCAL" = "$REMOTE_SHA" ] && [ -f "$TOOL" ]; then
   chmod +x "$TOOL" "$WRAPPER" 2>/dev/null || true
   # We already fetched origin/main above; tell ReelSec to reuse that ref so
