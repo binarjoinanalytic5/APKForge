@@ -262,3 +262,13 @@ The telemetry probe was also hardened to locate the actual `System.loadLibrary` 
 
 Latest implementation commits: `9abc0a6c55a4ca0079691900d76fb9c68d66c6bc0`, `75caa4633eb8cc3569ec0cde1cf6e912fe75301f`, `df1f4cf4d8c98f604894ff21dfd8193b398af426`, `d84b5689d2f40991efd0cbd077f480a8e1ca602b`.
 Regression coverage: `9bfeb10421decd959f5383713a15ffd6d9acc33b`, `240c3a5376dc75069954ff35ec2afb54a82291f1`.
+
+
+## Smali Anchor Detection Root Cause — 2026-10-07
+
+The 00:35 campaign confirmed that the no-resource decode path is healthy: Stage 04 = PASS and Stage 05 = READY. Stage 06 then blocked because the detector searched decoded Smali for the Java spelling `System.loadLibrary`. The actual application Smali contains the descriptor form `Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V`, e.g. the known AW.attachBaseContext path.
+
+The detector now matches the real Smali `invoke-static {registers}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V` form and records the matched registers. The mutation backend uses the same parser. Probe register allocation is method-local so a multi-method AW class cannot have a different method's register declaration modified accidentally.
+
+Implementation: `58653f9c818ad5bc4f6d6bd48f0ab436124804eb`, `9a5f6bbebbe328fdddaa1b066d20d7332c53cb0d`, `584e8f86cc83d5226c4e2cf8a10d9c9cffa535cc`, `6bb958fb406b8b0d952936ca63c8eb17e36ab679`
+Tests: `2434a4ae97da0e903c4757a79c7718162ecdf11d`, `1aca1b7bf6f94fc3dc5c5edb8951d3e4b8e1a439`
