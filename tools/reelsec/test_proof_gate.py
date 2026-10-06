@@ -10,6 +10,7 @@ from proof_gate import (
     PROVEN_STATIC,
     classify_target_evidence,
     correlate_behavioral_event,
+    build_evidence_ledger,
     screenshot_blocking_claim_allowed,
 )
 
