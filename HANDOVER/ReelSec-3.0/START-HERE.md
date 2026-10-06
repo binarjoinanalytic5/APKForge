@@ -42,3 +42,17 @@ ReelSec لا تزال تعتمد على المستخدم كطبقة orchestratio
 ./tools/reelsec/reelsec.py campaign ./original.apk
 
 ويجب أن تتولى ReelSec نفسها اكتشاف الأدوات واختيار البدائل وبناء الحملة وإنتاج التقرير.
+
+## Latest gate — 2026-10-06 23:06
+
+The first end-to-end phone campaign reached Apktool selection but decode returned `FAILED` because the output directory already existed. The campaign then exposed an unsafe repository-root fallback. That fallback has now been removed for campaign mode.
+
+Current rule:
+
+`campaign APK -> successful isolated decode -> READY inventory -> decoded target -> provenance -> analysis`
+
+A failed decode now ends as `BLOCKED_DECODE_FAILED` and never analyzes the pre-existing `apktool-src` tree as if it came from the supplied APK.
+
+Next phone validation command:
+
+`cd ~/apk-lab/ReelShort-v4.2.00 && git show origin/main:tools/reelsec/bootstrap-run.sh | bash -s -- campaign ./original.apk`
