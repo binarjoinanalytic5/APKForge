@@ -174,6 +174,9 @@ def plan_secshell_injection(decoded_root, application_smali=None):
             "reason": "decoded APK root is missing",
         }
 
+    manifest_class = _manifest_application_class(root)
+    manifest_target = _smali_path_for_class(root, manifest_class)
+
     if application_smali:
         targets = [Path(application_smali).expanduser().resolve()]
         try:
