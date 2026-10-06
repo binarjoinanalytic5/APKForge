@@ -177,8 +177,17 @@
       "status": "PASS",
       "detail": "dataflow_proven=False runtime=FRIDA_GADGET_REQUIRED",
       "timestamp": "2026-10-07T02:15:18+0300"
+    },
+    {
+      "index": 14,
+      "name": "Report publication",
+      "status": "PASS",
+      "detail": "published and remotely verified",
+      "timestamp": "2026-10-07T02:16:03+0300"
     }
   ],
-  "current": "Native / proof analysis",
-  "current_status": "PASS"
+  "current": "Report publication",
+  "current_status": "PASS",
+  "completed_at": "2026-10-07T02:16:03+0300",
+  "final_status": "COMPLETED_WITH_ISSUES"
 }
