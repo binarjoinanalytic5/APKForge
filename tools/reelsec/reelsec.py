@@ -79,6 +79,7 @@ def run_apktool_decode(selection, apk, output_dir, timeout=300):
         heartbeat=10,
         label="apktool",
         log_path=live_log_path,
+        progress_probe=lambda lp: _apktool_progress(lp, output_dir, apk),
     )
     log_path = (output_dir / "reelsec-apktool.log") if output_dir.is_dir() else live_log_path
     log_path.write_text(log, encoding="utf-8", errors="replace")
@@ -232,8 +233,80 @@ def plan_instrumentation(decoded_inventory, output_dir):
     )
     return result
 
-def run_with_heartbeat(cmd, cwd=None, timeout=None, heartbeat=10, label="process", log_path=None):
-    """Run a long process with periodic liveness updates."""
+
+def _apktool_progress(log_path, output_dir, apk_path):
+    """Estimate Apktool decode progress from observed work, never from elapsed time alone."""
+    log_text = ""
+    try:
+        log_text = Path(log_path).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        pass
+
+    upper = log_text.upper()
+    milestones = [
+        ("LOAD", 5, ("LOADING RESOURCE TABLE",)),
+        ("MANIFEST", 12, ("DECODING ANDROIDMANIFEST.XML", "REGULAR MANIFEST PACKAGE")),
+        ("RESOURCES", 25, ("DECODING FILE-RESOURCES",)),
+        ("VALUES", 35, ("DECODING VALUES",)),
+        ("BAKSMALI", 40, ("BAKSMALING ",)),
+        ("COPY_LIBS", 82, ("COPYING ASSETS AND LIBS",)),
+        ("COPY_UNKNOWN", 91, ("COPYING UNKNOWN FILES",)),
+        ("COPY_ORIGINAL", 97, ("COPYING ORIGINAL FILES",)),
+    ]
+
+    phase = "STARTING"
+    base_percent = 2
+    for name, percent, needles in milestones:
+        hits = [needle for needle in needles if needle in upper]
+        if hits:
+            phase = name
+            base_percent = percent
+
+    detail = ""
+    percent = float(base_percent)
+    eta = None
+
+    if phase == "BAKSMALI":
+        total_classes = 0
+        try:
+            import zipfile
+            with zipfile.ZipFile(apk_path, "r") as zf:
+                for info in zf.infolist():
+                    name = info.filename
+                    if name.endswith(".dex"):
+                        data = zf.read(info)
+                        if len(data) >= 0x64 and data[:3] == b"dex":
+                            total_classes += struct.unpack_from("<I", data, 0x60)[0]
+        except Exception:
+            total_classes = 0
+
+        produced = 0
+        try:
+            produced = sum(
+                1 for p in Path(output_dir).glob("smali*/**/*.smali")
+            )
+        except OSError:
+            produced = 0
+
+        if total_classes > 0:
+            ratio = min(1.0, produced / float(total_classes))
+            percent = 40.0 + ratio * 38.0
+            detail = "baksmali %d/%d classes" % (produced, total_classes)
+        else:
+            detail = "baksmali output growing; class total unavailable"
+    else:
+        detail = phase.lower().replace("_", " ")
+
+    return {
+        "mode": "ESTIMATE",
+        "phase": phase,
+        "percent": round(min(99.0, percent), 1),
+        "eta_seconds": eta,
+        "detail": detail,
+    }
+
+def run_with_heartbeat(cmd, cwd=None, timeout=None, heartbeat=10, label="process", log_path=None, progress_probe=None):
+    """Run a long process with periodic liveness and optional progress estimates."""
     log_file = Path(log_path).expanduser().resolve() if log_path else None
     if log_file:
         log_file.parent.mkdir(parents=True, exist_ok=True)
@@ -262,11 +335,23 @@ def run_with_heartbeat(cmd, cwd=None, timeout=None, heartbeat=10, label="process
                     size = log_file.stat().st_size if log_file else handle.tell()
                 except OSError:
                     size = 0
-                print(
-                    "      [%s] RUNNING elapsed=%ss process=alive log=%sB" %
-                    (label, elapsed, size),
-                    flush=True,
-                )
+                probe = progress_probe(log_file) if progress_probe and log_file else None
+                if probe:
+                    eta_text = (" eta=%ss" % probe["eta_seconds"]) if probe.get("eta_seconds") is not None else " eta=unknown"
+                    print(
+                        "      [%s] RUNNING elapsed=%ss process=alive log=%sB phase=%s progress=%s%% %s%s" %
+                        (
+                            label, elapsed, size, probe.get("phase", "UNKNOWN"),
+                            probe.get("percent", "?"), probe.get("detail", ""), eta_text,
+                        ),
+                        flush=True,
+                    )
+                else:
+                    print(
+                        "      [%s] RUNNING elapsed=%ss process=alive log=%sB" %
+                        (label, elapsed, size),
+                        flush=True,
+                    )
                 next_heartbeat = now + heartbeat
             if timeout is not None and (now - started) >= timeout:
                 proc.kill()
@@ -1929,14 +2014,19 @@ def _progress_state_path(output):
     return Path(output) / "PROGRESS.json"
 
 
-def _progress_render(index, total, name, status, detail=""):
+def _progress_render(index, total, name, status, detail="", subpercent=None, submode="STAGE"):
     width = 28
     terminal = status in ("PASS", "FAIL", "BLOCKED", "SKIP")
     done = max(0, min(total, index if terminal else index - 1))
     filled = int(width * done / max(1, total))
     bar = "#" * filled + "-" * (width - filled)
-    print("\r[%-28s] %3d%%  %02d/%02d  %-24s  %-8s  %s" %
-          (bar, int(100 * done / max(1, total)), index, total, name, status, detail[:180]),
+    overall = int(100 * done / max(1, total))
+    sub = (" sub=%s%%[%s]" % (
+        int(subpercent),
+        submode,
+    )) if subpercent is not None else ""
+    print("\r[%-28s] %3d%%  %02d/%02d  %-24s  %-8s  %s%s" %
+          (bar, overall, index, total, name, status, detail[:150], sub),
           flush=True)
     if detail:
         print("      " + str(detail)[:220], flush=True)
