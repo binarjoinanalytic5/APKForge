@@ -1757,9 +1757,13 @@ def main():
     _progress_stage(progress, output, 1, "Input / provenance", "PASS",
                     "APK SHA-256=%s" % input_apk_sha256 if input_apk_sha256 else "analysis mode")
 
+    _progress_stage(progress, output, 2, "Environment / capabilities", "RUNNING",
+                    "discovering installed tools and device capabilities")
     capabilities = write_capability_matrix(output, ROOT)
     _progress_stage(progress, output, 2, "Environment / capabilities", "PASS",
                     "capability matrix written")
+    _progress_stage(progress, output, 3, "Apktool backend", "RUNNING",
+                    "selecting a usable decode/build backend")
     try:
         apktool_backend = select_apktool_backend(capabilities)
     except ApktoolBackendError as exc:
@@ -1783,6 +1787,8 @@ def main():
 
     decode_result = None
     if args.command == "campaign" and apktool_backend.get("status") == "SELECTED":
+        _progress_stage(progress, output, 4, "APK decode", "RUNNING",
+                        "decoding original.apk into isolated campaign workspace")
         decoded_dir = output / "decoded-apk"
         decode_result = run_apktool_decode(
             apktool_backend, input_apk, decoded_dir
@@ -1811,6 +1817,8 @@ def main():
         ),
     )
 
+    _progress_stage(progress, output, 5, "Input inventory", "RUNNING",
+                    "inventorying manifest, Smali, DEX and native libraries")
     decoded_inventory = None
     if decode_result and decode_result.get("status") == "DECODED":
         decoded_inventory = inventory_decoded_apk(decode_result["output_dir"])
@@ -1829,6 +1837,8 @@ def main():
         (decoded_inventory or {}).get("status", "NOT_READY"),
     )
 
+    _progress_stage(progress, output, 6, "SecShell instrumentation plan", "RUNNING",
+                    "locating the SecShell Application loadLibrary anchor")
     instrumentation_plan = plan_instrumentation(decoded_inventory, output)
     _progress_stage(
         progress, output, 6, "SecShell instrumentation plan",
@@ -1837,6 +1847,8 @@ def main():
         else "BLOCKED",
         instrumentation_plan.get("reason", instrumentation_plan.get("status", "")),
     )
+    _progress_stage(progress, output, 7, "Instrumented copy", "RUNNING",
+                    "preparing an isolated copy; original.apk remains untouched")
     instrumented_copy_root = output / "instrumented-apk"
     instrumented_copy = {"status": "NOT_PREPARED"}
     if instrumentation_plan.get("status") == "READY":
@@ -1858,6 +1870,8 @@ def main():
         instrumented_copy.get("error", instrumented_copy.get("status", "")),
     )
 
+    _progress_stage(progress, output, 8, "Build instrumented APK", "RUNNING",
+                    "building only the isolated instrumented tree")
     build_verify = {"status": "NOT_BUILT"}
     if instrumented_copy.get("status") == "COPIED":
         try:
@@ -1887,6 +1901,8 @@ def main():
         build_verify.get("error", build_verify.get("status", "")),
     )
 
+    _progress_stage(progress, output, 9, "Sign / verify artifact", "RUNNING",
+                    "signing and verifying the isolated APK artifact")
     sign_verify = {"status": "NOT_SIGNED"}
     if build_verify.get("status") == "BUILT":
         try:
@@ -1923,6 +1939,8 @@ def main():
         sign_verify.get("error", sign_verify.get("status", "")),
     )
 
+    _progress_stage(progress, output, 10, "ADB deploy", "RUNNING",
+                    "checking the explicit test device and installing only the signed artifact")
     adb_deploy = {"status": "NOT_DEPLOYED"}
     if sign_verify.get("status") == "SIGNED_VERIFIED":
         try:
@@ -1959,6 +1977,8 @@ def main():
         adb_deploy.get("error", adb_deploy.get("status", "")),
     )
 
+    _progress_stage(progress, output, 11, "Gadget observation", "RUNNING",
+                    "preparing guarded Frida Gadget observation metadata")
     evidence_ledger = {"status": "NOT_READY"}
     gadget_observation = {"status": "NOT_PLANNED"}
     if sign_verify.get("status") == "SIGNED_VERIFIED":
@@ -1982,6 +2002,8 @@ def main():
         gadget_observation.get("error", gadget_observation.get("status", "")),
     )
 
+    _progress_stage(progress, output, 12, "Runtime evidence", "RUNNING",
+                    "capturing bounded ADB runtime evidence for the signed artifact")
     runtime_capture = {"status": "NOT_CAPTURED"}
     if adb_deploy.get("status") == "INSTALLED":
         try:
@@ -2033,11 +2055,19 @@ def main():
         _progress_state_path(output).write_text(
             json.dumps(progress, indent=2) + "\n", encoding="utf-8"
         )
+        _progress_stage(progress, output, 14, "Report publication", "SKIP",
+                        "campaign stopped before publication because no valid APK analysis root exists")
+        progress["completed_at"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+        progress["final_status"] = "BLOCKED"
+        _progress_state_path(output).write_text(
+            json.dumps(progress, indent=2) + "\n", encoding="utf-8"
+        )
         print("\nReelSec Campaign blocked", flush=True)
         print("Final report: %s" % output, flush=True)
         print("REPORT=" + str(output))
         print("CAMPAIGN_STATUS=BLOCKED_DECODE_FAILED")
         print("NO_REPOSITORY_ROOT_FALLBACK=YES")
+        print("FINAL_STATUS=BLOCKED")
         return 2
 
     analysis_root = (
@@ -2349,6 +2379,19 @@ def main():
         print("PUBLISH_STATUS_COMMIT=" + str(publish["status_commit"]))
     print("TARGET_PROVENANCE_STATUS=" + str(target_provenance.get("base_relation") if target_provenance else "NOT_RUN"))
     print("AUTONOMOUS_DATAFLOW_PROVEN=" + str(bool(dataflow_result.get("proven", 0))))
+    stage_statuses = [s.get("status") for s in progress.get("stages", [])]
+    progress["completed_at"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+    progress["final_status"] = (
+        "COMPLETED_WITH_ISSUES"
+        if any(s in ("FAIL", "BLOCKED") for s in stage_statuses)
+        else "COMPLETED"
+    )
+    _progress_state_path(output).write_text(
+        json.dumps(progress, indent=2) + "\n", encoding="utf-8"
+    )
+    print("\nReelSec Campaign %s" % progress["final_status"], flush=True)
+    print("Final report: %s" % output, flush=True)
+    print("FINAL_STATUS=" + progress["final_status"], flush=True)
     print("RUNTIME_PROOF_STATUS=" + str(runtime_result.get("status") if runtime_result else "NOT_RUN"))
 
 if __name__ == "__main__":
