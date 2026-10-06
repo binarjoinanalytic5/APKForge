@@ -53,13 +53,17 @@ def find_secshell_application(decoded_root):
     if not root.is_dir():
         return []
     candidates = []
-    for path in sorted(root.glob("smali*/**/*.smali")):
+    for path in sorted(
+        p for base in root.iterdir()
+        if base.is_dir() and (base.name == "smali" or base.name.startswith("smali_classes"))
+        for p in base.rglob("*.smali")
+    ):
         try:
             text = path.read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
         lower = text.lower()
-        if "loadlibrary(Ljava/lang/String;)V" not in lower or "secshell" not in lower:
+        if "loadlibrary(Ljava/lang/String;)v" not in lower or "secshell" not in lower:
             continue
         has_application = ".super Landroid/app/Application;" in text
         has_attach = "attachBaseContext" in text
