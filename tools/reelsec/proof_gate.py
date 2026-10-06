@@ -65,3 +65,24 @@ def build_instrumented_runtime_proof(provenance, target_observation, dispatch_ob
             },
         }
     return {"state": UNPROVEN, "causal_proof": False}
+
+
+def correlate_behavioral_event(target_event, behavior_event, window_ms=1000):
+    """Correlate two observed events by monotonic timestamps only.
+    Correlation is not itself proof of causality.
+    """
+    if not isinstance(target_event, dict) or not isinstance(behavior_event, dict):
+        return {"correlated": False, "causal_proof": False, "reason": "invalid_event"}
+    t = target_event.get("timestamp_ms")
+    b = behavior_event.get("timestamp_ms")
+    if not isinstance(t, (int, float)) or not isinstance(b, (int, float)):
+        return {"correlated": False, "causal_proof": False, "reason": "missing_timestamp"}
+    delta = abs(b - t)
+    correlated = delta <= window_ms
+    return {
+        "correlated": correlated,
+        "delta_ms": delta,
+        "window_ms": window_ms,
+        "causal_proof": False,
+        "reason": "within_window" if correlated else "outside_window",
+    }
