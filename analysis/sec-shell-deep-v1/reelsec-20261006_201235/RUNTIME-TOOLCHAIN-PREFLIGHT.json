@@ -1,0 +1,28 @@
+{
+  "actions": [
+    {
+      "action": "pkg_install_frida_tools",
+      "output": "No mirror or mirror group selected. You might want to select one by running 'termux-change-repo'\nChecking availability of current mirror:\n[*] https://ftp.fau.de/termux/termux-main: ok\n\nWARNING: apt does not have a stable CLI interface. Use with caution in scripts.\n\nReading package lists...\nBuilding dependency tree...\nReading state information...\nE: Unable to locate package frida-tools\n",
+      "returncode": 100
+    },
+    {
+      "action": "pip_install_frida_tools",
+      "output": "/data/data/com.termux/files/usr/tmp/pip-build-env-e37r6rj6/overlay/lib/python3.14/site-packages/setuptools/dist.py\", line 1106, in run_command\n          super().run_command(command)\n          ~~~~~~~~~~~~~~~~~~~^^^^^^^^^\n        File \"/data/data/com.termux/files/usr/tmp/pip-build-env-e37r6rj6/overlay/lib/python3.14/site-packages/setuptools/_distutils/dist.py\", line 1047, in run_command\n          cmd_obj.run()\n          ~~~~~~~~~~~^^\n        File \"/data/data/com.termux/files/usr/tmp/pip-build-env-e37r6rj6/overlay/lib/python3.14/site-packages/setuptools/command/bdist_wheel.py\", line 385, in run\n          self.run_command(\"build\")\n          ~~~~~~~~~~~~~~~~^^^^^^^^^\n        File \"/data/data/com.termux/files/usr/tmp/pip-build-env-e37r6rj6/overlay/lib/python3.14/site-packages/setuptools/_distutils/cmd.py\", line 342, in run_command\n          self.distribution.run_command(command)\n          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^\n        File \"/data/data/com.termux/files/usr/tmp/pip-build-env-e37r6rj6/overlay/lib/python3.14/site-packages/setuptools/dist.py\", line 1106, in run_command\n          super().run_command(command)\n          ~~~~~~~~~~~~~~~~~~~^^^^^^^^^\n        File \"/data/data/com.termux/files/usr/tmp/pip-build-env-e37r6rj6/overlay/lib/python3.14/site-packages/setuptools/_distutils/dist.py\", line 1047, in run_command\n          cmd_obj.run()\n          ~~~~~~~~~~~^^\n        File \"/data/data/com.termux/files/usr/tmp/pip-build-env-e37r6rj6/overlay/lib/python3.14/site-packages/setuptools/_distutils/command/build.py\", line 137, in run\n          self.run_command(cmd_name)\n          ~~~~~~~~~~~~~~~~^^^^^^^^^^\n        File \"/data/data/com.termux/files/usr/tmp/pip-build-env-e37r6rj6/overlay/lib/python3.14/site-packages/setuptools/_distutils/cmd.py\", line 342, in run_command\n          self.distribution.run_command(command)\n          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^\n        File \"/data/data/com.termux/files/usr/tmp/pip-build-env-e37r6rj6/overlay/lib/python3.14/site-packages/setuptools/dist.py\", line 1106, in run_command\n          super().run_command(command)\n          ~~~~~~~~~~~~~~~~~~~^^^^^^^^^\n        File \"/data/data/com.termux/files/usr/tmp/pip-build-env-e37r6rj6/overlay/lib/python3.14/site-packages/setuptools/_distutils/dist.py\", line 1047, in run_command\n          cmd_obj.run()\n          ~~~~~~~~~~~^^\n        File \"/data/data/com.termux/files/usr/tmp/pip-build-env-e37r6rj6/overlay/lib/python3.14/site-packages/setuptools/command/build_ext.py\", line 95, in run\n          _build_ext.run(self)\n          ~~~~~~~~~~~~~~^^^^^^\n        File \"/data/data/com.termux/files/usr/tmp/pip-build-env-e37r6rj6/overlay/lib/python3.14/site-packages/setuptools/_distutils/command/build_ext.py\", line 382, in run\n          self.build_extensions()\n          ~~~~~~~~~~~~~~~~~~~~~^^\n        File \"/data/data/com.termux/files/usr/tmp/pip-build-env-e37r6rj6/overlay/lib/python3.14/site-packages/setuptools/_distutils/command/build_ext.py\", line 498, in build_extensions\n          self._build_extensions_serial()\n          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n        File \"/data/data/com.termux/files/usr/tmp/pip-build-env-e37r6rj6/overlay/lib/python3.14/site-packages/setuptools/_distutils/command/build_ext.py\", line 524, in _build_extensions_serial\n          self.build_extension(ext)\n          ~~~~~~~~~~~~~~~~~~~~^^^^^\n        File \"<string>\", line 123, in build_extension\n        File \"/data/data/com.termux/files/usr/lib/python3.14/subprocess.py\", line 578, in run\n          raise CalledProcessError(retcode, process.args,\n                                   output=stdout, stderr=stderr)\n      subprocess.CalledProcessError: Command '['make']' returned non-zero exit status 2.\n      [end of output]\n  \n  note: This error originates from a subprocess, and is likely not a problem with pip.\n  ERROR: Failed building wheel for frida\nFailed to build frida\nerror: failed-wheel-build-for-install\n\n\u00d7 Failed to build installable wheels for some pyproject.toml based projects\n\u2570\u2500> frida\n",
+      "returncode": 1
+    }
+  ],
+  "attempted": true,
+  "missing_requirements": [
+    "frida_cli"
+  ],
+  "schema_version": "1.1",
+  "status": "RUNTIME_TOOLCHAIN_INCOMPLETE",
+  "tooling": {
+    "adb": "/data/data/com.termux/files/usr/bin/adb",
+    "frida": null,
+    "frida_after": null,
+    "frida_after_pkg": null,
+    "pkg": "/data/data/com.termux/files/usr/bin/pkg",
+    "python": "/data/data/com.termux/files/usr/bin/python"
+  }
+}
