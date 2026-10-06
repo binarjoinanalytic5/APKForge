@@ -40,20 +40,37 @@ if [ "$LOCAL" = "$REMOTE_SHA" ] && [ -f "$TOOL" ]; then
   REELSEC_ROOT="$ROOT" REELSEC_ORIGIN_READY="$REMOTE/$BRANCH" exec python3 "$TOOL" "$@"
 fi
 
-# Dirty tree: do not merge, reset, rebase, stash, or overwrite anything.
-# Execute the newest remote ReelSec directly from origin/main.
-TMP="$(mktemp -t reelsec-remote.XXXXXX.py)"
-trap 'rm -f "$TMP"' EXIT
-if ! git show "$REMOTE/$BRANCH:$TOOL" > "$TMP"; then
-  echo "ERROR: Could not retrieve latest ReelSec from $REMOTE/$BRANCH."
+# Dirty/diverged tree: do not merge, reset, rebase, stash, or overwrite anything.
+# Materialize the complete remote ReelSec Python package into an isolated
+# temporary tree so sibling imports (environment.py, proof_gate.py, etc.)
+# resolve correctly even though reelsec.py itself is executed from /tmp.
+STAGE="$(mktemp -d -t reelsec-remote.XXXXXX)"
+trap 'rm -rf "$STAGE"' EXIT
+
+PY_FILES="$(git ls-tree -r --name-only "$REMOTE/$BRANCH" -- tools/reelsec | grep -E '\\.py$' || true)"
+if [ -z "$PY_FILES" ]; then
+  echo "ERROR: No ReelSec Python modules found on $REMOTE/$BRANCH."
   exit 1
 fi
-chmod +x "$TMP"
-REELSEC_ROOT="$ROOT" REELSEC_ORIGIN_READY="$REMOTE/$BRANCH" python3 "$TMP" "$@"
+
+while IFS= read -r REL; do
+  [ -n "$REL" ] || continue
+  DEST="$STAGE/$REL"
+  mkdir -p "$(dirname "$DEST")"
+  if ! git show "$REMOTE/$BRANCH:$REL" > "$DEST"; then
+    echo "ERROR: Could not retrieve $REL from $REMOTE/$BRANCH."
+    exit 1
+  fi
+done <<< "$PY_FILES"
+
+chmod +x "$STAGE/$TOOL" 2>/dev/null || true
+REELSEC_ROOT="$ROOT" REELSEC_ORIGIN_READY="$REMOTE/$BRANCH" \
+  PYTHONPATH="$STAGE/tools/reelsec" python3 "$STAGE/$TOOL" "$@"
 STATUS=$?
 
 echo
 echo "REELSEC_BOOTSTRAP_STATUS=$STATUS"
 echo "LOCAL_CHANGES_PRESERVED=YES"
 echo "REMOTE_TOOL_SOURCE=$REMOTE/$BRANCH:$TOOL"
+echo "REMOTE_MODULE_STAGE=$STAGE"
 exit "$STATUS"
