@@ -12,6 +12,7 @@ import tempfile
 from pathlib import Path
 
 from environment import write_capability_matrix
+from apktool_backend import ApktoolBackendError, select_apktool_backend
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
 VERSION = "3.0.0"
@@ -1447,6 +1448,21 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
 
     capabilities = write_capability_matrix(output, ROOT)
+    try:
+        apktool_backend = select_apktool_backend(capabilities)
+    except ApktoolBackendError as exc:
+        apktool_backend = {
+            "name": None,
+            "backend": None,
+            "path": None,
+            "version": None,
+            "status": "BLOCKED",
+            "reason": str(exc),
+        }
+    (output / "APKTOOL-BACKEND.json").write_text(
+        json.dumps(apktool_backend, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
     target = find_target(args.elf)
     manifest = {
@@ -1459,6 +1475,7 @@ def main():
         "input_apk": str(input_apk) if input_apk else None,
         "input_apk_sha256": input_apk_sha256,
         "capabilities": capabilities,
+        "apktool_backend": apktool_backend,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
