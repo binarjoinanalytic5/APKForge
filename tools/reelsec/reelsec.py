@@ -82,7 +82,7 @@ def run_apktool_decode(selection, apk, output_dir, timeout=300):
     if missing:
         return {"status": "FAILED_VALIDATION", "returncode": rc, "command": command,
                 "output_dir": str(output_dir), "missing": missing,
-                "log": str(output_dir / "reelsec-apktool.log")}
+                "log": str(log_path)}
     return {"status": "DECODED", "returncode": rc, "command": command,
             "output_dir": str(output_dir),
             "log": str(output_dir / "reelsec-apktool.log")}
@@ -1366,8 +1366,62 @@ def write_runtime_toolchain_preflight(output):
     return result
 
 
-def write_runtime_probe(output, root, target):
+def _find_package_from_apk_tools(apk):
+    """Best-effort package discovery from the original APK using installed SDK tools."""
+    apk = Path(apk).expanduser().resolve()
+    if not apk.is_file():
+        return None, None, []
+
+    candidates = []
+    for name in ("aapt2", "aapt", "apkanalyzer"):
+        p = which(name)
+        if p:
+            candidates.append((name, p))
+
+    prefix = os.environ.get("PREFIX")
+    if prefix:
+        sdk_roots = [Path(prefix) / "lib/android-sdk", Path(prefix) / "opt/android-sdk"]
+        rootfs = Path(prefix) / "var/lib/proot-distro/containers/ubuntu/rootfs"
+        sdk_roots += [rootfs / "opt/android-sdk", rootfs / "usr/lib/android-sdk"]
+        for sdk in sdk_roots:
+            for p in sorted((sdk / "build-tools").glob("*/aapt2"), reverse=True):
+                if p.is_file(): candidates.append(("aapt2", str(p)))
+            for p in sorted((sdk / "build-tools").glob("*/aapt"), reverse=True):
+                if p.is_file(): candidates.append(("aapt", str(p)))
+
+    seen = set()
+    checked = []
+    for kind, tool in candidates:
+        key = (kind, str(tool))
+        if key in seen:
+            continue
+        seen.add(key)
+        if kind in ("aapt2", "aapt"):
+            cmd = [tool, "dump", "badging", str(apk)]
+        else:
+            cmd = [tool, "manifest", "application-id", str(apk)]
+        rc, out = run(cmd, timeout=30)
+        checked.append({"tool": kind, "path": tool, "returncode": rc, "output_tail": out[-2000:]})
+        if rc != 0:
+            continue
+        patterns = (
+            r"package: name='([^']+)'",
+            r"^([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)+)$",
+        )
+        for pattern in patterns:
+            m = re.search(pattern, out, re.M)
+            if m:
+                return m.group(1), kind, checked
+    return None, None, checked
+
+def write_runtime_probe(output, root, target, input_apk=None):
     package, manifest = _find_package_name(root)
+    package_source = "analysis_root_manifest" if package else None
+    package_tool_checks = []
+    if not package and input_apk:
+        package, package_tool, package_tool_checks = _find_package_from_apk_tools(input_apk)
+        if package:
+            package_source = "input_apk_tool:%s" % package_tool
     module = target.name if target else "libsaasCorePlayer.so"
     script = output / "reelsec-runtime-probe.js"
     js = r'''const TARGET_OFFSET = ptr("0x27a510");
@@ -1410,6 +1464,8 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
 
     preflight=write_runtime_toolchain_preflight(output)
     result = {"status":"NOT_ATTEMPTED","package":package,"manifest":manifest,
+              "package_source":package_source,
+              "package_tool_checks":package_tool_checks,
               "module":module,"tooling":preflight.get("tooling",{}),"events":[],
               "preflight_status":preflight.get("status")}
     result["tooling"] = result["tooling"].copy()
@@ -2113,7 +2169,8 @@ def main():
     _progress_stage(
         progress, output, 11, "Gadget observation",
         "PASS" if gadget_observation.get("status") not in ("BLOCKED_OR_FAILED", "NOT_PLANNED")
-        else "BLOCKED",
+        else "BLOCKED" if gadget_observation.get("status") == "BLOCKED_OR_FAILED"
+        else "SKIP",
         gadget_observation.get("error", gadget_observation.get("status", "")),
     )
 
@@ -2378,7 +2435,7 @@ def main():
     _progress_stage(progress, output, 13, "Native / proof analysis", "RUNNING",
                     "ELF, vtable, dispatch, dataflow, runtime readiness")
     dataflow_result = write_autonomous_dataflow(output, target, objdump)
-    runtime_result = write_runtime_probe(output, analysis_root, target)
+    runtime_result = write_runtime_probe(output, analysis_root, target, input_apk=input_apk)
     write_autonomous_campaign(output, dataflow_result, runtime_result, input_apk=str(input_apk) if input_apk else None, input_apk_sha256=input_apk_sha256)
     _progress_stage(
         progress, output, 13, "Native / proof analysis", "PASS",
