@@ -87,7 +87,7 @@ def run_apktool_decode(selection, apk, output_dir, timeout=300):
         ),
         stage_index=4,
         total_stages=14,
-        progress_path=output_dir.parent.parent / "PROGRESS.json",
+        progress_path=output_dir.parent / "PROGRESS.json",
     )
     log_path = (output_dir / "reelsec-apktool.log") if output_dir.is_dir() else live_log_path
     log_path.write_text(log, encoding="utf-8", errors="replace")
