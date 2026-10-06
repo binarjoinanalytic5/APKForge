@@ -55,27 +55,27 @@ def prepare_instrumented_copy(decoded_root, work_dir):
 
 def _reserve_probe_registers_in_method(text, anchor_match, count=2):
     """Reserve registers in the method that contains the matched loadLibrary call."""
-    method_matches = list(re.finditer(r"(?m)^[ \\t]*\\.method\\b", text[:anchor_match.start()]))
+    method_matches = list(re.finditer(r"(?m)^[ 	]*\.method\b", text[:anchor_match.start()]))
     method_start = method_matches[-1].start() if method_matches else -1
     if method_start < 0:
         raise InstrumentedCopyError("containing .method declaration not found")
-    method_end_match = re.search(r"(?m)^[ \\t]*\\.end method\\b", text[anchor_match.end():])
-    if not method_end_match:
+    end_match = re.search(r"(?m)^[ 	]*\.end method\b", text[anchor_match.end():])
+    if not end_match:
         raise InstrumentedCopyError("containing .end method declaration not found")
-    method_end = anchor_match.end() + method_end_match.start()
+    method_end = anchor_match.end() + end_match.start()
     block = text[method_start:method_end]
 
-    local_match = re.search(
-        r"(?m)^(?P<prefix>[ \\t]*)\\.locals[ \\t]+(?P<count>\\d+)[ \\t]*$",
+    locals_match = re.search(
+        r"(?m)^(?P<prefix>[ 	]*)\.locals[ 	]+(?P<count>\d+)[ 	]*$",
         block,
     )
-    if local_match:
-        base = int(local_match.group("count"))
-        replacement = local_match.group("prefix") + ".locals " + str(base + count)
-        block = block[:local_match.start()] + replacement + block[local_match.end():]
+    if locals_match:
+        base = int(locals_match.group("count"))
+        replacement = locals_match.group("prefix") + ".locals " + str(base + count)
+        block = block[:locals_match.start()] + replacement + block[locals_match.end():]
     else:
         registers_match = re.search(
-            r"(?m)^(?P<prefix>[ \\t]*)\\.registers[ \\t]+(?P<count>\\d+)[ \\t]*$",
+            r"(?m)^(?P<prefix>[ 	]*)\.registers[ 	]+(?P<count>\d+)[ 	]*$",
             block,
         )
         if not registers_match:
@@ -83,17 +83,13 @@ def _reserve_probe_registers_in_method(text, anchor_match, count=2):
         base = int(registers_match.group("count"))
         replacement = registers_match.group("prefix") + ".registers " + str(base + count)
         block = block[:registers_match.start()] + replacement + block[registers_match.end():]
-    updated = text[:method_start] + block + text[method_end:]
-    return updated, base
-
+    return text[:method_start] + block + text[method_end:], base
 
 
 def apply_text_probe(work_dir, target_smali):
-    """Inject a harmless Log.i telemetry marker immediately after SecShell loadLibrary.
+    """Inject a harmless Log.i telemetry marker after the SecShell loadLibrary call.
 
-    The probe only records that the SecShell library-load point was reached in
-    the isolated artifact. It does not disable, bypass, or alter a security
-    decision and never mutates the original APK.
+    This is telemetry-only and never mutates the original APK.
     """
     work = Path(work_dir).expanduser().resolve()
     target = Path(target_smali).expanduser().resolve()
@@ -109,14 +105,15 @@ def apply_text_probe(work_dir, target_smali):
         raise InstrumentedCopyError("instrumentation marker already present")
 
     pattern = re.compile(
-        r"^(?P<indent>[ \\t]*)invoke-static[ \\t]+\\{(?P<registers>[^}]+)\\},[ \\t]*"
-        r"Ljava/lang/System;->loadLibrary\\(Ljava/lang/String\\)\\)V[ \\t]*$",
+        r"^(?P<indent>[ 	]*)invoke-static[ 	]+\{(?P<registers>[^}]+)\},[ 	]*"
+        r"Ljava/lang/System;->loadLibrary\(Ljava/lang/String;\)V[ 	]*$",
         re.MULTILINE,
     )
     match = pattern.search(text)
     if not match:
         raise InstrumentedCopyError("expected SecShell loadLibrary Smali invoke not found")
 
+    original_registers = [x.strip() for x in match.group("registers").split(",") if x.strip()]
     updated, register_base = _reserve_probe_registers_in_method(text, match, 2)
     match = pattern.search(updated)
     if not match:
@@ -148,11 +145,12 @@ def apply_text_probe(work_dir, target_smali):
         "registers_added": 2,
         "log_tag": "ReelSec-Instrumentation",
         "log_message": "SecShell loadLibrary reached",
-        "matched_registers": [x.strip() for x in match.group("registers").split(",") if x.strip()],
+        "matched_registers": original_registers,
     })
     manifest_path.write_text(
         json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     return manifest
+
 
 
