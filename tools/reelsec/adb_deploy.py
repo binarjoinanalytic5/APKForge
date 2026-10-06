@@ -30,6 +30,15 @@ def uninstall_command(adb_path, serial, package_name):
     return adb_command(adb_path, serial, "uninstall", package_name)
 
 
+def is_signature_mismatch_error(message):
+    """Identify Android's update-signature rejection without broad matching."""
+    lowered = (message or "").lower()
+    return (
+        "install_failed_update_incompatible" in lowered
+        and "signatures do not match" in lowered
+    )
+
+
 def device_check_command(adb_path, serial):
     return adb_command(adb_path, serial, "get-state")
 
