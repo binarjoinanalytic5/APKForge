@@ -187,3 +187,18 @@ The progress renderer also computes percentage from completed stages, not from t
 Latest source commit: 7f621067d11f2dce22997259cfcea83d11a0bb91.
 
 Next validation: rerun the campaign. During APK decode there should now be periodic `[apktool] RUNNING elapsed=... process=alive ...` lines. A 300-second timeout will become an explicit failure instead of a silent wait.
+## Measured in-stage progress — 2026-10-06
+
+The phone run at 23:40 demonstrated that the long Apktool operation was alive: its log grew from 18,804 bytes at 10 seconds to 451,200 bytes at 220 seconds. The limitation was that the top-level percentage remained at the stage boundary, so the operator could not see progress inside stage 4.
+
+ReelSec now distinguishes `overall campaign progress` from `stage progress`. For Apktool decode, stage progress is estimated from observed Apktool milestones and, during Baksmaling, from the DEX `class_defs_size` compared with generated Smali class files. The overall bar interpolates between completed stages using this measured stage estimate.
+
+Example heartbeat shape:
+
+`[#########-------------------] 31.4% 04/14 APK decode RUNNING elapsed=220s stage=64% phase=BAKSMALI detail=baksmali 4360/6730 classes ETA=...`
+
+When an ETA cannot be derived safely, ReelSec reports `ETA=unknown` rather than inventing a time. Live progress is also persisted into `PROGRESS.json` with `current_progress_percent`, `current_phase`, `current_detail`, and `current_eta_seconds`.
+
+Regression test added: `tools/reelsec/test_progress_estimate.py` (commit `2c1d212dec4eb63fc248c8b79770f37fbe308377`).
+
+Latest source fix for measured progress: `1a8ca8d222cfe83e33545267d604d125bd9a211c`.
