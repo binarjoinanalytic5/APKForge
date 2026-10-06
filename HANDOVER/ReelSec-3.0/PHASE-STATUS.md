@@ -250,3 +250,15 @@ The first no-res campaign reached a valid `READY` inventory but incorrectly bloc
 
 Implementation: `58653f9c818ad5bc4f6d6bd48f0ab436124804eb`, `9a5f6bbebbe328fdddaa1b066d20d7332c53cb0d`
 Regression coverage: `2434a4ae97da0e903c4757a79c7718162ecdf11d`
+
+
+## Structural SecShell Discovery — 2026-10-07
+
+The next campaign run showed `DECODED_NO_RES -> READY` correctly, but Stage 6 still blocked because discovery required a literal `AW.smali` filename. Historical evidence confirms the SecShell Application class exists, but filename-based discovery is unnecessarily brittle.
+
+ReelSec now scans every `smali*` root and identifies candidates by structure/content: Android `Application` superclass, `attachBaseContext`, and a nearby `System.loadLibrary` call associated with `SecShell`. Candidate metadata records the class name, path, loadLibrary line, score, and discovery mode. The campaign no longer assumes the file is named `AW.smali`.
+
+The telemetry probe was also hardened to locate the actual `System.loadLibrary` instruction register dynamically and reserve two safe local registers before inserting the Log.i marker.
+
+Latest implementation commits: `9abc0a6c55a4ca0079691900d76fb9c68d66c6bc0`, `75caa4633eb8cc3569ec0cde1cf6e912fe75301f`, `df1f4cf4d8c98f604894ff21dfd8193b398af426`, `d84b5689d2f40991efd0cbd077f480a8e1ca602b`.
+Regression coverage: `9bfeb10421decd959f5383713a15ffd6d9acc33b`, `240c3a5376dc75069954ff35ec2afb54a82291f1`.
