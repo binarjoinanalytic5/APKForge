@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
-VERSION = "2.2.0"
+VERSION = "2.1.0"
 PROBES = [
     "elf",
     "symbols",
@@ -22,7 +22,6 @@ PROBES = [
     "critical-function",
     "protection-bridge",
     "vtable-abi",
-    "target-provenance",
     "critical-function-behavior",
     "native-security-api",
     "java-screen-security",
@@ -152,178 +151,6 @@ def resolve_symbol(symbols_text, addr):
         if value <= addr < value + max(size, 1):
             matches.append((value, size, name))
     return matches
-
-
-def _parse_symbol_rows(symbols_text):
-    rows = []
-    for line in symbols_text.splitlines():
-        fields = line.split()
-        if len(fields) < 8:
-            continue
-        try:
-            value = int(fields[1], 16)
-            size = int(fields[2], 10)
-        except (ValueError, IndexError):
-            continue
-        rows.append({
-            "addr": value,
-            "size": size,
-            "type": fields[3],
-            "name": fields[-1],
-        })
-    rows.sort(key=lambda item: (item["addr"], item["type"], item["name"]))
-    return rows
-
-
-def _symbol_context(rows, addr, symbol_type=None):
-    typed = [r for r in rows if symbol_type is None or r["type"] == symbol_type]
-    containing = [
-        r for r in typed
-        if r["addr"] <= addr < r["addr"] + max(r["size"], 1)
-    ]
-    previous = [r for r in typed if r["addr"] < addr]
-    following = [r for r in typed if r["addr"] > addr]
-    return {
-        "containing": containing,
-        "previous": max(previous, key=lambda r: r["addr"]) if previous else None,
-        "next": min(following, key=lambda r: r["addr"]) if following else None,
-    }
-
-
-def write_target_provenance_audit(output, data, symbols_text, ptr):
-    """Resolve target/vtable provenance without conflating base and derived classes."""
-    address_point = 0x717E60
-    slot = 0x717F68
-    header_start = address_point - 0x10
-
-    rows = _parse_symbol_rows(symbols_text)
-    func_ctx = _symbol_context(rows, ptr, "FUNC") if ptr is not None else {
-        "containing": [], "previous": None, "next": None
-    }
-    vtables = [r for r in rows if r["type"] == "OBJECT" and "_ZTV" in r["name"]]
-
-    base_candidates = [r for r in vtables if r["name"] == "_ZTV13ActiveDecoder"]
-    base = base_candidates[0] if base_candidates else None
-    base_address_point = (base["addr"] + 0x10) if base else None
-    base_slot = (base_address_point + 0x108) if base_address_point is not None else None
-    base_ptr = read_pointer(data, base_slot)[0] if base_slot is not None else None
-
-    target_rtti = read_pointer(data, address_point - 0x8)[0]
-    target_name_ptr = read_pointer(data, target_rtti + 0x8)[0] if target_rtti else None
-    target_type = cstring_at(data, target_name_ptr) if target_name_ptr else None
-    target_slot_ptr = read_pointer(data, slot)[0] if ptr is None else ptr
-
-    exact_header_predecessor = None
-    prior = [r for r in vtables if r["addr"] < header_start]
-    previous_vtable = max(prior, key=lambda r: r["addr"]) if prior else None
-    if previous_vtable and previous_vtable["addr"] + previous_vtable["size"] == header_start:
-        exact_header_predecessor = previous_vtable
-
-    target_symbol = func_ctx["containing"][0] if func_ctx["containing"] else None
-    previous_func = func_ctx["previous"]
-    next_func = func_ctx["next"]
-
-    target_region = "SYMBOL_RESOLVED"
-    if target_symbol is None:
-        target_region = "UNNAMED_EXECUTABLE_GAP"
-        if previous_func and next_func:
-            previous_end = previous_func["addr"] + previous_func["size"]
-            if previous_end <= ptr < next_func["addr"]:
-                target_region = "UNNAMED_EXECUTABLE_GAP_BETWEEN_SYMBOLS"
-
-    if exact_header_predecessor and target_type and "mediaCodecDecoder" in target_type:
-        vtable_status = "STRONG_UNNAMED_SECONDARY_VTABLE_EVIDENCE"
-    elif target_type:
-        vtable_status = "RTTI_BACKED_UNNAMED_VTABLE_ADDRESS_POINT"
-    else:
-        vtable_status = "UNRESOLVED_VTABLE_IDENTITY"
-
-    if base_ptr is not None and ptr is not None:
-        base_relation = (
-            "TARGET_POINTER_ALSO_OCCURS_IN_ACTIVEDECODER_BASE_VTABLE"
-            if base_ptr == ptr else
-            "TARGET_POINTER_DIFFERS_FROM_ACTIVEDECODER_BASE_VTABLE_SLOT"
-        )
-    else:
-        base_relation = "ACTIVEDECODER_BASE_VTABLE_SLOT_UNRESOLVED"
-
-    payload = {
-        "schema_version": "2.2",
-        "target_function": hex(ptr) if ptr is not None else None,
-        "target_address_point": hex(address_point),
-        "target_slot": hex(slot),
-        "target_symbol_resolution": target_region,
-        "target_symbol": target_symbol,
-        "previous_function_symbol": previous_func,
-        "next_function_symbol": next_func,
-        "previous_vtable_symbol": previous_vtable,
-        "secondary_vtable_header_start": hex(header_start),
-        "secondary_vtable_header_predecessor_match": bool(exact_header_predecessor),
-        "target_rtti": hex(target_rtti) if target_rtti is not None else None,
-        "target_type_name": target_type,
-        "target_slot_pointer": hex(target_slot_ptr) if target_slot_ptr is not None else None,
-        "target_vtable_status": vtable_status,
-        "active_decoder_base_vtable": base,
-        "active_decoder_base_address_point": hex(base_address_point) if base_address_point is not None else None,
-        "active_decoder_base_slot": hex(base_slot) if base_slot is not None else None,
-        "active_decoder_base_slot_pointer": hex(base_ptr) if base_ptr is not None else None,
-        "base_vtable_relation": base_relation,
-    }
-
-    lines = [
-        "# Target / VTable Provenance Audit",
-        "",
-        "Target function: %s" % (hex(ptr) if ptr is not None else "NOT_RESOLVED"),
-        "Target address-point: 0x717e60",
-        "Target slot: 0x717f68 (+0x108)",
-        "",
-        "## Target code identity",
-        "Target symbol resolution: %s" % target_region,
-    ]
-    if target_symbol:
-        lines.append("Containing function symbol: 0x%x size=%d %s" %
-                     (target_symbol["addr"], target_symbol["size"], target_symbol["name"]))
-    else:
-        lines.append("Containing function symbol: NONE")
-        if previous_func:
-            lines.append("Previous function symbol: 0x%x size=%d %s; end=0x%x" %
-                         (previous_func["addr"], previous_func["size"], previous_func["name"],
-                          previous_func["addr"] + previous_func["size"]))
-        if next_func:
-            lines.append("Next function symbol: 0x%x size=%d %s" %
-                         (next_func["addr"], next_func["size"], next_func["name"]))
-        lines.append("Interpretation: target lies in executable code not covered by a named FUNC symbol.")
-
-    lines += [
-        "",
-        "## Target vtable identity",
-        "RTTI pointer: %s" % (hex(target_rtti) if target_rtti is not None else "UNRESOLVED"),
-        "RTTI type name: %s" % (target_type or "UNRESOLVED"),
-        "Target vtable status: %s" % vtable_status,
-        "Vtable header start: 0x%x" % header_start,
-        "Named vtable immediately preceding header: %s" %
-        (previous_vtable["name"] if previous_vtable else "NONE"),
-        "Predecessor ends exactly at header: %s" %
-        ("YES" if exact_header_predecessor else "NO"),
-        "",
-        "## Base-vs-derived distinction",
-        "Named ActiveDecoder base vtable: %s" % (base["name"] if base else "UNRESOLVED"),
-        "ActiveDecoder base address-point (+0x10): %s" %
-        (hex(base_address_point) if base_address_point is not None else "UNRESOLVED"),
-        "ActiveDecoder +0x108 slot: %s" % (hex(base_slot) if base_slot is not None else "UNRESOLVED"),
-        "ActiveDecoder +0x108 pointer: %s" % (hex(base_ptr) if base_ptr is not None else "UNRESOLVED"),
-        "Base-vtable relation: %s" % base_relation,
-        "",
-        "## Conclusion",
-        "0x717e60 is not treated as the named ActiveDecoder base vtable address-point.",
-        "A base ActiveDecoder constructor call followed by a post-base vptr store is distinct from proof of the complete object's class identity.",
-        "The RTTI/header/adjacency evidence is recorded as secondary-vtable evidence, while class inheritance remains conservative.",
-    ]
-    (output / "TARGET-PROVENANCE-AUDIT.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    (output / "TARGET-PROVENANCE-AUDIT.json").write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
-    return payload
 
 def scan_security_indicators(strings_text):
     pattern = re.compile(
@@ -486,53 +313,66 @@ def write_critical_behavior(output, ptr):
     )
     return cls
 
-def write_vtable_object_proof(output, data=None, symbols_text=""):
+
+
+def _parse_symbol_rows(text):
+    rows=[]
+    for line in text.splitlines():
+        f=line.split()
+        if len(f)>=8 and f[0].endswith(":"):
+            try: rows.append({"addr":int(f[1],16),"size":int(f[2]),"type":f[3],"name":f[-1]})
+            except (ValueError,IndexError): pass
+    return sorted(rows,key=lambda x:x["addr"])
+
+def write_target_provenance_audit(output,data,symbols_text,ptr):
+    ap=0x717e60; slot=0x717f68
+    rows=_parse_symbol_rows(symbols_text); funcs=[r for r in rows if r["type"]=="FUNC"]
+    containing=[r for r in funcs if ptr is not None and r["addr"]<=ptr<r["addr"]+max(r["size"],1)]
+    prev=max([r for r in funcs if ptr is not None and r["addr"]<ptr],key=lambda r:r["addr"],default=None)
+    nxt=min([r for r in funcs if ptr is not None and r["addr"]>ptr],key=lambda r:r["addr"],default=None)
+    vtables=[r for r in rows if r["type"]=="OBJECT" and "_ZTV" in r["name"]]
+    base=next((r for r in vtables if r["name"]=="_ZTV13ActiveDecoder"),None)
+    base_ap=base["addr"]+0x10 if base else None
+    base_slot=base_ap+0x108 if base_ap is not None else None
+    base_ptr=read_pointer(data,base_slot)[0] if base_slot is not None else None
+    rtti=read_pointer(data,ap-8)[0]; np=read_pointer(data,rtti+8)[0] if rtti else None
+    typ=cstring_at(data,np) if np else None
+    payload={"schema_version":"2.3","target":hex(ptr) if ptr else None,"address_point":"0x717e60","slot":"0x717f68","rtti":hex(rtti) if rtti else None,"type_name":typ,"target_symbol":containing[0] if containing else None,"previous_function":prev,"next_function":nxt,"active_decoder_base_vtable":base,"active_decoder_base_address_point":hex(base_ap) if base_ap is not None else None,"active_decoder_base_slot_pointer":hex(base_ptr) if base_ptr is not None else None,"base_relation":"DIFFERENT_ADDRESS_POINT" if base_ap is not None and base_ap!=ap else "UNRESOLVED_OR_SAME"}
+    (output/"TARGET-PROVENANCE-AUDIT.json").write_text(json.dumps(payload,indent=2)+"\\n",encoding="utf-8")
+    lines=["# Target / VTable Provenance Audit","",f"Target: {hex(ptr) if ptr else 'UNRESOLVED'}",f"Target address-point: 0x{ap:x}",f"RTTI type: {typ or 'UNRESOLVED'}",f"Named ActiveDecoder base address-point: {hex(base_ap) if base_ap is not None else 'UNRESOLVED'}",f"Base relation: {payload['base_relation']}","","The target address-point is NOT automatically classified as the ActiveDecoder base vtable.","Constructor post-base vptr installation is evidence of object initialization, not by itself proof of complete-object class identity or runtime dispatch."]
+    if containing: lines.append(f"Containing function: 0x{containing[0]['addr']:x} {containing[0]['name']}")
+    else: lines += ["Containing function symbol: NONE",f"Previous symbol: {prev}",f"Next symbol: {nxt}","Target is an unnamed executable region between symbol boundaries."]
+    (output/"TARGET-PROVENANCE-AUDIT.md").write_text("\\n".join(lines)+"\\n",encoding="utf-8")
+    return payload
+
+def write_vtable_object_proof(output, data=None, symbols_text="")
     p = output / "ActiveDecoder-constructor.txt"
     text = p.read_text(encoding="utf-8", errors="replace") if p.exists() else ""
     has_base_ctor = bool(re.search(r"bl\s+0xdfbd0\s+<.*ActiveDecoderC2Ev", text))
+    # objdump may separate mnemonic/operands with tabs or variable whitespace.
     has_vtable_base = bool(re.search(r"\badrp\s+x8,\s+0x717000\b", text))
     has_vtable_add = bool(re.search(r"\badd\s+x8,\s+x8,\s+#0xe50\b", text))
     has_address_point = bool(re.search(r"\badd\s+x9,\s+x8,\s+#0x10\b", text))
     has_vptr_store = bool(re.search(r"\bstr\s+x9,\s+\[x19\]", text))
     proven = has_base_ctor and has_vtable_base and has_vtable_add and has_address_point and has_vptr_store
-
-    base_vtable = None
-    if symbols_text:
-        base_vtable = next(
-            (r for r in _parse_symbol_rows(symbols_text)
-             if r["type"] == "OBJECT" and r["name"] == "_ZTV13ActiveDecoder"),
-            None,
-        )
-    target_ap = 0x717E60
-    base_ap = (base_vtable["addr"] + 0x10) if base_vtable else None
-
     out = [
         "# VTable Object Proof",
         "",
         "Object register: x19",
-        "Base ActiveDecoder constructor call observed: %s" % ("YES" if has_base_ctor else "NO"),
-        "Post-base vtable address computation 0x717000 + 0xe50 observed: %s" %
-        ("YES" if has_vtable_base and has_vtable_add else "NO"),
-        "Target address-point computation 0x717e50 + 0x10 = 0x717e60 observed: %s" %
-        ("YES" if has_address_point else "NO"),
+        "Base constructor call observed: %s" % ("YES" if has_base_ctor else "NO"),
+        "VTable base computation 0x717000 + 0xe50 observed: %s" % ("YES" if has_vtable_base and has_vtable_add else "NO"),
+        "Address-point computation 0x717e50 + 0x10 = 0x717e60 observed: %s" % ("YES" if has_address_point else "NO"),
         "vptr store [x19] observed: %s" % ("YES" if has_vptr_store else "NO"),
         "",
-        "Named ActiveDecoder base vtable: %s" % (base_vtable["name"] if base_vtable else "UNRESOLVED"),
-        "Named ActiveDecoder base address-point: %s" % (hex(base_ap) if base_ap is not None else "UNRESOLVED"),
-        "Recovered target address-point: 0x717e60",
-        "Target differs from named base address-point: %s" %
-        ("YES" if base_ap is not None and base_ap != target_ap else "NO/UNRESOLVED"),
+        "RESULT: " + ("PROVEN_OBJECT_VPTR_TO_0x717E60" if proven else "NOT_PROVEN"),
         "",
-        "RESULT: " + ("PROVEN_POST_BASE_CONSTRUCTOR_VPTR_INSTALLATION" if proven else "NOT_PROVEN"),
-        "",
-        "This proves the analyzed path installs 0x717e60 after calling ActiveDecoderC2Ev.",
-        "It does not claim that 0x717e60 is the ActiveDecoder base vtable or that the complete object is definitively mediaCodecDecoder.",
+        "This proves the constructor path writes the recovered vtable address-point into the object register; it does not by itself prove which virtual method is invoked at runtime.",
     ]
     (output / "VTABLE-OBJECT-PROOF.md").write_text("\n".join(out) + "\n", encoding="utf-8")
     return proven
 
-def write_vtable_class_correlation(output, data, symbols_text=""):
-    """Correlate RTTI/vtable entries with the post-base constructor path conservatively."""
+def write_vtable_class_correlation(output, data, symbols_text="")
+    """Correlate RTTI, vtable entries, and constructor/destructor evidence."""
     address_point = 0x717E60
     first = read_pointer(data, address_point)[0]
     second = read_pointer(data, address_point + 0x8)[0]
@@ -555,36 +395,24 @@ def write_vtable_class_correlation(output, data, symbols_text=""):
     name_ptr = read_pointer(data, rtti + 0x8)[0] if rtti else None
     type_name = cstring_at(data, name_ptr) if name_ptr else None
 
-    rows = _parse_symbol_rows(symbols_text)
-    base_vtable = next(
-        (r for r in rows if r["type"] == "OBJECT" and r["name"] == "_ZTV13ActiveDecoder"),
-        None,
-    )
-    base_ap = (base_vtable["addr"] + 0x10) if base_vtable else None
-
     evidence = [
         ("RTTI type is mediaCodecDecoder", bool(type_name and "mediaCodecDecoder" in type_name)),
         ("vtable entry[0] == destructor candidate 0x2785bc", first == 0x2785BC),
         ("vtable entry[1] == destructor candidate 0x278768", second == 0x278768),
-        ("base ActiveDecoder constructor is called before vptr write", has_ctor),
-        ("post-base target vptr is stored into [x19]", has_ctor_vptr),
+        ("constructor calls ActiveDecoderC2Ev", has_ctor),
+        ("constructor stores vptr into [x19]", has_ctor_vptr),
         ("destructor calls ActiveDecoderD2Ev", has_dtor),
-        ("destructor restores a vptr into [x19]", has_dtor_vptr),
-        ("target address-point differs from named ActiveDecoder base vtable address-point",
-         base_ap is not None and base_ap != address_point),
+        ("destructor restores vptr into [x19]", has_dtor_vptr),
     ]
     proven = all(ok for _, ok in evidence)
 
     lines = [
-        "# VTable Class / Lifecycle Correlation",
+        "# VTable Class Correlation",
         "",
-        "Target address-point: 0x%X" % address_point,
+        "Address-point: 0x%X" % address_point,
         "RTTI type name: %s" % (type_name or "UNRESOLVED"),
         "vtable entry[0]: %s" % (hex(first) if first is not None else "UNRESOLVED"),
         "vtable entry[1]: %s" % (hex(second) if second is not None else "UNRESOLVED"),
-        "Named ActiveDecoder base vtable: %s" % (base_vtable["name"] if base_vtable else "UNRESOLVED"),
-        "Named ActiveDecoder base address-point: %s" %
-        (hex(base_ap) if base_ap is not None else "UNRESOLVED"),
         "",
         "Evidence:",
     ]
@@ -592,12 +420,12 @@ def write_vtable_class_correlation(output, data, symbols_text=""):
     lines += [
         "",
         "RESULT: " + (
-            "PROVEN_RTTI_POST_BASE_VPTR_LIFECYCLE_CORRELATION"
+            "PROVEN_RTTI_VTABLE_CONSTRUCTOR_DESTRUCTOR_CORRELATION"
             if proven else "NOT_PROVEN"
         ),
         "",
-        "Interpretation: a base ActiveDecoder constructor is followed by installation of the recovered 0x717e60 vptr, while the recovered address-point carries mediaCodecDecoder RTTI.",
-        "This does not by itself prove the complete-object C++ type relationship or runtime invocation of slot +0x108.",
+        "Static slot mapping: 0x717f68 (+0x108) -> 0x27a510.",
+        "Runtime execution of that virtual slot remains a separate question; this report does not claim that the program actually invoked slot +0x108.",
     ]
     (output / "VTABLE-CLASS-CORRELATION.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return proven
@@ -900,17 +728,6 @@ def write_autonomous_dataflow(output, target, objdump):
                     vptr_load_i=j
             constructor_chain=False
             constructor_evidence=None
-            label_lower = flabel.lower()
-            label_is_jni = (
-                "envp7_jnienv" in label_lower
-                or "ep7_jnienv" in label_lower
-                or "<jnionload" in label_lower
-                or "java" in label_lower
-                or "jni" in label_lower
-            )
-            has_receiver_x19 = any(re.search(r"\bmov\s+x0,\s+x19\b",w) for w in window)
-            jni_like = label_is_jni and (has_receiver_x19 or vptr_load_i is not None)
-
             if vptr_load_i is not None:
                 abs_candidate=start_i+rel_i
                 prior=[x for x in ctor_calls if x < abs_candidate and abs_candidate-x <= 512]
@@ -936,10 +753,7 @@ def write_autonomous_dataflow(output, target, objdump):
                                 "distance_in_instructions":abs_candidate-call_i,
                             }
 
-            if jni_like:
-                classification="JNI_DISPATCH_EXCLUDED"
-                proof_basis="JNI/JNIEnv semantic context; excluded from C++ vtable proof"
-            elif direct_vtable:
+            if direct_vtable:
                 classification="PROVEN_STATIC_TARGET_SLOT_LOAD"
                 proof_basis=direct_basis
             elif constructor_chain:
@@ -962,14 +776,13 @@ def write_autonomous_dataflow(output, target, objdump):
 
     proven=[x for x in records if x["classification"] in
             ("PROVEN_STATIC_TARGET_SLOT_LOAD","PROVEN_TARGET_VTABLE_DATAFLOW")]
-    jni=[x for x in records if x["classification"]=="JNI_DISPATCH_EXCLUDED"]
     cxx=[x for x in records if x["classification"]=="CXX_VPTR_DATAFLOW_UNRESOLVED"]
-    payload={"schema_version":"2.3","target_vtable":"0x717e60",
+    payload={"schema_version":"2.2","target_vtable":"0x717e60",
              "target_slot":"0x717f68","target_function":"0x27a510",
              "constructor_call_count":len(ctor_calls),
              "candidate_count":len(records),
              "proven_target_dataflow_count":len(proven),
-             "jni_excluded_count":len(jni),"cxx_unresolved_count":len(cxx),"records":records}
+             "cxx_unresolved_count":len(cxx),"records":records}
     (output/"AUTONOMOUS-DATAFLOW.json").write_text(
         json.dumps(payload,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     report=["# Autonomous Dataflow Proof","","Target vtable address-point: 0x717e60",
@@ -977,7 +790,6 @@ def write_autonomous_dataflow(output, target, objdump):
             "Constructor call sites resolved from machine code: %d"%len(ctor_calls),
             "Candidate dispatches analysed: %d"%len(records),
             "PROVEN target data-flow: %d"%len(proven),
-            "JNI semantic dispatches excluded: %d"%len(jni),
             "C++ vptr candidates still unresolved: %d"%len(cxx),"",
             "The analyzer never treats x19 naming alone as proof.",""]
     for item in records:
@@ -1109,10 +921,9 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
     return result
 
 
-def write_autonomous_campaign(output, dataflow, runtime, provenance=None):
-    payload={"schema_version":"2.2","mode":"AUTONOMOUS",
+def write_autonomous_campaign(output, dataflow, runtime):
+    payload={"schema_version":"2.1","mode":"AUTONOMOUS",
              "static_dataflow":dataflow,
-             "target_provenance":provenance or {},
              "runtime_status":runtime.get("status") if runtime else "NOT_RUN",
              "truth_rules":{
                  "static_target_slot":"PROVEN",
@@ -1134,7 +945,7 @@ def write_autonomous_campaign(output, dataflow, runtime, provenance=None):
 def git_publish(root, report_dir):
     """Publish from a clean worktree based on origin/main; never mutate the investigation checkout."""
     result = {
-        "schema_version": "2.2",
+        "schema_version": "2.1",
         "tool": "ReelSec",
         "version": VERSION,
         "attempted": True,
@@ -1170,8 +981,6 @@ def git_publish(root, report_dir):
         "PROTECTION-BRIDGE-AUDIT.md",
         "JNI-SEMANTIC-ANALYSIS.md",
         "VTABLE-ABI-ANALYSIS.md",
-        "TARGET-PROVENANCE-AUDIT.md",
-        "TARGET-PROVENANCE-AUDIT.json",
         "CRITICAL-FUNCTION-BEHAVIOR.md",
         "VTABLE-CLASS-CORRELATION.md",
         "REMAINING-DISPATCH-AUDIT.md",
@@ -1397,3 +1206,228 @@ def main():
     readelf = which("readelf", "llvm-readelf")
     strings_bin = which("strings")
     objdump = which("llvm-objdump", "objdump")
+
+    symbols_text = ""
+    if readelf:
+        for flag, filename in (
+            ("-SW", "sections.txt"),
+            ("-lW", "program-headers.txt"),
+            ("-Ws", "all-symbols.txt"),
+        ):
+            rc, text = run([readelf, flag, str(target)])
+            (output / filename).write_text(text, encoding="utf-8")
+            if filename == "all-symbols.txt":
+                symbols_text = text
+                (output / "readelf-symbols-exit.txt").write_text(
+                    str(rc) + "\n",
+                    encoding="utf-8",
+                )
+
+    strings_text = ""
+    if strings_bin:
+        _, strings_text = run([strings_bin, "-a", "-t", "x", str(target)])
+        (output / "strings-offsets.txt").write_text(strings_text, encoding="utf-8")
+        (output / "security-strings.txt").write_text(
+            scan_security_indicators(strings_text) + "\n",
+            encoding="utf-8",
+        )
+
+    address_point = 0x717E60
+    critical_slot = 0x717F68
+    ptr, raw = read_pointer(data, critical_slot)
+
+    analysis_lines = [
+        "ReelSec raw ELF analysis",
+        "ELF=" + str(target),
+        "SHA256=" + digest,
+        "0x717e60 file offset=" + str(va_to_offset(data, address_point)),
+        "0x717f68 file offset=" + str(va_to_offset(data, critical_slot)),
+    ]
+
+    if ptr is not None:
+        analysis_lines += [
+            "0x717f68 RAW_BYTES=" + " ".join(f"{b:02x}" for b in raw),
+            "0x717f68 FUNCTION_POINTER=0x" + format(ptr, "x"),
+        ]
+        (output / "CRITICAL-FUNCTION-POINTER.txt").write_text(
+            "\n".join(analysis_lines[-2:]) + "\n",
+            encoding="utf-8",
+        )
+    else:
+        analysis_lines.append("0x717f68 NOT_FILE_BACKED")
+
+    (output / "elf-python-analysis.txt").write_text(
+        "\n".join(analysis_lines) + "\n",
+        encoding="utf-8",
+    )
+
+    vtable_start = va_to_offset(data, 0x717CE0)
+    vtable_end = va_to_offset(data, 0x71807F)
+    if vtable_start is not None and vtable_end is not None and vtable_end >= vtable_start:
+        chunk = data[vtable_start:vtable_end + 1]
+        raw_lines = []
+        qword_lines = []
+        for i in range(0, len(chunk), 16):
+            raw_lines.append(
+                f"{0x717CE0 + i:016x}  " +
+                " ".join(f"{b:02x}" for b in chunk[i:i + 16])
+            )
+        for i in range(0, len(chunk) - 7, 8):
+            value = struct.unpack_from("<Q", chunk, i)[0]
+            qword_lines.append(f"{0x717CE0 + i:016x} -> {value:016x}")
+        (output / "vtable-raw-bytes.txt").write_text(
+            "\n".join(raw_lines) + "\n",
+            encoding="utf-8",
+        )
+        (output / "vtable-qwords.txt").write_text(
+            "\n".join(qword_lines) + "\n",
+            encoding="utf-8",
+        )
+
+    jni_semantic_found = False
+    vtable_abi = write_vtable_abi_analysis(output, data, symbols_text)
+    target_provenance = write_target_provenance_audit(output, data, symbols_text, ptr)
+    critical_behavior = "NOT_RUN"
+    if objdump:
+        disassemble(objdump, target, 0x27AE80, 0x27B280, output / "dispatch-sites.txt")
+        dispatch_text = (output / "dispatch-sites.txt").read_text(encoding="utf-8", errors="replace")
+        jni_semantic_found = write_jni_semantic_analysis(output, dispatch_text)
+        disassemble(objdump, target, 0x2783C0, 0x278500, output / "ActiveDecoder-constructor.txt")
+        disassemble(objdump, target, 0x2785BC, 0x2786B0, output / "ActiveDecoder-destructor.txt")
+        write_vtable_object_proof(output, data, symbols_text)
+        write_vtable_class_correlation(output, data, symbols_text)
+        write_remaining_dispatch_audit(output, objdump, target)
+        disassemble(objdump, target, 0x112E80, 0x113000, output / "onCaptureScreen-dispatch.txt")
+
+        if ptr is not None:
+            disassemble(
+                objdump,
+                target,
+                max(0, ptr - 0x120),
+                ptr + 0x500,
+                output / ("CRITICAL-FUNCTION-0x%X.txt" % ptr),
+            )
+            disassemble(
+                objdump,
+                target,
+                max(0, ptr - 0x40),
+                ptr + 0x40,
+                output / "CRITICAL-FUNCTION-ENTRY.txt",
+            )
+            critical_behavior = write_critical_behavior(output, ptr)
+
+    symbol_matches = resolve_symbol(symbols_text, ptr) if ptr is not None else []
+    symbol_lines = [
+        "0x%X size=%d %s" % match for match in symbol_matches
+    ]
+    if not symbol_lines:
+        symbol_lines = ["NOT_RESOLVED_BY_SYMBOL_TABLE"]
+    (output / "CRITICAL-FUNCTION-SYMBOL.txt").write_text(
+        "\n".join(symbol_lines) + "\n",
+        encoding="utf-8",
+    )
+
+    write_native_security_api_audit(output, strings_text, symbols_text)
+    write_java_screen_security_audit(output, ROOT)
+
+    dataflow_result = write_autonomous_dataflow(output, target, objdump)
+    runtime_result = write_runtime_probe(output, ROOT, target)
+    write_autonomous_campaign(output, dataflow_result, runtime_result)
+
+    security_text = (output / "security-strings.txt").read_text(
+        encoding="utf-8", errors="replace"
+    ) if (output / "security-strings.txt").exists() else ""
+
+    bridge = [
+        "# Protection Bridge Audit",
+        "",
+        "Critical pointer: " + (hex(ptr) if ptr is not None else "NOT_RESOLVED"),
+        "",
+        "Indicators found in target ELF:",
+    ]
+    for key in (
+        "queueSecureInputBuffer",
+        "setOutputSurface",
+        "setForceInsecureDecoder",
+        "ANativeWindow",
+        "EGL",
+        "GRALLOC",
+        "AHardwareBuffer",
+        "FLAG_SECURE",
+        "MediaProjection",
+        "createVirtualDisplay",
+        "screenshot",
+        "recording",
+    ):
+        bridge.append(
+            "- %s: %s" % (
+                key,
+                "FOUND" if key.lower() in security_text.lower() else "NOT_FOUND",
+            )
+        )
+    bridge += [
+        "",
+        "Rule: indicator presence is not execution proof.",
+        "Next proof step: inspect the critical function body and its outgoing call targets.",
+        "Important: 0x108 is classified as JNI GetMethodID index 33 by the observed call signature; it must not be assumed to be an ActiveDecoder C++ vtable slot.",
+    ]
+    (output / "PROTECTION-BRIDGE-AUDIT.md").write_text(
+        "\n".join(bridge) + "\n",
+        encoding="utf-8",
+    )
+
+    report = (
+        "# ReelSec VTable / Dispatch Resolution Report\n\n"
+        "Target: " + str(target) + "\n"
+        "SHA-256: " + digest + "\n"
+        "Calculated address-point: 0x717e60\n"
+        "Critical slot: 0x717f68\n"
+        "Extracted function pointer: " +
+        (hex(ptr) if ptr is not None else "NOT_RESOLVED") + "\n\n"
+        "The pointer is read directly from the ELF via PT_LOAD mapping. "
+        "The target function is then disassembled and resolved against the "
+        "symbol table when possible. No Screenshot-blocking claim is made "
+        "from this result alone.\n"
+    )
+    (output / "VTable-RESOLUTION-REPORT.md").write_text(
+        report,
+        encoding="utf-8",
+    )
+
+    manifest.update(
+        status="completed",
+        target_sha256=digest,
+        critical_pointer=(hex(ptr) if ptr is not None else None),
+        jni_semantic_found=jni_semantic_found,
+        vtable_abi=vtable_abi,
+        critical_function_behavior=critical_behavior,
+        autonomous_dataflow=dataflow_result,
+        runtime_probe_status=(runtime_result.get("status") if runtime_result else "NOT_RUN"),
+    )
+    (output / "manifest.json").write_text(
+        json.dumps(manifest, indent=2),
+        encoding="utf-8",
+    )
+
+    publish = None if args.no_publish else git_publish(ROOT, output)
+    if publish and not (output / "PUBLISH-STATUS.json").exists():
+        (output / "PUBLISH-STATUS.json").write_text(
+            json.dumps(publish, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+
+    print("REPORT=" + str(output))
+    print("FUNCTION_POINTER=" + (hex(ptr) if ptr is not None else "NOT_RESOLVED"))
+    if symbol_lines:
+        print("SYMBOL=" + symbol_lines[0])
+    if publish:
+        print("PUBLISH_STATUS=" + publish["status"])
+        print("PUBLISH_BRANCH=" + str(publish["branch"]))
+        print("PUBLISH_REPORT_COMMIT=" + str(publish["report_commit"]))
+        print("PUBLISH_STATUS_COMMIT=" + str(publish["status_commit"]))
+    print("TARGET_PROVENANCE_STATUS=" + str(target_provenance.get("base_relation") if target_provenance else "NOT_RUN"))
+    print("AUTONOMOUS_DATAFLOW_PROVEN=" + str(bool(dataflow_result.get("proven", 0))))
+    print("RUNTIME_PROOF_STATUS=" + str(runtime_result.get("status") if runtime_result else "NOT_RUN"))
+
+if __name__ == "__main__":
+    main()
