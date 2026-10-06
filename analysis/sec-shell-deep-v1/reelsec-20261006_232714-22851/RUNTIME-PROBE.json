@@ -1,0 +1,24 @@
+{
+  "events": [],
+  "manifest": null,
+  "missing_requirements": [
+    "package_manifest"
+  ],
+  "module": "libsaasCorePlayer.so",
+  "package": null,
+  "preflight_status": "CLIENTS_READY",
+  "reason": "missing: package_manifest",
+  "status": "RUNTIME_ENVIRONMENT_UNAVAILABLE",
+  "tooling": {
+    "adb": "/data/data/com.termux/files/usr/bin/adb",
+    "adb_source": "preflight.adb",
+    "frida": "/data/data/com.termux/files/home/.local/bin/frida",
+    "frida_after_pkg": null,
+    "frida_after_proot": "/data/data/com.termux/files/home/.local/bin/frida",
+    "frida_source": "preflight.frida_after_proot",
+    "frida_wrapper": "/data/data/com.termux/files/home/.local/bin/frida",
+    "pkg": "/data/data/com.termux/files/usr/bin/pkg",
+    "proot_distro": "/data/data/com.termux/files/usr/bin/proot-distro",
+    "python": "/data/data/com.termux/files/usr/bin/python"
+  }
+}
