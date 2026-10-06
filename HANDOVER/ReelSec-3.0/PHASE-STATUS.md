@@ -24,6 +24,12 @@ No runtime result from an instrumented build may be labeled as original-APK runt
 
 The repository CI definition includes the instrumentation backend tests, but GitHub has not exposed a workflow run/status for the branch head. Tests remain pending actual execution.
 
+## Completed in this stage
+
+The campaign can now prepare an isolated decoded working tree under the campaign output. The builder refuses to overwrite an existing work tree and records its source root and manifest hash in `INSTRUMENTED-COPY-MANIFEST.json`. The original decoded tree remains untouched.
+
+The actual mutation helper is deliberately separate from the copy operation and is not invoked automatically yet. This keeps copy creation, mutation, build/signing, and runtime proof as independent evidence gates.
+
 ## Next engineering gate
 
-Implement the **instrumented-copy builder** as an isolated artifact producer. It must copy rather than overwrite the original APK, preserve input SHA-256, record every mutation, and fail closed if the expected SecShell anchor is absent.
+Implement the **controlled mutation + build/sign/verify pipeline**. It must mutate only the isolated copy, validate Smali syntax/build output, preserve the original APK SHA-256, and produce a separately identifiable signed artifact.
