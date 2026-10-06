@@ -1,0 +1,584 @@
+  1acdf _ZN10KeyManager14getDrmMagicKeyEv
+  200d6 avcodec_find_decoder
+  22373 _ZN6Cicada14globalSettings27enableDecoderFastFirstFrameEv
+  24c52 _ZN14codecPrototype6createERK11Stream_metamiPKN6Cicada7DrmInfoE
+  24c92 _ZN6Cicada14avcodecDecoderC1Ev
+  24cb1 _ZN6Cicada14avcodecDecoder13close_decoderEv
+  24cf9 _ZN6Cicada14avcodecDecoder12init_decoderEPK11Stream_metaPvmPKNS_7DrmInfoE
+  24d85 _ZN6Cicada14avcodecDecoderC2Ev
+  24da4 _ZN13ActiveDecoderC2Ev
+  24dd0 _ZN6Cicada14avcodecDecoderD2Ev
+  24def _ZN13ActiveDecoderD2Ev
+  24e06 _ZThn584_N6Cicada14avcodecDecoderD1Ev
+  24e2c _ZN6Cicada14avcodecDecoderD0Ev
+  24e4b _ZThn584_N6Cicada14avcodecDecoderD0Ev
+  24e71 _ZN6Cicada14avcodecDecoder12is_supportedE9AFCodecID
+  24ea5 _ZN6Cicada14avcodecDecoder13flush_decoderEv
+  24ee7 _ZN6Cicada14avcodecDecoder15dequeue_decoderERNSt6__ndk110unique_ptrI8IAFFrameNS1_14default_deleteIS3_EEEE
+  24f96 _ZN6Cicada14avcodecDecoder15enqueue_decoderERNSt6__ndk110unique_ptrI9IAFPacketNS1_14default_deleteIS3_EEEE
+  2504b _ZN6Cicada14avcodecDecoder11canSendNullEv
+  25089 _ZN6Cicada14avcodecDecoder12supportReuseEv
+  250b4 _ZN13ActiveDecoder4openEPK11Stream_metaPvmPKN6Cicada7DrmInfoE
+  250f2 _ZN13ActiveDecoder10setDisplayEPv
+  25114 _ZN13ActiveDecoder5flushEv
+  2512f _ZN13ActiveDecoder14updateMetaDataEPK11Stream_meta
+  25162 _ZN13ActiveDecoder5closeEv
+  2517d _ZN13ActiveDecoder8prePauseEv
+  2519b _ZN13ActiveDecoder5pauseEb
+  251b6 _ZN13ActiveDecoder6isInitEv
+  251d2 _ZN13ActiveDecoder9resetInitEv
+  251f1 _ZN13ActiveDecoder23get_decoded_frame_countEv
+  2521f _ZN13ActiveDecoder11send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEEm
+  2527f _ZN13ActiveDecoder8getFrameERNSt6__ndk110unique_ptrI8IAFFrameNS0_14default_deleteIS2_EEEEm
+  252da _ZN13ActiveDecoder6holdOnEb
+  252f6 _ZN13ActiveDecoder19getRecoverQueueSizeEv
+  25320 _ZN13ActiveDecoder19getInputPaddingSizeEv
+  2534a _ZN13ActiveDecoder20getOutputPaddingSizeEv
+  2539b _ZN6Cicada14avcodecDecoder2seE
+  253ba _ZTVN6Cicada14avcodecDecoderE
+  253d8 _ZTSN6Cicada14avcodecDecoderE
+  253f6 _ZTI13ActiveDecoder
+  25434 _ZTIN6Cicada14avcodecDecoderE
+  25452 _ZN6Cicada14avcodecDecoderD1Ev
+  25598 _ZN6Cicada19DrmHandlerPrototype9isSupportEPKNS_7DrmInfoE
+  25611 _ZN13ActiveDecoder11decode_funcEv
+  25633 _ZN13ActiveDecoder15extract_decoderEb
+  25659 _ZN13ActiveDecoder12enqueueErrorEil
+  2567d _ZN13ActiveDecoder8needDropEP9IAFPacket
+  256a5 _ZN13ActiveDecoder18thread_send_packetERNSt6__ndk110unique_ptrI9IAFPacketNS0_14default_deleteIS2_EEEE
+  2570b _ZN13ActiveDecoder15thread_getFrameERNSt6__ndk110unique_ptrI8IAFFrameNS0_14default_deleteIS2_EEEE
+  2576d _ZN13ActiveDecoderD0Ev
+  2579c _ZTV13ActiveDecoder
+  257b0 _ZTS13ActiveDecoder
+  257c4 _ZN13ActiveDecoderD1Ev
+  25c82 ANativeWindow_fromSurface
+  25d4d eglCreatePbufferSurface
+  25d8b eglDestroySurface
+  25dcd eglCreateWindowSurface
+  26355 _ZN6Cicada19DrmHandlerPrototype6createERKNS_7DrmInfoE
+  2638b _ZN6Cicada19DrmHandlerPrototype12addPrototypeEPS0_
+  263be _ZN6Cicada19DrmHandlerPrototype15drmHandlerQueueE
+  263f0 _ZN6Cicada19DrmHandlerPrototype9_nextSlotE
+  2641b _ZTSN6Cicada19DrmHandlerPrototypeE
+  2643e _ZTIN6Cicada19DrmHandlerPrototypeE
+  28a16 mprotect
+ 59da85 mEnableProjection
+ 59dd4b protected.privateService.data.premiumVerifyCb
+ 59df8f protected.network.http.http2
+ 59dfc4 protected.network.multi.pipeline
+ 59dff9 public.capture.strategy.scale
+ 59e027 protected.audio.render.change_format
+ 59e04c protected.audio.render.change_format.fmt
+ 59e075 protected.audio.render.change_format.channels
+ 59e0a3 protected.audio.render.change_format.sample_rate
+ 59e0d4 protected.decode.codecplugin.
+ 59e11d protected.network.cache.local
+ 59e13b protected.network.cache.local.saveDir
+ 59e161 protected.network.cache.local.bufferMemoryKB
+ 59e18e protected.network.cache.local.expireMin
+ 59e1b6 protected.network.cache.local.maxCapacityMB
+ 59e1e2 protected.network.cache.local.freeStorageMB
+ 59e23b protected.network.cache.local.urlHashCb
+ 59e263 protected.network.cache.local.urlHashCbUserData
+ 59e337 protected.network.data.processCb
+ 59e358 protected.network.data.releaseCb
+ 59e404 protected.network.dns.httpdns.enhanced
+ 59e448 protected.network.networkbalance
+ 59e481 protected.network.switchNIC
+ 59e4c2 protected.network.enhancedNetworkbalance
+ 59e50c protected.network.bufferToLocalCache
+ 59e55b public.crash.strategy.captureCrash
+ 59e59e protected.ipAccessor.clientSwitch
+ 59e638 protected.IpResolveType
+ 59f8ef java_EnableHardwareDecoder(%d)
+ 59fb66 surfaceChanged
+ 59fef1 java_ClearScreen()
+ 5a0623 onCaptureScreen
+ 5a082a nEnableHardwareDecoder
+ 5a0841 nSetSurface
+ 5a084d (Landroid/view/Surface;)V
+ 5a0b7b nClearScreen
+ 5a0cbb nSurfaceChanged
+ 5a1225 AliyunCorePlayer callback --> CaptureScreen(%ld,%ld)
+ 5a300f SetDecoderType
+ 5a301e GetDecoderType
+ 5a3059 CaptureScreen
+ 5a338c nativeOnCaptureScreen
+ 5a346e requestDrm complete, len:%d, data:%s
+ 5a38f3 widevine
+ 5a38fc Widevine
+ 5a3905 requestDRMLicense: CDMData is null or dataLen <= 0
+ 5a3938 CDMData is null or empty, please check DRM configuration
+ 5a3971 requestDRMLicense: VOD DRM certId is empty, will try to proceed without it
+ 5a39bc requestDRMLicense: Live DRM certificate URL is empty
+ 5a39f1 Live DRM certificate URL is empty, please configure DRM certificate URL
+ 5a3aa7 DRMMagicKey
+ 5a42a6 enableProjection
+ 5a43f1 API_IN:EnableHardwareDecoder %d, addr is %p
+ 5a4431 ClearScreen
+ 5a4c01 public.decoder.adaptivedecode
+ 5a4dac Widevine-FairPlay
+ 5a5fa0 clearScreenDoneCallback
+ 5a5fb8 clear screen done
+ 5a6061 castScreen
+ 5a6075 ", "projectionLicenseEnable":"
+ 5a611f apsaraCaptureScreen
+ 5a7108 protected.license.premium.checkPremiumAddrUserData
+ 5a7bd3 crash_strategy_is_capture_crash
+ 5a7d5e decoder_disable_flush_on_extradata_changed
+ 5a7d89 decoder_fast_first_frame
+ 5a7da2 decoder_degrade_when_decode_error
+ 5a7dc4 decoder_adaptive_decode_cloud_config
+ 5a7de9 decoder_android_decoder_reuse_on_off
+ 5a7e0e decoder_android_decoder_reuse_on_off_cross_instance
+ 5a7e42 decoder_h266_disable_static_check
+ 5a7e64 decoder_h266_disable_dynamic_check
+ 5a7e87 decoder_h266_dynamic_check_tolerance
+ 5a8af2 public.decoder.disableFlushOnExtraDataChanged
+ 5a8b20 public.decoder.fastFrame
+ 5a8b39 public.decoder.decoderdegrade
+ 5a8b57 public.decoder.androidDecoderReuse
+ 5a8b7a public.decoder.androidDecoderReuseCrossInstance
+ 5a900f protected.local.cache.cleaner
+ 5a919d public.decoder.multicodec.vid.adaptive
+ 5a971f crash monitor allow capture : %d
+ 5a98fd crashMonitor capture success, crashFilePath 
+ 5a992f crashMonitor capture failed
+ 5a994b protected.network.preconnect.interval
+ 5a9971 protected.network.preconnect.request
+ 5a9996 protected.network.preconnect.domain
+ 5a99ba protected.network.preconnect.idle
+ 5a9d49 protected.networkQuality.checkShallDegradeAddr
+ 5a9d78 protected.networkQuality.maybeGetABetterIpAddr
+ 5aad0c tbDrmDemuxer
+ 5aad45 tbDRMKey
+ 5aad74 TbDrmMuxer
+ 5aaed4 tbDrm
+ 5aaeda tbDrmDec
+ 5aaeff tbDrmTs
+ 5ab0ac tbDrm_read_close 
+ 5ab0ea drmMagicKey
+ 5acbf4 RECORDING
+ 5acbfe SCHEDULED_EVENT_SENDER_AND_RECORDING_FOR_PLAYER
+ 5acded protected.playEvent.user.destroyAsync
+ 5acf2d protected.playEvent.user.stop
+ 5acf4b protected.playEvent.user.destroy
+ 5ad09d decoder_degrade_reason
+ 5ad794 FULLSCREEN
+ 5ad79f EXIT_FULLSCREEN
+ 5ad965 PLAY_BACKUP_AS_DECODER_CREATE_FAIL
+ 5ae237 GetDRMLicense
+ 5ae245 DRMType
+ 5ae63d DescribeDRMLicense
+ 5aef11 InvalidParameter.DRMNotActivated
+ 5aef32 DRMAuthError
+ 5af8aa t_decode_create_audio_decoder_start
+ 5af8ce t_decode_create_audio_decoder_end
+ 5af93e t_decode_create_video_decoder_start
+ 5af962 t_decode_create_video_decoder_end
+ 5b07f5 pauseThread while video decoder not init and still creating Decoder
+ 5b0bc4 decoderReuse
+ 5b0c0e decoderName
+ 5b0cf4 captureCrash
+ 5b0f84 Decoder degrade finished, current decoder type: %d
+ 5b15ea decoder input is not empty
+ 5b1605 mEOF, Send null Packet to AudioDecoder
+ 5b1712 mEOF, Send null Packet to VideoDecoder
+ 5b1739 stream is WideVine and occur decode error.
+ 5b1764 The hardware decoder switches to the software decoder due to decode_error!
+ 5b17af Cloud config disable hardware decoder switch to software decoder.
+ 5b1840 DECODER_PTS: try get video frame
+ 5b1e9b DECODER_PTS: try get audio frame
+ 5b215b stream extra data(sps/pps) changed, flush the decoder and its corresponding buffer. Do or not: (%d)
+ 5b21bf DECODER_PTS: readPacket: size=%ld pts=%ld extra_data_size=%d, streamindex=%d, video buffer size=%d audio buffer size=%d
+ 5b2654 av3a decoder create failed
+ 5b2686 setUpAudioDecoder error %d
+ 5b2a9d force switch to hardware decoder, as it's HDR video
+ 5b2ad1 force switch to hardware decoder, as tunnelRender || isWideVine
+ 5b2b11 SetUpVideoDecoder start
+ 5b2b29 CreateVideoDecoder cost %ld, TIMEOUT
+ 5b2b4e %s CreateVideoDecoder cost %ld, TIMEOUT, no need to downgrade
+ 5b2b9b CreateVideoDecoder TIMEOUT
+ 5b2bb6 vvc decoder create failed
+ 5b2bdd H265 hardware decoder create fail.
+ 5b2c00 Switch to backupUrl as hardware decoder create fail.
+ 5b2c35 %s CreateVideoDecoder failed, error msg is  %s
+ 5b2c64 Switch to software video decoder
+ 5b2d4f Cloud config set AndroidDecoderReuse to %s
+ 5b2e16 Decoder
+ 5b3f60 The video uses a codec not supported by the hardware decoder (e.g., H.265 on older devices)
+ 5b3fbc The video codec profile/level exceeds hardware decoder capability
+ 5b3ffe Software decoder fallback was not enabled or is unavailable
+ 5b403a Enable software decoding by setting DecoderType to DT_SOFTWARE
+ 5b41c8 The audio codec profile is not compatible with the hardware audio decoder
+ 5b42f1 Video decoder failed to open
+ 5b430e Hardware decoder is already in use by another application
+ 5b4394 On Android: TextureView may cause decoder init failure for DRM content
+ 5b43db If on Android, use SurfaceView instead of TextureView for DRM content
+ 5b47e0 Decoder initialization failed for the track
+ 5b480c DRM-protected content cannot be decrypted without proper keys
+ 5b4886 For DRM content, ensure proper license/key acquisition
+ 5b4ae9 DRM scheme not supported on this device
+ 5b4b11 The device does not support Widevine L1 or L3
+ 5b4b3f Widevine is not available on the device (e.g., uncertified device)
+ 5b4b82 The device's DRM system is outdated
+ 5b4ba6 Check the device's Widevine certification level
+ 5b4bd6 Use a certified device for DRM-protected content
+ 5b4c51 Contact the device manufacturer for DRM support information
+ 5b4c8d DRM key is expired or invalid
+ 5b4d56 Third-party DRM callback (requestKey) returned incorrect data
+ 5b4e0a For third-party DRM, check the DrmCallback.requestKey implementation
+ 5b4e4f Renew the DRM license and retry playback
+ 5b4e78 DRM key response is null
+ 5b4ef7 Third-party DRM callback returned null
+ 5b4fa6 For third-party DRM, ensure the requestKey callback returns valid data
+ 5b5016 DRM certificate URL is not configured or empty
+ 5b5045 The DRM certificate URL was not set before playback (e.g., FairPlay application certificate URL)
+ 5b5167 Set the DRM certificate URL via setDrmConfig or the corresponding API before calling prepare()
+ 5b51c6 For URL-based playback of DRM content, ensure the certificate URL is provided in the player configuration
+ 5b5230 Check the documentation for the correct way to configure the DRM certificate URL for your DRM scheme
+ 5b5295 DRM key request failed due to network error
+ 5b52c1 Network is unstable or disconnected when requesting the DRM key
+ 5b5301 The DRM key server is unreachable or overloaded
+ 5b53aa Verify the DRM key server URL is accessible from the device
+ 5b5453 DRM key server returned an error
+ 5b5474 The DRM key server returned HTTP 4xx or 5xx
+ 5b551b The DRM entitlement for this content has been revoked
+ 5b5551 Check the DRM key server response code and message
+ 5b55ce Contact the DRM provider to check if the content entitlement is valid
+ 5b5658 DRM key server response is invalid or cannot be parsed
+ 5b568f The DRM key server returned malformed JSON/XML
+ 5b5762 Verify the DRM key server is returning well-formed responses
+ 5b5842 DRM content key has expired
+ 5b585e The DRM key expiration time has passed
+ 5b592b Renew the DRM key and retry playback
+ 5b59b4 Contact the content provider to extend the DRM key validity
+ 5b5c1e DRM scheme does not match the media encryption type
+ 5b5c52 Attempting to play Widevine-encrypted content with an HLS URL (Widevine is typically used with DASH)
+ 5b5d1b The media uses Alibaba Cloud private encryption but the player is configured for commercial DRM
+ 5b5d7b The DRM type specified in the player configuration does not match the actual encryption
+ 5b5dd3 Ensure the DRM scheme matches the media format (Widevine + DASH, FairPlay + HLS)
+ 5b5ecb Verify the player DRM configuration matches the content encryption type
+ 5b6e9b reuse decoder %s
+ 5b6ebb open decoder(audio) with meta: index %d, codec %d, channels %d, samplerate %d, sample_fmt %d
+ 5b6f19 open decoder(video) with meta: index %d, codec %d, width %d, height %d, pixel_fmt %d
+ 5b6f6f config decoder error ret= %d 
+ 5b711a Put a decoder-render pair to Video DR pool: codec=%d, height=%d, width=%d, pixel_fmt=%d,dstFormat=%d
+ 5b722a DECODER_POOL_CLEAR_FOR_PLAYER
+ 5b7248 Pool size is %d now, executing release decoder from pool.
+ 5b7645 ProcessSetViewMsg: failed to get JNIEnv, cannot construct surface handle
+ 5b7aa2 video decoder recover size too large:
+ 5bb2e4 parseContentProtection
+ 5bb312 ContentProtection
+ 5bbd71 avcodecDecoder
+ 5bbd80 init_decoder error(mPDecoder->codec == nullptr), codec id is %d
+ 5bbdc0 init_decoder error(mPDecoder->codec == nullptr), isAudio:%d
+ 5bbdfc init_decoder error(avcodec_alloc_context3 failed, OOM), isAudio:%d
+ 5bbea4 set decoder thread as :%d
+ 5bbf4a send null to decoder
+ 5bc013 mediaCodecDecoder
+ 5bc025 android decoder use jni
+ 5bc0e2 ==> mediaCodecDecoder::init_decoder
+ 5bc106 init_decoder failed as doesn't support this pixel fmt:%d
+ 5bc13f init_decoder failed as check support failed
+ 5bc1b4 initDrmHandler failed, ret=%d
+ 5bc1d2 <== mediaCodecDecoder::init_decoder, ret=%d
+ 5bc1fe Init extra data to decoder, old size=%d, new size=%d
+ 5bc271 flush_decoder failed as not inited
+ 5bc2f7 queueSecureInputBuffer or queueInputBuffer error(%d) codecType = %d
+ 5bc376 dequeue_decoder failed as not inited
+ 5bc485 ==> mediaCodecDecoder::configDecoder
+ 5bc4aa failed to config mDecoder rv %d
+ 5bc4e3 <== mediaCodecDecoder::configDecoder, ret=%d
+ 5bc535 failed to initDrmHandler state=SESSION_STATE_IDLE
+ 5bc567 failed to initDrmHandler state=SESSION_STATE_ERROR, code=%d
+ 5bc5a3 failed to initDrmHandler try again
+ 5bc5c6 com/cicada/player/utils/media/MediaCodecDecoder
+ 5bc60b setDrmInfo
+ 5bc62e setForceInsecureDecoder
+ 5bc6fa queueSecureInputBuffer
+ 5bc766 getDecoderName
+ 5bc775 setOutputSurface
+ 5bc7b5 jBuffer is null, queueSecureInputBuffer may mem lack
+ 5bc991 bytes_of_protected_data
+ 5bc9a9 AFActiveDecoder
+ 5bc9b9 ActiveDecoder::open, init_decoder failed, error=%d, close() then
+ 5bc9fa extract_decoder error %d
+ 5bca26 DECODER_PTS: begin enqueue_decoder(streamindex=%d, size:%ld, pts=%ld, mInputQueue.size()=%zu, mOutputQueue.size()=%zu
+ 5bca9c enqueue_decoder error %d
+ 5bcb80 decoder have mem error
+ 5bcb98 DECODER_PTS: thread_getFrame got frame(key:%d, pts:%ld), mInputQueue.size()=%zu, mOutputQueue.size()=%zu
+ 5bcc01 dequeue_decoder out put EOS
+ 5bcc1e dequeue_decoder error %d
+ 5bcc38 decoder force extract all, ret is %d
+ 5bcc5e ActiveDecoder::holdOn, mInputQueue size is %zu, mHoldingQueue size is %zu
+ 5bd0df clearScreen
+ 5bd256 surface:%p, mInvalid:%d, queue size:%zu, may drop frame
+ 5bd2b1 capture cost time : capture = %ld ms
+ 5bd2d6 captureScreen exception, frameWidth or frameHeight is 0
+ 5bd33c createGLSurface failed
+ 5bd42c u_projection
+ 5bd50c com/cicada/player/utils/DecoderSurfaceTexture
+ 5bd53a DecoderSurface
+ 5bd549 Could not find surfaceTextureClass
+ 5bd56c createSurface
+ 5bd57a (IJ)Landroid/view/Surface;
+ 5bd603 faild tod create surface
+ 5bd61c mSurfaceTexture is nullptr
+ 5bd653 failed to create surfaceTexture obj
+ 5bd677 failed to create surfaceTexture
+ 5bd697 failed to create Surface obj
+ 5bd6b4 failed to create Surface
+ 5bd6da AndroidSurfaceHandle: invalid params env=%p jSurface=%p
+ 5bd712 AndroidSurfaceHandle: NewGlobalRef failed
+ 5bd73c AndroidSurfaceHandle: ANativeWindow_fromSurface returned null
+ 5bd77a AndroidSurfaceHandle::~AndroidSurfaceHandle: failed to get JNIEnv for DeleteGlobalRef
+ 5bd9eb protected.audio.render.hw.tempo
+ 5bdbda Device supports BT.2020 PQ. Will attempt to create HDR10 surface.
+ 5bdc1c Device does not support EGL_EXT_gl_colorspace_bt2020_pq. Creating standard SDR surface.
+ 5bdc95 Video is HLG and device supports extension. Creating BT.2020 HLG surface.
+ 5bdcdf Device does not support EGL_EXT_gl_colorspace_bt2020_hlg. Creating standard SDR surface.
+ 5bde2f eglCreatePbufferSurface: 0x%X
+ 5bde62 eglMakeCurrent: display(%p) surface(%p) context(%p)
+ 5bdef7 Output surface is null, not rendering!
+ 5bdf40 eglDestroySurface: 0x%x
+ 5bdf76 EGLContext CreateSurface mDisplay %p mConfig %p window %p 
+ 5bdfcb Video is SDR. Creating standard SDR surface.
+ 5bdff8 Retrying to create surface with default attributes...
+ 5be02e EGLContext eglCreateWindowSurface finally failed!
+ 5be060 EGLContext eglCreateWindowSurface surface: %p
+ 5be08e EGLContext eglDestroySurface eglSurface %p
+ 5be9bf WideVineDrmHandler
+ 5bea04 com/cicada/player/utils/media/DrmSessionManager
+ 5bea9e isForceInsecureDecoder
+ 5beaec drm changeState, objectId=%ld
+ 5beb3d drm prepared OK
+ 5beb4d drm requestProvision, objectId=%ld
+ 5beba8 drm requestKey, objectId=%ld
+ 5bec70 protected.networkBalanceServer.get.getCurrent
+ 5bec9e protected.networkBalanceServer.get.getCurrentTotal
+ 5c2d57 video decoder open error
+ 5c2d70 video decoder create timeout
+ 5c2ff0 This device/system doesn't support Widevine. You can try other device.
+ 5c3037 DRM key is expired or invalid, please check your configuration. If it's a third DRM, please provide correct DrmCallback.requestKey implementation.
+ 5c30ca DRM key is null, please check your configuration. If it's a third DRM, please provide correct DrmCallback.requestKey implementation.
+ 5c314f DRM provision response is null as request to Google failed.
+ 5c318b DRM resource busy
+ 5c319d DRM session released.
+ 5c31b3 DRM provision failed, your device/system doesn't pass Google's Widevine provision.
+ 5c3206 DRM media's security level is too high, can't play in this device, you can lower your media's security level and try again.
+ 5c3282 DRM cert is null, please check your configuration. If it's a third DRM, please provide correct AVPDrmDelegate.requestCert implementation.
+ 5c3369 DRM init decoder failed, please use SurfaceView instead of TextureView and try again.
+ 5c341d DRM key request network failed, please check your network connection.
+ 5c3463 DRM key server returned an error response, please check your license server configuration.
+ 5c34be DRM key response parse failed, the server response format is invalid.
+ 5c3504 DRM key has expired, please refresh the playback session or obtain a new license.
+ 5c3556 unknown drm error
+ 5c3662 protected.
+ 5c589f PersistentSpaceManager#RecordLogFileFinish [mLogBytesByProcess: %lu, mMaxLogBytesByProcess: %lu, businessType: %s, mLogBytesByBusinessMap: %lu, mMaxLogBytesByBusinessMap: %lu]
+ 5c594f PersistentSpaceManager#RecordLogFileFinish mLogBytesByProcess >= mMaxLogBytesByProcess !!!
+ 5c59aa PersistentSpaceManager#RecordLogFileFinish mLogBytesByBusinessMap[%s] >= mMaxLogBytesByBusinessMap[%s] !!!
+ 5c6325 /.usage.record
+ 5c6334 Read usage record error, maybe someone try to modify. %s
+ 5c636d Read usage record got 0 time. %s
+ 5c638e Read usage record error. can not read file stat. %s
+ 5c63c2 Read usage record error. file stat modify time(%lu) too late then recordTime(%lu)
+ 5c6414 Read usage record error. wrong sign: file(%s) vs check(%s)
+ 5c644f Save usage record error with content(%s) to file(%s)
+ 5c775c alivc_license_decoder.cpp
+ 5c7b16 decoder and check license file success
+ 5c840c /download.record
+ 5cbbe1 ERR_QPACK_DECODER_STREAM_ERROR
+ 5cce5a x-xss-protectio
+ 5cceaa upgrade-insecure-request
+ 5cd192 nghttp3_buf_left(dbuf) >= nghttp3_buf_len(&decoder->dbuf) + len
+ 5cd404 x-xss-protection
+ 5cd586 upgrade-insecure-requests
+ 5cf5ca processing buffered protected packet
+ 5d569e bad record mac
+ 5d576c record overflow
+ 5d5f86 RecordPadding
+ 5d5f94 record_padding
+ 5d65ba secure memory buffer
+ 5d87fe emailProtection
+ 5d880e E-mail Protection
+ 5da3da aRecord
+ 5da3f7 mXRecord
+ 5da400 nSRecord
+ 5da409 sOARecord
+ 5da413 cNAMERecord
+ 5da5fa Secure Electronic Transactions
+ 5dace7 setext-pinSecure
+ 5dafcb secure device signature
+ 5dd5be secureShellClient
+ 5dd5db secureShellServer
+ 5dfc8e No matching DANE TLSA records
+ 5e1b77 records
+ 5e1bd4 CREATE CRASH RECORDS DIR ERROR!! %s
+ 5e1cb8 CAN NOT getRecordsDir before Setup
+ 5e1f75 parseCrashDescContent failed: captureResult(%s) is invalid
+ 5e24df crash capture is close
+ 5e25c2 alivc_java_crash_capture.cc:57
+ 5e25fe alivc_java_crash_capture.cc:59
+ 5e2637 alivc_java_crash_capture.cc:96
+ 5e266b alivc_java_crash_capture.cc:104
+ 5e26a0 alivc_java_crash_capture.cc:110
+ 5e2748 alivc_java_crash_capture.cc:123
+ 5e27ff alivc_java_crash_capture.cc:154
+ 5e2830 alivc_java_crash_capture.cc:176
+ 5e286d alivc_java_crash_capture.cc:182
+ 5e28b2 alivc_java_crash_capture.cc:184
+ 5e28fa alivc_java_crash_capture.cc:194
+ 5e2929 alivc_java_crash_capture.cc:198
+ 5e2957 alivc_java_crash_capture.cc:208
+ 5e2988 alivc_java_crash_capture.cc:212
+ 5e29b8 alivc_java_crash_capture.cc:224
+ 5e29e9 alivc_java_crash_capture.cc:228
+ 5e2a19 alivc_java_crash_capture.cc:239
+ 5e2a4c alivc_java_crash_capture.cc:243
+ 5e2c24 alivc_native_crash_capture.cc:21
+ 5e39ef alivc_linux_native_crash_capture.cc:249
+ 5e3a3d alivc_linux_native_crash_capture.cc:255
+ 5e3aa4 alivc_linux_native_crash_capture.cc:262
+ 5e3af2 alivc_linux_native_crash_capture.cc:267
+ 5e3b3a alivc_linux_native_crash_capture.cc:271
+ 5e3b75 alivc_linux_native_crash_capture.cc:282
+ 5e3bcf alivc_linux_native_crash_capture.cc:428
+ 5e3c1e alivc_linux_native_crash_capture.cc:437
+ 5e3c58 alivc_linux_native_crash_capture.cc:484
+ 5e3c97 alivc_linux_native_crash_capture.cc:493
+ 5e3cf0 alivc_linux_native_crash_capture.cc:496
+ 5e3d37 alivc_linux_native_crash_capture.cc:504
+ 5e3d88 alivc_linux_native_crash_capture.cc:508
+ 5e3dc9 alivc_linux_native_crash_capture.cc:512
+ 5e3e12 alivc_linux_native_crash_capture.cc:521
+ 5e3e64 alivc_linux_native_crash_capture.cc:524
+ 5e3e96 alivc_linux_native_crash_capture.cc:529
+ 5e3ee6 alivc_linux_native_crash_capture.cc:575
+ 5e3f0e alivc_linux_native_crash_capture.cc:582
+ 5e3f57 alivc_linux_native_crash_capture.cc:594
+ 5e3f9d alivc_linux_native_crash_capture.cc:595
+ 5e3fdb alivc_linux_native_crash_capture.cc:600
+ 5e4012 alivc_linux_native_crash_capture.cc:603
+ 5e4050 alivc_linux_native_crash_capture.cc:608
+ 5e409f alivc_linux_native_crash_capture.cc:619
+ 5e40c7 alivc_linux_native_crash_capture.cc:624
+ 5e413d alivc_linux_native_crash_capture.cc:629
+ 5e417f alivc_linux_native_crash_capture.cc:634
+ 5e41d6 alivc_linux_native_crash_capture.cc:639
+ 5e4214 alivc_linux_native_crash_capture.cc:643
+ 5e426e alivc_linux_native_crash_capture.cc:645
+ 5e42bf alivc_linux_native_crash_capture.cc:658
+ 5e4304 alivc_linux_native_crash_capture.cc:708
+ 5e4352 alivc_linux_native_crash_capture.cc:718
+ 5e43ab alivc_linux_native_crash_capture.cc:733
+ 5e4405 alivc_linux_native_crash_capture.cc:739
+ 5e444a alivc_linux_native_crash_capture.cc:753
+ 5e448e alivc_linux_native_crash_capture.cc:771
+ 5e44cd alivc_linux_native_crash_capture.cc:789
+ 5e4510 alivc_linux_native_crash_capture.cc:805
+ 5e4548 alivc_linux_native_crash_capture.cc:810
+ 5e4586 alivc_linux_native_crash_capture.cc:813
+ 5e45c3 alivc_linux_native_crash_capture.cc:815
+ 5e4605 alivc_linux_native_crash_capture.cc:818
+ 5e463d alivc_linux_native_crash_capture.cc:821
+ 5e4670 alivc_linux_native_crash_capture.cc:828
+ 5e46c1 alivc_linux_native_crash_capture.cc:847
+ 5e4702 alivc_linux_native_crash_capture.cc:855
+ 5e4751 alivc_linux_native_crash_capture.cc:860
+ 5e4786 alivc_linux_native_crash_capture.cc:866
+ 5e47b9 alivc_linux_native_crash_capture.cc:186
+ 5e47f4 alivc_linux_native_crash_capture.cc:192
+ 5e481c alivc_linux_native_crash_capture.cc:199
+ 5e485c alivc_linux_native_crash_capture.cc:202
+ 5e489f alivc_linux_native_crash_capture.cc:210
+ 5e4906 alivc_linux_native_crash_capture.cc:150
+ 5e4940 alivc_linux_native_crash_capture.cc:153
+ 5e4978 alivc_linux_native_crash_capture.cc:159
+ 5e49c1 alivc_linux_native_crash_capture.cc:172
+ 5e4a04 alivc_linux_native_crash_capture.cc:177
+ 5e6034 alivc_crash_capture.cc:37
+ 5e604e Capture.Init: %p
+ 5e7e21 StatManagerImpl::Init mStatConfig [useSlsTagsSendPublicParam: %s, useHttpsProtocol: %s, enableStsTokenApi: %s, ntpTimeOffset: %s, autoInsertEventId: %s, saveRecordWhenLeave: %s]
+ 5e8435 crash_record
+ 5e8442 .crash_record
+ 5e84e6 RetryStatStrategy OnLogUploadFail begin [statPriority: %d, failRecord: %zd ]
+ 5e85c8 RetryStatStrategy ForceSaveFailRecord, waitForSaveFinish: %d
+ 5e86b6 RetryStatStrategy_SaveFailRecordVec
+ 5e86da RetryStatStrategy LoadFailRecordVec [fileName: %s, recordCount: %zu]
+ 5e878c .retry_record
+ 5e87c5 RetryStatStrategy ReSendData record
+ 5e87e9 RetryStatStrategy SaveFailRecordVec begin
+ 5e8813 RetryStatStrategy SaveFailRecordVec [fileName: %s, recordCount: %zu]
+ 5e8858 RetryStatStrategy SaveFailRecordVec timeout [saveRecordDuration: %llu]
+ 5e889f RetryStatStrategy SaveFailRecordVec end
+ 5e8942 StatStrategy::RetryStatRecord, needTryFlush: %d
+ 5e8a32 StatStrategy::NeedFlush [true] match record size 
+ 5e8a8f StatStrategy::NeedFlush [false] [flushing: %d, memoryCache: %d < %d, recordSize: %zu < %d, recordTime: %lld-%llu=%lld<%d]
+ 5e8b2c StatStrategy Flush [priority: %s, skipUpload: %d, cacheRecord: %zu]
+ 5e8ba7 StatStrategy Flush end [uploadResult: %d, needClearStatus: %d, needRefreshCacheRecordStatus: %d, cacheRecord: %zu]
+ 5e8fbb LogCUploader Upload record [IsStsTokenReady: %d, needRefreshStsToken: %d, recordCount: %zu ]
+ 5ea183 screenLayout
+ 5ea190 SCREENLAYOUT_SIZE_MASK
+ 5ea1a7 SCREENLAYOUT_SIZE_LARGE
+ 5eeb00 NSt6__ndk110__function6__funcIZN10NativeBase14java_ConstructEP7_JNIEnvP8_jobjectE4$_37NS_9allocatorIS7_EEFNS_10unique_ptrIN6Cicada15DrmResponseDataENS_14default_deleteISC_EEEERKNSB_15DrmRequestParamEEEE
+ 5eebd0 NSt6__ndk110__function6__baseIFNS_10unique_ptrIN6Cicada15DrmResponseDataENS_14default_deleteIS4_EEEERKNS3_15DrmRequestParamEEEE
+ 5f0350 NSt6__ndk110__function6__funcIZN7AVPSaas21requestLiveDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES5_PSF_E3$_0NSD_ISJ_EEFvSH_RK18LiveDRMLicenseInfoEEE
+ 5f0420 NSt6__ndk110__function6__baseIFvRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEERK18LiveDRMLicenseInfoEEE
+ 5f04a0 ZN7AVPSaas21requestLiveDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNSt6__ndk112basic_stringIcNS7_11char_traitsIcEENS7_9allocatorIcEEEES2_PSD_E3$_0
+ 5f0530 NSt6__ndk110__function6__funcIZN7AVPSaas21requestLiveDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES5_PSF_E3$_1NSD_ISJ_EEFviSH_SH_EEE
+ 5f05f0 ZN7AVPSaas21requestLiveDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNSt6__ndk112basic_stringIcNS7_11char_traitsIcEENS7_9allocatorIcEEEES2_PSD_E3$_1
+ 5f0680 NSt6__ndk110__function6__funcIZN7AVPSaas20requestVodDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES5_PSF_E3$_3NSD_ISJ_EEFvSH_RK14DRMLicenseInfoEEE
+ 5f0750 NSt6__ndk110__function6__baseIFvRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEERK14DRMLicenseInfoEEE
+ 5f07d0 ZN7AVPSaas20requestVodDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNSt6__ndk112basic_stringIcNS7_11char_traitsIcEENS7_9allocatorIcEEEES2_PSD_E3$_3
+ 5f0860 NSt6__ndk110__function6__funcIZN7AVPSaas20requestVodDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES5_PSF_E3$_4NSD_ISJ_EEFviSH_SH_EEE
+ 5f0920 ZN7AVPSaas20requestVodDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNSt6__ndk112basic_stringIcNS7_11char_traitsIcEENS7_9allocatorIcEEEES2_PSD_E3$_4
+ 5f0b00 NSt6__ndk110__function6__funcIZN7AVPSaas24requestWideVineProvisionEPPcPiRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPKciS5_PSB_E3$_8NS9_ISH_EEFvS3_lEEE
+ 5f0be0 ZN7AVPSaas24requestWideVineProvisionEPPcPiRKNSt6__ndk112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEEPKciS2_PS9_E3$_8
+ 5f0c60 NSt6__ndk110__function6__funcIZN7AVPSaas24requestWideVineProvisionEPPcPiRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPKciS5_PSB_E3$_9NS9_ISH_EEFviSB_EEE
+ 5f0d70 ZN7AVPSaas24requestWideVineProvisionEPPcPiRKNSt6__ndk112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEEPKciS2_PS9_E3$_9
+ 5f3a50 NSt6__ndk110__function6__funcIZN7AVPBase10initPlayerEvE4$_44NS_9allocatorIS3_EEFNS_10unique_ptrIN6Cicada15DrmResponseDataENS_14default_deleteIS8_EEEERKNS7_15DrmRequestParamEEEE
+ 5f4d30 N6Cicada12tbDrmDemuxerE
+ 5f4d48 10TbDrmMuxer
+ 5f7eb0 20GetDRMLicenseRequest
+ 5f9350 NSt6__ndk110__function6__funcIZN6Cicada16SuperMediaPlayer11ClearScreenEbE3$_1NS_9allocatorIS4_EEFvvEEE
+ 5f93c0 ZN6Cicada16SuperMediaPlayer11ClearScreenEbE3$_1
+ 5f93f0 NSt6__ndk110__function6__funcIZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2NS_9allocatorIS4_EEFvPhiiEEE
+ 5f9490 ZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2
+ 5f9870 NSt6__ndk110__function6__funcIZN6Cicada18SMPAVDeviceManager12setUpDecoderEmPK11Stream_metaPvNS3_10deviceTypeEjE3$_0NS_9allocatorIS9_EEFNS_10shared_ptrINS2_10DrmHandlerEEERKNS2_7DrmInfoEEEE
+ 5f9930 NSt6__ndk110__function6__baseIFNS_10shared_ptrIN6Cicada10DrmHandlerEEERKNS3_7DrmInfoEEEE
+ 5f9990 ZN6Cicada18SMPAVDeviceManager12setUpDecoderEmPK11Stream_metaPvNS0_10deviceTypeEjE3$_0
+ 5f9d00 NSt6__ndk120__shared_ptr_emplaceIN6Cicada20AndroidSurfaceHandleENS_9allocatorIS2_EEEE
+ 5fad00 N6Cicada14avcodecDecoderE
+ 5fad60 N6Cicada17mediaCodecDecoderE
+ 5fad80 N6Cicada10DrmHandlerE
+ 5fada0 NSt6__ndk110__function6__funcIZN6Cicada17mediaCodecDecoder15dequeue_decoderERNS_10unique_ptrI8IAFFrameNS_14default_deleteIS5_EEEEE3$_0NS_9allocatorISA_EEFvibEEE
+ 5fae50 ZN6Cicada17mediaCodecDecoder15dequeue_decoderERNSt6__ndk110unique_ptrI8IAFFrameNS1_14default_deleteIS3_EEEEE3$_0
+ 5faec4 13ActiveDecoder
+ 5faee0 N6Cicada8IDecoderE
+ 5faf00 NSt6__ndk110__function6__funcIZN13ActiveDecoder4openEPK11Stream_metaPvmPKN6Cicada7DrmInfoEE3$_0NS_9allocatorISB_EEFivEEE
+ 5faf80 ZN13ActiveDecoder4openEPK11Stream_metaPvmPKN6Cicada7DrmInfoEE3$_0
+ 5fb1ba         uniform mat4 u_projection;
+ 5fb3a9             gl_Position = u_projection * vec4(a_position, 0.0, 1.0);
+ 5fd864         uniform mat4 u_projection;
+ 5fd8bb             gl_Position = u_projection * vec4(a_position, 0.0, 1.0);
+ 6007b0 N6Cicada22DecoderSurfaceCallbackE
+ 601100 N6Cicada18WideVineDrmHandlerE
+ 601120 N6Cicada19DrmHandlerPrototypeE
+ 601140 NSt6__ndk123enable_shared_from_thisIN6Cicada18WideVineDrmHandlerEEE
+ 601190 NSt6__ndk120__shared_ptr_emplaceIN6Cicada18WideVineDrmHandlerENS_9allocatorIS2_EEEE
+ 60cbb8 ignoring duplicate 'chunked' decoder
+ 60cc28 added %s decoder %s -> %d
+ 60cc48 decoder not requested, ignored: %.*s
+ 60cc70 looking for %s decoder: %.*s
+ 60cd88 __Secure-
+ 60cdd0 secure
+ 61bb40 nghttp3_stream_write_qpack_decoder_stream
+ 61d090 nghttp3_qpack_decoder_cancel_stream
+ 61d0c0 nghttp3_qpack_decoder_read_encoder
+ 61d190 nghttp3_qpack_decoder_pbrel2abs
+ 61d1d0 nghttp3_qpack_decoder_set_max_dtable_capacity
+ 61d200 nghttp3_qpack_encoder_read_decoder
+ 61d2b0 nghttp3_qpack_decoder_read_request
+ 61d3e0 nghttp3_qpack_decoder_write_decoder
+ 73ba90 Ant Secure Compiler build211110 (based on LLVM 4.0.1)

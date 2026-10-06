@@ -1,0 +1,16 @@
+ 59da85 mEnableProjection
+ 5a0623 onCaptureScreen
+ 5a1225 AliyunCorePlayer callback --> CaptureScreen(%ld,%ld)
+ 5a3059 CaptureScreen
+ 5a338c nativeOnCaptureScreen
+ 5a42a6 enableProjection
+ 5a6075 ", "projectionLicenseEnable":"
+ 5a611f apsaraCaptureScreen
+ 5acbf4 RECORDING
+ 5acbfe SCHEDULED_EVENT_SENDER_AND_RECORDING_FOR_PLAYER
+ 5bb2e4 parseContentProtection
+ 5bb312 ContentProtection
+ 5bc62e setForceInsecureDecoder
+ 5bd2d6 captureScreen exception, frameWidth or frameHeight is 0
+ 5f93f0 NSt6__ndk110__function6__funcIZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2NS_9allocatorIS4_EEFvPhiiEEE
+ 5f9490 ZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2

@@ -1,0 +1,37 @@
+AX APK NATIVE CAPTURE/SECURITY DEEP ANALYSIS
+============================================
+
+APK: ReelShort-v4.2.00
+LIB: libsaasCorePlayer.so
+DATE: 2026-10-06T14:09:37+03:00
+
+[FILES]
+analysis/auto-deep/jni/disassembly-jni.txt	1328 bytes
+analysis/auto-deep/jni/relocations-filtered.txt	0 bytes
+analysis/auto-deep/jni/symbols-filtered.txt	5955 bytes
+analysis/auto-deep/raw/elf-header.txt	936 bytes
+analysis/auto-deep/raw/elf-relocations.txt	2149210 bytes
+analysis/auto-deep/raw/elf-sections.txt	3105 bytes
+analysis/auto-deep/raw/elf-symbols.txt	404432 bytes
+analysis/auto-deep/raw/libsaasCorePlayer-disassembly.txt	69495106 bytes
+analysis/auto-deep/reports/INDEX.txt	181 bytes
+analysis/auto-deep/reports/xref-context.txt	66635 bytes
+analysis/auto-deep/security/all-security-api-hits.txt	607358 bytes
+analysis/auto-deep/smali/apktool-capture.txt	0 bytes
+analysis/auto-deep/smali/jadx-capture.txt	31074 bytes
+analysis/auto-deep/strings/broad-native-security-strings.txt	31507 bytes
+analysis/auto-deep/strings/capture-security-strings.txt	656 bytes
+analysis/auto-deep/xrefs/confirmed-arm64-xrefs.txt	1316 bytes
+analysis/auto-deep/xrefs/disassembly-target-hits.txt	1328 bytes
+analysis/auto-deep/xrefs/resolve_arm64_xrefs.py	2012 bytes
+
+[CONFIRMED XREF COUNT]
+12
+
+[JAVA/SMALI CAPTURE HITS]
+    0 analysis/auto-deep/smali/apktool-capture.txt
+    1 analysis/auto-deep/smali/jadx-capture.txt
+    1 total
+
+[SECURITY API HITS]
+8 analysis/auto-deep/security/all-security-api-hits.txt
