@@ -136,6 +136,7 @@ def discover_environment(root=None):
     root = str(Path(root or os.getcwd()).resolve())
     java = _probe("java", [_tool("java")])
     python = _probe("python", [_tool("python3"), _tool("python")])
+    signing = _probe_signing()
     result = {
         "schema_version": "1.0",
         "resolver": "ReelSec Environment Resolver",
@@ -146,7 +147,12 @@ def discover_environment(root=None):
             "adb": _probe_adb(),
             "apktool": _probe_apktool(),
             "frida": _probe_frida(),
-            "signing": _probe_signing(),
+            "signing": signing,
+            # Compatibility aliases for callers that historically expected
+            # signing tools directly under tools.<name>.
+            "zipalign": signing.get("zipalign"),
+            "apksigner": signing.get("apksigner"),
+            "jarsigner": signing.get("jarsigner"),
         },
         "device": {},
         "policy": {
