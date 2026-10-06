@@ -253,3 +253,75 @@ The desired result for the current evidence is either:
 
 Any security conclusion remains blocked until that proof exists.
 
+
+
+## J. Autonomous investigation upgrade — 2026-10-06
+
+ReelSec 2.1.0 now performs the next proof stages automatically and publishes the resulting artifacts through the existing clean-worktree publication mechanism. The operator does not need to extract intermediate report files manually.
+
+### J.1 Automatic static proof stage
+
+The analyzer performs bounded intra-function AArch64 data-flow reconstruction over every discovered ldr x8,[x8,#0x108] -> blr x8 candidate.
+
+Classifications:
+
+- PROVEN_STATIC_TARGET_SLOT_LOAD: the recovered address-point 0x717e60 is independently materialized before the slot load.
+- PROVEN_TARGET_VTABLE_DATAFLOW: target constructor call -> object capture in x19 -> vptr load from [x19] -> +0x108 -> blr, without an intervening x19 overwrite.
+- CXX_VPTR_DATAFLOW_UNRESOLVED: C++-style vptr load exists but target-vtable provenance is not established.
+- UNRESOLVED_0x108_DATAFLOW: insufficient provenance.
+
+The analyzer never promotes a candidate merely because x19 is used.
+
+### J.2 Automatic runtime proof stage
+
+ReelSec generates a bounded observational Frida probe targeting:
+
+- native module: the discovered ELF filename
+- function offset: 0x27a510
+- expected vptr: 0x717e60
+- expected slot result: 0x27a510
+
+When Android package identity, ADB, Frida, and an online device are available, the probe is executed automatically with an 18-second hard timeout.
+
+Runtime proof becomes PROVEN only when the target function entry is actually observed and both conditions are simultaneously true:
+
+x0 -> vptr == 0x717e60
+
+and
+
+[vptr + 0x108] == 0x27a510
+
+The probe does not replace or mutate the target function.
+
+### J.3 Persistent artifacts
+
+Every run now attempts to publish:
+
+- AUTONOMOUS-DATAFLOW.md
+- AUTONOMOUS-DATAFLOW.json
+- RUNTIME-PROOF-READINESS.md
+- RUNTIME-PROBE.json
+- reelsec-runtime-probe.js
+- AUTONOMOUS-CAMPAIGN.md
+- AUTONOMOUS-CAMPAIGN.json
+
+The existing PUBLISH-STATUS.json continues to verify the report branch and final receipt remotely.
+
+### J.4 Current proof policy
+
+- Static slot mapping is PROVEN.
+- Constructor/vtable lifecycle correlation is PROVEN.
+- Static data-flow can be upgraded to PROVEN only from explicit register/data provenance.
+- Runtime execution is PROVEN only from the dynamic target-entry observation above.
+- Screenshot blocking remains NOT_PROVEN unless a complete security-relevant caller/dispatch/runtime chain establishes it.
+
+### J.5 Next operator action
+
+The same bootstrap command is sufficient. No manual extraction of report files is required:
+
+    cd ~/apk-lab/ReelShort-v4.2.00 && \
+    git fetch origin main && \
+    git show origin/main:tools/reelsec/bootstrap-run.sh | bash
+
+The command now causes ReelSec to run the autonomous static/data-flow stage, attempt the bounded runtime stage when the environment permits it, preserve all evidence, and publish the resulting report branch automatically.
+
