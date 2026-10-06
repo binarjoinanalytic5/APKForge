@@ -1,0 +1,28 @@
+name: ReelSec tests
+
+on:
+  push:
+    branches:
+      - main
+      - "reelsec-*"
+  pull_request:
+    paths:
+      - "tools/reelsec/**"
+      - ".github/workflows/reelsec-tests.yml"
+
+jobs:
+  test-reelsec:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile ReelSec modules
+        run: |
+          python -m py_compile tools/reelsec/environment.py tools/reelsec/reelsec.py tools/reelsec/test_environment.py
+      - name: Run environment resolver tests
+        run: |
+          python -m unittest -v tools/reelsec/test_environment.py
