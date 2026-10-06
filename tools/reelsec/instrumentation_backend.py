@@ -47,47 +47,88 @@ def _find_loadlibrary_anchor(text):
     return None, None
 
 
+def _manifest_application_class(root):
+    """Read the decoded manifest's application class without requiring XML tooling."""
+    manifest = Path(root) / "AndroidManifest.xml"
+    if not manifest.is_file():
+        return None
+    try:
+        text = manifest.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    match = re.search(r'android:name=["\\']([^"\\']+)["\\']', text)
+    return match.group(1) if match else None
+
+
+def _smali_path_for_class(root, class_name):
+    if not class_name:
+        return None
+    name = class_name
+    if name.startswith("."):
+        # Relative manifest class; caller should have package-expanded form when possible.
+        return None
+    if name.startswith("L") and name.endswith(";"):
+        rel = name[1:-1] + ".smali"
+    else:
+        rel = name.replace(".", "/") + ".smali"
+    for base in Path(root).iterdir():
+        if base.is_dir() and (base.name == "smali" or base.name.startswith("smali_classes")):
+            candidate = base / rel
+            if candidate.is_file():
+                return candidate
+    return None
+
+
 def find_secshell_application(decoded_root):
-    """Discover a SecShell Application structurally instead of trusting a filename."""
+    """Discover the SecShell Application structurally, preferring the manifest declaration."""
     root = Path(decoded_root).expanduser().resolve()
     if not root.is_dir():
         return []
     candidates = []
+    manifest_class = _manifest_application_class(root)
+    manifest_target = _smali_path_for_class(root, manifest_class)
+    paths = []
+    if manifest_target:
+        paths.append(manifest_target)
     for path in sorted(
         p for base in root.iterdir()
         if base.is_dir() and (base.name == "smali" or base.name.startswith("smali_classes"))
         for p in base.rglob("*.smali")
     ):
+        if path not in paths:
+            paths.append(path)
+
+    for path in paths:
         try:
             text = path.read_text(encoding="utf-8", errors="replace")
         except OSError:
             continue
         lower = text.lower()
-        if "loadlibrary(Ljava/lang/String;)v" not in lower or "secshell" not in lower:
+        if "loadlibrary(Ljava/lang/String;)v" not in lower:
             continue
         has_application = ".super Landroid/app/Application;" in text
         has_attach = "attachBaseContext" in text
         line_no, anchor = _find_loadlibrary_anchor(text)
+        if line_no is None or not has_application:
+            continue
         score = (
-            100 if has_application else 0
-        ) + (
-            50 if has_attach else 0
-        ) + (
-            25 if "com/SecShell/SecShell/" in text else 0
-        ) + (
-            10 if "SecShell-x86" in text else 0
-        )
-        if line_no is not None:
-            candidates.append({
-                "path": str(path),
-                "relative_path": str(path.relative_to(root)),
-                "class_name": _smali_class_name(text),
-                "score": score,
-                "is_application": has_application,
-                "has_attach_base_context": has_attach,
-                "loadlibrary_line": line_no + 1,
-                "loadlibrary_anchor": anchor,
-            })
+            250 if manifest_target and path.resolve() == manifest_target.resolve() else 0
+        ) + 100 + (50 if has_attach else 0) + (
+            25 if "secshell" in lower else 0
+        ) + (10 if "SecShell-x86".lower() in lower else 0)
+        candidates.append({
+            "path": str(path),
+            "relative_path": str(path.relative_to(root)),
+            "class_name": _smali_class_name(text),
+            "score": score,
+            "is_application": has_application,
+            "has_attach_base_context": has_attach,
+            "manifest_application": manifest_class,
+            "manifest_match": bool(manifest_target and path.resolve() == manifest_target.resolve()),
+            "loadlibrary_line": line_no + 1,
+            "loadlibrary_anchor": anchor,
+            "secshell_reference_in_class": "secshell" in lower,
+        })
     return sorted(candidates, key=lambda x: (-x["score"], x["relative_path"]))
 
 
@@ -123,7 +164,7 @@ def plan_secshell_injection(decoded_root, application_smali=None):
             continue
         has_application = ".super Landroid/app/Application;" in text
         has_attach = "attachBaseContext" in text
-        if not (has_application and has_attach):
+        if not has_application:
             continue
         candidates.append({
             "target": str(target),
