@@ -263,21 +263,16 @@ def write_critical_behavior(output, ptr):
         for line in lines[start:]:
             body_lines.append(line)
             st = line.strip()
-            # Stop on an ARM64 RET instruction regardless of objdump spacing.
-            # Matching the opcode token avoids false negatives caused by
-            # variable whitespace between opcode and mnemonic.
-            tokens = st.split()
-            if len(tokens) >= 2 and tokens[-1] == "ret" and tokens[-2].lower() == "d65f03c0":
+            # Stop on the first ARM64 RET instruction. Match the opcode
+            # and mnemonic structurally so objdump whitespace cannot affect
+            # the boundary decision.
+            if re.search(r"^\s*[0-9a-fA-F]+:\s*d65f03c0\s+ret(?:\s|$)", st, re.I):
                 break
 
     calls = [x for x in body_lines if re.search(r"\b(bl|blr)\b", x)]
-    # A body must never include instructions after its first RET. This is an
-    # invariant, not merely a formatting convention.
-    boundary_violations = [x for x in body_lines if re.match(r"^\s*[0-9a-fA-F]+:\\s", x) and x.strip().lower().endswith("d65f03c0 ret") is False]
-    if any(re.search(r"\\bd65f03c0\\s+ret\\s*$", x, re.I) for x in body_lines):
-        ret_index = next(i for i, x in enumerate(body_lines) if re.search(r"\\bd65f03c0\\s+ret\\s*$", x, re.I))
-        if body_lines[ret_index+1:]:
-            raise RuntimeError("CRITICAL FUNCTION BOUNDARY VIOLATION: instructions exist after RET")
+    # Defensive invariant: the extracted body must terminate at RET.
+    if body_lines and not re.search(r"^\s*[0-9a-fA-F]+:\s*d65f03c0\s+ret(?:\s|$)", body_lines[-1], re.I):
+        raise RuntimeError("CRITICAL FUNCTION BOUNDARY VIOLATION: body does not terminate at RET")
     security = [x for x in body_lines if re.search(
         r"surface|window|egl|secure|protect|gralloc|buffer|mediacodec|screenshot|record",
         x, re.I
