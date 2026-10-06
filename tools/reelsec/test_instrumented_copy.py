@@ -21,7 +21,11 @@ class InstrumentedCopyTests(unittest.TestCase):
             target.parent.mkdir(parents=True)
             original = (
                 ".class public Lcom/SecShell/SecShell/AW;\n"
-                "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n"
+                ".method public attachBaseContext(Landroid/content/Context;)V\n"
+                "    .registers 2\n"
+                "    invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n"
+                "    return-void\n"
+                ".end method\n"
             )
             target.write_text(original, encoding="utf-8")
             (source / "AndroidManifest.xml").write_text("<manifest/>\n", encoding="utf-8")
