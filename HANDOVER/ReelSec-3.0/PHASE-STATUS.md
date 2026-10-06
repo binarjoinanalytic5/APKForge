@@ -210,3 +210,15 @@ The latest phone run confirms the measured progress path is active, but Apktool 
 The Apktool timeout was raised from 300s to 900s by default, with `REELSEC_APKTOOL_TIMEOUT` available as a per-run override. This prevents a slow but active decode from being misclassified as a failure solely because it crossed five minutes. The estimate remains explicitly separate from measured class-output progress during Baksmaling.
 
 Relevant commits: `d240cc3e2344ae4240734fa237eb444aefaa0578` (source) and `46f1cfc004be9dfc70379ba14f0316daa0a2bc4f` (regression test).
+
+
+## Decode Recovery — 2026-10-06
+
+The campaign exposed a second, distinct decode failure: full Apktool resource decoding can spend the entire timeout in the resource phase and then force ReelSec into RAW-only analysis. RAW extraction is insufficient for the SecShell instrumentation path because it does not produce Smali.
+
+ReelSec now retries a timed-out/failed full decode with a real Apktool decode using `-r` (resource decoding disabled) into a separate isolated `*-no-res` tree. This recovery is accepted only when a decoded `AndroidManifest.xml` and at least one `smali*` root are present. The tree is explicitly marked `DECODED_NO_RES`, `instrumentable_smali=true`, and `resources_decoded=false`; it is not mislabeled as a full resource decode.
+
+Regression coverage was added for the full-decode-fails / no-res-recovery path.
+
+Fix commit: `dbe0d8a33dd14d60e16553d915662cc3721160cf`
+Regression-test commit: `2d0305f75e600a33391210f6dc46bd2cd3c334b7`
