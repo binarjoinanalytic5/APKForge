@@ -1,0 +1,18 @@
+===== RAW STRING BYTES =====
+--- CaptureScreen ---
+file_offset=0x5a0625
+file_offset=0x5a3059
+file_offset=0x5a3394
+file_offset=0x5a6125
+--- nativeOnCaptureScreen ---
+file_offset=0x5a338c
+--- onCaptureScreen ---
+file_offset=0x5a0623
+--- apsaraCaptureScreen ---
+file_offset=0x5a611f
+--- enableProjection ---
+file_offset=0x5a42a6
+--- mEnableProjection ---
+file_offset=0x59da85
+--- setForceInsecureDecoder ---
+file_offset=0x5bc62e
