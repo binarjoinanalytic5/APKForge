@@ -1,0 +1,8 @@
+{
+  "backend": "java-classpath",
+  "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+  "name": "apktool-standalone",
+  "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+  "status": "SELECTED",
+  "version": "2.7.0-dirty"
+}

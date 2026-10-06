@@ -1,0 +1,13 @@
+  27a510: d10083ff     	sub	sp, sp, #0x20
+  27a514: a9017bfd     	stp	x29, x30, [sp, #0x10]
+  27a518: 910043fd     	add	x29, sp, #0x10
+  27a51c: d53bd048     	mrs	x8, TPIDR_EL0
+  27a520: f9401509     	ldr	x9, [x8, #0x28]
+  27a524: f90007e9     	str	x9, [sp, #0x8]
+  27a528: f9401508     	ldr	x8, [x8, #0x28]
+  27a52c: f94007e9     	ldr	x9, [sp, #0x8]
+  27a530: eb09011f     	cmp	x8, x9
+  27a534: 54000081     	b.ne	0x27a544 <_ZN18codecPluginManager13dummyFunctionEv+0x2150>
+  27a538: a9417bfd     	ldp	x29, x30, [sp, #0x10]
+  27a53c: 910083ff     	add	sp, sp, #0x20
+  27a540: d65f03c0     	ret
