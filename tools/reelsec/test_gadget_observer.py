@@ -9,6 +9,7 @@ from gadget_observer import (
     GadgetObserverError,
     observation_record,
     validate_target_observation,
+    validate_vtable_dispatch,
     plan_gadget_observation,
 )
 
@@ -42,6 +43,18 @@ class GadgetObserverTests(unittest.TestCase):
         self.assertTrue(result["runtime_observed"])
         self.assertEqual(result["proof_class"], "TARGET_EXECUTION_OBSERVED")
         self.assertFalse(result["causal_proof"])
+
+    def test_vtable_dispatch_requires_all_three_fields(self):
+        expected = {"vtable": "0x717e60", "slot": "0x108", "target": "0x27a510"}
+        result = validate_vtable_dispatch(expected, expected)
+        self.assertTrue(result["dispatch_relationship_observed"])
+        self.assertEqual(result["proof_class"], "VTABLE_DISPATCH_OBSERVED")
+        self.assertFalse(result["causal_proof"])
+
+        incomplete = dict(expected)
+        incomplete["slot"] = "0x110"
+        result = validate_vtable_dispatch(incomplete, expected)
+        self.assertFalse(result["dispatch_relationship_observed"])
 
     def test_missing_artifact_rejected(self):
         with self.assertRaises(GadgetObserverError):
