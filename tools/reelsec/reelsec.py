@@ -387,7 +387,16 @@ def git_publish(root, report_dir):
         result["details"] = str(report_dir)
         return result
 
-    required = ["manifest.json", "VTable-RESOLUTION-REPORT.md", "PROTECTION-BRIDGE-AUDIT.md"]
+    required = [
+        "manifest.json",
+        "VTable-RESOLUTION-REPORT.md",
+        "PROTECTION-BRIDGE-AUDIT.md",
+        "JNI-SEMANTIC-ANALYSIS.md",
+        "VTABLE-ABI-ANALYSIS.md",
+        "CRITICAL-FUNCTION-BEHAVIOR.md",
+        "NATIVE-SECURITY-API-AUDIT.md",
+        "JAVA-SCREEN-SECURITY-AUDIT.md",
+    ]
     result["required_artifacts"] = required
     result["report_path"] = rel
     missing = [name for name in required if not (report_dir / name).is_file()]
