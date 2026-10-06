@@ -1,0 +1,20 @@
+{
+  "attempted": true,
+  "branch": "reelsec/reports/20261006_175202-11035",
+  "details": "",
+  "remote": "origin/reelsec/reports/20261006_175202-11035",
+  "remote_verified": true,
+  "report_commit": "76979055868e743ce5f8710b78520e312d31b43d",
+  "report_path": "analysis/sec-shell-deep-v1/reelsec-20261006_175158",
+  "required_artifacts": [
+    "manifest.json",
+    "VTable-RESOLUTION-REPORT.md",
+    "PROTECTION-BRIDGE-AUDIT.md"
+  ],
+  "schema_version": "2.0",
+  "status": "PUBLISHED",
+  "status_commit": null,
+  "status_remote_verified": false,
+  "tool": "ReelSec",
+  "version": "2.0.0"
+}
