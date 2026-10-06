@@ -12,7 +12,7 @@ BLOCKED = "BLOCKED"
 FAILED = "FAILED"
 
 
-def classify_target_evidence(provenance, runtime_status=None, target_executed=False):
+def classify_target_evidence(provenance, runtime_status=None, target_executed=False, static_evidence_proven=False):
     """Never promote static provenance to runtime proof."""
     if not provenance or provenance.get("target_relation") != "WITHIN_ANALYSIS_ROOT":
         return BLOCKED if runtime_status in (None, "BLOCKED") else UNPROVEN
@@ -26,7 +26,9 @@ def classify_target_evidence(provenance, runtime_status=None, target_executed=Fa
     if target_executed:
         return OBSERVED
 
-    return PROVEN_STATIC
+    if static_evidence_proven:
+        return PROVEN_STATIC
+    return UNPROVEN
 
 
 def screenshot_blocking_claim_allowed(*, screenshot_event, relevant_path,
