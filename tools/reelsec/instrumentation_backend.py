@@ -37,14 +37,36 @@ def _smali_class_name(text):
 
 
 def _find_loadlibrary_anchor(text):
+    """Find a System.loadLibrary invocation and require nearby SecShell evidence."""
     lines = text.splitlines()
     for i, line in enumerate(lines):
-        if "Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V" not in line:
+        if not re.search(
+            r"Ljava/lang/System;->loadLibrary\s*\(Ljava/lang/String;\)V",
+            line,
+            re.I,
+        ):
             continue
-        window = "\n".join(lines[max(0, i - 12):i + 1])
-        if "SecShell" in window:
+        window = "\n".join(lines[max(0, i - 16):i + 1])
+        if re.search(r"SecShell(?:-x86)?", window, re.I):
             return i, line.strip()
     return None, None
+
+
+def _is_android_application(text):
+    """Recognize an Application subclass without depending on formatting."""
+    return bool(re.search(
+        r"^\\.super\\s+Landroid/app/Application;",
+        text,
+        re.M,
+    ))
+
+
+def _has_loadlibrary_invocation(text):
+    return bool(re.search(
+        r"Ljava/lang/System;->loadLibrary\\s*\\(Ljava/lang/String;\\)V",
+        text,
+        re.I,
+    ))
 
 
 def _manifest_application_class(root):
@@ -115,9 +137,9 @@ def find_secshell_application(decoded_root):
         except OSError:
             continue
         lower = text.lower()
-        if "loadlibrary(Ljava/lang/String;)v" not in lower:
+        if not _has_loadlibrary_invocation(text):
             continue
-        has_application = ".super Landroid/app/Application;" in text
+        has_application = _is_android_application(text)
         has_attach = "attachBaseContext" in text
         line_no, anchor = _find_loadlibrary_anchor(text)
         if line_no is None or not has_application:
@@ -173,7 +195,7 @@ def plan_secshell_injection(decoded_root, application_smali=None):
         line_no, anchor = _find_loadlibrary_anchor(text)
         if line_no is None:
             continue
-        has_application = ".super Landroid/app/Application;" in text
+        has_application = _is_android_application(text)
         has_attach = "attachBaseContext" in text
         if not has_application:
             continue
@@ -187,10 +209,47 @@ def plan_secshell_injection(decoded_root, application_smali=None):
         })
 
     if not candidates:
+        smali_dirs = sorted(
+            str(p) for p in root.iterdir()
+            if p.is_dir() and (p.name == "smali" or p.name.startswith("smali_classes"))
+        )
+        smali_files = [
+            p for base in root.iterdir()
+            if base.is_dir() and (base.name == "smali" or base.name.startswith("smali_classes"))
+            for p in base.rglob("*.smali")
+        ]
+        application_classes = []
+        loadlibrary_classes = []
+        secshell_loadlibrary_classes = []
+        for path in smali_files:
+            try:
+                text = path.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            if _is_android_application(text):
+                application_classes.append(str(path.relative_to(root)))
+                if _has_loadlibrary_invocation(text):
+                    loadlibrary_classes.append(str(path.relative_to(root)))
+                    line_no, _ = _find_loadlibrary_anchor(text)
+                    if line_no is not None:
+                        secshell_loadlibrary_classes.append(str(path.relative_to(root)))
+        diagnostics = {
+            "manifest_application": _manifest_application_class(root),
+            "manifest_target": str(manifest_target) if manifest_target else None,
+            "manifest_target_exists": bool(manifest_target and manifest_target.is_file()),
+            "smali_roots": smali_dirs,
+            "smali_file_count": len(smali_files),
+            "application_class_count": len(application_classes),
+            "application_classes_sample": sorted(application_classes)[:50],
+            "application_with_loadlibrary_count": len(loadlibrary_classes),
+            "application_with_secshell_loadlibrary_count": len(secshell_loadlibrary_classes),
+            "application_with_secshell_loadlibrary_sample": sorted(secshell_loadlibrary_classes)[:50],
+        }
         return {
             "status": INSTRUMENTATION_BLOCKED,
             "reason": "SecShell Application/loadLibrary anchor not found by structural discovery",
             "candidate_count": len(targets),
+            "diagnostics": diagnostics,
         }
 
     chosen = candidates[0]
