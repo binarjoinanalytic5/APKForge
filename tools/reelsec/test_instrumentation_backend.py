@@ -30,10 +30,11 @@ class InstrumentationBackendTests(unittest.TestCase):
                 ".end method\n",
                 encoding="utf-8",
             )
-            result = plan_secshell_injection(root, target)
+            result = plan_secshell_injection(root)
             self.assertEqual(result["status"], INSTRUMENTATION_READY)
-            self.assertEqual(result["registers"], ["v0"])
-            self.assertIn("Ljava/lang/System;->loadLibrary", result["anchor"])
+            self.assertEqual(result["target"], str(target.resolve()))
+            self.assertEqual(result["discovery"], "STRUCTURAL_CONTENT")
+            self.assertIn("Ljava/lang/System;->loadLibrary", result["loadlibrary_anchor"])
             self.assertFalse(result["runtime_proof"])
 
     def test_missing_anchor_is_blocked(self):
@@ -41,7 +42,7 @@ class InstrumentationBackendTests(unittest.TestCase):
             root = Path(tmp)
             target = root / "AW.smali"
             target.write_text(".class public LAW;\n", encoding="utf-8")
-            result = plan_secshell_injection(root, target)
+            result = plan_secshell_injection(root)
             self.assertEqual(result["status"], INSTRUMENTATION_BLOCKED)
 
     def test_termux_preflight_does_not_mutate_original(self):
