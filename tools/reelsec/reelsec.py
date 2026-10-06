@@ -11,8 +11,19 @@ import time
 import tempfile
 from pathlib import Path
 
+from environment import write_capability_matrix
+from apktool_backend import ApktoolBackendError, select_apktool_backend, decode_command
+from instrumentation_backend import plan_secshell_injection
+from instrumented_copy import prepare_instrumented_copy
+from build_verify import apktool_build_command, verify_artifact
+from sign_verify import artifact_identity, sign_command, verify_command, run_checked
+from adb_deploy import install_command, device_check_command
+from runtime_capture import capture_snapshot, bind_artifact
+from gadget_observer import plan_gadget_observation
+from proof_gate import build_evidence_ledger
+
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
-VERSION = "2.2.3"
+VERSION = "3.0.0"
 PROBES = [
     "elf",
     "symbols",
@@ -31,7 +42,86 @@ PROBES = [
     "runtime-frida-probe",
     "target-provenance",
     "runtime-toolchain-preflight",
+    "environment-capability",
+    "campaign-cli",
 ]
+
+def run_apktool_decode(selection, apk, output_dir, timeout=300):
+    """Decode APK into an isolated output directory and verify the result."""
+    apk = Path(apk).expanduser().resolve()
+    output_dir = Path(output_dir).expanduser().resolve()
+    if not apk.is_file():
+        raise ApktoolBackendError("APK input does not exist: %s" % apk)
+    if output_dir == apk.parent:
+        raise ApktoolBackendError("Decode output must not be the APK directory")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    command = decode_command(selection, apk, output_dir)
+    rc, log = run(command, timeout=timeout)
+    (output_dir / "reelsec-apktool.log").write_text(log, encoding="utf-8", errors="replace")
+    if rc != 0:
+        return {"status": "FAILED", "returncode": rc, "command": command,
+                "output_dir": str(output_dir), "log": str(output_dir / "reelsec-apktool.log")}
+    required = [output_dir / "AndroidManifest.xml", output_dir / "smali"]
+    missing = [str(p) for p in required if not p.exists()]
+    if missing:
+        return {"status": "FAILED_VALIDATION", "returncode": rc, "command": command,
+                "output_dir": str(output_dir), "missing": missing,
+                "log": str(output_dir / "reelsec-apktool.log")}
+    return {"status": "DECODED", "returncode": rc, "command": command,
+            "output_dir": str(output_dir),
+            "log": str(output_dir / "reelsec-apktool.log")}
+
+def inventory_decoded_apk(output_dir):
+    """Create a deterministic inventory of decoded APK analysis inputs."""
+    root = Path(output_dir).resolve()
+    if not root.is_dir():
+        return {"status": "INVALID", "reason": "decoded output directory is missing"}
+
+    manifest = root / "AndroidManifest.xml"
+    smali_dirs = sorted(p for p in root.iterdir() if p.is_dir() and (p.name == "smali" or p.name.startswith("smali_classes")))
+    lib_files = sorted(p for p in root.rglob("*") if p.is_file() and p.suffix == ".so")
+    dex_files = sorted(p for p in root.rglob("*") if p.is_file() and p.suffix == ".dex")
+    smali_files = sum(1 for d in smali_dirs for p in d.rglob("*.smali"))
+    inventory = {
+        "schema_version": "1.0",
+        "status": "READY" if manifest.is_file() and smali_dirs else "INCOMPLETE",
+        "root": str(root),
+        "manifest": str(manifest) if manifest.is_file() else None,
+        "smali_roots": [str(p) for p in smali_dirs],
+        "smali_file_count": smali_files,
+        "native_library_count": len(lib_files),
+        "native_libraries": [str(p.relative_to(root)) for p in lib_files],
+        "dex_count": len(dex_files),
+        "dex_files": [str(p.relative_to(root)) for p in dex_files],
+    }
+    (root.parent / "DECODED-INPUT-INVENTORY.json").write_text(json.dumps(inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return inventory
+
+def plan_instrumentation(decoded_inventory, output_dir):
+    """Locate the known SecShell Application anchor and emit a non-mutating plan."""
+    if not decoded_inventory or decoded_inventory.get("status") != "READY":
+        return {"status": "BLOCKED", "reason": "decoded APK inventory is not ready"}
+    root = Path(decoded_inventory["root"]).resolve()
+    candidates = sorted(root.rglob("AW.smali"))
+    for target in candidates:
+        result = plan_secshell_injection(root, target)
+        if result.get("status") == "READY":
+            result["candidate_count"] = len(candidates)
+            (Path(output_dir) / "INSTRUMENTATION-PLAN.json").write_text(
+                json.dumps(result, indent=2, sort_keys=True) + "\\n",
+                encoding="utf-8",
+            )
+            return result
+    result = {
+        "status": "BLOCKED",
+        "reason": "SecShell AW.smali anchor not found",
+        "candidate_count": len(candidates),
+    }
+    (Path(output_dir) / "INSTRUMENTATION-PLAN.json").write_text(
+        json.dumps(result, indent=2, sort_keys=True) + "\\n",
+        encoding="utf-8",
+    )
+    return result
 
 def run(cmd, cwd=None, timeout=None):
     try:
@@ -153,13 +243,14 @@ def sha256_file(path):
             h.update(block)
     return h.hexdigest()
 
-def find_target(explicit):
+def find_target(explicit, search_root=None):
     if explicit:
         p = Path(explicit).expanduser().resolve()
         return p if p.is_file() else None
 
+    search_root = Path(search_root or ROOT).expanduser().resolve()
     strings_bin = which("strings")
-    candidates = sorted(ROOT.rglob("*.so"))
+    candidates = sorted(search_root.rglob("*.so"))
     needles = (
         "ActiveDecoder",
         "avcodecDecoder",
@@ -178,6 +269,28 @@ def find_target(explicit):
         if "saasCorePlayer" in p.name:
             return p
     return None
+
+def build_input_provenance(input_apk, input_apk_sha256, analysis_root, target):
+    """Bind analysis artifacts to their input source without claiming causality."""
+    root = Path(analysis_root).resolve()
+    target_path = Path(target).resolve() if target else None
+    relation = "UNKNOWN"
+    if target_path:
+        try:
+            target_path.relative_to(root)
+            relation = "WITHIN_ANALYSIS_ROOT"
+        except ValueError:
+            relation = "OUTSIDE_ANALYSIS_ROOT"
+    return {
+        "schema_version": "1.0",
+        "input_apk": str(Path(input_apk).resolve()) if input_apk else None,
+        "input_apk_sha256": input_apk_sha256,
+        "analysis_root": str(root),
+        "target": str(target_path) if target_path else None,
+        "target_relation": relation,
+        "evidence_scope": "static-analysis-input-provenance",
+        "causality_proven": False,
+    }
 
 def load_segments(data):
     if len(data) < 64 or data[:4] != b"\x7fELF" or data[4] != 2 or data[5] != 1:
@@ -1172,10 +1285,12 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
     return result
 
 
-def write_autonomous_campaign(output, dataflow, runtime):
+def write_autonomous_campaign(output, dataflow, runtime, input_apk=None, input_apk_sha256=None):
     payload={"schema_version":"2.3","mode":"AUTONOMOUS",
              "static_dataflow":dataflow,
              "runtime_status":runtime.get("status") if runtime else "NOT_RUN",
+             "input_apk":input_apk,
+             "input_apk_sha256":input_apk_sha256,
              "truth_rules":{
                  "static_target_slot":"PROVEN",
                  "runtime_execution":"PROVEN only when target entry observes vptr=0x717e60 and slot=0x27a510",
@@ -1243,6 +1358,8 @@ def git_publish(root, report_dir):
         "TARGET-PROVENANCE-AUDIT.json",
         "RUNTIME-TOOLCHAIN-PREFLIGHT.md",
         "RUNTIME-TOOLCHAIN-PREFLIGHT.json",
+        "CAPABILITY-MATRIX.md",
+        "CAPABILITY-MATRIX.json",
         "RUNTIME-PROOF-READINESS.md",
         "RUNTIME-PROBE.json",
         "AUTONOMOUS-CAMPAIGN.md",
@@ -1414,11 +1531,23 @@ def git_publish(root, report_dir):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("command", nargs="?", choices=("campaign",))
+    parser.add_argument("apk", nargs="?")
     parser.add_argument("--elf")
     parser.add_argument("--output")
     parser.add_argument("--no-publish", action="store_true")
     parser.add_argument("--version", action="version", version=VERSION)
     args = parser.parse_args()
+
+    input_apk = None
+    input_apk_sha256 = None
+    if args.command == "campaign":
+        if not args.apk:
+            parser.error("campaign mode requires an APK path")
+        input_apk = Path(args.apk).expanduser().resolve()
+        if not input_apk.is_file():
+            parser.error("APK not found: %s" % input_apk)
+        input_apk_sha256 = sha256_file(input_apk)
 
     default_output = ROOT / "analysis" / "sec-shell-deep-v1" / (
         "reelsec-" + time.strftime("%Y%m%d_%H%M%S")
@@ -1426,13 +1555,198 @@ def main():
     output = Path(args.output).expanduser() if args.output else default_output
     output.mkdir(parents=True, exist_ok=True)
 
-    target = find_target(args.elf)
+    capabilities = write_capability_matrix(output, ROOT)
+    try:
+        apktool_backend = select_apktool_backend(capabilities)
+    except ApktoolBackendError as exc:
+        apktool_backend = {
+            "name": None,
+            "backend": None,
+            "path": None,
+            "version": None,
+            "status": "BLOCKED",
+            "reason": str(exc),
+        }
+    (output / "APKTOOL-BACKEND.json").write_text(
+        json.dumps(apktool_backend, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    decode_result = None
+    if args.command == "campaign" and apktool_backend.get("status") == "SELECTED":
+        decoded_dir = output / "decoded-apk"
+        decode_result = run_apktool_decode(
+            apktool_backend, input_apk, decoded_dir
+        )
+    elif args.command == "campaign":
+        decode_result = {"status": "BLOCKED",
+                         "reason": apktool_backend.get("reason", "No usable Apktool backend")}
+
+    (output / "APKTOOL-DECODE.json").write_text(
+        json.dumps(decode_result, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    decoded_inventory = None
+    if decode_result and decode_result.get("status") == "DECODED":
+        decoded_inventory = inventory_decoded_apk(decode_result["output_dir"])
+    elif args.command == "campaign":
+        decoded_inventory = {"status": "BLOCKED", "reason": "decoded APK is unavailable"}
+    (output / "DECODED-INPUT-INVENTORY.json").write_text(
+        json.dumps(decoded_inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+    instrumentation_plan = plan_instrumentation(decoded_inventory, output)
+    instrumented_copy_root = output / "instrumented-apk"
+    instrumented_copy = {"status": "NOT_PREPARED"}
+    if instrumentation_plan.get("status") == "READY":
+        try:
+            instrumented_copy = prepare_instrumented_copy(
+                decoded_inventory["root"], instrumented_copy_root
+            )
+        except Exception as exc:
+            instrumented_copy = {"status": "FAILED", "error": str(exc)}
+        (output / "INSTRUMENTED-COPY-MANIFEST.json").write_text(
+            json.dumps(instrumented_copy, indent=2, sort_keys=True) + "\\n",
+            encoding="utf-8",
+        )
+
+    build_verify = {"status": "NOT_BUILT"}
+    if instrumented_copy.get("status") == "COPIED":
+        try:
+            built_apk = output / "instrumented-unsigned.apk"
+            build_cmd = apktool_build_command(apktool_backend, instrumented_copy_root, built_apk)
+            run(build_cmd, cwd=ROOT, timeout=300)
+            build_verify = verify_artifact(built_apk)
+            build_verify["command"] = build_cmd
+        except Exception as exc:
+            build_verify = {"status": "FAILED", "error": str(exc)}
+        (output / "BUILD-VERIFY.json").write_text(
+            json.dumps(build_verify, indent=2, sort_keys=True) + "\\n",
+            encoding="utf-8",
+        )
+
+    sign_verify = {"status": "NOT_SIGNED"}
+    if build_verify.get("status") == "BUILT":
+        try:
+            apksigner = capabilities.get("tools", {}).get("apksigner", {}).get("path")
+            keystore = os.environ.get("REELSEC_TEST_KEYSTORE")
+            alias = os.environ.get("REELSEC_TEST_KEY_ALIAS", "reelsec-test")
+            if not apksigner or not keystore:
+                raise RuntimeError("apksigner or REELSEC_TEST_KEYSTORE unavailable")
+            unsigned_apk = Path(build_verify["path"]).resolve()
+            signed_apk = output / "instrumented-signed.apk"
+            cmd = sign_command(apksigner, unsigned_apk, signed_apk, keystore, alias)
+            sign_output = run_checked(cmd)
+            verify_cmd = verify_command(apksigner, signed_apk)
+            verify_output = run_checked(verify_cmd)
+            sign_verify = artifact_identity(unsigned_apk, signed_apk)
+            sign_verify.update({
+                "status": "SIGNED_VERIFIED",
+                "sign_command": cmd,
+                "verify_command": verify_cmd,
+                "sign_output_tail": sign_output[-2000:],
+                "verify_output_tail": verify_output[-2000:],
+            })
+        except Exception as exc:
+            sign_verify = {"status": "BLOCKED_OR_FAILED", "error": str(exc)}
+        (output / "SIGN-VERIFY.json").write_text(
+            json.dumps(sign_verify, indent=2, sort_keys=True) + "\\n",
+            encoding="utf-8",
+        )
+
+    adb_deploy = {"status": "NOT_DEPLOYED"}
+    if sign_verify.get("status") == "SIGNED_VERIFIED":
+        try:
+            adb = capabilities.get("tools", {}).get("adb", {}).get("path")
+            serial = os.environ.get("REELSEC_TEST_DEVICE")
+            if not adb or not serial:
+                raise RuntimeError("ADB or REELSEC_TEST_DEVICE unavailable")
+            state_cmd = device_check_command(adb, serial)
+            state_output = run_checked(state_cmd)
+            if "device" not in state_output.strip().splitlines()[-1:]:
+                raise RuntimeError("test device is not in adb device state")
+            install_cmd = install_command(adb, serial, sign_verify["signed_path"])
+            install_output = run_checked(install_cmd)
+            adb_deploy = {
+                "status": "INSTALLED",
+                "serial": serial,
+                "artifact": sign_verify["signed_path"],
+                "artifact_sha256": sign_verify["signed_sha256"],
+                "device_check_command": state_cmd,
+                "install_command": install_cmd,
+                "install_output_tail": install_output[-2000:],
+            }
+        except Exception as exc:
+            adb_deploy = {"status": "BLOCKED_OR_FAILED", "error": str(exc)}
+        (output / "ADB-DEPLOY.json").write_text(
+            json.dumps(adb_deploy, indent=2, sort_keys=True) + "\\n",
+            encoding="utf-8",
+        )
+
+    evidence_ledger = {"status": "NOT_READY"}
+    gadget_observation = {"status": "NOT_PLANNED"}
+    if sign_verify.get("status") == "SIGNED_VERIFIED":
+        try:
+            package_name = os.environ.get("REELSEC_TEST_PACKAGE")
+            if not package_name:
+                raise RuntimeError("REELSEC_TEST_PACKAGE unavailable")
+            gadget_observation = plan_gadget_observation(
+                sign_verify["signed_path"], package_name, target_offset="0x27a510"
+            )
+        except Exception as exc:
+            gadget_observation = {"status": "BLOCKED_OR_FAILED", "error": str(exc)}
+        (output / "GADGET-OBSERVATION-PLAN.json").write_text(
+            json.dumps(gadget_observation, indent=2, sort_keys=True) + "\\n",
+            encoding="utf-8",
+        )
+
+    runtime_capture = {"status": "NOT_CAPTURED"}
+    if adb_deploy.get("status") == "INSTALLED":
+        try:
+            adb = capabilities.get("tools", {}).get("adb", {}).get("path")
+            serial = adb_deploy["serial"]
+            package_name = os.environ.get("REELSEC_TEST_PACKAGE")
+            if not package_name:
+                raise RuntimeError("REELSEC_TEST_PACKAGE unavailable")
+            snapshot = capture_snapshot(adb, serial, package_name)
+            runtime_capture = bind_artifact(snapshot, sign_verify["signed_path"])
+            runtime_capture["status"] = "CAPTURED"
+        except Exception as exc:
+            runtime_capture = {"status": "BLOCKED_OR_FAILED", "error": str(exc)}
+        (output / "RUNTIME-EVIDENCE.json").write_text(
+            json.dumps(runtime_capture, indent=2, sort_keys=True) + "\\n",
+            encoding="utf-8",
+        )
+
+    analysis_root = Path(decoded_inventory["root"]).resolve() if decoded_inventory and decoded_inventory.get("status") == "READY" else ROOT
+    target = find_target(args.elf, analysis_root)
+    target_source = "decoded-apk" if analysis_root != ROOT else "repository-root-fallback"
+    input_provenance = build_input_provenance(input_apk, input_apk_sha256, analysis_root, target)
+    (output / "INPUT-PROVENANCE.json").write_text(json.dumps(input_provenance, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     manifest = {
         "tool": "ReelSec",
         "version": VERSION,
         "probes": PROBES,
         "target": str(target) if target else None,
         "created_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+        "mode": args.command or "analysis",
+        "input_apk": str(input_apk) if input_apk else None,
+        "input_apk_sha256": input_apk_sha256,
+        "capabilities": capabilities,
+        "apktool_backend": apktool_backend,
+        "apktool_decode": decode_result,
+        "decoded_input_inventory": decoded_inventory,
+        "analysis_root": str(analysis_root),
+        "target_source": target_source,
+        "input_provenance": input_provenance,
+        "instrumentation_plan": instrumentation_plan,
+        "instrumented_copy": instrumented_copy,
+        "build_verify": build_verify,
+        "sign_verify": sign_verify,
+        "adb_deploy": adb_deploy,
+        "runtime_capture": runtime_capture,
+        "gadget_observation": gadget_observation,\n        "evidence_ledger": evidence_ledger,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
@@ -1587,7 +1901,7 @@ def main():
 
     dataflow_result = write_autonomous_dataflow(output, target, objdump)
     runtime_result = write_runtime_probe(output, ROOT, target)
-    write_autonomous_campaign(output, dataflow_result, runtime_result)
+    write_autonomous_campaign(output, dataflow_result, runtime_result, input_apk=str(input_apk) if input_apk else None, input_apk_sha256=input_apk_sha256)
 
     security_text = (output / "security-strings.txt").read_text(
         encoding="utf-8", errors="replace"
@@ -1658,6 +1972,11 @@ def main():
         critical_function_behavior=critical_behavior,
         autonomous_dataflow=dataflow_result,
         runtime_probe_status=(runtime_result.get("status") if runtime_result else "NOT_RUN"),
+        decoded_input_inventory=decoded_inventory,
+        analysis_root=str(analysis_root),
+        target_source=target_source,
+        input_provenance=input_provenance,
+        instrumentation_plan=instrumentation_plan,
     )
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),

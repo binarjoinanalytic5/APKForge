@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""Conservative evidence classification for ReelSec artifacts."""
+
+PROVEN_STATIC = "PROVEN_STATIC"
+PROVEN_RUNTIME_ORIGINAL = "PROVEN_RUNTIME_ORIGINAL"
+PROVEN_ON_INSTRUMENTED_BUILD = "PROVEN_ON_INSTRUMENTED_BUILD"
+OBSERVED = "OBSERVED"
+SUPPORTED = "SUPPORTED"
+LIKELY = "LIKELY"
+UNPROVEN = "UNPROVEN"
+BLOCKED = "BLOCKED"
+FAILED = "FAILED"
+
+
+def classify_target_evidence(provenance, runtime_status=None, target_executed=False, static_evidence_proven=False):
+    """Never promote static provenance to runtime proof."""
+    if not provenance or provenance.get("target_relation") != "WITHIN_ANALYSIS_ROOT":
+        return BLOCKED if runtime_status in (None, "BLOCKED") else UNPROVEN
+
+    if runtime_status == "ORIGINAL_EXECUTION_PROVEN" and target_executed:
+        return PROVEN_RUNTIME_ORIGINAL
+
+    if runtime_status == "INSTRUMENTED_EXECUTION_PROVEN" and target_executed:
+        return PROVEN_ON_INSTRUMENTED_BUILD
+
+    if target_executed:
+        return OBSERVED
+
+    if static_evidence_proven:
+        return PROVEN_STATIC
+    return UNPROVEN
+
+
+def screenshot_blocking_claim_allowed(*, screenshot_event, relevant_path,
+                                      target_executed, behavioral_effect,
+                                      timing_correlated, alternatives_considered,
+                                      runtime_proof=False):
+    """Require the full causal chain before permitting a blocking claim."""
+    return all((
+        screenshot_event,
+        relevant_path,
+        target_executed,
+        behavioral_effect,
+        timing_correlated,
+        alternatives_considered,
+        runtime_proof,
+    ))
+
+
+def build_instrumented_runtime_proof(provenance, target_observation, dispatch_observation, behavioral_correlation=None):
+    """Return a proof state only when artifact provenance and both runtime observations agree."""
+    if not provenance or provenance.get("target_relation") != "WITHIN_ANALYSIS_ROOT":
+        return {"state": BLOCKED, "causal_proof": False}
+    target_ok = target_observation.get("runtime_observed") is True
+    dispatch_ok = dispatch_observation.get("dispatch_relationship_observed") is True
+    behavior_ok = bool(behavioral_correlation and behavioral_correlation.get("correlated") is True)
+    if target_ok and dispatch_ok:
+        return {
+            "state": PROVEN_ON_INSTRUMENTED_BUILD,
+            "causal_proof": False,
+            "requirements": {
+                "artifact_provenance": True,
+                "target_execution": True,
+                "vtable_dispatch": True,
+                "behavioral_correlation": behavior_ok,
+            },
+        }
+    return {"state": UNPROVEN, "causal_proof": False}
+
+
+def correlate_behavioral_event(target_event, behavior_event, window_ms=1000):
+    """Correlate two observed events by monotonic timestamps only.
+    Correlation is not itself proof of causality.
+    """
+    if not isinstance(target_event, dict) or not isinstance(behavior_event, dict):
+        return {"correlated": False, "causal_proof": False, "reason": "invalid_event"}
+    t = target_event.get("timestamp_ms")
+    b = behavior_event.get("timestamp_ms")
+    if not isinstance(t, (int, float)) or not isinstance(b, (int, float)):
+        return {"correlated": False, "causal_proof": False, "reason": "missing_timestamp"}
+    delta = abs(b - t)
+    correlated = delta <= window_ms
+    return {
+        "correlated": correlated,
+        "delta_ms": delta,
+        "window_ms": window_ms,
+        "causal_proof": False,
+        "reason": "within_window" if correlated else "outside_window",
+    }
+
+
+def build_evidence_ledger(artifact, target_observation, dispatch_observation,
+                          behavioral_correlation=None):
+    """Create a deterministic evidence record; never upgrades causality by itself."""
+    if not isinstance(artifact, dict):
+        return {"status": "INVALID", "causal_proof": False}
+    ledger = {
+        "schema_version": 1,
+        "artifact": dict(artifact),
+        "target_observation": dict(target_observation or {}),
+        "dispatch_observation": dict(dispatch_observation or {}),
+        "behavioral_correlation": dict(behavioral_correlation or {}),
+        "causal_proof": False,
+    }
+    ledger["evidence_state"] = "OBSERVED"
+    if (
+        ledger["target_observation"].get("runtime_observed") is True
+        and ledger["dispatch_observation"].get("dispatch_relationship_observed") is True
+    ):
+        ledger["evidence_state"] = "TARGET_AND_DISPATCH_OBSERVED"
+    return ledger
+
+
+def finalize_instrumented_proof(provenance, target_observation, dispatch_observation, behavioral_correlation=None):
+    """Conservative final classifier for an instrumented runtime campaign."""
+    result = build_instrumented_runtime_proof(
+        provenance, target_observation, dispatch_observation,
+        behavioral_correlation,
+    )
+    if result.get("state") != PROVEN_ON_INSTRUMENTED_BUILD:
+        return result
+    if not (behavioral_correlation and behavioral_correlation.get("correlated") is True):
+        result["state"] = OBSERVED
+        result["reason"] = "runtime target and dispatch observed without behavioral correlation"
+        return result
+    result["state"] = PROVEN_ON_INSTRUMENTED_BUILD
+    result["reason"] = "artifact, target execution, dispatch, and bounded behavioral correlation observed"
+    result["causal_proof"] = False
+    return result

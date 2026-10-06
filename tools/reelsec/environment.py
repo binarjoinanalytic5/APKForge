@@ -70,24 +70,32 @@ def _apktool_candidates():
 
 def _probe_apktool():
     candidates = _apktool_candidates()
+    attempts = []
+    broken_cli = None
     for c in candidates:
         if c.startswith("__JAVA_CLASSPATH__:"):
             _, java, cp = c.split(":", 2)
             rc, out = _run([java, "-cp", cp, "brut.apktool.Main", "--version"], 15)
+            attempts.append({"backend": "java-classpath", "path": java, "returncode": rc})
             if rc == 0:
                 return {"name": "apktool-standalone", "status": "USABLE",
                         "path": java, "version": out.splitlines()[0] if out else "",
-                        "backend": "java-classpath"}
+                        "backend": "java-classpath", "classpath": cp,
+                        "attempts": attempts}
             continue
         rc, out = _run([c, "--version"], 15)
+        attempts.append({"backend": "cli", "path": c, "returncode": rc})
         if rc == 0:
             return {"name": "apktool", "status": "USABLE", "path": c,
                     "version": out.splitlines()[0] if out else "",
-                    "backend": "cli"}
-        # The command exists but its wrapper/rootfs is unusable.
-        return {"name": "apktool", "status": "BROKEN", "path": c,
-                "version": None, "backend": "cli"}
-    return {"name": "apktool", "status": "MISSING", "path": None, "version": None}
+                    "backend": "cli", "attempts": attempts}
+        broken_cli = c
+    if broken_cli:
+        return {"name": "apktool", "status": "BROKEN", "path": broken_cli,
+                "version": None, "backend": "cli", "attempts": attempts,
+                "fallback_attempted": True}
+    return {"name": "apktool", "status": "MISSING", "path": None,
+            "version": None, "attempts": attempts}
 
 
 def _probe_frida():
