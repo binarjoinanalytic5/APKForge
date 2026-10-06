@@ -71,8 +71,16 @@ def run_apktool_decode(selection, apk, output_dir, timeout=300):
     # Apktool must create its own output directory; pre-creating it causes Apktool 2.7 to refuse the decode.
     output_dir.parent.mkdir(parents=True, exist_ok=True)
     command = decode_command(selection, apk, output_dir)
-    rc, log = run(command, timeout=timeout)
-    log_path = (output_dir / "reelsec-apktool.log") if output_dir.is_dir() else (output_dir.parent / (output_dir.name + ".apktool.log"))
+    live_log_path = output_dir.parent / (output_dir.name + ".apktool-live.log")
+    print("      [apktool] timeout=%ss heartbeat=10s" % timeout, flush=True)
+    rc, log = run_with_heartbeat(
+        command,
+        timeout=timeout,
+        heartbeat=10,
+        label="apktool",
+        log_path=live_log_path,
+    )
+    log_path = (output_dir / "reelsec-apktool.log") if output_dir.is_dir() else live_log_path
     log_path.write_text(log, encoding="utf-8", errors="replace")
     if rc != 0:
         return {"status": "FAILED", "returncode": rc, "command": command,
@@ -223,6 +231,71 @@ def plan_instrumentation(decoded_inventory, output_dir):
         encoding="utf-8",
     )
     return result
+
+def run_with_heartbeat(cmd, cwd=None, timeout=None, heartbeat=10, label="process", log_path=None):
+    """Run a long process with periodic liveness updates."""
+    log_file = Path(log_path).expanduser().resolve() if log_path else None
+    if log_file:
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+
+    started = time.monotonic()
+    next_heartbeat = started + heartbeat
+    handle = (
+        open(log_file, "w", encoding="utf-8", errors="replace")
+        if log_file
+        else tempfile.TemporaryFile(mode="w+", encoding="utf-8")
+    )
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            cwd=cwd,
+            text=True,
+            stdout=handle,
+            stderr=subprocess.STDOUT,
+            bufsize=1,
+        )
+        while proc.poll() is None:
+            now = time.monotonic()
+            if now >= next_heartbeat:
+                elapsed = int(now - started)
+                try:
+                    size = log_file.stat().st_size if log_file else handle.tell()
+                except OSError:
+                    size = 0
+                print(
+                    "      [%s] RUNNING elapsed=%ss process=alive log=%sB" %
+                    (label, elapsed, size),
+                    flush=True,
+                )
+                next_heartbeat = now + heartbeat
+            if timeout is not None and (now - started) >= timeout:
+                proc.kill()
+                proc.wait()
+                try:
+                    handle.flush()
+                except Exception:
+                    pass
+                output = (
+                    log_file.read_text(encoding="utf-8", errors="replace")
+                    if log_file
+                    else ""
+                )
+                return 124, output + "\n[timeout=%ss]\n" % timeout
+            time.sleep(1)
+
+        handle.flush()
+        if log_file:
+            output = log_file.read_text(encoding="utf-8", errors="replace")
+        else:
+            handle.seek(0)
+            output = handle.read()
+        return proc.returncode, output
+    finally:
+        try:
+            handle.close()
+        except Exception:
+            pass
+
 
 def run(cmd, cwd=None, timeout=None):
     try:
@@ -1858,11 +1931,12 @@ def _progress_state_path(output):
 
 def _progress_render(index, total, name, status, detail=""):
     width = 28
-    done = max(0, min(total, index if status in ("PASS", "FAIL", "BLOCKED", "SKIP") else index - 1))
+    terminal = status in ("PASS", "FAIL", "BLOCKED", "SKIP")
+    done = max(0, min(total, index if terminal else index - 1))
     filled = int(width * done / max(1, total))
     bar = "#" * filled + "-" * (width - filled)
-    print("\r[%-28s] %3d%%  %02d/%02d  %-24s  %s" %
-          (bar, int(100 * done / max(1, total)), index, total, name, status),
+    print("\r[%-28s] %3d%%  %02d/%02d  %-24s  %-8s  %s" %
+          (bar, int(100 * done / max(1, total)), index, total, name, status, detail[:180]),
           flush=True)
     if detail:
         print("      " + str(detail)[:220], flush=True)
