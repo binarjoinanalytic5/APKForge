@@ -17,7 +17,13 @@ from instrumentation_backend import plan_secshell_injection, find_secshell_appli
 from instrumented_copy import prepare_instrumented_copy, apply_text_probe
 from build_verify import apktool_build_command, verify_artifact
 from sign_verify import artifact_identity, sign_command, verify_command, run_checked
-from adb_deploy import install_command, device_check_command, resolve_test_device
+from adb_deploy import (
+    install_command,
+    uninstall_command,
+    device_check_command,
+    resolve_test_device,
+    is_signature_mismatch_error,
+)
 from runtime_capture import capture_snapshot, bind_artifact
 from gadget_observer import plan_gadget_observation
 from proof_gate import build_evidence_ledger
@@ -2544,7 +2550,27 @@ def main():
             if state_output.strip() != "device":
                 raise RuntimeError("resolved test device is not in adb device state")
             install_cmd = install_command(adb, serial, sign_verify["signed_path"])
-            install_output = run_checked(install_cmd)
+            try:
+                install_output = run_checked(install_cmd)
+                reinstall_mode = "UPDATE"
+                uninstall_output = ""
+                uninstall_cmd = None
+            except Exception as install_exc:
+                if not is_signature_mismatch_error(str(install_exc)):
+                    raise
+                if os.environ.get("REELSEC_ALLOW_TEST_DEVICE_UNINSTALL", "").strip() != "1":
+                    raise RuntimeError(
+                        "existing package is signed with a different certificate; "
+                        "set REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1 only on the explicit "
+                        "test device to remove the existing package and reinstall the isolated artifact"
+                    )
+                package_name = os.environ.get("REELSEC_TEST_PACKAGE")
+                if not package_name:
+                    raise RuntimeError("REELSEC_TEST_PACKAGE unavailable; refusing package uninstall")
+                uninstall_cmd = uninstall_command(adb, serial, package_name)
+                uninstall_output = run_checked(uninstall_cmd)
+                install_output = run_checked(install_cmd)
+                reinstall_mode = "UNINSTALL_THEN_INSTALL"
             adb_deploy = {
                 "status": "INSTALLED",
                 "serial": serial,
@@ -2556,6 +2582,9 @@ def main():
                 "device_inventory_command": resolution.get("inventory_command"),
                 "device_check_command": state_cmd,
                 "install_command": install_cmd,
+                "install_mode": reinstall_mode,
+                "uninstall_command": uninstall_cmd,
+                "uninstall_output_tail": uninstall_output[-2000:],
                 "install_output_tail": install_output[-2000:],
             }
         except Exception as exc:
