@@ -87,3 +87,25 @@ def correlate_behavioral_event(target_event, behavior_event, window_ms=1000):
         "causal_proof": False,
         "reason": "within_window" if correlated else "outside_window",
     }
+
+
+def build_evidence_ledger(artifact, target_observation, dispatch_observation,
+                          behavioral_correlation=None):
+    """Create a deterministic evidence record; never upgrades causality by itself."""
+    if not isinstance(artifact, dict):
+        return {"status": "INVALID", "causal_proof": False}
+    ledger = {
+        "schema_version": 1,
+        "artifact": dict(artifact),
+        "target_observation": dict(target_observation or {}),
+        "dispatch_observation": dict(dispatch_observation or {}),
+        "behavioral_correlation": dict(behavioral_correlation or {}),
+        "causal_proof": False,
+    }
+    ledger["evidence_state"] = "OBSERVED"
+    if (
+        ledger["target_observation"].get("runtime_observed") is True
+        and ledger["dispatch_observation"].get("dispatch_relationship_observed") is True
+    ):
+        ledger["evidence_state"] = "TARGET_AND_DISPATCH_OBSERVED"
+    return ledger
