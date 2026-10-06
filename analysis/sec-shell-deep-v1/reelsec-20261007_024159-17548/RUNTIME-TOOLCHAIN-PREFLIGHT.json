@@ -1,0 +1,33 @@
+{
+  "actions": [
+    {
+      "action": "pkg_install_frida_tools",
+      "output": "No mirror or mirror group selected. You might want to select one by running 'termux-change-repo'\nChecking availability of current mirror:\n[*] https://ftp.fau.de/termux/termux-main: ok\n\nWARNING: apt does not have a stable CLI interface. Use with caution in scripts.\n\nReading package lists...\nBuilding dependency tree...\nReading state information...\nE: Unable to locate package frida-tools\n",
+      "returncode": 100
+    },
+    {
+      "action": "proot_debian_probe",
+      "output": "",
+      "returncode": 0
+    },
+    {
+      "action": "proot_install_frida_tools",
+      "output": "Requirement already satisfied: frida-tools in /usr/local/lib/python3.13/dist-packages (14.11.0)\nRequirement already satisfied: colorama<1.0.0,>=0.2.7 in /usr/local/lib/python3.13/dist-packages (from frida-tools) (0.4.6)\nRequirement already satisfied: frida<18.0.0,>=17.10.0 in /usr/local/lib/python3.13/dist-packages (from frida-tools) (17.22.2)\nRequirement already satisfied: prompt-toolkit<4.0.0,>=2.0.0 in /usr/local/lib/python3.13/dist-packages (from frida-tools) (3.0.53)\nRequirement already satisfied: pygments<3.0.0,>=2.0.2 in /usr/local/lib/python3.13/dist-packages (from frida-tools) (2.21.0)\nRequirement already satisfied: websockets<14.0.0,>=13.0.0 in /usr/local/lib/python3.13/dist-packages (from frida-tools) (13.1)\nRequirement already satisfied: wcwidth>=0.1.4 in /usr/local/lib/python3.13/dist-packages (from prompt-toolkit<4.0.0,>=2.0.0->frida-tools) (0.9.2)\nWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.\n",
+      "returncode": 0
+    }
+  ],
+  "attempted": true,
+  "missing_requirements": [],
+  "schema_version": "1.2",
+  "status": "CLIENTS_READY",
+  "tooling": {
+    "adb": "/data/data/com.termux/files/usr/bin/adb",
+    "frida": null,
+    "frida_after_pkg": null,
+    "frida_after_proot": "/data/data/com.termux/files/home/.local/bin/frida",
+    "frida_wrapper": "/data/data/com.termux/files/home/.local/bin/frida",
+    "pkg": "/data/data/com.termux/files/usr/bin/pkg",
+    "proot_distro": "/data/data/com.termux/files/usr/bin/proot-distro",
+    "python": "/data/data/com.termux/files/usr/bin/python"
+  }
+}
