@@ -1883,10 +1883,48 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
         else:
             result["execution_attempted"] = True
 
-            frida_rc, frida_output = run(
-                [frida, "-U", "-f", package, "-l", str(script)],
-                timeout=18,
-            )
+            gadget_mode = os.environ.get("REELSEC_USE_GADGET", "").strip().lower() in ("1", "true", "yes")
+            gadget_port = _positive_int_env("REELSEC_FRIDA_GADGET_PORT", 27042)
+            result["gadget_mode"] = gadget_mode
+            result["gadget_port"] = gadget_port
+            forward_established = False
+            if gadget_mode:
+                forward_rc, forward_output = run(
+                    [adb, "forward", "tcp:%d" % gadget_port, "tcp:%d" % gadget_port]
+                )
+                result["gadget_forward_returncode"] = forward_rc
+                result["gadget_forward_output"] = (forward_output or "")[-4000:]
+                if forward_rc != 0:
+                    result["status"] = "GADGET_PORT_FORWARD_FAILED"
+                    result["reason"] = "adb forward failed"
+                    result["execution_attempted"] = False
+                    frida_rc, frida_output = 1, forward_output or ""
+                else:
+                    forward_established = True
+                    launch_rc, launch_output = run(
+                        [adb, "shell", "monkey", "-p", package, "1"],
+                        timeout=15,
+                    )
+                    result["gadget_launch_returncode"] = launch_rc
+                    result["gadget_launch_output"] = (launch_output or "")[-4000:]
+                    if launch_rc != 0:
+                        result["status"] = "GADGET_APP_LAUNCH_FAILED"
+                        result["reason"] = "adb monkey launch failed"
+                        frida_rc, frida_output = launch_rc, launch_output or ""
+                    else:
+                        frida_rc, frida_output = run(
+                            [frida, "-H", "127.0.0.1:%d" % gadget_port,
+                             "-n", package, "-l", str(script)],
+                            timeout=18,
+                        )
+            else:
+                frida_rc, frida_output = run(
+                    [frida, "-U", "-f", package, "-l", str(script)],
+                    timeout=18,
+                )
+
+            if forward_established:
+                run([adb, "forward", "--remove", "tcp:%d" % gadget_port], timeout=10)
 
             result["frida_exit"]=frida_rc
             result["frida_output"]=frida_output[-12000:]
