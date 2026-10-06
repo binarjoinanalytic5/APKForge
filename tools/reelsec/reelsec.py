@@ -294,7 +294,14 @@ def git_publish(root, report_dir):
 
         # The receipt is committed only after the report commit has been verified.
         receipt = dict(result)
-        receipt["status"] = "PUBLISHED"
+        receipt["status"] = "REPORT_PUBLISHED;STATUS_COMMIT_FOLLOWS"
+        receipt["status_commit"] = None
+        receipt["status_remote_verified"] = None
+        receipt["status_commit_note"] = (
+            "The SHA of the commit that contains this receipt cannot be embedded "
+            "inside the same receipt without making the commit hash self-referential. "
+            "The final status commit is verified separately by git ls-remote after push."
+        )
         status_path = publish_report / "PUBLISH-STATUS.json"
         status_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
