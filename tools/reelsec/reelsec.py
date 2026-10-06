@@ -13,7 +13,7 @@ from pathlib import Path
 
 from environment import write_capability_matrix
 from apktool_backend import ApktoolBackendError, select_apktool_backend, decode_command
-from instrumentation_backend import plan_secshell_injection
+from instrumentation_backend import plan_secshell_injection, find_secshell_application
 from instrumented_copy import prepare_instrumented_copy, apply_text_probe
 from build_verify import apktool_build_command, verify_artifact
 from sign_verify import artifact_identity, sign_command, verify_command, run_checked
@@ -340,25 +340,17 @@ def inventory_decoded_apk(output_dir):
     return inventory
 
 def plan_instrumentation(decoded_inventory, output_dir):
-    """Locate the known SecShell Application anchor and emit a non-mutating plan."""
+    """Locate the SecShell Application/loadLibrary anchor using structural discovery."""
     if not decoded_inventory or decoded_inventory.get("status") not in ("READY", "READY_NATIVE_ONLY"):
         return {"status": "BLOCKED", "reason": "decoded APK inventory is not ready"}
     root = Path(decoded_inventory["root"]).resolve()
-    candidates = sorted(root.rglob("AW.smali"))
-    for target in candidates:
-        result = plan_secshell_injection(root, target)
-        if result.get("status") == "READY":
-            result["candidate_count"] = len(candidates)
-            (Path(output_dir) / "INSTRUMENTATION-PLAN.json").write_text(
-                json.dumps(result, indent=2, sort_keys=True) + "\n",
-                encoding="utf-8",
-            )
-            return result
-    result = {
-        "status": "BLOCKED",
-        "reason": "SecShell AW.smali anchor not found",
-        "candidate_count": len(candidates),
-    }
+    if decoded_inventory.get("status") != "READY":
+        return {"status": "BLOCKED", "reason": "decoded APK inventory is native-only"}
+
+    discovered = find_secshell_application(root)
+    result = plan_secshell_injection(root)
+    result["candidate_count"] = len(discovered)
+    result["discovered_candidates"] = discovered
     (Path(output_dir) / "INSTRUMENTATION-PLAN.json").write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
