@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
+import sys
 import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from apktool_backend import ApktoolBackendError, select_apktool_backend
 
