@@ -84,3 +84,57 @@ See:
 
 ### 10. Session rule
 The next agent/session should first read this file and the two documents above, inspect the current `tools/reelsec` implementation, then run the campaign. Do not restart the investigation from scratch and do not discard prior negative/uncertain findings.
+
+
+## 11. Signing-gate findings — 2026-10-07 02:25 campaign
+Campaign report:
+`analysis/sec-shell-deep-v1/reelsec-20261007_022538-31232`
+
+Stages 01–08 passed exactly as intended. Stage 09 no longer failed because of missing signer discovery: the capability-path compatibility fix allowed ReelSec to locate `apksigner` and the configured test keystore.
+
+The new Stage 09 failure was:
+- `apksigner` prompted for the keystore password on stdin;
+- ReelSec runs the signer through a non-interactive subprocess;
+- stdin therefore did not provide the password;
+- `apksigner` returned `keystore password was incorrect`.
+
+This is an automation/input-mode defect, not evidence that the keystore is invalid. The keystore was independently validated with `keytool -list` and contains alias `reelsec-test`.
+
+## 12. Signing automation fix
+Two implementation fixes are now on `main`:
+- `9b15a5be2aaf727c5e31ef753581215e6ccfe0c7`: expose signing capabilities at the compatibility paths expected by ReelSec.
+- `b4efbb269d087bcbf6d184e832d9ccd256752929`: make `sign_verify.py` use unattended password references.
+- `13a327af6f8321e8cf6729cd4582ec00d7cf7066`: add regression coverage for unattended signing and ensure password values are not embedded in command arguments.
+
+Required environment variables for the next campaign:
+- `REELSEC_TEST_KEYSTORE`
+- `REELSEC_TEST_KEY_ALIAS`
+- `REELSEC_TEST_KEYSTORE_PASSWORD`
+- `REELSEC_TEST_KEY_PASSWORD`
+
+The last two variables must contain the passwords already configured for the isolated test keystore. Do not commit them or paste their values into repository files.
+
+The generated signing command uses `env:REELSEC_TEST_...` references, so password values are not written into the command manifest.
+
+## 13. Immediate next action
+In the same Termux session, set the two password variables to the values used when the test keystore was created, then rerun the remote bootstrap:
+
+```bash
+export REELSEC_TEST_KEYSTORE_PASSWORD='[same keystore password used during keytool creation]'
+export REELSEC_TEST_KEY_PASSWORD='[same private-key password used during keytool creation]'
+
+cd ~/apk-lab/ReelShort-v4.2.00 && \
+git fetch origin main && \
+git show origin/main:tools/reelsec/bootstrap-run.sh | bash -s -- campaign ./original.apk
+```
+
+Do not regenerate the keystore unless a later verification proves it is corrupted. Do not alter `original.apk`.
+
+## 14. Current proof boundary
+After the signing fix, the expected progression is:
+- Stage 09: `SIGNED_VERIFIED`
+- Stage 10: install only the signed isolated artifact, using explicit `REELSEC_TEST_DEVICE`
+- Stage 11: guarded Frida Gadget observation, if the package/device prerequisites are available
+- Stage 12: bounded runtime evidence
+
+Even after those stages pass, `0x27a510` remains a pointer/dataflow candidate until runtime evidence observes the expected vptr/slot chain. Screenshot protection must not be inferred from the pointer alone.
