@@ -54,7 +54,21 @@ def run_apktool_decode(selection, apk, output_dir, timeout=300):
         raise ApktoolBackendError("APK input does not exist: %s" % apk)
     if output_dir == apk.parent:
         raise ApktoolBackendError("Decode output must not be the APK directory")
-    output_dir.mkdir(parents=True, exist_ok=True)
+    if output_dir.exists():
+        try:
+            nonempty = any(output_dir.iterdir())
+        except OSError as exc:
+            raise ApktoolBackendError("Cannot inspect decode output directory: %s" % exc)
+        if nonempty:
+            return {
+                "status": "FAILED_OUTPUT_EXISTS",
+                "returncode": None,
+                "command": None,
+                "output_dir": str(output_dir),
+                "reason": "Refusing to reuse a non-empty decode directory; this protects prior campaign evidence.",
+            }
+        output_dir.rmdir()
+    output_dir.mkdir(parents=True, exist_ok=False)
     command = decode_command(selection, apk, output_dir)
     rc, log = run(command, timeout=timeout)
     (output_dir / "reelsec-apktool.log").write_text(log, encoding="utf-8", errors="replace")
@@ -275,18 +289,25 @@ def build_input_provenance(input_apk, input_apk_sha256, analysis_root, target):
     root = Path(analysis_root).resolve()
     target_path = Path(target).resolve() if target else None
     relation = "UNKNOWN"
+    target_relative_path = None
+    target_sha256 = None
     if target_path:
         try:
-            target_path.relative_to(root)
+            target_relative_path = target_path.relative_to(root).as_posix()
             relation = "WITHIN_ANALYSIS_ROOT"
+            if target_path.is_file():
+                target_sha256 = sha256_file(target_path)
         except ValueError:
             relation = "OUTSIDE_ANALYSIS_ROOT"
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "input_apk": str(Path(input_apk).resolve()) if input_apk else None,
         "input_apk_sha256": input_apk_sha256,
         "analysis_root": str(root),
+        "analysis_root_kind": "decoded_apk_from_input" if input_apk and target_relative_path else "repository_or_external_root",
         "target": str(target_path) if target_path else None,
+        "target_relative_path": target_relative_path,
+        "target_sha256": target_sha256,
         "target_relation": relation,
         "evidence_scope": "static-analysis-input-provenance",
         "causality_proven": False,
@@ -1550,7 +1571,7 @@ def main():
         input_apk_sha256 = sha256_file(input_apk)
 
     default_output = ROOT / "analysis" / "sec-shell-deep-v1" / (
-        "reelsec-" + time.strftime("%Y%m%d_%H%M%S")
+        "reelsec-" + time.strftime("%Y%m%d_%H%M%S") + "-" + str(os.getpid())
     )
     output = Path(args.output).expanduser() if args.output else default_output
     output.mkdir(parents=True, exist_ok=True)
@@ -1616,9 +1637,16 @@ def main():
         try:
             built_apk = output / "instrumented-unsigned.apk"
             build_cmd = apktool_build_command(apktool_backend, instrumented_copy_root, built_apk)
-            run(build_cmd, cwd=ROOT, timeout=300)
+            build_rc, build_log = run(build_cmd, cwd=ROOT, timeout=300)
+            if build_rc != 0:
+                raise RuntimeError(
+                    "Apktool build failed (rc=%s): %s" %
+                    (build_rc, (build_log or "")[-4000:])
+                )
             build_verify = verify_artifact(built_apk)
             build_verify["command"] = build_cmd
+            build_verify["returncode"] = build_rc
+            build_verify["output_tail"] = (build_log or "")[-4000:]
         except Exception as exc:
             build_verify = {"status": "FAILED", "error": str(exc)}
         (output / "BUILD-VERIFY.json").write_text(
@@ -1718,6 +1746,27 @@ def main():
             json.dumps(runtime_capture, indent=2, sort_keys=True) + "\\n",
             encoding="utf-8",
         )
+
+    if args.command == "campaign" and (not decoded_inventory or decoded_inventory.get("status") != "READY"):
+        blocker = {
+            "schema_version": "1.0",
+            "status": "BLOCKED_DECODE_FAILED",
+            "input_apk": str(input_apk) if input_apk else None,
+            "input_apk_sha256": input_apk_sha256,
+            "apktool_decode": decode_result,
+            "decoded_input_inventory": decoded_inventory,
+            "rule": "campaign mode never falls back to repository-root static artifacts after decode failure",
+        }
+        (output / "CAMPAIGN-BLOCKER.json").write_text(
+            json.dumps(blocker, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        (output / "STATUS.txt").write_text(
+            "BLOCKED_DECODE_FAILED\nNO_REPOSITORY_ROOT_FALLBACK\n", encoding="utf-8"
+        )
+        print("REPORT=" + str(output))
+        print("CAMPAIGN_STATUS=BLOCKED_DECODE_FAILED")
+        print("NO_REPOSITORY_ROOT_FALLBACK=YES")
+        return 2
 
     analysis_root = Path(decoded_inventory["root"]).resolve() if decoded_inventory and decoded_inventory.get("status") == "READY" else ROOT
     target = find_target(args.elf, analysis_root)
