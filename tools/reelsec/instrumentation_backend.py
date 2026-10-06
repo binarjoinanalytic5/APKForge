@@ -6,6 +6,7 @@ It is Termux-friendly and does not install tools or modify the original APK.
 """
 import hashlib
 import json
+import re
 import shlex
 from pathlib import Path
 
@@ -44,10 +45,16 @@ def plan_secshell_injection(decoded_root, application_smali):
         }
 
     text = target.read_text(encoding="utf-8", errors="replace")
-    if "System.loadLibrary" not in text or "SecShell" not in text:
+    pattern = re.compile(
+        r"^(?P<indent>\\s*)invoke-static\\s+\\{(?P<registers>[^}]+)\\},\\s*"
+        r"Ljava/lang/System;->loadLibrary\\(Ljava/lang/String;\\)V\\s*$",
+        re.MULTILINE,
+    )
+    match = pattern.search(text)
+    if not match:
         return {
             "status": INSTRUMENTATION_BLOCKED,
-            "reason": "SecShell loadLibrary anchor not found",
+            "reason": "SecShell loadLibrary Smali invoke not found",
             "target": str(target),
         }
 
@@ -55,7 +62,9 @@ def plan_secshell_injection(decoded_root, application_smali):
         "status": INSTRUMENTATION_READY,
         "mode": "NON_MUTATING_PLAN",
         "target": str(target),
-        "anchor": 'System.loadLibrary("SecShell")',
+        "anchor": match.group(0).strip(),
+        "anchor_pattern": "Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "registers": [x.strip() for x in match.group("registers").split(",") if x.strip()],
         "placement": "immediately_after_loadLibrary_before_normal_application_init",
         "runtime_proof": False,
     }
