@@ -1,0 +1,40 @@
+{
+  "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-signed.apk",
+  "artifact_sha256": "35304cfda30efe781c6a32057f0ef2d9d8f179f323d2470f89f5518c8e33de78",
+  "device_check_command": [
+    "/data/data/com.termux/files/usr/bin/adb",
+    "-s",
+    "192.168.8.8:32897",
+    "get-state"
+  ],
+  "device_inventory_command": [
+    "/data/data/com.termux/files/usr/bin/adb",
+    "devices",
+    "-l"
+  ],
+  "device_resolution": "AUTO_REBOUND_SINGLE_ONLINE_DEVICE",
+  "install_command": [
+    "/data/data/com.termux/files/usr/bin/adb",
+    "-s",
+    "192.168.8.8:32897",
+    "install",
+    "-r",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-signed.apk"
+  ],
+  "install_mode": "UNINSTALL_THEN_INSTALL",
+  "install_output_tail": "Serving...\nPerforming Incremental Install\n\nException occurred while executing 'install-incremental':\njava.lang.IllegalArgumentException: Incremental installation not allowed.\n\tat com.android.server.pm.PackageInstallerSession.<init>(PackageInstallerSession.java:1051)\n\tat com.android.server.pm.Packa\nPerforming Streamed Install\nSuccess\n",
+  "online_devices": [
+    "192.168.8.8:32897"
+  ],
+  "requested_serial": "192.168.8.8:39927",
+  "serial": "192.168.8.8:32897",
+  "status": "INSTALLED",
+  "uninstall_command": [
+    "/data/data/com.termux/files/usr/bin/adb",
+    "-s",
+    "192.168.8.8:32897",
+    "uninstall",
+    "com.newleaf.app.android.victor"
+  ],
+  "uninstall_output_tail": "Success\n"
+}

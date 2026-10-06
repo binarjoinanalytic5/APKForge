@@ -1,0 +1,21 @@
+{
+  "mutations": [
+    {
+      "anchor": "Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+      "file": "smali/com/SecShell/SecShell/AW.smali",
+      "log_message": "SecShell loadLibrary reached",
+      "log_tag": "ReelSec-Instrumentation",
+      "matched_registers": [
+        "v0"
+      ],
+      "purpose": "telemetry_only",
+      "registers_added": 2,
+      "type": "LOG_I_PROBE"
+    }
+  ],
+  "schema_version": 1,
+  "source_manifest_sha256": "3fe3d6c8811e4d4ece4108b94d9afca2301eb0cf3118d707648e9484a2c7a1f4",
+  "source_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/decoded-apk-no-res",
+  "status": "MUTATED",
+  "work_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-apk"
+}

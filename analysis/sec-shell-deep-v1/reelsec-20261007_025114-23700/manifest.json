@@ -1,0 +1,513 @@
+{
+  "tool": "ReelSec",
+  "version": "3.0.0",
+  "probes": [
+    "elf",
+    "symbols",
+    "strings",
+    "vtable",
+    "dispatch",
+    "critical-function",
+    "protection-bridge",
+    "vtable-abi",
+    "critical-function-behavior",
+    "native-security-api",
+    "java-screen-security",
+    "auto-publish",
+    "autonomous-dataflow",
+    "runtime-proof-readiness",
+    "runtime-frida-probe",
+    "target-provenance",
+    "runtime-toolchain-preflight",
+    "environment-capability",
+    "campaign-cli"
+  ],
+  "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so",
+  "created_at": "2026-10-07T02:51:57+0300",
+  "mode": "campaign",
+  "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+  "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+  "capabilities": {
+    "schema_version": "1.0",
+    "resolver": "ReelSec Environment Resolver",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00",
+    "tools": {
+      "java": {
+        "name": "java",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "openjdk 21.0.12 2026-07-21",
+        "returncode": 0
+      },
+      "python": {
+        "name": "python",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/python3.14",
+        "version": "Python 3.14.6",
+        "returncode": 0
+      },
+      "adb": {
+        "name": "adb",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/adb",
+        "version": "Android Debug Bridge version 1.0.41",
+        "returncode": 0,
+        "device_query": "USABLE",
+        "devices": [
+          "192.168.8.8:32897      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+        ]
+      },
+      "apktool": {
+        "name": "apktool-standalone",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "2.7.0-dirty",
+        "backend": "java-classpath",
+        "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+        "attempts": [
+          {
+            "backend": "cli",
+            "path": "/data/data/com.termux/files/usr/bin/apktool",
+            "returncode": 1
+          },
+          {
+            "backend": "java-classpath",
+            "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+            "returncode": 0
+          }
+        ]
+      },
+      "frida": {
+        "name": "frida",
+        "status": "MISSING",
+        "path": null
+      },
+      "signing": {
+        "zipalign": {
+          "name": "zipalign",
+          "status": "BROKEN",
+          "path": "/data/data/com.termux/files/usr/bin/zipalign",
+          "version": null,
+          "returncode": 127
+        },
+        "apksigner": {
+          "name": "apksigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/bin/apksigner",
+          "version": "0.9",
+          "returncode": 0
+        },
+        "jarsigner": {
+          "name": "jarsigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+          "version": "jarsigner 21.0.12",
+          "returncode": 0
+        }
+      },
+      "zipalign": {
+        "name": "zipalign",
+        "status": "BROKEN",
+        "path": "/data/data/com.termux/files/usr/bin/zipalign",
+        "version": null,
+        "returncode": 127
+      },
+      "apksigner": {
+        "name": "apksigner",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/apksigner",
+        "version": "0.9",
+        "returncode": 0
+      },
+      "jarsigner": {
+        "name": "jarsigner",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+        "version": "jarsigner 21.0.12",
+        "returncode": 0
+      }
+    },
+    "device": {
+      "online_count": 1,
+      "state": "USABLE",
+      "records": [
+        "192.168.8.8:32897      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+      ]
+    },
+    "policy": {
+      "available_is_not_usable": true,
+      "resolver_does_not_install": true,
+      "original_apk_is_immutable": true
+    }
+  },
+  "apktool_backend": {
+    "name": "apktool-standalone",
+    "backend": "java-classpath",
+    "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+    "version": "2.7.0-dirty",
+    "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+    "status": "SELECTED"
+  },
+  "apktool_decode": {
+    "status": "DECODED_NO_RES",
+    "returncode": 0,
+    "command": [
+      "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "-cp",
+      "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "brut.apktool.Main",
+      "d",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+      "-o",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/decoded-apk-no-res",
+      "-r"
+    ],
+    "output_dir": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/decoded-apk-no-res",
+    "log": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/decoded-apk-no-res/reelsec-apktool-recovery.log",
+    "mode": "APKTOOL_NO_RES",
+    "resources_decoded": false,
+    "instrumentable_smali": true,
+    "buildable_with_apktool": true,
+    "selection_strategy": "NO_RES_FIRST"
+  },
+  "decoded_input_inventory": {
+    "schema_version": "1.1",
+    "status": "READY",
+    "analysis_mode": "DECODED_SMALI_NATIVE",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/decoded-apk-no-res",
+    "manifest": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/decoded-apk-no-res/AndroidManifest.xml",
+    "smali_roots": [
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/decoded-apk-no-res/smali"
+    ],
+    "smali_file_count": 514,
+    "native_library_count": 50,
+    "native_libraries": [
+      "lib/arm64-v8a/libSecShell-x86.so",
+      "lib/arm64-v8a/libSecShell.so",
+      "lib/arm64-v8a/libalinetworkdiagnosis.so",
+      "lib/arm64-v8a/libalivcffmpeg.so",
+      "lib/arm64-v8a/libapplovin-native-crash-reporter.so",
+      "lib/arm64-v8a/libbuffer_pgl.so",
+      "lib/arm64-v8a/libc++_shared.so",
+      "lib/arm64-v8a/libcrashlytics-common.so",
+      "lib/arm64-v8a/libcrashlytics-handler.so",
+      "lib/arm64-v8a/libcrashlytics-trampoline.so",
+      "lib/arm64-v8a/libcrashlytics.so",
+      "lib/arm64-v8a/libdatastore_shared_counter.so",
+      "lib/arm64-v8a/libfile_lock_pgl.so",
+      "lib/arm64-v8a/libmarsxlog.so",
+      "lib/arm64-v8a/libmku_aaab.so",
+      "lib/arm64-v8a/libmmkv.so",
+      "lib/arm64-v8a/libnms.so",
+      "lib/arm64-v8a/libpglarmor.so",
+      "lib/arm64-v8a/libprotect.so",
+      "lib/arm64-v8a/libsaasCorePlayer.so",
+      "lib/arm64-v8a/libsaasDownloader.so",
+      "lib/arm64-v8a/libsls_producer.so",
+      "lib/arm64-v8a/libstupid.so",
+      "lib/arm64-v8a/libtapjoy.so",
+      "lib/arm64-v8a/libtt_ugen_layout.so",
+      "lib/armeabi-v7a/libSecShell-x86.so",
+      "lib/armeabi-v7a/libSecShell.so",
+      "lib/armeabi-v7a/libalinetworkdiagnosis.so",
+      "lib/armeabi-v7a/libalivcffmpeg.so",
+      "lib/armeabi-v7a/libapplovin-native-crash-reporter.so",
+      "lib/armeabi-v7a/libbuffer_pgl.so",
+      "lib/armeabi-v7a/libc++_shared.so",
+      "lib/armeabi-v7a/libcrashlytics-common.so",
+      "lib/armeabi-v7a/libcrashlytics-handler.so",
+      "lib/armeabi-v7a/libcrashlytics-trampoline.so",
+      "lib/armeabi-v7a/libcrashlytics.so",
+      "lib/armeabi-v7a/libdatastore_shared_counter.so",
+      "lib/armeabi-v7a/libfile_lock_pgl.so",
+      "lib/armeabi-v7a/libmarsxlog.so",
+      "lib/armeabi-v7a/libmku_aaab.so",
+      "lib/armeabi-v7a/libmmkv.so",
+      "lib/armeabi-v7a/libnms.so",
+      "lib/armeabi-v7a/libpglarmor.so",
+      "lib/armeabi-v7a/libprotect.so",
+      "lib/armeabi-v7a/libsaasCorePlayer.so",
+      "lib/armeabi-v7a/libsaasDownloader.so",
+      "lib/armeabi-v7a/libsls_producer.so",
+      "lib/armeabi-v7a/libstupid.so",
+      "lib/armeabi-v7a/libtapjoy.so",
+      "lib/armeabi-v7a/libtt_ugen_layout.so"
+    ],
+    "dex_count": 0,
+    "dex_files": [],
+    "decode_mode": "APKTOOL_NO_RES",
+    "resources_decoded": false
+  },
+  "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/decoded-apk-no-res",
+  "target_source": "decoded-apk-no-res",
+  "input_provenance": {
+    "schema_version": "1.1",
+    "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+    "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+    "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/decoded-apk-no-res",
+    "analysis_root_kind": "repository_or_external_root",
+    "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_relative_path": "lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+    "target_relation": "WITHIN_ANALYSIS_ROOT",
+    "evidence_scope": "static-analysis-input-provenance",
+    "causality_proven": false
+  },
+  "instrumentation_plan": {
+    "status": "READY",
+    "mode": "NON_MUTATING_PLAN",
+    "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+    "class_name": "com/SecShell/SecShell/AW",
+    "loadlibrary_line": 135,
+    "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+    "anchor": "System.loadLibrary(\"SecShell\")",
+    "placement": "immediately_after_loadLibrary_before_normal_application_init",
+    "runtime_proof": false,
+    "discovery": "STRUCTURAL_CONTENT",
+    "candidate_count": 1,
+    "candidates": [
+      {
+        "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+        "class_name": "com/SecShell/SecShell/AW",
+        "loadlibrary_line": 135,
+        "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "is_application": true,
+        "has_attach_base_context": true
+      }
+    ],
+    "discovered_candidates": [
+      {
+        "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+        "relative_path": "smali/com/SecShell/SecShell/AW.smali",
+        "class_name": "com/SecShell/SecShell/AW",
+        "score": 185,
+        "is_application": true,
+        "has_attach_base_context": true,
+        "manifest_application": null,
+        "manifest_match": false,
+        "loadlibrary_line": 135,
+        "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "secshell_reference_in_class": true
+      }
+    ]
+  },
+  "instrumented_copy": {
+    "mutations": [
+      {
+        "file": "smali/com/SecShell/SecShell/AW.smali",
+        "type": "LOG_I_PROBE",
+        "anchor": "Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "purpose": "telemetry_only",
+        "registers_added": 2,
+        "log_tag": "ReelSec-Instrumentation",
+        "log_message": "SecShell loadLibrary reached",
+        "matched_registers": [
+          "v0"
+        ]
+      }
+    ],
+    "schema_version": 1,
+    "source_manifest_sha256": "3fe3d6c8811e4d4ece4108b94d9afca2301eb0cf3118d707648e9484a2c7a1f4",
+    "source_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/decoded-apk-no-res",
+    "status": "MUTATED",
+    "work_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-apk",
+    "instrumentation_target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-apk/smali/com/SecShell/SecShell/AW.smali"
+  },
+  "build_verify": {
+    "status": "BUILT",
+    "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-unsigned.apk",
+    "size": 50565793,
+    "sha256": "c27d8a9c118fe6dc96f2e64beb775047ea2315379ae2805330912e0d0d6a3352",
+    "command": [
+      "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "-cp",
+      "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "brut.apktool.Main",
+      "b",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-apk",
+      "-o",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-unsigned.apk"
+    ],
+    "returncode": 0,
+    "output_tail": "I: Using Apktool 2.7.0-dirty\nI: Checking whether sources has changed...\nI: Smaling smali folder into classes.dex...\nI: Checking whether resources has changed...\nI: Copying raw resources...\nI: Copying libs... (/lib)\nI: Copying libs... (/kotlin)\nI: Copying libs... (/META-INF/services)\nI: Building apk file...\nI: Copying unknown files/dir...\nI: Built apk into: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-unsigned.apk\n"
+  },
+  "sign_verify": {
+    "unsigned_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-unsigned.apk",
+    "unsigned_sha256": "c27d8a9c118fe6dc96f2e64beb775047ea2315379ae2805330912e0d0d6a3352",
+    "signed_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-signed.apk",
+    "signed_sha256": "35304cfda30efe781c6a32057f0ef2d9d8f179f323d2470f89f5518c8e33de78",
+    "original_mutation": false,
+    "status": "SIGNED_VERIFIED",
+    "sign_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "sign",
+      "--ks",
+      "/data/data/com.termux/files/home/apk-lab/reelsec-test/reelsec-test.jks",
+      "--ks-key-alias",
+      "reelsec-test",
+      "--ks-pass",
+      "env:REELSEC_TEST_KEYSTORE_PASSWORD",
+      "--key-pass",
+      "env:REELSEC_TEST_KEY_PASSWORD",
+      "--out",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-signed.apk",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-unsigned.apk"
+    ],
+    "verify_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "verify",
+      "--verbose",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-signed.apk"
+    ],
+    "sign_output_tail": "",
+    "verify_output_tail": "Verifies\nVerified using v1 scheme (JAR signing): true\nVerified using v2 scheme (APK Signature Scheme v2): true\nVerified using v3 scheme (APK Signature Scheme v3): true\nVerified using v3.1 scheme (APK Signature Scheme v3.1): false\nVerified using v3.2 scheme (APK Signature Scheme v3.2): false\nVerified using v4 scheme (APK Signature Scheme v4): false\nVerified for SourceStamp: false\nNumber of signers: 1\nWARNING: META-INF/services/io.ktor.client.HttpClientEngineContainer not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.CoroutineExceptionHandler not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.internal.MainDispatcherFactory not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\n"
+  },
+  "adb_deploy": {
+    "status": "INSTALLED",
+    "serial": "192.168.8.8:32897",
+    "requested_serial": "192.168.8.8:39927",
+    "device_resolution": "AUTO_REBOUND_SINGLE_ONLINE_DEVICE",
+    "online_devices": [
+      "192.168.8.8:32897"
+    ],
+    "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-signed.apk",
+    "artifact_sha256": "35304cfda30efe781c6a32057f0ef2d9d8f179f323d2470f89f5518c8e33de78",
+    "device_inventory_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "devices",
+      "-l"
+    ],
+    "device_check_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "-s",
+      "192.168.8.8:32897",
+      "get-state"
+    ],
+    "install_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "-s",
+      "192.168.8.8:32897",
+      "install",
+      "-r",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-signed.apk"
+    ],
+    "install_mode": "UNINSTALL_THEN_INSTALL",
+    "uninstall_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "-s",
+      "192.168.8.8:32897",
+      "uninstall",
+      "com.newleaf.app.android.victor"
+    ],
+    "uninstall_output_tail": "Success\n",
+    "install_output_tail": "Serving...\nPerforming Incremental Install\n\nException occurred while executing 'install-incremental':\njava.lang.IllegalArgumentException: Incremental installation not allowed.\n\tat com.android.server.pm.PackageInstallerSession.<init>(PackageInstallerSession.java:1051)\n\tat com.android.server.pm.Packa\nPerforming Streamed Install\nSuccess\n"
+  },
+  "runtime_capture": {
+    "schema_version": 1,
+    "captured_at_epoch": 1791330711.6615758,
+    "device_serial": "192.168.8.8:32897",
+    "package": "com.newleaf.app.android.victor",
+    "observations": {
+      "state": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:32897",
+          "get-state"
+        ],
+        "returncode": 0,
+        "output": "device\n"
+      },
+      "package_path": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:32897",
+          "shell",
+          "pm",
+          "path",
+          "com.newleaf.app.android.victor"
+        ],
+        "returncode": 0,
+        "output": "package:/data/app/~~HVVGkBadJFXpEsEbpt0vjA==/com.newleaf.app.android.victor-Zgm8amIG_ZPTC12zN2dd4w==/base.apk\n"
+      },
+      "process": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:32897",
+          "shell",
+          "sh",
+          "-c",
+          "ps -A | grep -F com.newleaf.app.android.victor || true"
+        ],
+        "returncode": 0,
+        "output": ""
+      },
+      "logcat_tail": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:32897",
+          "logcat",
+          "-d",
+          "-t",
+          "250",
+          "-v",
+          "threadtime"
+        ],
+        "returncode": 0,
+        "output": "--------- beginning of main\n10-07 02:51:52.313 24711 24711 I VSET/SettingsFeature: initUnihalFeature: SETTINGS_AUTO_FRAMING_MODE_MENU, : false\n10-07 02:51:52.313 24711 24711 I VSET/SettingsFeature: initUnihalFeature: SETTINGS_BEAUTY_MODE_MENU, : false\n10-07 02:51:52.313 24711 24711 I VSET/SettingsFeature: initUnihalFeature: SETTINGS_COLOR_TONE_MODE_MENU, : false\n10-07 02:51:52.313 24711 24711 I VSET/SettingsFeature: initUnihalFeature: SETTINGS_AUDIO_CONFIGURATION_MENU, : false\n10-07 02:51:52.313 24711 24711 I VSET/SettingsFeature: initUnihalFeature: SETTINGS_AVAILABLE_APPS_MENU, : true\n10-07 02:51:52.313 24711 24711 I VSET/SettingsFeature: initUnihalFeature: CAMERA_SUPPORTED_SEGMENTATION_MODE, : false\n10-07 02:51:52.313 24711 24711 I VSET/SettingsFeature: initUnihalFeature: CAMERA_SUPPORTED_AUTO_FRAMING_MODE, : false\n10-07 02:51:52.313 24711 24711 I VSET/SettingsFeature: initUnihalFeature: CAMERA_SUPPORTED_MIC_MODE, : false\n10-07 02:51:52.313 24711 24711 I VSET/SettingsFeature: initUnihalFeature: DEVICE_INJECTOR_SUPPORTED, : false\n10-07 02:51:52.313 24711 24711 I VSET/CameraUtil: getPrimaryFrontCameraId: direct Return -> 1\n10-07 02:51:52.313 24711 24793 I VSET/CameraUtil: getCameraCharacteristics: 1\n10-07 02:51:52.314  1049  2176 E FRONT_AF_DEBUG: [cam_id_0][CMG_EFL] FrontAfLib_AlgorithmInit (line 467) focus mode = 0 paf_stats_valid : 0 \n10-07 02:51:52.314  1049  2176 E FRONT_AF_DEBUG: Front_AfInit (line 156). C2(0xF82D). mode(0). sensor(3648 x 2736). touch(0 x 0 ). cal(far(241) - mid(-1) - near(339). curr(313)\n10-07 02:51:52.314  1049  2176 E FRONT_AF_DEBUG: [cam_id_0][CMG_EFL] Front_UpdateAfStatus (line 304) : AF status 0x20 0x3\n10-07 02:51:52.314 24711 24711 I VSET/CameraUtil: isSupportedSmartMonitorExternalCamera: false\n10-07 02:51:52.314 24711 24711 I VSET/SettingsFeature: isAvailableDeviceInjector: false / 2 / true\n10-07 02:51:52.314 24711 24711 I VSET/SettingsFeature: initDeviceInjectorFeature: false\n10-07 02:51:52.314 24711 24711 I VSET/GlobalSettingDatabaseHelper: init: \n10-07 02:51:52.314 24711 24711 I VSET/GlobalSettingDatabaseHelper: sync: \n--------- beginning of system\n10-07 02:51:52.314  1221  5050 I GenerationRegistry: mBackingStore.isClosed() : false\n10-07 02:51:52.315  1049  2175 I SS_3A   :  INFO: AEC: TsAec_process_get_aec_info: 1550: [0][22] algo_out Av=2.273 g=15.239 e_t=0.03326 LLS=0x0 Ev=4.164 Bv=-0.867 PEv=4.133 Cvgd=0 lux=337, lls=0x0, drc=1.000 wide=1\n10-07 02:51:52.315  1221  5050 I GenerationRegistry: mBackingStore.isClosed() : false\n10-07 02:51:52.316 24711 24711 W VSET/VisionServerHelper: getContext: null!! \n10-07 02:51:52.318  1414 24694 I sec_fr_AImageClient: Post Image Available\n10-07 02:51:52.318  1414 24695 I sec_fr_FaceCameraClient: FaceCameraClient::onCaptureCompleted()\n10-07 02:51:52.319  1414 24684 I sec_fr_AImageClient: releaseBuffer() bufId = (0xb400007d66012380)\n10-07 02:51:52.319  1414 24684 I sec_fr_FaceWorkerManager: onReleaseBuffer : not found buffer - keepBuffer(0xb400007d66012380) \n10-07 02:51:52.326  2841  2841 D RegisteredNfcFServicesCache: Service unchanged, not updating\n10-07 02:51:52.326  1221  1720 D MARsPolicyManager: updateMARsTargetPackages mMARsTargetPackages.size-225\n10-07 02:51:52.328  1414 24693 I sec_fr_AImageClient: Post Image Available\n10-07 02:51:52.328  1414 24684 I sec_fr_AImageClient: releaseBuffer() bufId = (0xb400007d6600ec60)\n10-07 02:51:52.328  1414 24684 I sec_fr_FaceWorkerManager: onReleaseBuffer : not found buffer - keepBuffer(0xb400007d6600ec60) \n10-07 02:51:52.336 24711 24711 I VSET/VisionServerHelper: init: X\n10-07 02:51:52.336 24711 24711 I VSET/SALogCommon: init: setSAConfiguration\n10-07 02:51:52.336 24711 24711 I VSET/SALogCommon: registerSettingPref: already registered\n10-07 02:51:52.337 24711 24711 I VSET/CameraProxyWorker: init: \n10-07 02:51:52.339 24711 24711 I VSET/CameraProxyWorker: init: v 2\n10-07 02:51:52.339 24711 24711 I VSET/VSETFeature: isDefaultOffCounty: US\n10-07 02:51:52.339 24711 24711 I VSET/VSETPreference: getVSETEnabled: update first lunch time false\n10-07 02:51:52.339 24711 24711 I VSET/CameraProxyWorker: applySegmentationMode: 0, false\n10-07 02:51:52.339 24711 24711 I VSET/CameraProxyWorker: applySegmentationMode: mode 0\n10-07 02:51:52.340 24808 24808 D nativeloader: Load libframework-connectivity-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity.jar: ok\n10-07 02:51:52.341  1221  1568 W AccessibilitySecurityPolicy: Skipping accessibility service pro.bingbon.app/pro.bingintl.widget.suspendedwindow.service.WorkAccessibilityService: it does not require the permission android.permission.BIND_ACCESSIBILITY_SERVICE\n10-07 02:51:52.347  1049  2175 E FRONT_AF_DEBUG: [cam_id_0][CMG_EFL] FrontAfLib_AlgorithmInit (line 467) focus mode = 0 paf_stats_valid : 0 \n10-07 02:51:52.347  1049  2175 E FRONT_AF_DEBUG: Front_AfInit (line 156). C2(0xF82D). mode(0). sensor(3648 x 2736). touch(0 x 0 ). cal(far(241) - mid(-1) - near(339). curr(313)\n10-07 02:51:52.347  1049  2175 E FRONT_AF_DEBUG: [cam_id_0][CMG_EFL] Front_UpdateAfStatus (line 304) : AF status 0x20 0x3\n10-07 02:51:52.349  1049  2172 I SS_3A   :  INFO: AEC: TsAec_process_get_aec_info: 1550: [0][23] algo_out Av=2.273 g=16.174 e_t=0.03326 LLS=0x0 Ev=4.078 Bv=-0.945 PEv=4.055 Cvgd=0 lux=339, lls=0x0, drc=1.000 wide=1\n10-07 02:51:52.350  1221  2574 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 10069; state: DISABLED\n10-07 02:51:52.350  1414 24694 I sec_fr_AImageClient: Post Image Available\n10-07 02:51:52.350  1414 24684 I sec_fr_AImageClient: releaseBuffer() bufId = (0xb400007d660133d0)\n10-07 02:51:52.350  1414 24684 I sec_fr_FaceWorkerManager: onReleaseBuffer : not found buffer - keepBuffer(0xb400007d660133d0) \n10-07 02:51:52.350  1414 24695 I sec_fr_FaceCameraClient: FaceCameraClient::onCaptureCompleted()\n10-07 02:51:52.350  1221  2574 I ActivityManager: DSS OFF for com.samsung.android.app.galaxyfinder\n10-07 02:51:52.350  1221  5096 I RequestInjectorService: applyRequests requests size = 2\n10-07 02:51:52.351  1221  5096 I RequestInjectorService:   PersistableBundle[{key.i32=[30], key.tagName=samsung.android.unihal.videoMode}]\n10-07 02:51:52.351  1221  5096 I RequestInjectorService:   PersistableBundle[{key.i32=[0], key.tagName=samsung.android.unihal.videoSegmentationMode}]\n10-07 02:51:52.351  1221  5096 I RequestInjectorService: sendExtraRequestsToRequestInjector updated size = 2\n10-07 02:51:52.351  1221  5096 I RequestInjectorService:   PersistableBundle[{key.i32=[30], key.tagName=samsung.android.unihal.videoMode}]\n10-07 02:51:52.351  1221  5096 I RequestInjectorService:   PersistableBundle[{key.i32=[0], key.tagName=samsung.android.unihal.videoSegmentationMode}]\n10-07 02:51:52.351  1221  2293 D InputReader: Btn_touch(11): value=1 when=5312.523564\n10-07 02:51:52.352  1221  2293 I InputReader: Touch event's action is 0x0 (id=3, t=0) [pCnt=1, s=0.3233 ] when=5312.523564\n10-07 02:51:52.353  1308  7882 E CameraService: applyExtraRequestsToRequestInjector\n10-07 02:51:52.353  1308  7882 D CameraService: applyExtraRequestsToRequestInjector: tag(samsung.android.unihal.videoMode) found\n10-07 02:51:52.353  1308  7882 D CameraService: applyExtraRequestsToRequestInjector: i32 type data found count(1) = [ 30 ]\n10-07 02:51:52.353  1308  7882 D CameraService: applyExtraRequestsToRequestInjector: tag(samsung.android.unihal.videoSegmentationMode) found\n10-07 02:51:52.353  1308  7882 D CameraService: applyExtraRequestsToRequestInjector: i32 type data found count(1) = [ 0 ]\n10-07 02:51:52.353  1308  7882 I CameraService: applyExtraRequestsToRequestInjector: # of changed request = 2\n10-07 02:51:52.353  1308  7882 I CameraService: applyExtraRequestsToRequestInjector: Skip Request Injector ExtraRequests to existing client(client.pid<1414>)\n10-07 02:51:52.353  1308  7882 D CameraService: applyExtraRequestsToRequestInjector: Apply Request Injector ExtraRequests done. Save it.\n10-07 02:51:52.354  1221  5096 I RequestInjectorService: sendExtraRequestsToRequestInjector done\n10-07 02:51:52.354 24808 24808 V GraphicsEnvironment: ANGLE Developer option for 'com.google.android.permissioncontroller' set to: 'default'\n10-07 02:51:52.354 24808 24808 V GraphicsEnvironment: ANGLE GameManagerService for com.google.android.permissioncontroller: false\n10-07 02:51:52.360 24839 24839 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10069; state: ENABLED\n10-07 02:51:52.361  1221  5096 W system_server: Large reply transaction of 373280 bytes, interface descriptor , code 1\n10-07 02:51:52.362  1414 24693 I sec_fr_AImageClient: Post Image Available\n10-07 02:51:52.362  1414 24684 I sec_fr_AImageClient: releaseBuffer() bufId = (0xb400007d66012380)\n10-07 02:51:52.362  1414 24684 I sec_fr_FaceWorkerManager: onReleaseBuffer : not found buffer - keepBuffer(0xb400007d66012380) \n10-07 02:51:52.362  1308 24708 E Camera3-Stream: [VSync] getBuffer: Stream 0: wait for max dequeued buffer exceeds 30000us (33853)us\n10-07 02:51:52.367  1221  1571 D ApplicationPolicy: isStatusBarNotificationAllowedAsUser: packageName = com.flashget.kidscontrol,userId = 0\n10-07 02:51:52.367  1221  1571 D ApplicationPolicy: isStatusBarNotificationAllowedAsUser: packageName = com.flashget.kidscontrol,userId = 0\n10-07 02:51:52.367  1221  1571 E NotificationService: Suppressing notification from package com.flashget.kidscontrol by user request.\n10-07 02:51:52.369  1221  7968 W system_server: Long monitor contention with owner binder:1221_10 (3072) at boolean com.android.server.job.JobServiceContext.executeRunnableJob(com.android.server.job.controllers.JobStatus, int)(JobServiceContext.java:380) waiters=0 in android.app.job.JobInfo com.android.server.job.JobSchedulerService.getPendingJob(int, int) for 451ms\n10-07 02:51:52.369  1221  1221 W Looper  : Slow dispatch took 162ms main h=com.android.server.job.JobSchedulerService$JobHandler c=null m=4\n10-07 02:51:52.372  2985  2985 I TouchInteractionService: onOverviewTargetChange, isHomeAndOverviewSame : false\n10-07 02:51:52.373  3980 24837 I ProximityAuth: [RecentAppsMediator] Package added: (user=UserHandle{0}) com.newleaf.app.android.victor\n10-07 02:51:52.374 24096 24096 I Routine@Core[4.2.01.2]: MetadataLoaderJobService: onCreate\n10-07 02:51:52.375 24096 24096 I Routine@Core[4.2.01.2]: Pref: putSharedPrefsData() key=pref_metaloader_loading\n10-07 02:51:52.375  2985  2985 I TouchInteractionService: onOverviewTargetChange, isHomeAndOverviewSame : false\n10-07 02:51:52.376  1221  1809 W Looper  : Slow dispatch took 254ms pm.handler2 h=android.os.Handler c=com.android.server.pm.Settings$RuntimePermissionPersistence$$ExternalSyntheticLambda0@87fb96a m=0\n10-07 02:51:52.377  1221  1809 W Looper  : Slow delivery took 234ms pm.handler2 h=android.os.Handler c=com.android.server.pm.Settings$RuntimePermissionPersistence$$ExternalSyntheticLambda0@adc6e5b m=0\n10-07 02:51:52.378  1221  1221 D PowerManagerService: [api] userActivity : event: 0 flags: 0 (uid: 1000 pid: 1221) <- handleMotionEvent() in com.android.server.accessibility.AccessibilityInputFilter:481 eventTime = 5312523 displayId = 0\n10-07 02:51:52.378  1221  1221 D InputDispatcher: Inject motion (0/0): action=0x0, time=5312523564000, f=0x0, d=0 dsdx=0.750000 dtdx=-0.000000\n10-07 02:51:52.379  1221  2292 I InputDispatcher: Delivering touch to (2521): action: 0x4, f=0x800, d=0, 'cd694ff', t=1 \n10-07 02:51:52.379  1221  2292 I InputDispatcher: Delivering touch to (2521): action: 0x0, f=0x800, d=0, '401a29f', t=1 *(0.75)\n10-07 02:51:52.379  2521  2521 I ViewRootImpl@a58004[NotificationShade]: ViewPostIme pointer 0\n10-07 02:51:52.380  1221  1494 I GestureDetector: obtain mCurrentDownEvent. id: 692974413 caller: com.android.server.wm.SystemGesturesPointerEventListener.onPointerEvent:203 com.android.server.wm.PointerEventDispatcher.onInputEvent:53 android.view.InputEventReceiver.dispatchInputEvent:285 \n10-07 02:51:52.380  1221  1494 I GestureDetector: obtain mCurrentDownEvent. id: 692974413 caller: com.android.server.wm.SystemPerformancePointerEventListener.onPointerEvent:89 com.android.server.wm.PointerEventDispatcher.onInputEvent:53 android.view.InputEventReceiver.dispatchInputEvent:285 \n10-07 02:51:52.380  2521  2521 D SecPanelLogger: PanelView.dispatchTouchEvent() MotionEvent { action=ACTION_DOWN, actionButton=0, id[0]=0, x[0]=474.34567, y[0]=1393.7839, toolType[0]=TOOL_TYPE_FINGER, buttonState=0, classification=NONE, metaState=0, flags=0x800, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=5312523, downTime=5312523, deviceId=3, source=0x1002, displayId=0, eventId=692974413 } |  StatusBarState:KEYGUARD\n10-07 02:51:52.380  2521  2521 D SecPanelLogger: NPVC InterceptTouch(ACTION_DOWN) (mQsExpansionEnabledPolicy:true && mQsExpansionEnabledAmbient:true && !isRemoteInputActive:true && !isDexStandAloneMode():true) |  StatusBarState:KEYGUARD\n10-07 02:51:52.381 24096 24096 I Routine@Core[4.2.01.2]: RoutineService: onDestroy\n10-07 02:51:52.381  2521  2521 I DymLock|DynamicLockContainer: isTouchOnItemViewArea() false\n10-07 02:51:52.381  2521  2521 D KeyguardTouchBase: setIntercept true\n10-07 02:51:52.381  2521  2521 D KeyguardTouchAnimator: intercepted: action=0 mQsExpanded=false, mQsFullyExpanded=false\n10-07 02:51:52.381  2521  2521 D SecPanelLogger: NPVC onTouch(ACTION_DOWN)  |  StatusBarState:KEYGUARD\n10-07 02:51:52.383  1049  2175 E FRONT_AF_DEBUG: [cam_id_0][CMG_EFL] FrontAfLib_AlgorithmInit (line 467) focus mode = 0 paf_stats_valid : 0 \n10-07 02:51:52.383  1049  2175 E FRONT_AF_DEBUG: Front_AfInit (line 156). C2(0xF82D). mode(0). sensor(3648 x 2736). touch(0 x 0 ). cal(far(241) - mid(-1) - near(339). curr(313)\n10-07 02:51:52.383  1049  2175 E FRONT_AF_DEBUG: [cam_id_0][CMG_EFL] Front_UpdateAfStatus (line 304) : AF status 0x20 0x3\n10-07 02:51:52.383  1049  2173 I SS_3A   :  INFO: AEC: TsAec_process_get_aec_info: 1550: [0][24] algo_out Av=2.273 g=16.890 e_t=0.03326 LLS=0x0 Ev=4.016 Bv=-1.004 PEv=3.996 Cvgd=0 lux=340, lls=0x0, drc=1.000 wide=1\n10-07 02:51:52.385  1414 24695 I sec_fr_FaceCameraClient: FaceCameraClient::onCaptureCompleted()\n10-07 02:51:52.387  1221  2957 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10064; state: DISABLED\n10-07 02:51:52.387  1221  2957 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 10064; state: DISABLED\n10-07 02:51:52.387  1221  2957 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 10064; state: DISABLED\n10-07 02:51:52.388  1221  2957 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 10064; state: ENABLED\n10-07 02:51:52.388  2985  2985 I TouchInteractionService: onOverviewTargetChange, isHomeAndOverviewSame : false\n10-07 02:51:52.388  1221  1573 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10064; state: ENABLED\n10-07 02:51:52.389  2985  2985 I TouchInteractionService: onOverviewTargetChange, isHomeAndOverviewSame : false\n10-07 02:51:52.389  1221  1799 E VerityUtils: Failed to measure fs-verity, errno 95: /data/app/~~HVVGkBadJFXpEsEbpt0vjA==/com.newleaf.app.android.victor-Zgm8amIG_ZPTC12zN2dd4w==/base.apk\n10-07 02:51:52.391  2985  2985 I TouchInteractionService: onOverviewTargetChange, isHomeAndOverviewSame : false\n10-07 02:51:52.391  1308  2460 I CameraService: onUidStateChanged: uid=10253, procState is changed. (16 -> 11)\n10-07 02:51:52.391  1414 24694 I sec_fr_AImageClient: Post Image Available\n10-07 02:51:52.391  1414 24684 I sec_fr_AImageClient: releaseBuffer() bufId = (0xb400007d6600ec60)\n10-07 02:51:52.391  1414 24684 I sec_fr_FaceWorkerManager: onReleaseBuffer : not found buffer - keepBuffer(0xb400007d6600ec60) \n10-07 02:51:52.393  1414 24693 I sec_fr_AImageClient: Post Image Available\n10-07 02:51:52.393  1414 24684 I sec_fr_AImageClient: releaseBuffer() bufId = (0xb400007d660133d0)\n10-07 02:51:52.393  1414 24684 I sec_fr_FaceWorkerManager: onReleaseBuffer : not found buffer - keepBuffer(0xb400007d660133d0) \n10-07 02:51:52.393  2985  2985 I TouchInteractionService: onOverviewTargetChange, isHomeAndOverviewSame : false\n10-07 02:51:52.394  2985  2985 I TouchInteractionService: onOverviewTargetChange, isHomeAndOverviewSame : false\n10-07 02:51:52.398  1414 24683 I sec_fr_engine_qsee: [Performance Log] QSEECom_send_cmd (113671) us in sec_fr_engine_on_authenticate_frame_cdsp\n10-07 02:51:52.398  1414 24683 I sec_fr_engine_qsee: sec_face :  Lly-XM#-}oy-X(#-Lr#-WXX#91-[d {`y-`zy-{`y-B#P-PUy-y91--ro PUy*32<-za*~n291-ro #`zz*l[2<-PUy*3291---ro y-#?P-?aa-P#P-P?B91--lo #zP-``P-Pay-`B?91lo P?y-By?-%`-UP91--[XXKMG %#B`-??P``{{P-{BU9---[XX P-#91---[XXKYG] y-y-y91-l[ ??-{`-y-y91--WXXL\\T\\M y9 #?U9 y9 y91-Ml #?9M] a#91\n10-07 02:51:52.398  1414 24683 I sec_fr_engine_qsee: cdsp handle process status (1), next step (2)\n10-07 02:51:52.398  1414 24683 I sec_fr_engine_qsee: return value from qsapp is 0\n10-07 02:51:52.398  1414 24683 I sec_fr_FaceRecognizer: sec_fr_engine_on_authenticate_frame - status = [12]\n10-07 02:51:52.398  1414 24683 I sec_fr_FaceRecognizer: sec_fr_engine_on_authenticate_frame is not successfull with status (12)\n10-07 02:51:52.398  1414 24683 I sec_fr_FaceRecognizer: change format status(12) to acquired(10)\n10-07 02:51:52.398  1414 24683 I FaceServiceCallback: sendOnAcquired vendorCode=10\n10-07 02:51:52.399  1414 24684 I sec_fr_AImageClient: releaseBuffer() bufId = (0xb400007d660136a0)\n10-07 02:51:52.399  1414 24684 I sec_fr_AImageClient: releaseBuffer() bufId = (0xb400007d66012800)\n10-07 02:51:52.399  1308  2732 I CameraService: onUidStateChanged: uid=10385, procState is changed. (16 -> 11)\n10-07 02:51:52.399  3980 24836 W GCM     : Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package: flg=0x4000010 pkg=com.google.android.gms cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }\n10-07 02:51:52.400  1308  2732 I CameraService: onUidStateChanged: uid=10253, procState is changed. (11 -> 16)\n10-07 02:51:52.401  1414 24683 I sec_fr_engine_qsee: sec_fr_engine_on_authenticate_frame\n10-07 02:51:52.401  1414 24683 I sec_fr_engine_qsee: sec_fr_engine_on_authenticate_frame_cdsp\n10-07 02:51:52.401  1414 24683 I sec_fr_engine_qsee: call QSEECom_send_cmd\n10-07 02:51:52.404  1221  2275 D PocketModeEvent: touch action : 0\n10-07 02:51:52.405   925   925 D Zygote  : Forked child process 24866\n10-07 02:51:52.405  1221  1573 I ActivityManager: Start proc 24866:com.samsung.android.dynamiclock/u0a64 for content provider {com.samsung.android.dynamiclock/com.samsung.android.dynamiclock.data.provider.DynamicLockProvider}\n10-07 02:51:52.409  3980 24837 E gle.android.gms: Invalid ID 0x00000000.\n10-07 02:51:52.410 24808 24808 D NetworkSecurityConfig: No Network Security Config specified, using platform default\n10-07 02:51:52.411 24808 24808 D NetworkSecurityConfig: No Network Security Config specified, using platform default\n10-07 02:51:52.412  3980 24859 I Auth    : (REDACTED) [SupervisedAccountIntentOperation] onHandleIntent: %s\n10-07 02:51:52.414  1049  2172 E FRONT_AF_DEBUG: [cam_id_0][CMG_EFL] FrontAfLib_AlgorithmInit (line 467) focus mode = 0 paf_stats_valid : 0 \n10-07 02:51:52.414  1049  2172 E FRONT_AF_DEBUG: Front_AfInit (line 156). C2(0xF82D). mode(0). sensor(3648 x 2736). touch(0 x 0 ). cal(far(241) - mid(-1) - near(339). curr(313)\n10-07 02:51:52.414  1049  2172 E FRONT_AF_DEBUG: [cam_id_0][CMG_EFL] Front_UpdateAfStatus (line 304) : AF status 0x20 0x3\n10-07 02:51:52.416  3980 24870 W NetworkScheduler: Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package: flg=0x4000010 pkg=com.google.android.gms cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }\n10-07 02:51:52.417  1049  2177 I SS_3A   :  INFO: AEC: TsAec_process_get_aec_info: 1550: [0][25] algo_out Av=2.273 g=17.307 e_t=0.03326 LLS=0x0 Ev=3.980 Bv=-1.023 PEv=3.977 Cvgd=0 lux=340, lls=0x0, drc=1.000 wide=1\n10-07 02:51:52.417  1414 24694 I sec_fr_AImageClient: Post Image Available\n10-07 02:51:52.417  1308  2732 I CameraService: onUidStateChanged: uid=10385, procState is changed. (11 -> 16)\n10-07 02:51:52.419  1414 24695 I sec_fr_FaceCameraClient: FaceCameraClient::onCaptureCompleted()\n10-07 02:51:52.424  1221  1494 I GestureDetector: obtain mCurrentMotionEventRaw. action: 2 id: 362262675\n10-07 02:51:52.424  1221  1494 I GestureDetector: obtain mCurrentMotionEventRaw. action: 2 id: 362262675\n10-07 02:51:52.427  1414 24693 I sec_fr_AImageClient: Post Image Available\n10-07 02:51:52.427  1308 24708 E Camera3-Stream: [VSync] getBuffer: Stream 0: wait for max dequeued buffer exceeds 30000us (32273)us\n10-07 02:51:52.430 22243 28391 E LoadedApk: Exception : java.lang.NullPointerException: Attempt to invoke virtual method 'boolean android.os.Looper.isPerfLogEnable()' on a null object reference\n10-07 02:51:52.432  3980 24876 W AppInstallOperation: FDL Migration::InstallIntentOperation by FDL Module [CONTEXT service_id=77 ]\n10-07 02:51:52.435 24808 24808 W FeatureFlagsImplExport: java.lang.NoClassDefFoundError: Failed resolution of: Landroid/os/flagging/AconfigPackage;\n10-07 02:51:52.435 13942 14155 I SmartFaceService: onReceive: android.intent.action.SCREEN_ON\n10-07 02:51:52.435 24808 24808 W FeatureFlagsImplExport: java.lang.NoClassDefFoundError: Failed resolution of: Landroid/os/flagging/AconfigPackage;\n10-07 02:51:52.436 24808 24808 W FeatureFlagsImplExport: java.lang.NoClassDefFoundError: Failed resolution of: Landroid/os/flagging/AconfigPackage;\n10-07 02:51:52.436 24808 24808 W FeatureFlagsImplExport: java.lang.NoClassDefFoundError: Failed resolution of: Landroid/os/flagging/AconfigPackage;\n10-07 02:51:52.437 24808 24808 W FeatureFlagsImplExport: java.lang.NoClassDefFoundError: Failed resolution of: Landroid/os/flagging/AconfigPackage;\n10-07 02:51:52.438  3980 24875 I FraudProtectUtils: Not in testing population, skipping local test bank apps. [CONTEXT service_id=469 ]\n10-07 02:51:52.438  3980 24875 I FraudProtectUtils: (REDACTED) Latest bank app list size: %d, %s isBankApp: false\n10-07 02:51:52.438  3980 24875 I PackageInstallIntentOp: (REDACTED) Package %s is not a bank app. Skipping updates.\n10-07 02:51:52.446 24866 24866 I oid.dynamiclock: Using generational CollectorTypeCC GC.\n10-07 02:51:52.448  1049  2172 E FRONT_AF_DEBUG: [cam_id_0][CMG_EFL] FrontAfLib_AlgorithmInit (line 467) focus mode = 0 paf_stats_valid : 0 \n10-07 02:51:52.448  1049  2172 E FRONT_AF_DEBUG: Front_AfInit (line 156). C2(0xF82D). mode(0). sensor(3648 x 2736). touch(0 x 0 ). cal(far(241) - mid(-1) - near(339). curr(313)\n10-07 02:51:52.448  1049  2172 E FRONT_AF_DEBUG: [cam_id_0][CMG_EFL] Front_UpdateAfStatus (line 304) : AF status 0x20 0x3\n10-07 02:51:52.449  1049  2173 I SS_3A   :  INFO: AEC: TsAec_process_get_aec_info: 1550: [0][26] algo_out Av=2.273 g=17.495 e_t=0.03326 LLS=0x0 Ev=3.965 Bv=-1.039 PEv=3.961 Cvgd=0 lux=341, lls=0x0, drc=1.000 wide=1\n10-07 02:51:52.451  1414 24694 I sec_fr_AImageClient: Post Image Available\n10-07 02:51:52.451  1414 24684 I sec_fr_AImageClient: releaseBuffer() bufId = (0xb400007d66012800)\n10-07 02:51:52.451  1414 24684 I sec_fr_FaceWorkerManager: onReleaseBuffer : not found buffer - keepBuffer(0xb400007d66012800) \n10-07 02:51:52.451  1414 24695 I sec_fr_FaceCameraClient: FaceCameraClient::onCaptureCompleted()\n10-07 02:51:52.454  1221  5050 D PackageManager: setEnabledSetting : userId = 95 packageName = com.google.android.permissioncontroller cmp = com.android.permissioncontroller.role.ui.SpecialAppAccessListActivity newState = 2 callingPackage = 9510282/com.google.android.permissioncontroller\n10-07 02:51:52.455  3692  3692 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color:export ANDROID_LOG_TAGS=''; exec logcat '-d' '-t' '250' '-v' 'threadtime''\n10-07 02:51:52.455 13942 14155 I SmartFaceService: from registerCoverManager -> mClearCoverOpened: true\n10-07 02:51:52.455 13942 14155 I SmartFaceService: mActiveServiceType: 100\n10-07 02:51:52.455 13942 14155 I SmartFaceService: Service Type to Worker: 0\n10-07 02:51:52.455 13942 14155 I SmartFaceService: Last Active clients:0 Current Active clients: 0\n10-07 02:51:52.460  1308 24708 E Camera3-Stream: [VSync] getBuffer: Stream 0: wait for max dequeued buffer exceeds 30000us (30667)us\n10-07 02:51:52.460 24711 24711 I VSET/CameraProxyWorker: applyEv: 0\n10-07 02:51:52.460  1221  5029 I RequestInjectorService: applyRequests requests size = 1\n10-07 02:51:52.460  1221  5029 I RequestInjectorService:   PersistableBundle[{key.i32=[0], key.tagName=samsung.android.unihal.aeExposureCompensation}]\n10-07 02:51:52.461  1221  5029 I RequestInjectorService: sendExtraRequestsToRequestInjector updated size = 1\n10-07 02:51:52.461  1221  5029 I RequestInjectorService:   PersistableBundle[{key.i32=[0], key.tagName=samsung.android.unihal.aeExposureCompensation}]\n10-07 02:51:52.461 13892 14609 E LoadedApk: Exception : java.lang.NullPointerException: Attempt to invoke virtual method 'boolean android.os.Looper.isPerfLogEnable()' on a null object reference\n10-07 02:51:52.462  1414 24693 I sec_fr_AImageClient: Post Image Available\n10-07 02:51:52.462  1414 24684 I sec_fr_AImageClient: releaseBuffer() bufId = (0xb400007d660136a0)\n10-07 02:51:52.462  1414 24684 I sec_fr_FaceWorkerManager: onReleaseBuffer : not found buffer - keepBuffer(0xb400007d660136a0) \n10-07 02:51:52.463 24866 24866 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok\n10-07 02:51:52.463  1308  2732 E CameraService: applyExtraRequestsToRequestInjector\n10-07 02:51:52.463  1308  2732 D CameraService: applyExtraRequestsToRequestInjector: tag(samsung.android.unihal.aeExposureCompensation) found\n10-07 02:51:52.463  1308  2732 D CameraService: applyExtraRequestsToRequestInjector: i32 type data found count(1) = [ 0 ]\n10-07 02:51:52.463  1308  2732 I CameraService: applyExtraRequestsToRequestInjector: # of changed request = 1\n10-07 02:51:52.463  1308  2732 I CameraService: applyExtraRequestsToRequestInjector: Skip Request Injector ExtraRequests to existing client(client.pid<1414>)\n10-07 02:51:52.463  1308  2732 D CameraService: applyExtraRequestsToRequestInjector: Apply Request Injector ExtraRequests done. Save it.\n10-07 02:51:52.464  1221  5029 I RequestInjectorService: sendExtraRequestsToRequestInjector done\n10-07 02:51:52.468 24866 24866 D ActivityThread: setConscryptValidator\n10-07 02:51:52.469 24866 24866 D ActivityThread: setConscryptValidator - put\n10-07 02:51:52.472  3980 24873 I Dck     : [DckModuleInit] Package added intent processing... [CONTEXT service_id=289 ]\n10-07 02:51:52.474  3980 24876 I NearbyDiscovery: (REDACTED) processGrantSlicePermission: %s\n10-07 02:51:52.478  3980 24837 I AppIconSolution: return the original icon because tray option is set to None for com.newleaf.app.android.victor, isNight = false\n10-07 02:51:52.478  1221  5096 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 10064; state: DISABLED\n10-07 02:51:52.479  1221  5096 I ActivityManager: DSS OFF for com.samsung.android.dynamiclock\n10-07 02:51:52.479  3980 24873 I Dck     : [DckModuleInit] Package added is not voem app [CONTEXT service_id=289 ]\n10-07 02:51:52.481  1049  2174 E FRONT_AF_DEBUG: [cam_id_0][CMG_EFL] FrontAfLib_AlgorithmInit (line 467) focus mode = 0 paf_stats_valid : 0 \n10-07 02:51:52.481  1049  2174 E FRONT_AF_DEBUG: Front_AfInit (line 156). C2(0xF82D). mode(0). sensor(3648 x 2736). touch(0 x 0 ). cal(far(241) - mid(-1) - near(339). curr(313)\n10-07 02:51:52.481  1049  2174 E FRONT_AF_DEBUG: [cam_id_0][CMG_EFL] Front_UpdateAfStatus (line 304) : AF status 0x20 0x3\n10-07 02:51:52.482  1049  2174 I SS_3A   :  INFO: AEC: TsAec_process_get_aec_info: 1550: [0][27] algo_out Av=2.273 g=17.590 e_t=0.03326 LLS=0x0 Ev=3.957 Bv=-1.043 PEv=3.957 Cvgd=1 lux=341, lls=0x0, drc=1.000 wide=1\n10-07 02:51:52.483  1221  5096 I ActivityManager: Changes in 10064 20 to 5, 0 to 8\n10-07 02:51:52.485 24866 24866 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10064; state: ENABLED\n10-07 02:51:52.489  1414 24695 I sec_fr_FaceCameraClient: FaceCameraClient::onCaptureCompleted()\n10-07 02:51:52.489  1414 24694 I sec_fr_AImageClient: Post Image Available\n10-07 02:51:52.490  1414 24684 I sec_fr_AImageClient: releaseBuffer() bufId = (0xb400007d660133d0)\n10-07 02:51:52.490  1414 24684 I sec_fr_FaceWorkerManager: onReleaseBuffer : not found buffer - keepBuffer(0xb400007d660133d0) \n10-07 02:51:52.492  1414 24693 I sec_fr_AImageClient: Post Image Available\n10-07 02:51:52.492  1414 24684 I sec_fr_AImageClient: releaseBuffer() bufId = (0xb400007d66012800)\n10-07 02:51:52.492  1414 24684 I sec_fr_FaceWorkerManager: onReleaseBuffer : not found buffer - keepBuffer(0xb400007d66012800) \n10-07 02:51:52.492  1308 24708 E Camera3-Stream: [VSync] getBuffer: Stream 0: wait for max dequeued buffer exceeds 30000us (30863)us\n10-07 02:51:52.494 24096 24096 I Routine@Core[4.2.01.2]: MetadataLoaderJobService: onStartJob: collectPackageInBG - com.newleaf.app.android.victor\n10-07 02:51:52.496 24096 24096 I Routine@Core[4.2.01.2]: MetadataSyncHistory: latest : 4.2.01.2, currentVersion : 4.2.01.2\n10-07 02:51:52.497  1221  2347 W DevicePolicyManager: Unknown user type: UserInfo{95:DUAL_APP:20001010}\n10-07 02:51:52.497  1221  2347 W DevicePolicyManager: Unknown user type: UserInfo{95:DUAL_APP:20001010}\n10-07 02:51:52.497  1414 24683 I sec_fr_engine_qsee: [Performance Log] QSEECom_send_cmd (95836) us in sec_fr_engine_on_authenticate_frame_cdsp\n10-07 02:51:52.497  1414 24683 I sec_fr_engine_qsee: sec_face :  Lly-XM#-}oy-X(#-Lr#-WXX#91-[d {`y-`zy-{`y-B#P-PUy-y91--ro PUy*32<-a#*~n291-ro #{{B*l[2<-PUy*3291---ro y-U#-?{B-P#U-PPU91---lo #P?-`yU-P?P-`#y91lo #Uz-`{B-%?-U`91--[XXKMG %#a{-??P``{{P-Uy#9---[XX P-#91---[XXKYG] y-y-y91-l[ P{-{z-y-y91--WXXL\\T\\M y9 ##y9 y9 y91-Ml ?B9M] Ua91\n10-07 02:51:52.497  1414 24683 I sec_fr_engine_qsee: cdsp handle process status (1), next step (2)\n10-07 02:51:52.497  1414 24683 I sec_fr_engine_qsee: return value from qsapp is 0\n10-07 02:51:52.497  1414 24683 I sec_fr_FaceRecognizer: sec_fr_engine_on_authenticate_frame - status = [12]\n10-07 02:51:52.497  1414 24683 I sec_fr_FaceRecognizer: sec_fr_engine_on_authenticate_frame is not successfull with status (12)\n10-07 02:51:52.497  1414 24683 I sec_fr_FaceRecognizer: change format status(12) to acquired(10)\n10-07 02:51:52.497  1414 24683 I FaceServiceCallback: sendOnAcquired vendorCode=10\n10-07 02:51:52.497 13892 14609 E LoadedApk: Exception : java.lang.NullPointerException: Attempt to invoke virtual method 'boolean android.os.Looper.isPerfLogEnable()' on a null object reference\n10-07 02:51:52.498  1414 24684 I sec_fr_AImageClient: releaseBuffer() bufId = (0xb400007d66012380)\n10-07 02:51:52.498  1414 24684 I sec_fr_AImageClient: releaseBuffer() bufId = (0xb400007d6600ec60)\n10-07 02:51:52.498  1414 24683 I sec_fr_engine_qsee: sec_fr_engine_on_authenticate_frame\n10-07 02:51:52.498  1414 24683 I sec_fr_engine_qsee: sec_fr_engine_on_authenticate_frame_cdsp\n10-07 02:51:52.498  1414 24683 I sec_fr_engine_qsee: call QSEECom_send_cmd\n10-07 02:51:52.499  1221  2347 W DevicePolicyManager: Unknown user type: UserInfo{95:DUAL_APP:20001010}\n10-07 02:51:52.499  1221  2347 W DevicePolicyManager: Unknown user type: UserInfo{95:DUAL_APP:20001010}\n10-07 02:51:52.502  2985 24192 I LauncherProvider: External provider call by package : com.samsung.android.app.galaxyfinder  for method : get_home_mode\n10-07 02:51:52.502  2985 24192 I ExternalMethodFactory: get_home_mode\n"
+      }
+    },
+    "artifact": {
+      "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-signed.apk",
+      "sha256": "35304cfda30efe781c6a32057f0ef2d9d8f179f323d2470f89f5518c8e33de78"
+    },
+    "evidence_class": "OBSERVED",
+    "causal_proof": false,
+    "status": "CAPTURED"
+  },
+  "gadget_observation": {
+    "schema_version": 1,
+    "status": "READY",
+    "mode": "OBSERVATION_ONLY",
+    "artifact": {
+      "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025114-23700/instrumented-signed.apk",
+      "sha256": "35304cfda30efe781c6a32057f0ef2d9d8f179f323d2470f89f5518c8e33de78"
+    },
+    "package": "com.newleaf.app.android.victor",
+    "module": "libsaasCorePlayer.so",
+    "target_offset": "0x27a510",
+    "requires_gadget": true,
+    "mutates_original_apk": false,
+    "causal_proof": false,
+    "proof_class": "OBSERVED_ONLY"
+  },
+  "evidence_ledger": {
+    "status": "NOT_READY"
+  },
+  "status": "completed",
+  "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+  "critical_pointer": "0x27a510",
+  "jni_semantic_found": true,
+  "vtable_abi": {
+    "address_point": "0x717e60",
+    "slot": "0x717f68",
+    "rtti": "0x71f4d0",
+    "type_name": "N6Cicada17mediaCodecDecoderE",
+    "container_vtable": null,
+    "pointer": "0x27a510",
+    "function_symbol": null
+  },
+  "critical_function_behavior": "NO_SECURITY_OPERATION_OBSERVED",
+  "autonomous_dataflow": {
+    "status": "completed",
+    "proven": 0,
+    "candidates": 473,
+    "cxx_unresolved": 354,
+    "jni_excluded_count": 6,
+    "constructor_calls": 4
+  },
+  "runtime_probe_status": "FRIDA_GADGET_REQUIRED"
+}
