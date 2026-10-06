@@ -9,6 +9,7 @@ from proof_gate import (
     PROVEN_RUNTIME_ORIGINAL,
     PROVEN_STATIC,
     classify_target_evidence,
+    correlate_behavioral_event,
     screenshot_blocking_claim_allowed,
 )
 
