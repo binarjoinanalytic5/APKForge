@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
-VERSION = "2.2.2"
+VERSION = "2.2.3"
 PROBES = [
     "elf",
     "symbols",
@@ -118,6 +118,32 @@ def resolve_runtime_clients(preflight):
     adb, adb_source = choose(adb_candidates, "adb")
     frida, frida_source = choose(frida_candidates, "frida")
     return adb, adb_source, frida, frida_source
+
+
+def classify_frida_failure(output):
+    """Classify common Frida runtime failures into actionable states."""
+    lowered = (output or "").lower()
+
+    if "need gadget to attach on jailed android" in lowered:
+        return (
+            "FRIDA_GADGET_REQUIRED",
+            "Frida connected to Android, but spawn is unavailable on a jailed device without Frida Gadget or an equivalent privileged backend",
+        )
+
+    if (
+        "frida-server" in lowered
+        or "unable to connect to remote" in lowered
+        or "unable to communicate" in lowered
+    ):
+        return (
+            "FRIDA_BACKEND_UNAVAILABLE",
+            "Frida could not establish a usable Android instrumentation backend",
+        )
+
+    return (
+        "FRIDA_PROBE_FAILED",
+        "Frida runtime probe exited non-zero",
+    )
 
 
 def sha256_file(path):
@@ -1122,17 +1148,9 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
                 result["status"]="RUNTIME_PROBE_TIMEOUT_NO_TARGET_OBSERVED"
                 result["reason"]="Frida probe exceeded the bounded 18s execution window"
             elif frida_rc != 0:
-                lowered=frida_output.lower()
-                if (
-                    "frida-server" in lowered
-                    or "unable to connect to remote" in lowered
-                    or "unable to communicate" in lowered
-                ):
-                    result["status"]="FRIDA_BACKEND_UNAVAILABLE"
-                    result["reason"]="Frida could not establish an Android instrumentation backend"
-                else:
-                    result["status"]="FRIDA_PROBE_FAILED"
-                    result["reason"]="Frida runtime probe exited non-zero"
+                status, reason = classify_frida_failure(frida_output)
+                result["status"] = status
+                result["reason"] = reason
             else:
                 result["status"]="RUNTIME_TARGET_NOT_OBSERVED"
                 result["reason"]="Frida probe ran, but no target entry satisfied the full vptr+slot proof predicate"
