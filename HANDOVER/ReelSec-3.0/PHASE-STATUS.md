@@ -55,3 +55,40 @@ Frida Gadget observation planning is now present for the instrumented artifact. 
 ## Next engineering gate
 
 Connect actual Gadget hook-event ingestion to these validators, then correlate target/vtable events with a bounded behavioral observation. Only the instrumented artifact may receive this observation hook; original-APK proof remains a separate evidence class.
+
+## Phone / Termux validation — 2026-10-06
+
+The Android test environment was validated on a Samsung SM-N986U running Android 13 / SDK 33 / arm64-v8a.
+
+Validated capabilities:
+- Python 3.14.6: usable.
+- Java 21.0.12 in Termux: usable.
+- ADB 1.0.41 / Android platform-tools 37.0.0-android: usable; a test device is connected over ADB TCP.
+- Apktool 2.7.0-dirty: usable through the standalone Java classpath backend in the Ubuntu PRoot rootfs.
+- `proot-distro`: usable with Debian and Ubuntu containers.
+- Frida 17.22.2: available in Debian PRoot. Direct jailed-Android spawn previously classified as `FRIDA_GADGET_REQUIRED`.
+- `apksigner`, `zipalign`, `jarsigner`, `unzip`: present. `zip` is not present.
+- `original.apk` remains immutable.
+
+The phone checkout itself is intentionally dirty with investigation outputs and local edits. The remote bootstrap path was therefore hardened so it can materialize the complete remote ReelSec Python package into a temporary staging tree and execute it without stashing, resetting, rebasing, merging, or overwriting the local investigation tree.
+
+## Source synchronization correction
+
+The phone had been pinned to a report branch commit where only the legacy `reelsec.py` existed locally. ReelSec 3.0 components were present on PR #5 but not on the phone's local refs.
+
+PR #5 was merged into `main` at `6907c95fe42273e40da93953be7e89af99e58815` after:
+- fixing the proof-gate test's missing `UNPROVEN` import;
+- adding final instrumented-proof classifier coverage;
+- simplifying CI discovery to compile all ReelSec Python modules and discover all `test_*.py` tests;
+- fixing dirty-tree bootstrap staging so sibling ReelSec modules resolve correctly.
+
+The subsequent bootstrap fix is committed on `main` at `d9d9f749f73becb4a32b0c057dfb4edeebb61e71`.
+
+## Immediate phone gate
+
+Run the remote bootstrap entrypoint from the current checkout:
+
+`cd ~/apk-lab/ReelShort-v4.2.00 && git show origin/main:tools/reelsec/bootstrap-run.sh | bash -s -- campaign ./original.apk`
+
+This route is expected to preserve local investigation changes while executing the current `main` ReelSec 3.0 package. The first required evidence gates are capability resolution, Apktool backend selection, isolated decode, decoded inventory, and input provenance. Build/sign/install/runtime stages remain independently gated by their required explicit test configuration.
+
