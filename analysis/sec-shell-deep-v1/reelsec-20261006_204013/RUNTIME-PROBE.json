@@ -1,0 +1,21 @@
+{
+  "events": [],
+  "manifest": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/AndroidManifest.xml",
+  "missing_requirements": [],
+  "module": "libsaasCorePlayer.so",
+  "package": "com.newleaf.app.android.victor",
+  "preflight_status": "CLIENTS_READY",
+  "reason": "adb is installed but no online device is available",
+  "status": "NO_ONLINE_ANDROID_DEVICE",
+  "tooling": {
+    "adb": "/data/data/com.termux/files/usr/bin/adb",
+    "adb_devices": [],
+    "frida": "/data/data/com.termux/files/home/.local/bin/frida",
+    "frida_after_pkg": null,
+    "frida_after_proot": "/data/data/com.termux/files/home/.local/bin/frida",
+    "frida_wrapper": "/data/data/com.termux/files/home/.local/bin/frida",
+    "pkg": "/data/data/com.termux/files/usr/bin/pkg",
+    "proot_distro": "/data/data/com.termux/files/usr/bin/proot-distro",
+    "python": "/data/data/com.termux/files/usr/bin/python"
+  }
+}
