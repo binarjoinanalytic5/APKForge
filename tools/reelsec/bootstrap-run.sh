@@ -47,7 +47,7 @@ if ! git show "$REMOTE/$BRANCH:$TOOL" > "$TMP"; then
   exit 1
 fi
 chmod +x "$TMP"
-python3 "$TMP" "$@"
+REELSEC_ROOT="$ROOT" python3 "$TMP" "$@"
 STATUS=$?
 
 echo
