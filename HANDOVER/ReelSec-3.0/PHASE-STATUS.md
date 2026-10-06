@@ -202,3 +202,11 @@ When an ETA cannot be derived safely, ReelSec reports `ETA=unknown` rather than 
 Regression test added: `tools/reelsec/test_progress_estimate.py` (commit `2c1d212dec4eb63fc248c8b79770f37fbe308377`).
 
 Latest source fix for measured progress: `1a8ca8d222cfe83e33545267d604d125bd9a211c`.
+
+## Decode liveness hardening — 2026-10-06
+
+The latest phone run confirms the measured progress path is active, but Apktool can remain on a single coarse milestone (`MANIFEST`) for a long time. ReelSec therefore does not invent a finer percentage when Apktool exposes no reliable sub-work unit. During long phases the heartbeat now reports process activity from Linux `/proc/<pid>/stat` CPU jiffies plus log-byte deltas, and persists that telemetry in `PROGRESS.json` as `current_activity` and `current_log_delta_bytes`.
+
+The Apktool timeout was raised from 300s to 900s by default, with `REELSEC_APKTOOL_TIMEOUT` available as a per-run override. This prevents a slow but active decode from being misclassified as a failure solely because it crossed five minutes. The estimate remains explicitly separate from measured class-output progress during Baksmaling.
+
+Relevant commits: `d240cc3e2344ae4240734fa237eb444aefaa0578` (source) and `46f1cfc004be9dfc70379ba14f0316daa0a2bc4f` (regression test).
