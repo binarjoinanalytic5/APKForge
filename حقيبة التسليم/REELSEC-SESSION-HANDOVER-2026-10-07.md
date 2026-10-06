@@ -3,7 +3,7 @@
 
 **Repository:** binarjoinanalytic5/ReelShort-v4.2.00-analysis  
 **Branch:** main  
-**Latest known implementation commit:** 4a4c216558386e16344306a7758b91f92fb565ef  
+**Latest known implementation commit:** 71fa8d7215da7666f18de0a8367190894be375b5  
 **Target APK:** original.apk  
 **Package:** com.newleaf.app.android.victor  
 **Version:** 4.2.00 / versionCode 4200
@@ -194,3 +194,52 @@ Expected Stage 10 behavior with the currently observed single online device:
 - Stage 10 should use `192.168.8.8:32897` and record `AUTO_REBOUND_SINGLE_ONLINE_DEVICE`.
 
 Success at Stage 10 is still only deployment evidence. Stage 12/runtime and the native proof gate remain the decisive next steps.
+
+
+## 18. Campaign 2026-10-07 02:47 — ADB endpoint fixed; package-signature gate exposed
+Report:
+`analysis/sec-shell-deep-v1/reelsec-20261007_024703-21217`
+
+Confirmed:
+- Stage 10 selected the current online endpoint `192.168.8.8:32897`; the stale `39927` problem is fixed.
+- The signed instrumented artifact was valid: Stage 09 `SIGNED_VERIFIED`.
+- Android rejected the install with `INSTALL_FAILED_UPDATE_INCOMPATIBLE` because the already-installed `com.newleaf.app.android.victor` is signed by a different certificate.
+- The initial incremental-install warning (`Incremental installation not allowed`) was followed by a normal streamed install attempt; the decisive failure is the signature mismatch.
+- Stage 12 therefore remained `NOT_CAPTURED`.
+- Native proof remains unchanged: `AUTONOMOUS_DATAFLOW_PROVEN=False`, `RUNTIME_PROOF_STATUS=FRIDA_GADGET_REQUIRED`.
+- Published report commit: `66c2c41c72c32c5208e77d139535c02e21850442`.
+- Published status commit: `3b844ba3b6035f6f785bbe5cccc144b1a82fafd9`.
+
+## 19. Guarded reinstall fix
+Implementation commits:
+- `c603b305884ca9b1af6a1c04711fb112b3e093d2`: add precise signature-mismatch classification.
+- `6cc873e9978132d34ec9f19c370cc2706c4a2135`: Stage 10 can retry after uninstalling the existing package, but **only** when `REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1` is explicitly set.
+- `71fa8d7215da7666f18de0a8367190894be375b5`: regression test for the signature-mismatch classifier.
+
+Safety rule:
+- ReelSec never silently uninstalls an existing package.
+- The uninstall path requires `REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1`.
+- It also requires `REELSEC_TEST_PACKAGE`; the uninstall target is exactly that configured test package.
+- The uninstall/reinstall mode is recorded in `ADB-DEPLOY.json`.
+- This is a test-device installation concern and is independent from screenshot/recording proof.
+
+## 20. Immediate next action
+The next campaign should be run only on the intended explicit test device, with the guarded uninstall flag enabled so the tool can replace the differently-signed existing package:
+
+```bash
+export REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1
+
+cd ~/apk-lab/ReelShort-v4.2.00 && \
+git fetch origin main && \
+git show origin/main:tools/reelsec/bootstrap-run.sh | bash -s -- campaign ./original.apk
+```
+
+Keep the existing signing/password environment variables unchanged. Do not modify `original.apk`.
+
+Expected progression:
+- Stage 09: `SIGNED_VERIFIED`
+- Stage 10: uninstall existing same-package test install, then install isolated signed artifact
+- Stage 12: `CAPTURED` if the instrumented application launches and the bounded runtime collector succeeds
+- Stage 13 may still report `dataflow_proven=False`; only direct runtime observations can advance the proof gate.
+
+Do not claim Screenshot/Recording protection from successful installation or Gadget readiness alone.
