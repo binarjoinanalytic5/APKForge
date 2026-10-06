@@ -20,6 +20,7 @@ from sign_verify import artifact_identity, sign_command, verify_command, run_che
 from adb_deploy import install_command, device_check_command
 from runtime_capture import capture_snapshot, bind_artifact
 from gadget_observer import plan_gadget_observation
+from proof_gate import build_evidence_ledger
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
 VERSION = "3.0.0"
@@ -1683,6 +1684,7 @@ def main():
             encoding="utf-8",
         )
 
+    evidence_ledger = {"status": "NOT_READY"}
     gadget_observation = {"status": "NOT_PLANNED"}
     if sign_verify.get("status") == "SIGNED_VERIFIED":
         try:
@@ -1744,7 +1746,7 @@ def main():
         "sign_verify": sign_verify,
         "adb_deploy": adb_deploy,
         "runtime_capture": runtime_capture,
-        "gadget_observation": gadget_observation,
+        "gadget_observation": gadget_observation,\n        "evidence_ledger": evidence_ledger,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
