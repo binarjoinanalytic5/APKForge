@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:tag="layout/item_discover_second_tab_layout_0"
+    android:clipChildren="false"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent">
+    <TextView
+        android:gravity="center"
+        android:id="@+id/tv_tab"
+        android:background="@drawable/bg_ffffff_alpha_10_corner4"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginTop="3dp"
+        android:paddingHorizontal="8dp"
+        style="@style/body_medium"/>
+    <ImageView
+        android:id="@+id/iv_tab"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginTop="3dp"
+        android:scaleType="fitCenter"/>
+    <ImageView
+        android:layout_gravity="top|right"
+        android:id="@+id/iv_red_point"
+        android:background="@drawable/discover_channel_tab_red_point"
+        android:visibility="gone"
+        android:layout_width="6dp"
+        android:layout_height="6dp"
+        android:layout_marginRight="-3dp"/>
+</FrameLayout>

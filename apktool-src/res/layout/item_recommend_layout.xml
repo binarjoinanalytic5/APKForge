@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:tag="layout/item_recommend_layout_0" android:layout_width="match_parent" android:layout_height="169.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.newleaf.app.android.victor.view.RoundImageView android:id="@id/iv_book_poster" android:layout_width="127.0dp" android:layout_height="169.0dp" app:borderColor="@color/color_white15" app:borderWidth="1.0dp" style="@style/v_book_poster_image_style" />
+    <com.newleaf.app.android.victor.view.BookMarkView android:id="@id/bookMarkView" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignTop="@id/iv_book_poster" android:layout_alignStart="@id/iv_book_poster" style="@style/v_book_mark_style" />
+    <ImageView android:background="@drawable/bg_shadow" android:layout_width="127.0dp" android:layout_height="wrap_content" android:layout_alignBottom="@id/iv_book_poster" />
+    <TextView android:textSize="12.0sp" android:textColor="@color/color_white" android:id="@id/tv_viewed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="5.0dp" android:includeFontPadding="false" android:layout_alignBottom="@id/iv_book_poster" android:drawableStart="@drawable/icon_play_count" android:layout_marginEnd="3.0dp" android:layout_alignEnd="@id/iv_book_poster" />
+    <TextView android:textSize="16.0sp" android:textColor="@color/white" android:ellipsize="end" android:id="@id/tv_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="2" android:layout_marginStart="8.0dp" android:layout_toEndOf="@id/iv_book_poster" />
+    <TextView android:textSize="12.0sp" android:textColor="@color/color_white60" android:ellipsize="end" android:id="@id/tv_desc" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8.0dp" android:maxLines="5" android:layout_below="@id/tv_title" android:layout_marginStart="8.0dp" android:layout_toEndOf="@id/iv_book_poster" />
+    <RelativeLayout android:id="@id/rl_play" android:layout_width="match_parent" android:layout_height="38.0dp" android:layout_alignBottom="@id/iv_book_poster" android:layout_marginStart="8.0dp" android:layout_toEndOf="@id/iv_book_poster">
+        <ProgressBar android:id="@id/pb_progress" android:background="@null" android:layout_width="match_parent" android:layout_height="38.0dp" android:progressDrawable="@drawable/pb_4dffffff_ffffff" style="?android:progressBarStyleHorizontal" />
+        <TextView android:textSize="16.0sp" android:textColor="@color/color_black" android:id="@id/tv_play" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/play" android:drawablePadding="6.0dp" android:layout_centerInParent="true" android:drawableStart="@drawable/icon_play_black" />
+    </RelativeLayout>
+</RelativeLayout>

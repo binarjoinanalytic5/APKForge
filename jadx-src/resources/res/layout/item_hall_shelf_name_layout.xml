@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rl_shelf_name_root"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp">
+    <TextView
+        android:textSize="21sp"
+        android:textStyle="bold"
+        android:textColor="@color/color_ffffff_alpha_90"
+        android:ellipsize="end"
+        android:id="@+id/tv_shelf_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="7dp"/>
+</FrameLayout>

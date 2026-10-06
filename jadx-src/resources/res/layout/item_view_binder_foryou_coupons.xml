@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cl_root"
+    android:tag="layout/item_view_binder_foryou_coupons_0"
+    android:background="@drawable/bg_161616_corner_4"
+    android:layout_width="match_parent"
+    android:layout_height="40dp"
+    android:layout_marginTop="12dp">
+    <ImageView
+        android:id="@+id/iv_icon_coupons"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:src="@drawable/icon_coupons_white"
+        android:layout_marginStart="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+    <TextView
+        android:textSize="14sp"
+        android:textColor="@color/color_ffffff_alpha_90"
+        android:id="@+id/tv_my_coupons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/my_coupons"
+        android:layout_marginStart="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/iv_icon_coupons"
+        app:layout_constraintTop_toTopOf="parent"/>
+    <ImageView
+        android:id="@+id/iv_right_arrow"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:src="@drawable/icon_right_arrow"
+        android:layout_marginEnd="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

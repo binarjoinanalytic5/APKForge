@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:gravity="center"
+    android:id="@+id/tv_no_more"
+    android:tag="layout/foot_view_no_more_data_layout_2_0"
+    android:paddingTop="26dp"
+    android:paddingBottom="33dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    style="@style/footnote_regular"/>

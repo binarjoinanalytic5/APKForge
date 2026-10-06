@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:orientation="vertical" android:id="@id/cl_main" android:tag="layout/activity_comic_0" android:background="@color/backgrounds_background_2" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.fragment.app.FragmentContainerView android:id="@id/fl_unlock_helper" android:layout_width="0.0dp" android:layout_height="0.0dp" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
+    <androidx.fragment.app.FragmentContainerView android:id="@id/fl_read" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <androidx.fragment.app.FragmentContainerView android:id="@id/fl_control" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <com.newleaf.app.android.victor.view.LoadFailView android:id="@id/load_fail_view" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent" android:elevation="1.0dp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

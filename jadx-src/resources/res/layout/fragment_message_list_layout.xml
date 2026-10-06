@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:tag="layout/fragment_message_list_layout_0"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.scwang.smart.refresh.layout.SmartRefreshLayout
+        android:id="@+id/refresh_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.newleaf.app.android.victor.view.RecyclerViewAtViewPager2
+            android:id="@+id/recycle_view"
+            android:scrollbars="none"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:overScrollMode="never"
+            android:layout_marginHorizontal="16dp"/>
+    </com.scwang.smart.refresh.layout.SmartRefreshLayout>
+    <com.newleaf.app.android.victor.view.LoadFailView
+        android:id="@+id/loadFailView"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</FrameLayout>

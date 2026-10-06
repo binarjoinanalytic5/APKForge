@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.newleaf.app.android.victor.view.XBannerAtViewPager2 android:id="@id/banner" android:tag="layout/item_store_banner_layout_0" android:layout_width="match_parent" android:layout_height="102.0dp" android:scaleType="centerCrop" android:importantForAccessibility="no" app:pageChangeDuration="800" app:pointNormal="@drawable/shape_reward_banner_point_normal" app:pointSelect="@drawable/shape_reward_banner_point_select" app:pointTopBottomPadding="3.0dp" app:pointsVisibility="true"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" />

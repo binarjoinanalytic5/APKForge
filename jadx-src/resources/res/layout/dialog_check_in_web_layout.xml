@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:tag="layout/dialog_check_in_web_layout_0"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/web_container"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <LinearLayout
+        android:layout_gravity="center_horizontal"
+        android:orientation="vertical"
+        android:id="@+id/ll_loading"
+        android:background="@drawable/loading_common_shape_bg"
+        android:visibility="gone"
+        android:layout_width="96dp"
+        android:layout_height="wrap_content">
+        <com.airbnb.lottie.LottieAnimationView
+            android:layout_gravity="center_horizontal"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="28dp"
+            android:layout_marginBottom="28dp"
+            app:lottie_autoPlay="true"
+            app:lottie_fileName="loading_icon2.json"
+            app:lottie_loop="true"/>
+        <View
+            android:id="@+id/view_line"
+            android:background="#26ffffff"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"/>
+        <TextView
+            android:textSize="12sp"
+            android:textColor="@color/color_white90"
+            android:layout_gravity="center_horizontal"
+            android:id="@+id/tv_cancel"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="7dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/cancel"/>
+    </LinearLayout>
+</FrameLayout>

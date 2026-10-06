@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:tag="layout/item_vip_new_benefits_layout_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView android:textSize="10.0sp" android:textStyle="bold" android:textColor="@color/black" android:gravity="center" android:id="@id/tv_num" android:background="@drawable/bg_white_circle_shape" android:layout_width="16.0dp" android:layout_height="16.0dp" android:includeFontPadding="false" app:layout_constraintBottom_toBottomOf="@id/tv_content" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="@id/tv_content" />
+    <TextView android:textColor="@color/texticon_primary" android:id="@id/tv_content" android:layout_width="0.0dp" android:layout_height="wrap_content" android:text="Collect daily VIP points." android:layout_marginStart="8.0dp" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toEndOf="@id/tv_num" app:layout_constraintTop_toTopOf="parent" style="@style/body_medium" />
+</androidx.constraintlayout.widget.ConstraintLayout>

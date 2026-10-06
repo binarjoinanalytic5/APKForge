@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:tag="layout/fragment_tag_recommend_0" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.newleaf.app.android.victor.view.RecyclerViewAtViewPager2 android:id="@id/rc_list" android:scrollbars="none" android:layout_width="match_parent" android:layout_height="match_parent" android:overScrollMode="never" android:layout_marginStart="16.0dp" android:layout_marginEnd="16.0dp" android:nestedScrollingEnabled="true" app:layout_behavior="" />
+    <com.newleaf.app.android.victor.view.LoadFailView android:id="@id/load_fail_view" android:tag="binding_1" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent" android:elevation="0.5dp" app:load_fail_view_bg_color="@color/transparent" />
+</FrameLayout>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:tag="layout/fragment_old_store_0" android:background="@color/profile_common_bg" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include android:id="@id/title" layout="@layout/include_title_transparent_background_bar" />
+    <com.newleaf.app.android.victor.view.RecyclerViewAtViewPager2 android:id="@id/rlv_list" android:scrollbars="none" android:clipChildren="false" android:clipToPadding="false" android:layout_width="0.0dp" android:layout_height="0.0dp" android:layout_marginTop="8.0dp" android:overScrollMode="never" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/title" />
+    <com.newleaf.app.android.victor.view.LoadFailView android:id="@id/loadFailView" android:tag="binding_1" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

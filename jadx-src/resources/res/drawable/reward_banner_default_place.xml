@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:height="98dp"
+        android:width="351dp">
+        <shape android:shape="rectangle">
+            <size
+                android:height="98dp"
+                android:width="351dp"/>
+            <solid android:color="#29ffffff"/>
+        </shape>
+    </item>
+    <item
+        android:gravity="center"
+        android:height="55dp"
+        android:width="55dp">
+        <bitmap android:src="@drawable/icon_reward_banner_place"/>
+    </item>
+</layer-list>

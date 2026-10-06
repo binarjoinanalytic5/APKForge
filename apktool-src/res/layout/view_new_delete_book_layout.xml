@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <RelativeLayout android:id="@id/rl_delete" android:tag="layout/view_new_delete_book_layout_0" android:background="@color/color_000000" android:layout_width="match_parent" android:layout_height="@dimen/main_bottom_navigation_height" app:layout_constraintBottom_toBottomOf="parent">
+        <FrameLayout android:id="@id/fl_select_all" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignTop="@id/tv_select_all" android:layout_alignBottom="@id/tv_select_all" android:paddingStart="16.0dp" android:paddingEnd="4.0dp">
+            <CheckBox android:layout_gravity="center" android:id="@id/cb_check_all" android:background="@drawable/check_delete_all2" android:layout_width="20.0dp" android:layout_height="20.0dp" android:button="@null" />
+        </FrameLayout>
+        <TextView android:textColor="@color/color_ffffff_alpha_90" android:id="@id/tv_select_all" android:paddingTop="10.0dp" android:paddingBottom="10.0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6.0dp" android:text="@string/select_all" android:layout_toEndOf="@id/fl_select_all" android:paddingVertical="10.0dp" style="@style/headline_medium" />
+        <LinearLayout android:gravity="center" android:orientation="horizontal" android:id="@id/ll_delete" android:layout_width="wrap_content" android:layout_height="match_parent" android:paddingStart="5.0dp" android:paddingEnd="16.0dp" android:layout_alignParentEnd="true">
+            <ImageView android:id="@id/img_icon_delete" android:layout_width="24.0dp" android:layout_height="24.0dp" android:layout_marginTop="1.0dp" android:src="@drawable/icon_dialog_delete_none" android:layout_marginEnd="4.0dp" />
+            <TextView android:textColor="@color/color_ffffff_alpha_30" android:id="@id/tv_delete" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/delete" style="@style/headline_medium" />
+        </LinearLayout>
+    </RelativeLayout>
+</merge>

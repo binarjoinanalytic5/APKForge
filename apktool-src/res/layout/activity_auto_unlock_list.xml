@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:tag="layout/activity_auto_unlock_list_0" android:background="@color/profile_common_bg" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <include android:id="@id/title" layout="@layout/include_title_bar" />
+    <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
+        <androidx.recyclerview.widget.RecyclerView android:orientation="vertical" android:id="@id/rlv_auto_unlock" android:background="@color/backgrounds_background_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="16.0dp" />
+        <com.newleaf.app.android.victor.view.LoadFailView android:id="@id/loadFailView" android:tag="binding_1" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent" />
+    </FrameLayout>
+</LinearLayout>

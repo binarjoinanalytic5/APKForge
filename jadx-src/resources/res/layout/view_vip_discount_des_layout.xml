@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:id="@+id/v_vip_discount_card"
+    android:tag="layout/view_vip_discount_des_layout_0"
+    android:background="#1affb629"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="40dp"
+    android:paddingHorizontal="16dp">
+    <ImageView
+        android:id="@+id/iv_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/icon_bell"/>
+    <androidx.appcompat.widget.AppCompatTextView
+        android:textColor="@color/texticon_yellow_normal"
+        android:id="@+id/tv_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        style="@style/footnote_regular"/>
+</LinearLayout>

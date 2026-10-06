@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:tag="layout/item_book_detail_common_tag_layout_0" android:background="@drawable/bg_1affffff_corner4" android:paddingLeft="6.0dp" android:paddingTop="4.0dp" android:paddingRight="6.0dp" android:paddingBottom="4.0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:paddingHorizontal="6.0dp" android:paddingVertical="4.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView android:id="@id/iv_hot" android:visibility="gone" android:layout_width="16.0dp" android:layout_height="16.0dp" android:src="@drawable/icon_hot" />
+    <TextView android:textColor="@color/texticon_primary" android:id="@id/tv_tag" android:layout_width="wrap_content" android:layout_height="wrap_content" style="@style/footnote_regular" />
+    <ImageView android:layout_width="10.0dp" android:layout_height="10.0dp" android:src="@drawable/icon_arror_right_white" />
+</LinearLayout>

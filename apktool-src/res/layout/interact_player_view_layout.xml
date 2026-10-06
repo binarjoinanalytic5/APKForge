@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:tag="layout/interact_player_view_layout_0" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.newleaf.app.android.victor.view.RecyclerViewAtPlayer android:id="@id/recycle_view" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <include android:id="@id/title_space" layout="@layout/include_statusbar_space" />
+    <include android:id="@id/include_level_tag" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="44.0dp" android:layout_below="@id/title_space" layout="@layout/include_layout_level_tag" />
+    <com.newleaf.app.android.victor.view.KoLevelTagView android:id="@id/view_ko_level_tag" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="44.0dp" android:layout_below="@id/title_space" />
+    <androidx.fragment.app.FragmentContainerView android:id="@id/options_container" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <com.newleaf.app.android.victor.interackPlayer.view.InteractPlayerControlView android:id="@id/player_control_view" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <com.newleaf.app.android.victor.view.floatview.WatchTaskFloatContainer android:id="@id/view_watch_float" android:layout_width="match_parent" android:layout_height="match_parent" app:location="interact" />
+    <com.newleaf.app.android.victor.player.view.RecommendView android:id="@id/player_recommend" android:visibility="gone" android:layout_width="match_parent" android:layout_height="250.0dp" android:layout_alignParentBottom="true" />
+    <com.newleaf.app.android.victor.interackPlayer.view.InteractUnlockControlHelpView android:id="@id/unlock_control_view" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent" />
+</RelativeLayout>

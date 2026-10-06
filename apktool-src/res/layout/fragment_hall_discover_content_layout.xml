@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.newleaf.app.android.victor.view.refresh.VictorRefreshLayoutV4 android:id="@id/refresh_view" android:tag="layout/fragment_hall_discover_content_layout_0" android:layout_width="match_parent" android:layout_height="match_parent" android:contentDescription="@null"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <RelativeLayout android:clipChildren="false" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="match_parent">
+        <View android:id="@id/title_view" android:tag="binding_1" android:layout_width="match_parent" android:layout_height="25.0dp" app:layout_constraintTop_toTopOf="parent" />
+        <View android:id="@id/v_top_bg" android:visibility="gone" android:layout_width="match_parent" android:layout_height="375.0dp" android:layout_alignParentTop="true" android:elevation="-1.0dp" app:layout_constraintTop_toTopOf="parent" />
+        <com.scwang.smart.refresh.layout.SmartRefreshLayout android:id="@id/smart_layout" android:clipChildren="false" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_marginTop="88.0dp" android:layout_below="@id/title_view">
+            <com.newleaf.app.android.victor.view.RecyclerViewAtViewPager2 android:id="@id/rv_list" android:scrollbars="none" android:clipChildren="false" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="match_parent" android:contentDescription="@null" android:overScrollMode="never" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintTop_toTopOf="parent" />
+        </com.scwang.smart.refresh.layout.SmartRefreshLayout>
+        <View android:id="@id/view_space" android:layout_width="match_parent" android:layout_height="60.0dp" android:layout_below="@id/title_view" />
+        <View android:id="@id/view_title_mask" android:background="@color/transparent" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_alignBottom="@id/view_space" />
+        <View android:id="@id/view_title_mask2" android:background="@color/transparent" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="-16.0dp" android:layout_alignBottom="@id/view_space" />
+        <ViewStub android:id="@id/load_fail_view_stub" android:layout="@layout/stub_layout_hall_discover_load_fail" android:layout_width="match_parent" android:layout_height="match_parent" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
+    </RelativeLayout>
+</com.newleaf.app.android.victor.view.refresh.VictorRefreshLayoutV4>

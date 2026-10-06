@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:id="@id/main_contain" android:tag="layout/interact_play_guide_0" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView android:id="@id/close_btn" android:layout_width="36.0dp" android:layout_height="36.0dp" android:layout_marginTop="18.0dp" android:src="@drawable/interact_guide_close_icon" android:contentDescription="@string/description_close" android:layout_marginEnd="18.0dp" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" />
+    <TextView android:textSize="32.0sp" android:textStyle="bold" android:textColor="@color/color_white" android:gravity="center" android:id="@id/tv_guide_text" android:paddingLeft="24.0dp" android:paddingRight="24.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/interact_play_guide_text" android:paddingHorizontal="24.0dp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

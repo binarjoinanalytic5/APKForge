@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:tag="layout/dialog_bind_phone_error_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <LinearLayout android:gravity="center_horizontal" android:orientation="vertical" android:id="@id/cl_root" android:background="@drawable/bg_backgrounds_background_3_r12" android:paddingLeft="16.0dp" android:paddingTop="24.0dp" android:paddingRight="16.0dp" android:paddingBottom="16.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="16.0dp">
+        <ImageView android:id="@id/iv_status" android:layout_width="48.0dp" android:layout_height="48.0dp" android:contentDescription="@null" />
+        <androidx.appcompat.widget.AppCompatTextView android:textColor="@color/texticon_primary" android:gravity="center" android:id="@id/tv_message" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16.0dp" android:includeFontPadding="false" android:lineSpacingExtra="2.0dp" style="@style/headline_regular" />
+        <androidx.appcompat.widget.AppCompatTextView android:textColor="@color/texticon_fixed_primary" android:ellipsize="end" android:gravity="center" android:id="@id/tv_action" android:background="@drawable/bg_button_brand_normal_r4" android:paddingLeft="16.0dp" android:paddingRight="16.0dp" android:layout_width="match_parent" android:layout_height="48.0dp" android:layout_marginTop="24.0dp" android:maxLines="1" android:paddingHorizontal="16.0dp" style="@style/body_bold" />
+    </LinearLayout>
+</FrameLayout>

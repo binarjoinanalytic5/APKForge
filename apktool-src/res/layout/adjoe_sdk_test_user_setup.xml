@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="center" android:orientation="vertical" android:background="#ff440f67" android:padding="16.0dp" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ProgressBar android:id="@id/adjoe_test_user_setup_progress" android:layout_width="128.0dp" android:layout_height="128.0dp" android:indeterminate="true" android:indeterminateDuration="1500" />
+    <ImageView android:layout_gravity="center" android:id="@id/adjoe_test_user_setup_icon_success" android:padding="16.0dp" android:visibility="gone" android:layout_width="128.0dp" android:layout_height="128.0dp" android:src="@drawable/adjoe_sdk_check" />
+    <ImageView android:layout_gravity="center" android:id="@id/adjoe_test_user_setup_icon_fail" android:padding="16.0dp" android:visibility="gone" android:layout_width="128.0dp" android:layout_height="128.0dp" android:src="@drawable/adjoe_sdk_clear" />
+    <TextView android:textSize="18.0sp" android:textColor="#ffffffff" android:id="@id/adjoe_test_user_setup_text" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textAlignment="center" />
+</LinearLayout>

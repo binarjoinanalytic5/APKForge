@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.newleaf.app.android.victor.player.view.LandControlView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/land_control_layout"
+    android:tag="layout/layout_land_control_view_0"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"/>

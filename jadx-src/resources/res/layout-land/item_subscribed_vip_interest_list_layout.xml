@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ll_root"
+    android:tag="layout-land/item_subscribed_vip_interest_list_layout_0"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:layout_width="77dp"
+    android:layout_height="90dp">
+    <ImageView
+        android:id="@+id/iv_icon"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+    <TextView
+        android:textColor="#b2fae7bf"
+        android:ellipsize="end"
+        android:gravity="top|center_horizontal"
+        android:id="@+id/tv_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginRight="4dp"
+        android:maxLines="2"
+        android:includeFontPadding="false"
+        android:lineSpacingMultiplier="0.88"
+        android:layout_marginHorizontal="4dp"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/iv_icon"
+        style="@style/caption_regular"/>
+    <Space
+        android:id="@+id/space"
+        android:layout_width="1px"
+        android:layout_height="1px"
+        android:layout_marginBottom="7dp"
+        android:layout_marginStart="8.5dp"
+        app:layout_constraintBottom_toTopOf="@+id/iv_icon"
+        app:layout_constraintStart_toEndOf="@+id/iv_icon"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

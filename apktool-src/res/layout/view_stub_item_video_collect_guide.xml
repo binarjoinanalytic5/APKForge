@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:paddingLeft="6.0dp" android:paddingRight="6.0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:elevation="1.0dp" android:paddingHorizontal="6.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <View android:id="@id/img_video_collect_guide_click" android:layout_width="56.0dp" android:layout_height="56.0dp" android:layout_marginEnd="5.0dp" android:layout_alignParentEnd="true" />
+    <com.airbnb.lottie.LottieAnimationView android:id="@id/img_video_collect_guide_hand" android:layout_width="100.0dp" android:layout_height="100.0dp" android:layout_marginTop="-8.0dp" android:layout_marginEnd="-18.0dp" android:layout_alignParentEnd="true" app:lottie_autoPlay="true" app:lottie_fileName="interact_player_guidelines.json" app:lottie_loop="true" />
+    <TextView android:textSize="12.0sp" android:textColor="@color/color_white" android:gravity="center" android:background="@drawable/icon_guide_right_arrow_text_bg" android:paddingTop="2.0dp" android:paddingBottom="8.0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10.0dp" android:text="@string/for_you_guide_text3" android:layout_alignTop="@id/img_video_collect_guide_click" android:paddingStart="10.0dp" android:paddingEnd="14.0dp" android:layout_toStartOf="@id/img_video_collect_guide_click" />
+</RelativeLayout>

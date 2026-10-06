@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:tag="layout/fragment_comic_catalog_layout_0"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <com.newleaf.app.android.victor.view.SmartRefreshLayoutV2
+        android:id="@+id/refresh_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/iv_book_poster">
+        <com.newleaf.app.android.victor.view.MaxHeightRecyclerView
+            android:id="@+id/rlv_list"
+            android:background="@color/button_secondary_normal"
+            android:scrollbars="none"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:overScrollMode="never"
+            android:layout_marginHorizontal="16dp"/>
+    </com.newleaf.app.android.victor.view.SmartRefreshLayoutV2>
+    <com.newleaf.app.android.victor.view.LoadFailView
+        android:id="@+id/load_fail_view"
+        android:background="@android:color/transparent"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</FrameLayout>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:id="@+id/header_container"
+    android:tag="layout/item_preference_header_0"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <com.newleaf.app.android.victor.view.AutoSizeWrapContentTextView
+        android:textColor="@color/texticon_primary"
+        android:ellipsize="end"
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:maxLines="2"
+        android:includeFontPadding="false"
+        app:awcMaxTextSize="20sp"
+        app:awcMinTextSize="12sp"
+        app:awcStepGranularity="0.5sp"
+        style="@style/title1_bold"/>
+    <com.newleaf.app.android.victor.view.AutoSizeWrapContentTextView
+        android:textColor="@color/texticon_tertiary"
+        android:ellipsize="end"
+        android:id="@+id/tv_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:maxLines="2"
+        android:includeFontPadding="false"
+        app:awcMaxTextSize="14sp"
+        app:awcMinTextSize="12sp"
+        app:awcStepGranularity="0.5sp"
+        style="@style/body_regular"/>
+</LinearLayout>

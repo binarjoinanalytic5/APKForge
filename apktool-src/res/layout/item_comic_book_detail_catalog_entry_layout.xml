@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="center" android:orientation="horizontal" android:tag="layout/item_comic_book_detail_catalog_entry_layout_0" android:paddingLeft="16.0dp" android:paddingRight="16.0dp" android:layout_width="match_parent" android:layout_height="48.0dp" android:paddingHorizontal="16.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView android:id="@id/iv_icon" android:layout_width="16.0dp" android:layout_height="16.0dp" android:src="@drawable/icon_comic_catalog_white" />
+    <TextView android:textColor="@color/texticon_primary" android:ellipsize="end" android:id="@id/tv_chapter_num" android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="1" android:layout_marginStart="8.0dp" style="@style/footnote_regular" />
+</LinearLayout>

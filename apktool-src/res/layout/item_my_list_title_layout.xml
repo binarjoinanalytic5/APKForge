@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:id="@id/cl_title_view" android:tag="layout/item_my_list_title_layout_0" android:layout_width="match_parent" android:layout_height="22.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView android:textColor="@color/texticon_primary" android:id="@id/tv_module_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/table_library" android:layout_marginStart="16.0dp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" style="@style/title3_bold" />
+    <TextView android:textColor="@color/texticon_primary" android:gravity="center" android:id="@id/tv_edit" android:paddingLeft="16.0dp" android:paddingRight="16.0dp" android:layout_width="wrap_content" android:layout_height="match_parent" android:text="@string/edit" android:paddingHorizontal="16.0dp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" style="@style/body_medium" />
+</androidx.constraintlayout.widget.ConstraintLayout>

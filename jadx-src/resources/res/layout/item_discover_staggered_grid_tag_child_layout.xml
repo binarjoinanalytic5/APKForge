@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.AppCompatTextView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:textSize="14sp"
+    android:textColor="@color/color_ffffff_alpha_90"
+    android:ellipsize="end"
+    android:gravity="center"
+    android:id="@+id/tv_tag_name"
+    android:background="@drawable/bg_white15_r4"
+    android:padding="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:maxLines="1"
+    app:autoSizeMaxTextSize="14sp"
+    app:autoSizeMinTextSize="10sp"
+    app:autoSizeStepGranularity="0.5sp"
+    app:autoSizeTextType="uniform"/>

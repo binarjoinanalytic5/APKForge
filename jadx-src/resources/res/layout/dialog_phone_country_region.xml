@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:tag="layout/dialog_phone_country_region_0"
+    android:background="@drawable/bg_141414_top_corner_16"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <TextView
+        android:textColor="@color/texticon_primary"
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Select country/region"
+        android:lineSpacingMultiplier="0.88"
+        android:layout_marginStart="16dp"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toStartOf="@+id/iv_close"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        style="@style/title3_bold"/>
+    <ImageView
+        android:id="@+id/iv_close"
+        android:padding="16dp"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:src="@drawable/icon_close_gray_bg"
+        android:contentDescription="@string/description_close"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+    <com.newleaf.app.android.victor.view.MaxHeightRecyclerView
+        android:scrollbarSize="2dp"
+        android:id="@+id/rlv_list"
+        android:scrollbars="vertical"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="16dp"
+        android:overScrollMode="never"
+        android:layout_marginHorizontal="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_title"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.newleaf.app.android.victor.view.RoundImageView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/iv_banner"
+    android:tag="layout/item_playing_detail_banner_0"
+    android:layout_width="match_parent"
+    android:layout_height="98dp"
+    android:layout_marginTop="24dp"
+    android:scaleType="centerCrop"
+    app:radius="4dp"/>

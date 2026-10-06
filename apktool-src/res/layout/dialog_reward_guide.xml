@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:tag="layout/dialog_reward_guide_0" android:clipChildren="false" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <com.newleaf.app.android.victor.dialog.RewardGuideView android:id="@id/custom_view" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <com.airbnb.lottie.LottieAnimationView android:layout_gravity="center|bottom" android:id="@id/lottie_view" android:layout_width="match_parent" android:layout_height="wrap_content" android:elevation="1.0px" />
+    <com.airbnb.lottie.LottieAnimationView android:layout_gravity="start|top" android:id="@id/lottie_view2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:elevation="1.0px" />
+    <FrameLayout android:id="@id/cl_tips" android:visibility="invisible" android:clipChildren="false" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="match_parent">
+        <FrameLayout android:layout_gravity="start|top" android:id="@id/tv_tips_layout" android:background="@drawable/bg_popup_purple_r8" android:padding="12.0dp" android:layout_width="256.0dp" android:layout_height="90.0dp">
+            <TextView android:textColor="@color/texticon_primary" android:gravity="start|top" android:id="@id/tv_tips_view" android:layout_width="match_parent" android:layout_height="match_parent" android:text="@string/vip_reward_guide_tips" style="@style/body_bold" />
+            <TextView android:textColor="@color/texticon_black_normal" android:gravity="center" android:layout_gravity="end|bottom" android:id="@id/tv_count_down" android:background="@drawable/bg_button_white_fixed_normal_r4" android:paddingLeft="16.0dp" android:paddingRight="16.0dp" android:layout_width="wrap_content" android:layout_height="24.0dp" android:paddingHorizontal="16.0dp" style="@style/footnote_medium" />
+        </FrameLayout>
+        <View android:layout_gravity="start|top" android:id="@id/arrow_view" android:background="@color/popup_purple" android:layout_width="18.0dp" android:layout_height="18.0dp" android:rotation="45.0" />
+    </FrameLayout>
+</FrameLayout>

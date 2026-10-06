@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.ProjectV" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="android:typeface">monospace</item>
+        <item name="android:fontFamily">@font/noto_sans_1</item>
+        <item name="android:statusBarColor">?colorPrimaryVariant</item>
+        <item name="android:forceDarkAllowed">false</item>
+        <item name="colorOnPrimary">@color/color_black</item>
+        <item name="colorOnSecondary">@color/color_black</item>
+        <item name="colorPrimary">@color/color_black</item>
+        <item name="colorPrimaryVariant">@color/color_black</item>
+        <item name="colorSecondary">@color/color_black</item>
+        <item name="colorSecondaryVariant">@color/color_black</item>
+    </style>
+</resources>

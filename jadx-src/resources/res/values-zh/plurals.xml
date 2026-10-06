@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="fg_notification_2_text_with_time">
+        <item quantity="one">再玩%2$d 分鐘獲取更多 %1$s！</item>
+        <item quantity="other">再玩%2$d 分鐘獲取更多 %1$s！</item>
+    </plurals>
+</resources>

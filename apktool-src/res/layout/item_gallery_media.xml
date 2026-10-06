@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:tag="layout/item_gallery_media_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:foreground="?android:selectableItemBackground"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:bind="http://schemas.android.com/apk/res-auto">
+    <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+        <ImageView android:id="@id/iv_image" android:tag="binding_1" android:layout_width="0.0dp" android:layout_height="0.0dp" android:scaleType="centerCrop" bind:layout_constraintBottom_toBottomOf="parent" bind:layout_constraintDimensionRatio="1:1" bind:layout_constraintEnd_toEndOf="parent" bind:layout_constraintStart_toStartOf="parent" bind:layout_constraintTop_toTopOf="parent" />
+        <FrameLayout android:id="@id/view_zoom_out" android:tag="binding_2" android:padding="@dimen/default_padding_xsmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/default_padding_xsmall" bind:layout_constraintBottom_toBottomOf="parent" bind:layout_constraintStart_toStartOf="parent">
+            <ImageView android:background="@color/ted_image_picker_zoom_background" android:layout_width="@dimen/ted_image_picker_zoom_size" android:layout_height="@dimen/ted_image_picker_zoom_size" android:src="@drawable/ic_zoom_out_24dp" android:adjustViewBounds="true" />
+        </FrameLayout>
+        <TextView android:textColor="@color/white" android:tag="binding_3" android:background="@color/black_54" android:padding="@dimen/default_padding_xsmall" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="@dimen/default_padding_small" bind:layout_constraintBottom_toBottomOf="parent" bind:layout_constraintEnd_toEndOf="parent" style="@style/TextAppearance.TedImagePicker.Caption" />
+        <FrameLayout android:tag="binding_4" android:layout_width="0.0dp" android:layout_height="0.0dp" bind:layout_constraintBottom_toBottomOf="@id/iv_image" bind:layout_constraintEnd_toEndOf="@id/iv_image" bind:layout_constraintStart_toStartOf="@id/iv_image" bind:layout_constraintTop_toTopOf="@id/iv_image">
+            <View android:tag="binding_5" android:background="@color/ted_image_picker_selected_foreground" android:layout_width="match_parent" android:layout_height="match_parent" />
+            <TextView android:textColor="@color/white" android:gravity="center" android:layout_gravity="end" android:tag="binding_6" android:layout_width="@dimen/list_item_avatar_size_small" android:layout_height="@dimen/list_item_avatar_size_small" android:layout_margin="@dimen/default_padding_small" style="@style/TextAppearance.TedImagePicker.Body1" />
+        </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:tag="layout/fragment_discover_filter_ranking_book_0" android:clipChildren="false" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.scwang.smart.refresh.layout.SmartRefreshLayout android:id="@id/smart_layout" android:clipChildren="false" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="match_parent" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintTop_toBottomOf="@id/title_bar">
+        <com.newleaf.app.android.victor.view.RecyclerViewAtViewPager2 android:id="@id/rv_list" android:clipChildren="false" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="match_parent" />
+    </com.scwang.smart.refresh.layout.SmartRefreshLayout>
+    <com.newleaf.app.android.victor.view.LoadFailView android:id="@id/load_fail_view" android:tag="binding_1" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent" app:load_fail_view_bg_color="@color/transparent" />
+</FrameLayout>

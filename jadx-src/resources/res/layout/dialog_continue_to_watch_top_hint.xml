@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:tag="layout/dialog_continue_to_watch_top_hint_0"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.newleaf.app.android.victor.view.ContinueToWatchTopHintView
+        android:layout_gravity="center"
+        android:id="@+id/continueView"
+        android:layout_width="343dp"
+        android:layout_height="64dp"/>
+</FrameLayout>

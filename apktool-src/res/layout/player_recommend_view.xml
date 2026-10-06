@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:tag="layout/player_recommend_view_0" android:background="@drawable/bg_00000000_ff000000" android:layout_width="match_parent" android:layout_height="250.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:id="@id/iv_arrow_left" android:background="@drawable/bg_recommend_dir" android:layout_width="23.0dp" android:layout_height="50.0dp" android:layout_marginTop="112.0dp" android:src="@drawable/icon_arrow_left" android:scaleType="center" android:contentDescription="@string/description_previous" android:layout_marginStart="8.0dp" />
+    <ImageView android:id="@id/iv_arrow_right" android:background="@drawable/bg_recommend_dir" android:layout_width="23.0dp" android:layout_height="50.0dp" android:layout_marginTop="112.0dp" android:src="@drawable/icon_arrow_right" android:scaleType="center" android:contentDescription="@string/next" android:layout_marginEnd="8.0dp" android:layout_alignParentEnd="true" />
+    <androidx.recyclerview.widget.RecyclerView android:id="@id/rv_recommend" android:layout_width="match_parent" android:layout_height="169.0dp" android:layout_marginTop="52.0dp" android:layout_marginStart="38.0dp" android:layout_marginEnd="38.0dp" />
+    <ImageView android:id="@id/iv_close" android:background="@drawable/icon_close_2" android:layout_width="20.0dp" android:layout_height="20.0dp" android:layout_marginTop="53.0dp" android:contentDescription="@string/description_close" android:layout_marginEnd="10.0dp" android:layout_alignParentEnd="true" />
+</RelativeLayout>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="center" android:orientation="vertical" android:id="@id/ll_option" android:tag="layout/item_bill_record_filter_option_layout_0" android:background="@drawable/bg_292929_corner_4" android:layout_width="match_parent" android:layout_height="56.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView android:id="@id/iv_icon" android:visibility="gone" android:layout_width="16.0dp" android:layout_height="16.0dp" android:scaleType="fitXY" />
+    <TextView android:textColor="@color/texticon_primary" android:gravity="center" android:id="@id/tv_option" android:layout_width="wrap_content" android:layout_height="wrap_content" style="@style/body_medium" />
+</LinearLayout>

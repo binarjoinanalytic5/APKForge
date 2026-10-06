@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="horizontal" android:tag="layout/item_delete_account_des_layout_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="16.0dp" android:layout_marginRight="16.0dp" android:layout_marginHorizontal="16.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:background="@drawable/bg_oval_ffffff" android:layout_width="4.0dp" android:layout_height="4.0dp" android:layout_marginTop="6.0dp" />
+    <TextView android:textSize="14.0sp" android:textColor="@color/color_white" android:gravity="start|center" android:id="@id/tv_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="8.0dp" />
+</LinearLayout>

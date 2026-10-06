@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/background">
+        <shape android:shape="ring" android:innerRadiusRatio="2.3" android:thicknessRatio="18.0" android:useLevel="false" android:type="sweep">
+            <solid android:color="#80ffffff" />
+        </shape>
+    </item>
+    <item android:id="@android:id/progress">
+        <rotate android:fromDegrees="-90.0" android:toDegrees="-90.0" android:pivotX="50.0%" android:pivotY="50.0%">
+            <shape android:shape="ring" android:innerRadiusRatio="2.3" android:thicknessRatio="18.0" android:angle="0.0" android:type="sweep">
+                <solid android:color="#ffffffff" />
+            </shape>
+        </rotate>
+    </item>
+</layer-list>

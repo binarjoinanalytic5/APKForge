@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cl_container"
+    android:tag="layout/item_player_iaa_unlock_panel_ad_layout_0"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <include
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/cl_item"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        layout="@layout/item_unlock_button_layout"/>
+</FrameLayout>

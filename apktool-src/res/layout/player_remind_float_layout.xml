@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView android:tag="layout/player_remind_float_layout_0" android:layout_width="match_parent" android:layout_height="148.0dp" app:cardBackgroundColor="#ff363636" app:cardCornerRadius="4.0dp" app:cardElevation="0.0dp" app:cardPreventCornerOverlap="false"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="match_parent">
+        <ImageView android:id="@id/iv_recommend_poster" android:layout_width="111.0dp" android:layout_height="148.0dp" android:scaleType="centerCrop" android:contentDescription="@null" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
+        <LinearLayout android:orientation="vertical" android:paddingTop="16.0dp" android:paddingBottom="8.0dp" android:layout_width="0.0dp" android:layout_height="0.0dp" android:paddingStart="8.0dp" android:paddingEnd="8.0dp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toEndOf="@id/iv_recommend_poster" app:layout_constraintTop_toTopOf="parent">
+            <androidx.appcompat.widget.AppCompatTextView android:textColor="@color/texticon_primary" android:ellipsize="end" android:gravity="center" android:id="@id/tv_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLines="2" android:includeFontPadding="false" style="@style/title3_bold" />
+            <TextView android:textColor="@color/texticon_tertiary" android:ellipsize="end" android:gravity="center" android:id="@id/tv_book_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2.0dp" android:maxLines="1" android:includeFontPadding="false" style="@style/caption_regular" />
+            <Space android:layout_width="match_parent" android:layout_height="0.0dp" android:layout_weight="1.0" />
+            <TextView android:textColor="@color/texticon_primary" android:ellipsize="end" android:gravity="center" android:id="@id/tv_coming_date" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLines="1" android:includeFontPadding="false" style="@style/caption_regular" />
+            <LinearLayout android:gravity="center" android:orientation="horizontal" android:id="@id/ll_remind" android:background="@drawable/selector_reminder_btn_bg" android:layout_width="match_parent" android:layout_height="32.0dp" android:layout_marginTop="8.0dp">
+                <ImageView android:duplicateParentState="true" android:layout_width="16.0dp" android:layout_height="16.0dp" android:contentDescription="@null" android:layout_marginEnd="4.0dp" app:srcCompat="@drawable/selector_reminder_btn_icon" />
+                <TextView android:textColor="@color/selector_reminder_btn_content" android:id="@id/tv_remind" android:duplicateParentState="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/reserve_now" android:includeFontPadding="false" style="@style/body_medium" />
+            </LinearLayout>
+        </LinearLayout>
+        <ImageView android:id="@id/iv_close" android:padding="4.0dp" android:layout_width="22.0dp" android:layout_height="22.0dp" android:src="@drawable/icon_close_2" android:contentDescription="@string/description_close" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

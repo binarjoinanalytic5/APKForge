@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:tag="layout/item_video_for_you2_0" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.constraintlayout.widget.ConstraintLayout android:id="@id/layout_content" android:tag="binding_1" android:layout_width="match_parent" android:layout_height="match_parent">
+        <include android:id="@id/space" layout="@layout/include_statusbar_space" />
+        <ImageView android:id="@id/img_bg" android:layout_width="match_parent" android:layout_height="match_parent" />
+        <RelativeLayout android:id="@id/subtitle_layout" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent" />
+        <include android:id="@id/control" android:layout_width="match_parent" android:layout_height="match_parent" layout="@layout/include_layout_player_control_foryou" />
+        <com.airbnb.lottie.LottieAnimationView android:id="@id/iv_video_loading" android:visibility="gone" android:layout_width="match_parent" android:layout_height="3.0dp" android:layout_marginLeft="18.0dp" android:layout_marginRight="18.0dp" android:layout_marginHorizontal="18.0dp" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:lottie_autoPlay="true" app:lottie_fileName="video_loading.json" app:lottie_loop="true" />
+        <com.newleaf.app.android.victor.view.KoLevelTagView android:id="@id/view_ko_level_tag" android:visibility="gone" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="44.0dp" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/space" />
+        <ViewStub android:id="@id/vs_ai_level_tag" android:layout="@layout/view_ai_level_tag_layout" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="44.0dp" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toBottomOf="@id/space" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <ViewStub android:id="@id/view_stub_seek_thumbnail" android:layout="@layout/view_stub_layout_seek_thumbnail" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <SeekBar android:layout_gravity="bottom" android:id="@id/seek_bar" android:focusable="false" android:layout_width="match_parent" android:layout_height="32.0dp" android:layout_marginBottom="-16.0dp" android:maxHeight="32.0dp" android:progressDrawable="@drawable/player_progress_bar_bg" android:minHeight="32.0dp" android:thumb="@null" android:contentDescription="@string/description_episode_progress_bar" android:layoutDirection="ltr" android:paddingStart="16.0dp" android:paddingEnd="16.0dp" style="@android:style/Widget.ProgressBar.Horizontal" />
+    <FrameLayout android:id="@id/guide_container" android:layout_width="match_parent" android:layout_height="match_parent" />
+    <FrameLayout android:layout_gravity="bottom" android:id="@id/promotion_container" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="16.0dp" />
+</FrameLayout>

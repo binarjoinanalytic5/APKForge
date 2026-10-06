@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:height="135dp"
+        android:width="262dp">
+        <shape android:shape="rectangle">
+            <size
+                android:height="135dp"
+                android:width="262dp"/>
+            <solid android:color="#ff2a2a2a"/>
+            <corners android:radius="6dp"/>
+        </shape>
+    </item>
+    <item
+        android:gravity="center"
+        android:height="60dp"
+        android:width="60dp">
+        <bitmap android:src="@drawable/icon_promotion_place_img"/>
+    </item>
+</layer-list>

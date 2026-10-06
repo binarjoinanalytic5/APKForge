@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="center" android:orientation="vertical" android:layout_width="match_parent" android:layout_height="214.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:layout_gravity="center" android:id="@id/iv_rotary" android:layout_width="120.0dp" android:layout_height="120.0dp" android:src="@drawable/icon_rotary_grey" />
+    <TextView android:textSize="14.0sp" android:textColor="@color/color_ffffff_alpha_50" android:gravity="center_horizontal" android:id="@id/tv_des" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="40.0dp" android:layout_marginTop="8.0dp" android:layout_marginRight="40.0dp" android:layout_marginHorizontal="40.0dp" />
+</LinearLayout>

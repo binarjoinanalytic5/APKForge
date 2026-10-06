@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:tag="layout/bottomsheet_partial_access_manage_0"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <View
+        android:layout_gravity="center_horizontal"
+        android:background="@color/txt_white_gray"
+        android:layout_width="80dp"
+        android:layout_height="4dp"
+        android:layout_margin="8dp"/>
+    <TextView
+        android:id="@+id/tv_select_more_photo_video"
+        android:padding="@dimen/list_item_container_padding"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:foreground="?android:attr/selectableItemBackground"
+        style="@style/TextAppearance.TedImagePicker.Subhead"/>
+    <TextView
+        android:id="@+id/tv_grant_full_access_photo_video"
+        android:padding="@dimen/list_item_container_padding"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:foreground="?android:attr/selectableItemBackground"
+        style="@style/TextAppearance.TedImagePicker.Subhead"/>
+    <TextView
+        android:id="@+id/tv_cancel"
+        android:padding="@dimen/list_item_container_padding"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:text="@string/ted_image_picker_cancel"
+        style="@style/TextAppearance.TedImagePicker.Subhead"/>
+</LinearLayout>

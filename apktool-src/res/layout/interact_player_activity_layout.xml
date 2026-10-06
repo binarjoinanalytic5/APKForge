@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:tag="layout/interact_player_activity_layout_0" android:background="@color/black" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <include android:id="@id/space" layout="@layout/include_statusbar_space" />
+    <androidx.fragment.app.FragmentContainerView android:id="@id/player_container" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_below="@id/space" />
+    <com.newleaf.app.android.victor.view.LoadFailView android:id="@id/load_fail_view" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_below="@id/space" app:load_fail_view_bg_color="@color/black" />
+</RelativeLayout>

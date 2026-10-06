@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="center|top" android:orientation="vertical" android:tag="layout/activity_notification_left_string_right_image_a_0" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.cardview.widget.CardView android:id="@id/card_view" android:layout_width="wrap_content" android:layout_height="wrap_content" style="@style/v_notification_card_view">
+        <FrameLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <LinearLayout android:orientation="vertical" android:id="@id/ll_content" android:background="@drawable/bg_notification_full_intent_a" android:padding="16.0dp" android:layout_width="355.0dp" android:layout_height="wrap_content">
+                <LinearLayout android:gravity="start|center" android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="8.0dp">
+                    <androidx.appcompat.widget.AppCompatImageView android:id="@id/iv_logo" android:layout_width="22.0dp" android:layout_height="22.0dp" android:src="@mipmap/ic_launcher_round" />
+                    <androidx.appcompat.widget.AppCompatImageView android:id="@id/iv_logo_text" app:tint="@color/color_000000" style="@style/v_notification_logo_image_word_art" />
+                </LinearLayout>
+                <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+                    <LinearLayout android:orientation="vertical" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_weight="1.0">
+                        <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                            <TextView android:layout_gravity="center" android:id="@id/tv_tag" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginEnd="4.0dp" style="@style/v_notification_tag" />
+                            <androidx.appcompat.widget.AppCompatTextView android:textSize="14.0sp" android:textStyle="bold" android:textColor="#ff4a1a0b" android:ellipsize="end" android:id="@id/tv_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="1" />
+                        </LinearLayout>
+                        <androidx.appcompat.widget.AppCompatTextView android:textSize="14.0sp" android:textColor="#ff642411" android:ellipsize="end" android:id="@id/tv_content" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2.0dp" android:maxLines="3" />
+                    </LinearLayout>
+                    <com.newleaf.app.android.victor.view.RoundImageView android:id="@id/iv_big_image" android:layout_width="56.0dp" android:layout_height="75.0dp" android:scaleType="centerCrop" android:layout_marginStart="8.0dp" app:radius="6.0dp" />
+                </LinearLayout>
+            </LinearLayout>
+            <FrameLayout android:layout_gravity="end" android:id="@id/fl_close" android:padding="16.0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent">
+                <androidx.appcompat.widget.AppCompatImageView android:layout_width="20.0dp" android:layout_height="20.0dp" android:src="@drawable/icon_close_full_intent" android:contentDescription="@string/description_close" app:tint="@color/color_000000" />
+            </FrameLayout>
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
+    <include android:id="@id/included_button" android:layout_width="355.0dp" android:layout_height="wrap_content" layout="@layout/include_remote_views_notification_activity_button_b" />
+</LinearLayout>

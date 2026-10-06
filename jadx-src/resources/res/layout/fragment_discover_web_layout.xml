@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.newleaf.app.android.victor.view.WebViewAtViewPager2 xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/fl_container"
+    android:tag="layout/fragment_discover_web_layout_0"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/web_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <View
+        android:layout_gravity="top"
+        android:id="@+id/view_title_mask"
+        android:background="@color/transparent"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"/>
+    <com.newleaf.app.android.victor.view.LoadFailView
+        android:id="@+id/load_fail_view"
+        android:tag="binding_1"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:load_fail_view_bg_color="@color/profile_common_bg"/>
+</com.newleaf.app.android.victor.view.WebViewAtViewPager2>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:id="@id/cl_container" android:tag="layout/item_hall_banner_new_layout4_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.newleaf.app.android.victor.view.roundview.RoundFrameLayout android:id="@id/banner_container" android:layout_width="match_parent" android:layout_height="183.0dp" app:rRadius="4.0dp">
+        <com.newleaf.app.android.victor.view.BannerRecyclerView android:id="@id/banner" android:layout_width="match_parent" android:layout_height="match_parent" android:importantForAccessibility="no" app:auto_switch_enable="true" app:auto_switch_interval_time="10000" />
+    </com.newleaf.app.android.victor.view.roundview.RoundFrameLayout>
+    <com.newleaf.app.android.victor.view.HallBannerIndicatorView android:layout_gravity="center|bottom" android:id="@id/indicator" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8.0dp" android:layout_marginBottom="12.0dp" android:importantForAccessibility="no" app:ind_point_background_color="@color/color_95928E" app:ind_point_height="4.0dp" app:ind_point_select_color="@color/white" app:ind_point_select_height="4.0dp" app:ind_point_select_width="16.0dp" app:ind_point_space="4.0dp" app:ind_point_width="4.0dp" />
+</LinearLayout>

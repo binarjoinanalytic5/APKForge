@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.newleaf.app.android.victor.view.RoundImageView android:id="@id/iv_book_poster" android:layout_width="match_parent" android:layout_height="144.0dp" style="@style/v_book_poster_image_style"
+  xmlns:android="http://schemas.android.com/apk/res/android" />

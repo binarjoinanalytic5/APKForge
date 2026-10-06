@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:clipChildren="false" android:clipToPadding="false" android:layout_width="match_parent" android:layout_height="match_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:mv="http://schemas.android.com/apk/res-auto">
+    <TextView android:gravity="center" android:id="@id/tv_tab_title" android:padding="0.0dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:singleLine="true" android:includeFontPadding="false" mv:layout_constrainedWidth="true" mv:layout_constraintBottom_toBottomOf="parent" mv:layout_constraintEnd_toEndOf="parent" mv:layout_constraintStart_toStartOf="parent" mv:layout_constraintTop_toTopOf="parent" />
+    <com.flyco.tablayout.widget.MsgView android:textSize="11.5sp" android:textColor="#ffffffff" android:gravity="center" android:id="@id/rtv_msg_tip" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" mv:layout_constraintStart_toStartOf="parent" mv:layout_constraintTop_toTopOf="parent" mv:mv_backgroundColor="#fffd481f" mv:mv_isRadiusHalfHeight="true" mv:mv_strokeColor="#ffffffff" mv:mv_strokeWidth="1.0dp" />
+</androidx.constraintlayout.widget.ConstraintLayout>

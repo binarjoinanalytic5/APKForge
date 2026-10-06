@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cl_root"
+    android:tag="layout/item_common_login_channel_layout_0"
+    android:background="@drawable/item_login_channel_bg_shape"
+    android:layout_width="60dp"
+    android:layout_height="60dp">
+    <ImageView
+        android:layout_gravity="center"
+        android:id="@+id/iv_logo"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/icon_facebook_white"/>
+</FrameLayout>

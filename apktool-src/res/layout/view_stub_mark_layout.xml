@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="center_vertical" android:id="@id/ll_mark" android:tag="layout/view_stub_mark_layout_0" android:background="@drawable/bg_white_r4_unlock_mark" android:paddingLeft="8.0dp" android:paddingRight="8.0dp" android:visibility="visible" android:layout_width="wrap_content" android:layout_height="16.0dp" android:paddingHorizontal="8.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView android:textColor="@color/texticon_brand_normal" android:gravity="center_vertical" android:id="@id/tv_text_mark" android:layout_width="wrap_content" android:layout_height="wrap_content" android:includeFontPadding="false" style="@style/caption_medium" />
+    <View android:id="@id/v_dividing_line" android:background="#ffe52e2e" android:layout_width="1.0dp" android:layout_height="match_parent" android:layout_margin="4.0dp" android:alpha="0.3" />
+    <androidx.appcompat.widget.AppCompatTextView android:textColor="@color/texticon_brand_normal" android:ellipsize="end" android:gravity="center_vertical" android:id="@id/tv_count_down_mark" android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="1" android:includeFontPadding="false" app:autoSizeMaxTextSize="@dimen/fontSize_12" app:autoSizeMinTextSize="4.0sp" app:autoSizeStepGranularity="1.0px" app:autoSizeTextType="uniform" style="@style/caption_medium" />
+</LinearLayout>

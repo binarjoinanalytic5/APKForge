@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_gravity="center" android:tag="layout/dialog_coins_experience_0" android:background="@android:color/transparent" android:layout_width="320.0dp" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.newleaf.app.android.victor.player.view.PremiumDialogView android:id="@id/dialogView" android:layout_width="320.0dp" android:layout_height="wrap_content" android:layout_marginTop="70.0dp">
+        <RelativeLayout android:layout_width="320.0dp" android:layout_height="wrap_content">
+            <TextView android:gravity="center" android:id="@id/tv_unlock_free" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="45.0dp" android:text="Now User Reward! Unlock episodes now!" android:maxLines="2" android:layout_centerHorizontal="true" android:layout_marginStart="16.0dp" android:layout_marginEnd="16.0dp" style="@style/body_regular" />
+            <TextView android:gravity="center_horizontal" android:id="@id/tv_desc" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8.0dp" android:text="+60 Coins" android:layout_below="@id/tv_unlock_free" android:layout_marginStart="20.0dp" android:layout_marginEnd="20.0dp" style="@style/mediumtitle_bold" />
+            <RelativeLayout android:id="@id/btn_container" android:background="@drawable/bg_e52e2e_corner_4" android:layout_width="match_parent" android:layout_height="44.0dp" android:layout_marginTop="30.0dp" android:layout_below="@id/tv_desc" android:layout_marginStart="20.0dp" android:layout_marginEnd="20.0dp">
+                <TextView android:textColor="#ffffffe5" android:id="@id/tv_sign_in" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/unlock_now" android:drawablePadding="2.0dp" android:layout_centerInParent="true" app:drawableStartCompat="@drawable/icon_unlock_button" style="@style/body_bold" />
+            </RelativeLayout>
+            <TextView android:textColor="@color/texticon_tertiary" android:gravity="center" android:id="@id/tv_not_now" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10.0dp" android:layout_marginBottom="20.0dp" android:text="*Earned Coins: For This Episode Unlock Only" android:maxLines="2" android:layout_below="@id/btn_container" android:layout_centerHorizontal="true" android:layout_marginStart="16.0dp" android:layout_marginEnd="16.0dp" style="@style/body_regular" />
+        </RelativeLayout>
+    </com.newleaf.app.android.victor.player.view.PremiumDialogView>
+    <ImageView android:id="@id/iv_gift" android:layout_width="120.0dp" android:layout_height="120.0dp" android:src="@drawable/icon_reward_coins_second_issue" android:layout_centerHorizontal="true" />
+</RelativeLayout>

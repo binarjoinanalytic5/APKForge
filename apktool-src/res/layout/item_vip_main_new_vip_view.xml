@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:tag="layout/item_vip_main_new_vip_view_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.newleaf.app.android.victor.view.VipContainerView android:id="@id/vip_tab" android:layout_width="match_parent" android:layout_height="wrap_content" app:layout_constraintTop_toBottomOf="@id/view_flipper" app:v_background_res="@drawable/bg_292929_to_000000" app:v_option_left_res="@drawable/bg_vip_center_left" app:v_option_left_text_select_color="#fff2ca91" app:v_option_right_res="@drawable/bg_vip_center_right" app:v_option_right_text_select_color="#ffffc6a3" app:v_option_text_default_color="@color/texticon_tertiary" />
+    <com.newleaf.app.android.victor.player.newunlock.NewVipListView android:id="@id/vip_view" android:scrollbars="none" android:layout_width="match_parent" android:layout_height="wrap_content" android:overScrollMode="never" app:layout_constrainedWidth="true" app:layout_constraintHorizontal_bias="0.0" />
+</LinearLayout>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView android:textSize="21.0sp" android:textStyle="bold" android:textColor="@color/color_ffffff_alpha_90" android:ellipsize="end" android:gravity="start" android:id="@id/tv_shelf_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="16.0dp" android:layout_marginRight="16.0dp" android:layout_marginBottom="12.0dp" android:maxLines="1" android:layout_marginHorizontal="16.0dp" style="@style/title3_bold" />
+    <com.newleaf.app.android.victor.view.RecyclerViewAtViewPager2 android:id="@id/rlv_rank_tab" android:layout_width="match_parent" android:layout_height="28.0dp" android:layout_marginBottom="12.0dp" android:nestedScrollingEnabled="false" />
+    <FrameLayout android:clipChildren="false" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <com.newleaf.app.android.victor.view.RecyclerViewAtViewPager2 android:id="@id/rlv_rank_list" android:clipChildren="false" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="16.0dp" android:nestedScrollingEnabled="false" />
+        <com.newleaf.app.android.victor.view.LoadFailView android:layout_gravity="center" android:id="@id/load_fail_view" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent" android:minHeight="330.0dp" app:load_fail_view_bg_color="@color/profile_common_bg" />
+    </FrameLayout>
+</LinearLayout>

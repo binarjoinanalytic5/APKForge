@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:tag="layout/item_vip_list_benefits_list_layout_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="16.0dp"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView android:id="@id/iv_icon" android:layout_width="16.0dp" android:layout_height="16.0dp" android:src="@drawable/icon_app_task_download" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
+    <TextView android:textColor="@color/color_401a06" android:id="@id/tv_text" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Unlimited Viewing" android:layout_marginStart="4.0dp" app:layout_constrainedWidth="true" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintHorizontal_bias="0.0" app:layout_constraintStart_toEndOf="@id/iv_icon" app:layout_constraintTop_toTopOf="parent" style="@style/caption_medium" />
+</androidx.constraintlayout.widget.ConstraintLayout>

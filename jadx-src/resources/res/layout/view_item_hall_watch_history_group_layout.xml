@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.newleaf.app.android.victor.view.RecyclerViewAtViewPager2 xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rlv_history"
+    android:tag="layout/view_item_hall_watch_history_group_layout_0"
+    android:scrollbars="none"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:layout_width="match_parent"
+    android:layout_height="88dp"
+    android:overScrollMode="never"
+    android:nestedScrollingEnabled="false"/>

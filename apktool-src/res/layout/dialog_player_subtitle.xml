@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:tag="layout/dialog_player_subtitle_0" android:background="@drawable/bg_141414_top_corner_16" android:paddingBottom="16.0dp" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <TextView android:textSize="16.0sp" android:textStyle="bold" android:textColor="@color/color_white" android:id="@id/tv_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16.0dp" android:text="@string/subtitles" android:layout_marginStart="16.0dp" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
+    <ImageView android:id="@id/fl_close" android:layout_width="24.0dp" android:layout_height="24.0dp" android:layout_marginTop="16.0dp" android:src="@drawable/icon_close_more" android:contentDescription="@string/description_close" android:layout_marginEnd="16.0dp" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent" />
+    <com.newleaf.app.android.victor.view.MaxHeightNestedScrollView android:id="@id/nested_scroll" android:layout_width="match_parent" android:layout_height="wrap_content" app:layout_constraintTop_toBottomOf="@id/fl_close">
+        <LinearLayout android:orientation="vertical" android:id="@id/dialog_subtitle_all" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16.0dp" android:layout_marginStart="16.0dp" android:layout_marginEnd="16.0dp" app:layout_constraintTop_toBottomOf="@id/fl_close">
+            <LinearLayout android:gravity="start|center" android:orientation="horizontal" android:id="@id/more_subtitle_off" android:background="@drawable/bg_292929_corner_8" android:visibility="visible" android:layout_width="match_parent" android:layout_height="48.0dp" app:layout_constraintStart_toStartOf="parent">
+                <ImageView android:id="@id/iv_off" android:visibility="invisible" android:layout_width="16.0dp" android:layout_height="16.0dp" android:src="@drawable/icon_select" android:layout_marginStart="16.0dp" />
+                <TextView android:textSize="14.0sp" android:textColor="#b2ffffff" android:id="@id/tv_off" android:visibility="visible" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/subtitles_off" android:layout_marginStart="8.0dp" />
+            </LinearLayout>
+            <androidx.recyclerview.widget.RecyclerView android:id="@id/rv_subtitles" android:background="@drawable/bg_292929_corner_8" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12.0dp" />
+        </LinearLayout>
+    </com.newleaf.app.android.victor.view.MaxHeightNestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

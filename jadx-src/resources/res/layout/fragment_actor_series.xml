@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:tag="layout/fragment_actor_series_0"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.newleaf.app.android.victor.view.RecyclerViewAtViewPager2
+        android:id="@+id/rc_list"
+        android:scrollbars="none"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:overScrollMode="never"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:nestedScrollingEnabled="true"
+        app:layout_behavior=""/>
+    <com.newleaf.app.android.victor.view.LoadFailView
+        android:id="@+id/load_fail_view"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="500dp"
+        android:elevation="0.5dp"
+        app:load_fail_view_bg_color="@color/transparent"
+        app:load_fail_view_can_click="true"/>
+</FrameLayout>

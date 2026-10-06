@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="16dp"
+    android:width="20dp"
+    android:viewportWidth="20"
+    android:viewportHeight="16">
+    <path
+        android:fillColor="@color/texticon_primary"
+        android:pathData="M2,1.5h16c1.1,0 2,0.9 2,2v9c0,1.1 -0.9,2 -2,2H2c-1.1,0 -2,-0.9 -2,-2v-9c0,-1.1 0.9,-2 2,-2z"/>
+    <path
+        android:fillColor="@color/button_brand_normal"
+        android:pathData="M0,4.5h20v2H0zM12.5,10.5h5v1.4h-5z"/>
+</vector>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rl_banner"
+    android:layout_width="match_parent"
+    android:layout_height="60dp">
+    <ImageView
+        android:id="@+id/iv_banner"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:scaleType="centerCrop"
+        android:layout_centerVertical="true"
+        android:contentDescription="@null"/>
+    <FrameLayout
+        android:id="@+id/fl_close_banner"
+        android:paddingTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:paddingStart="30dp"
+        android:paddingEnd="10dp"
+        android:layout_alignParentEnd="true">
+        <ImageView
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:src="@mipmap/cc_coupon_icon_close_banner"
+            android:contentDescription="@null"/>
+    </FrameLayout>
+</RelativeLayout>

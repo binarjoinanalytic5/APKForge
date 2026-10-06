@@ -1,0 +1,82 @@
+===== ORIGINAL APK =====
+e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278  original.apk
+-rw-------. 1 u0_a799 u0_a799 77M Oct  6 04:26 original.apk
+
+===== JADX =====
+74M	jadx-src
+4554
+
+===== APKTOOL =====
+78M	apktool-src
+4708
+
+===== NATIVE LIBRARIES =====
+apktool-src/lib/armeabi-v7a/libmarsxlog.so
+apktool-src/lib/armeabi-v7a/libsaasCorePlayer.so
+apktool-src/lib/armeabi-v7a/libmmkv.so
+apktool-src/lib/armeabi-v7a/libmku_aaab.so
+apktool-src/lib/armeabi-v7a/libsaasDownloader.so
+apktool-src/lib/armeabi-v7a/libtapjoy.so
+apktool-src/lib/armeabi-v7a/libalivcffmpeg.so
+apktool-src/lib/armeabi-v7a/libcrashlytics-common.so
+apktool-src/lib/armeabi-v7a/libalinetworkdiagnosis.so
+apktool-src/lib/armeabi-v7a/libcrashlytics.so
+apktool-src/lib/armeabi-v7a/libnms.so
+apktool-src/lib/armeabi-v7a/libtt_ugen_layout.so
+apktool-src/lib/armeabi-v7a/libc++_shared.so
+apktool-src/lib/armeabi-v7a/libprotect.so
+apktool-src/lib/armeabi-v7a/libstupid.so
+apktool-src/lib/armeabi-v7a/libcrashlytics-handler.so
+apktool-src/lib/armeabi-v7a/libsls_producer.so
+apktool-src/lib/armeabi-v7a/libfile_lock_pgl.so
+apktool-src/lib/armeabi-v7a/libdatastore_shared_counter.so
+apktool-src/lib/armeabi-v7a/libapplovin-native-crash-reporter.so
+apktool-src/lib/armeabi-v7a/libpglarmor.so
+apktool-src/lib/armeabi-v7a/libcrashlytics-trampoline.so
+apktool-src/lib/armeabi-v7a/libbuffer_pgl.so
+apktool-src/lib/armeabi-v7a/libSecShell-x86.so
+apktool-src/lib/armeabi-v7a/libSecShell.so
+apktool-src/lib/arm64-v8a/libmarsxlog.so
+apktool-src/lib/arm64-v8a/libsaasCorePlayer.so
+apktool-src/lib/arm64-v8a/libmmkv.so
+apktool-src/lib/arm64-v8a/libmku_aaab.so
+apktool-src/lib/arm64-v8a/libsaasDownloader.so
+apktool-src/lib/arm64-v8a/libtapjoy.so
+apktool-src/lib/arm64-v8a/libalivcffmpeg.so
+apktool-src/lib/arm64-v8a/libcrashlytics-common.so
+apktool-src/lib/arm64-v8a/libalinetworkdiagnosis.so
+apktool-src/lib/arm64-v8a/libcrashlytics.so
+apktool-src/lib/arm64-v8a/libnms.so
+apktool-src/lib/arm64-v8a/libtt_ugen_layout.so
+apktool-src/lib/arm64-v8a/libc++_shared.so
+apktool-src/lib/arm64-v8a/libprotect.so
+apktool-src/lib/arm64-v8a/libstupid.so
+apktool-src/lib/arm64-v8a/libcrashlytics-handler.so
+apktool-src/lib/arm64-v8a/libsls_producer.so
+apktool-src/lib/arm64-v8a/libfile_lock_pgl.so
+apktool-src/lib/arm64-v8a/libdatastore_shared_counter.so
+apktool-src/lib/arm64-v8a/libapplovin-native-crash-reporter.so
+apktool-src/lib/arm64-v8a/libpglarmor.so
+apktool-src/lib/arm64-v8a/libcrashlytics-trampoline.so
+apktool-src/lib/arm64-v8a/libbuffer_pgl.so
+apktool-src/lib/arm64-v8a/libSecShell-x86.so
+apktool-src/lib/arm64-v8a/libSecShell.so
+
+===== JADX ERRORS =====
+INFO  - loading ...
+INFO  - processing ...
+INFO  - progress: 0 of 4056 (0%)INFO  - progress: 486 of 4056 (11%)INFO  - progress: 986 of 4056 (24%)INFO  - progress: 1409 of 4056 (34%)INFO  - progress: 1979 of 4056 (48%)INFO  - progress: 3684 of 4056 (90%)INFO  - progress: 3885 of 4056 (95%)INFO  - progress: 3918 of 4056 (96%)INFO  - progress: 3928 of 4056 (96%)INFO  - progress: 3954 of 4056 (97%)INFO  - progress: 3972 of 4056 (97%)INFO  - progress: 3990 of 4056 (98%)INFO  - progress: 3992 of 4056 (98%)INFO  - progress: 3998 of 4056 (98%)INFO  - progress: 4002 of 4056 (98%)INFO  - progress: 4012 of 4056 (98%)INFO  - progress: 4020 of 4056 (99%)INFO  - progress: 4031 of 4056 (99%)INFO  - progress: 4047 of 4056 (99%)INFO  - progress: 4052 of 4056 (99%)INFO  - progress: 4054 of 4056 (99%)                                                             ERROR - finished with errors, count: 4
+
+===== APKTOOL LOG =====
+I: Using Apktool 3.0.3 on original.apk with 8 threads
+I: Loading resource table...
+I: Baksmaling classes.dex...
+I: Decoding value resources...
+I: Loading resource table from file: /data/data/com.termux/files/home/.local/share/apktool/framework/1.apk
+I: Decoding file resources...
+I: Generating values XMLs...
+I: Decoding AndroidManifest.xml with resources...
+I: Copying original files...
+I: Copying assets...
+I: Copying lib...
+I: Copying unknown files...

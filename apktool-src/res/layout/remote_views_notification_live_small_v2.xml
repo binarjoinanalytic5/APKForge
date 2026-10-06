@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:layout_gravity="start|center" android:id="@id/iv_big_image" android:layout_width="40.0dp" android:layout_height="54.0dp" android:scaleType="fitCenter" android:layout_marginEnd="8.0dp" />
+    <LinearLayout android:gravity="start|center" android:layout_gravity="start|center" android:orientation="vertical" android:layout_width="0.0dp" android:layout_height="wrap_content" android:layout_weight="1.0">
+        <TextView android:textAppearance="@style/v_notification_title" android:ellipsize="end" android:id="@id/tv_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:maxLines="2" />
+        <TextView android:textAppearance="@style/v_notification_info" android:textColor="@color/color_99000000_to_99ffffff" android:ellipsize="end" android:id="@id/tv_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2.0dp" android:maxLines="1" />
+    </LinearLayout>
+    <ImageView android:layout_width="40.0dp" android:layout_height="32.0dp" android:src="@drawable/icon_notification_small_right_live" android:scaleType="fitCenter" android:layout_marginStart="16.0dp" />
+</LinearLayout>

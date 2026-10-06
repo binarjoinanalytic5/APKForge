@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.AppCompatTextView android:textSize="14.0sp" android:textColor="@color/color_ffffff_alpha_90" android:ellipsize="end" android:gravity="center" android:id="@id/tv_tag_name" android:background="@drawable/bg_white15_r4" android:padding="8.0dp" android:layout_width="match_parent" android:layout_height="wrap_content" android:maxLines="1" app:autoSizeMaxTextSize="14.0sp" app:autoSizeMinTextSize="10.0sp" app:autoSizeStepGranularity="0.5sp" app:autoSizeTextType="uniform"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" />
