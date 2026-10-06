@@ -232,3 +232,13 @@ The campaign default is now `REELSEC_DECODE_STRATEGY=no-res-first`. This avoids 
 
 Fix commits: `3b9cfcb30ccae3df430b9ad80ba895ab3abf6b73`, `e49a97cd198441f673aaea2c435a45aa56dfbccb`
 Regression coverage: `4d5e6b2a753494afc5acb4d2e9e3e9edd8699011`
+
+
+## Instrumentation Execution Path — 2026-10-07
+
+After the decode-state fix, Stage 7 was found to be copy-only: the campaign prepared an isolated tree but did not actually apply the planned SecShell probe. ReelSec now applies the telemetry probe to the copied `AW.smali` target before build. The probe reserves two local registers and emits a `Log.i` marker after the SecShell `System.loadLibrary` call. It is explicitly telemetry-only and does not disable or alter a security decision.
+
+The original APK and decoded source remain untouched. The copied manifest records the mutation and target path; Stage 8 accepts the resulting `MUTATED` state.
+
+Implementation commits: `e79f52519b3bfa1025ca7cda194decf8659db72f`, `eb7ff8336dde87855be693fa21387e6c90c3c27f`
+Test-fixture correction: `83fa850a21ff3a73748faff57736adcab1bea200`
