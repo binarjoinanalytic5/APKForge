@@ -16,6 +16,7 @@ from apktool_backend import ApktoolBackendError, select_apktool_backend, decode_
 from instrumentation_backend import plan_secshell_injection
 from instrumented_copy import prepare_instrumented_copy
 from build_verify import apktool_build_command, verify_artifact
+from sign_verify import artifact_identity, sign_command, verify_command, run_checked
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
 VERSION = "3.0.0"
@@ -1621,6 +1622,35 @@ def main():
             encoding="utf-8",
         )
 
+    sign_verify = {"status": "NOT_SIGNED"}
+    if build_verify.get("status") == "BUILT":
+        try:
+            apksigner = capabilities.get("tools", {}).get("apksigner", {}).get("path")
+            keystore = os.environ.get("REELSEC_TEST_KEYSTORE")
+            alias = os.environ.get("REELSEC_TEST_KEY_ALIAS", "reelsec-test")
+            if not apksigner or not keystore:
+                raise RuntimeError("apksigner or REELSEC_TEST_KEYSTORE unavailable")
+            unsigned_apk = Path(build_verify["path"]).resolve()
+            signed_apk = output / "instrumented-signed.apk"
+            cmd = sign_command(apksigner, unsigned_apk, signed_apk, keystore, alias)
+            sign_output = run_checked(cmd)
+            verify_cmd = verify_command(apksigner, signed_apk)
+            verify_output = run_checked(verify_cmd)
+            sign_verify = artifact_identity(unsigned_apk, signed_apk)
+            sign_verify.update({
+                "status": "SIGNED_VERIFIED",
+                "sign_command": cmd,
+                "verify_command": verify_cmd,
+                "sign_output_tail": sign_output[-2000:],
+                "verify_output_tail": verify_output[-2000:],
+            })
+        except Exception as exc:
+            sign_verify = {"status": "BLOCKED_OR_FAILED", "error": str(exc)}
+        (output / "SIGN-VERIFY.json").write_text(
+            json.dumps(sign_verify, indent=2, sort_keys=True) + "\\n",
+            encoding="utf-8",
+        )
+
     analysis_root = Path(decoded_inventory["root"]).resolve() if decoded_inventory and decoded_inventory.get("status") == "READY" else ROOT
     target = find_target(args.elf, analysis_root)
     target_source = "decoded-apk" if analysis_root != ROOT else "repository-root-fallback"
@@ -1645,6 +1675,7 @@ def main():
         "instrumentation_plan": instrumentation_plan,
         "instrumented_copy": instrumented_copy,
         "build_verify": build_verify,
+        "sign_verify": sign_verify,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
