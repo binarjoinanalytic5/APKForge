@@ -139,3 +139,14 @@ or:
 `DECODE_FAILED_RAW_FALLBACK + READY_NATIVE_ONLY` — continue honest native/static analysis while keeping instrumentation/build gated.
 
 Only a real decoded tree can unlock the SecShell instrumentation/build stages.
+## Live campaign UX — 2026-10-06
+
+ReelSec campaign execution now records and renders live stage state rather than emitting only final key/value lines. The campaign has a 14-stage progress model with RUNNING and terminal PASS/FAIL/BLOCKED/SKIP states, persisted to PROGRESS.json.
+
+The UI intentionally distinguishes a failed Apktool decode from a successful raw ZIP fallback: the decode stage remains FAIL while the raw/native analysis path may continue under READY_NATIVE_ONLY.
+
+The aggregate terminal state is COMPLETED or COMPLETED_WITH_ISSUES for a completed campaign, and BLOCKED for an early campaign gate failure.
+
+The latest UI correctness fix also repaired the campaign-blocker indentation defect that previously produced an IndentationError before progress initialization.
+
+Latest ReelSec source commit: 25a42787ac07541ffaf0252ede1516b03d536d9f.
