@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:id="@2131362123" android:tag="" android:layout_width="-2" android:layout_height="-2" xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView android:id="@2131362786" android:layout_width="90.0dip" android:layout_height="90.0dip" app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent" />
+    <TextView android:textSize="14.0sp" android:textColor="@2131100902" android:ellipsize="3" android:id="@2131364083" android:layout_width="0.0dip" android:layout_height="-2" android:layout_marginTop="7.0dip" android:maxLines="2" app:layout_constraintEnd_toEndOf="@id/iv_more_game_app_logo" app:layout_constraintStart_toStartOf="@id/iv_more_game_app_logo" app:layout_constraintTop_toBottomOf="@id/iv_more_game_app_logo" />
+</androidx.constraintlayout.widget.ConstraintLayout>

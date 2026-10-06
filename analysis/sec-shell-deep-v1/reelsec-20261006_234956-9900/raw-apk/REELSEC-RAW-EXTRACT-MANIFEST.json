@@ -1,0 +1,13 @@
+{
+  "buildable_with_apktool": false,
+  "decoded": false,
+  "extracted_files": 3885,
+  "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+  "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+  "instrumentable_smali": false,
+  "mode": "RAW_APK_ZIP_EXTRACTION",
+  "mutates_original_apk": false,
+  "output_dir": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261006_234956-9900/raw-apk",
+  "skipped_members": [],
+  "status": "RAW_EXTRACTED"
+}

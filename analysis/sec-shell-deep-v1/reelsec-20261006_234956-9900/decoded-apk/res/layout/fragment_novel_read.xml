@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:tag="" android:layout_width="-1" android:layout_height="-1"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.scwang.smart.refresh.layout.SmartRefreshLayout android:id="@2131363621" android:layout_width="-1" android:layout_height="0.0dip" android:overScrollMode="2" app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintTop_toTopOf="parent">
+        <com.crazymaple.reelshort.novel.widget.recyclerview.NovelRecyclerView android:id="@2131363548" android:layout_width="-1" android:layout_height="-1" android:overScrollMode="2" />
+    </com.scwang.smart.refresh.layout.SmartRefreshLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
