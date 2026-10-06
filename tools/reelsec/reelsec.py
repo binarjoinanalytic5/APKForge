@@ -390,7 +390,14 @@ def write_vtable_class_correlation(output, data):
     return proven
 
 def write_remaining_dispatch_audit(output, objdump, target):
-    """Scan the full executable text for +0x108 indirect-dispatch candidates."""
+    """Scan the full executable text for +0x108 indirect-dispatch candidates.
+
+    This deliberately separates:
+    - JNI interface-table dispatches;
+    - C++ virtual-dispatch candidates;
+    - target-vtable candidates (only when the loaded vptr is proven to equal
+      the recovered 0x717e60 address-point).
+    """
     if not objdump:
         (output / "REMAINING-DISPATCH-AUDIT.md").write_text(
             "# Remaining Dispatch Audit\n\nOBJDUMP_NOT_FOUND\n", encoding="utf-8"
@@ -410,65 +417,107 @@ def write_remaining_dispatch_audit(output, objdump, target):
         stripped = line.strip()
         if re.search(r"^0*[0-9a-fA-F]+\s+<.*>:$", stripped):
             current_label = stripped
+
         if re.search(r"\bbl\s+(?:0x)?27a510\b", line, re.I):
             direct_target.append(line.strip())
-        if re.search(r"\bldr\s+x8,\s+\[x8,\s+#0x108\]", line):
-            window = lines[i:min(len(lines), i + 5)]
-            if any(re.search(r"\bblr\s+x8\b", w) for w in window):
-                prev = lines[max(0, i - 6):i]
-                has_object_vptr = any(re.search(r"\bldr\s+x8,\s+\[x19\]", w) for w in prev)
-                has_env_receiver = any(re.search(r"\bmov\s+x0,\s+x19\b", w) for w in window)
-                candidates.append({
-                    "address": stripped.split(":", 1)[0],
-                    "label": current_label,
-                    "object_vptr_predecessor": has_object_vptr,
-                    "jni_receiver_pattern": has_env_receiver,
-                    "window": "\n".join(prev[-3:] + window[:5]),
-                })
 
-    proven_object = [c for c in candidates if c["object_vptr_predecessor"] and not c["jni_receiver_pattern"]]
-    jni_like = [c for c in candidates if c["jni_receiver_pattern"]]
-    unresolved = [c for c in candidates if c not in proven_object and c not in jni_like]
+        if re.search(r"\bldr\s+x8,\s+\[x8,\s+#0x108\]", line):
+            window = lines[i:min(len(lines), i + 6)]
+            if not any(re.search(r"\bblr\s+x8\b", w) for w in window):
+                continue
+
+            prev = lines[max(0, i - 8):i]
+            has_vptr_load = any(re.search(r"\bldr\s+x8,\s+\[x19\]", w) for w in prev)
+            has_receiver_x19 = any(re.search(r"\bmov\s+x0,\s+x19\b", w) for w in window)
+
+            # Function-label evidence. JNI bridge functions conventionally
+            # carry JNIEnv in the demangled signature or Java/Jni naming.
+            label_lower = current_label.lower()
+            label_is_jni = (
+                "envp7_jnienv" in label_lower
+                or "ep7_jnienv" in label_lower
+                or "<jnionload" in label_lower
+                or "java" in label_lower
+                or "jni" in label_lower
+            )
+
+            # Strong JNI pattern: JNIEnv receiver handoff plus a Java/JNI-like
+            # function label. This avoids misclassifying C++ calls merely
+            # because x19 happens to be the receiver register.
+            jni_like = label_is_jni and (has_receiver_x19 or has_vptr_load)
+
+            # We can only call this a target-vtable dispatch if the actual
+            # loaded vptr is statically tied to the recovered address point.
+            # No current full-text pass proves that tie, so this starts false.
+            target_vtable_proven = False
+
+            if jni_like:
+                classification = "JNI_LIKELY"
+            elif target_vtable_proven:
+                classification = "PROVEN_TARGET_VTABLE"
+            elif has_vptr_load:
+                classification = "CXX_DISPATCH_CANDIDATE_UNRESOLVED_VTABLE"
+            else:
+                classification = "INDIRECT_0x108_UNRESOLVED"
+
+            candidates.append({
+                "address": stripped.split(":", 1)[0],
+                "label": current_label,
+                "has_vptr_load": has_vptr_load,
+                "jni": jni_like,
+                "target_vtable": target_vtable_proven,
+                "classification": classification,
+                "window": "\n".join(prev[-4:] + window[:6]),
+            })
+
+    jni_like = [c for c in candidates if c["classification"] == "JNI_LIKELY"]
+    target_vtable = [c for c in candidates if c["classification"] == "PROVEN_TARGET_VTABLE"]
+    cxx_unresolved = [c for c in candidates if c["classification"] == "CXX_DISPATCH_CANDIDATE_UNRESOLVED_VTABLE"]
+    unresolved = [c for c in candidates if c["classification"] == "INDIRECT_0x108_UNRESOLVED"]
 
     out = [
         "# Remaining Dispatch Audit",
         "",
-        "Goal: prove or disprove a concrete C++ object -> vptr -> +0x108 -> indirect call path.",
+        "Goal: prove a concrete target-object -> vptr 0x717e60 -> +0x108 -> 0x27a510 path.",
         "Full disassembly return code: %d" % rc,
         "Candidate +0x108 indirect dispatches: %d" % len(candidates),
-        "JNI-like +0x108 candidates: %d" % len(jni_like),
-        "Proven-object C++ +0x108 candidates: %d" % len(proven_object),
-        "Unresolved candidates: %d" % len(unresolved),
+        "JNI-like candidates: %d" % len(jni_like),
+        "C++ candidates with vptr load but unresolved vtable: %d" % len(cxx_unresolved),
+        "Other unresolved +0x108 candidates: %d" % len(unresolved),
+        "PROVEN target-vtable candidates: %d" % len(target_vtable),
         "Direct BL to 0x27a510: %d" % len(direct_target),
         "",
         "Classification rule:",
-        "- JNI_LIKELY requires the observed JNIEnv-style receiver handoff (mov x0, x19) around the +0x108 dispatch.",
-        "- PROVEN_CXX_OBJECT requires an object-vptr predecessor without that JNI receiver pattern.",
-        "- UNRESOLVED requires manual/data-flow reconstruction.",
+        "- JNI_LIKELY: function context is Java/JNI-like and the receiver pattern is compatible with JNIEnv dispatch.",
+        "- PROVEN_TARGET_VTABLE: requires independent proof that the loaded vptr equals 0x717e60; this pass does not infer that from register names alone.",
+        "- CXX_DISPATCH_CANDIDATE_UNRESOLVED_VTABLE: C++-looking indirect dispatch where the vptr source is not tied to 0x717e60.",
+        "- INDIRECT_0x108_UNRESOLVED: insufficient context to classify.",
         "",
     ]
     for item in candidates:
-        cls = "PROVEN_CXX_OBJECT" if item in proven_object else ("JNI_LIKELY" if item in jni_like else "UNRESOLVED")
         out += [
             "## 0x" + item["address"],
-            "Classification: " + cls,
+            "Classification: " + item["classification"],
             "Function: " + item["label"],
             "ASM:",
             item["window"],
             "",
         ]
+
     if not candidates:
         out.append("No +0x108 indirect-dispatch candidates were found in the executable text.")
+
     out += [
         "RESULT: " + (
-            "NO_PROVEN_CXX_RUNTIME_DISPATCH_FOUND"
-            if not proven_object else "PROVEN_CXX_RUNTIME_DISPATCH_CANDIDATE_FOUND"
+            "PROVEN_TARGET_VTABLE_DISPATCH_FOUND"
+            if target_vtable else
+            "NO_PROVEN_TARGET_VTABLE_DISPATCH_FOUND"
         ),
         "",
-        "This is a static scan. It cannot prove runtime execution/non-execution by itself.",
+        "This is a static scan. It does not prove runtime execution or non-execution.",
     ]
     (output / "REMAINING-DISPATCH-AUDIT.md").write_text("\n".join(out) + "\n", encoding="utf-8")
-    return bool(proven_object)
+    return bool(target_vtable)
 
 def write_native_security_api_audit(output, strings_text, symbols_text):
     keys = [
