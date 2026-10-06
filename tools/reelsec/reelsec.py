@@ -2504,8 +2504,23 @@ def main():
     )
     print("\nReelSec Campaign %s" % progress["final_status"], flush=True)
     print("Final report: %s" % output, flush=True)
+    counts = {
+        status: sum(1 for s in progress.get("stages", []) if s.get("status") == status)
+        for status in ("PASS", "FAIL", "BLOCKED", "SKIP")
+    }
+    print(
+        "STAGE_SUMMARY=PASS:%d FAIL:%d BLOCKED:%d SKIP:%d" %
+        (counts["PASS"], counts["FAIL"], counts["BLOCKED"], counts["SKIP"]),
+        flush=True,
+    )
     print("FINAL_STATUS=" + progress["final_status"], flush=True)
-    print("RUNTIME_PROOF_STATUS=" + str(runtime_result.get("status") if runtime_result else "NOT_RUN"))
+    print("RUNTIME_PROOF_STATUS=" + str(runtime_result.get("status") if runtime_result else "NOT_RUN"), flush=True)
+
+    # Exit non-zero when the campaign completed with failed/blocked stages.
+    # This makes the CLI truthful for automation while preserving the report.
+    if progress["final_status"] == "COMPLETED_WITH_ISSUES":
+        return 2
+    return 0
 
 if __name__ == "__main__":
     raise SystemExit(main())
