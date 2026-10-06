@@ -56,16 +56,16 @@ def _manifest_application_class(root):
         text = manifest.read_text(encoding="utf-8", errors="replace")
     except OSError:
         return None
-    app = re.search(r'<application\\b[^>]*?android:name=["\\']([^"\\']+)["\\']', text, re.S)
+    app = re.search(r"<application\b[^>]*?android:name=['\"]([^'\"]+)['\"]", text, re.S)
     if not app:
         return None
     name = app.group(1)
     if name.startswith("."):
-        package = re.search(r'<manifest\\b[^>]*?package=["\\']([^"\\']+)["\\']', text, re.S)
+        package = re.search(r"<manifest\b[^>]*?package=['\"]([^'\"]+)['\"]", text, re.S)
         if package:
             name = package.group(1) + name
     elif "." not in name and "/" not in name:
-        package = re.search(r'<manifest\\b[^>]*?package=["\\']([^"\\']+)["\\']', text, re.S)
+        package = re.search(r"<manifest\b[^>]*?package=['\"]([^'\"]+)['\"]", text, re.S)
         if package:
             name = package.group(1) + "." + name
     return name
