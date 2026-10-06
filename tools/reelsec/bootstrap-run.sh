@@ -19,26 +19,21 @@ git fetch "$REMOTE" "$BRANCH" || {
 }
 
 # Never destroy or stash investigation work automatically.
-if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+STATUS="$(git status --porcelain 2>/dev/null)"
+LOCAL="$(git rev-parse HEAD)"
+REMOTE_SHA="$(git rev-parse "$REMOTE/$BRANCH")"
+AHEAD="$(git rev-list --count "$REMOTE/$BRANCH"..HEAD 2>/dev/null || echo 0)"
+BEHIND="$(git rev-list --count HEAD.."$REMOTE/$BRANCH" 2>/dev/null || echo 0)"
+
+# Only fast-forward a completely clean checkout that is strictly behind.
+# Divergence is not an error: run the newest remote tool without merging.
+if [ -z "$STATUS" ] && [ "$AHEAD" = "0" ] && [ "$BEHIND" != "0" ]; then
+  git merge --ff-only "$REMOTE/$BRANCH" >/dev/null 2>&1 || true
   LOCAL="$(git rev-parse HEAD)"
-  REMOTE_SHA="$(git rev-parse "$REMOTE/$BRANCH")"
-  if [ "$LOCAL" != "$REMOTE_SHA" ]; then
-    AHEAD="$(git rev-list --count "$REMOTE/$BRANCH"..HEAD 2>/dev/null || echo 0)"
-    BEHIND="$(git rev-list --count HEAD.."$REMOTE/$BRANCH" 2>/dev/null || echo 0)"
-    if [ "$AHEAD" = "0" ]; then
-      git merge --ff-only "$REMOTE/$BRANCH" >/dev/null 2>&1 || git merge --no-edit "$REMOTE/$BRANCH" || {
-        echo "ERROR: safe synchronization failed."
-        exit 1
-      }
-    elif [ "$BEHIND" = "0" ]; then
-      :
-    else
-      git merge --no-edit "$REMOTE/$BRANCH" || {
-        echo "ERROR: merge conflict detected; local investigation was preserved."
-        exit 1
-      }
-    fi
-  fi
+fi
+
+# Clean and already synchronized: run the checked-out tool.
+if [ "$LOCAL" = "$REMOTE_SHA" ] && [ -f "$TOOL" ]; then
   chmod +x "$TOOL" "$WRAPPER" 2>/dev/null || true
   exec python3 "$TOOL" "$@"
 fi
