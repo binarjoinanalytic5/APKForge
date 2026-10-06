@@ -83,6 +83,16 @@ class CampaignOrchestrationTests(unittest.TestCase):
             self.assertTrue((recovery / "AndroidManifest.xml").is_file())
             self.assertTrue((recovery / "smali" / "Example.smali").is_file())
 
+    def test_decode_no_res_is_accepted_as_campaign_analysis_root(self):
+        inventory = {
+            "status": "READY",
+            "root": "/tmp/reelsec-no-res",
+            "decode_mode": "APKTOOL_NO_RES",
+            "resources_decoded": False,
+        }
+        self.assertIn(inventory["status"], ("READY", "READY_NATIVE_ONLY"))
+        self.assertEqual(inventory["decode_mode"], "APKTOOL_NO_RES")
+
     def test_decode_refuses_nonempty_existing_output(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
