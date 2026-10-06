@@ -161,3 +161,18 @@ The same run exposed a runtime-discovery edge case: AndroidManifest.xml from the
 The CLI now prints STAGE_SUMMARY=PASS:<n> FAIL:<n> BLOCKED:<n> SKIP:<n> and returns exit code 2 for COMPLETED_WITH_ISSUES while preserving the generated report. A clean COMPLETED campaign returns 0.
 
 Latest source commit: 065d5adafe35299ba1178721136828b6992c8bfb.
+## Apktool orchestration root-cause correction — 2026-10-06
+
+The 23:27 campaign proved the live progress UX works, but also exposed why every decode attempt was failing: ReelSec created the `decoded-apk` destination before invoking Apktool. Apktool 2.7 then correctly rejected the already-existing destination.
+
+This has now been corrected in `run_apktool_decode`: ReelSec only creates the parent directory and lets Apktool create the destination itself. A non-empty pre-existing destination is still refused, preserving prior evidence. Regression tests were added for both behaviors.
+
+Latest source commit: 8fc7dbf73ffcc94d024603336abe89a82d36f135.
+Regression-test commit: 21fd138d491344ae3c350cc89b85a431f87ffce7.
+
+The next campaign run is therefore the first meaningful test of the actual Apktool decode path on `original.apk`. Expected possibilities:
+
+`DECODED` -> continue to real Smali inventory and SecShell instrumentation;
+`DECODE_FAILED_RAW_FALLBACK` -> Apktool has a genuine compatibility/input problem, and the raw fallback becomes the honest native-only path.
+
+The previous raw-only run also showed 3885 extracted files, one DEX, and 50 native libraries bound to the supplied APK SHA-256. Runtime package discovery remains enhanced by binary AXML parsing plus an installed SDK-tool fallback.
