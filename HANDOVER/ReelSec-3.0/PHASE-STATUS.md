@@ -150,3 +150,14 @@ The aggregate terminal state is COMPLETED or COMPLETED_WITH_ISSUES for a complet
 The latest UI correctness fix also repaired the campaign-blocker indentation defect that previously produced an IndentationError before progress initialization.
 
 Latest ReelSec source commit: 25a42787ac07541ffaf0252ede1516b03d536d9f.
+## Professional campaign status semantics — latest
+
+Live progress is now rendered before and after each major stage. The progress renderer persists stage records in PROGRESS.json and the terminal aggregate distinguishes COMPLETED from COMPLETED_WITH_ISSUES.
+
+The native/raw campaign run on 2026-10-06 proved the input binding for the supplied APK: input SHA-256 e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278, raw extraction of 3885 files, one DEX, and 50 native libraries. The target lib/arm64-v8a/libsaasCorePlayer.so was inside the raw extraction root and hashed a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4.
+
+The same run exposed a runtime-discovery edge case: AndroidManifest.xml from the raw APK path is binary AXML, so text-only package discovery returned package_manifest missing. ReelSec main now contains an internal binary AXML string-pool/start-element parser and can recover the manifest package without an external aapt dependency.
+
+The CLI now prints STAGE_SUMMARY=PASS:<n> FAIL:<n> BLOCKED:<n> SKIP:<n> and returns exit code 2 for COMPLETED_WITH_ISSUES while preserving the generated report. A clean COMPLETED campaign returns 0.
+
+Latest source commit: 065d5adafe35299ba1178721136828b6992c8bfb.
