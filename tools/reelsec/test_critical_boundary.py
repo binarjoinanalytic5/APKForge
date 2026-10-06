@@ -30,6 +30,21 @@ class CriticalBoundaryTests(unittest.TestCase):
             self.assertNotIn("27a544", report)
             self.assertNotIn("__stack_chk_fail", report)
 
+    def test_vtable_object_proof_accepts_objdump_tabs(self):
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td)
+            (out / "ActiveDecoder-constructor.txt").write_text(
+                "278450: 97f99de0     \tbl\t0xdfbd0 <_ZN13ActiveDecoderC2Ev@plt>\n"
+                "278454: f00024e8     \tadrp\tx8, 0x717000 <_ZTVN6Cicada12avAESEncryptE+0x730>\n"
+                "278458: 91394108     \tadd\tx8, x8, #0xe50\n"
+                "27846c: 91004109     \tadd\tx9, x8, #0x10\n"
+                "27847c: f9000269     \tstr\tx9, [x19]\n",
+                encoding="utf-8",
+            )
+            self.assertTrue(reelsec.write_vtable_object_proof(out))
+            proof = (out / "VTABLE-OBJECT-PROOF.md").read_text(encoding="utf-8")
+            self.assertIn("RESULT: PROVEN_OBJECT_VPTR_TO_0x717E60", proof)
+
     def test_rejects_non_ret_terminated_body(self):
         with tempfile.TemporaryDirectory() as td:
             out = Path(td)
