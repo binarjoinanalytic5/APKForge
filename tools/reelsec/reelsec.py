@@ -507,14 +507,10 @@ def write_critical_behavior(output, ptr):
         "This is body-local evidence only; it does not prove Screenshot blocking."
     ]
     (output / "CRITICAL-FUNCTION-BODY.txt").write_text(
-        "
-".join(body_lines) + "
-", encoding="utf-8"
+        "\n".join(body_lines) + "\n", encoding="utf-8"
     )
     (output / "CRITICAL-FUNCTION-BEHAVIOR.md").write_text(
-        "
-".join(out) + "
-", encoding="utf-8"
+        "\n".join(out) + "\n", encoding="utf-8"
     )
     return cls
 
@@ -646,10 +642,7 @@ def write_remaining_dispatch_audit(output, objdump, target):
     """
     if not objdump:
         (output / "REMAINING-DISPATCH-AUDIT.md").write_text(
-            "# Remaining Dispatch Audit
-
-OBJDUMP_NOT_FOUND
-", encoding="utf-8"
+            "# Remaining Dispatch Audit\n\nOBJDUMP_NOT_FOUND\n", encoding="utf-8"
         )
         return False
 
@@ -716,8 +709,7 @@ OBJDUMP_NOT_FOUND
                 "jni": jni_like,
                 "target_vtable": target_vtable_proven,
                 "classification": classification,
-                "window": "
-".join(prev[-4:] + window[:6]),
+                "window": "\n".join(prev[-4:] + window[:6]),
             })
 
     jni_like = [c for c in candidates if c["classification"] == "JNI_LIKELY"]
@@ -790,9 +782,7 @@ def write_native_security_api_audit(output, strings_text, symbols_text):
         out.append("- %s: %s" % (key, "FOUND" if key.lower() in combined else "NOT_FOUND"))
     out += ["", "Rule: names/imports are indicators, not execution proof."]
     (output / "NATIVE-SECURITY-API-AUDIT.md").write_text(
-        "
-".join(out) + "
-", encoding="utf-8"
+        "\n".join(out) + "\n", encoding="utf-8"
     )
 
 def write_java_screen_security_audit(output, root):
@@ -829,9 +819,7 @@ def write_java_screen_security_audit(output, root):
     if len(out) == 2:
         out.append("No Java/Kotlin/Smali evidence matched the monitored screen-security terms.")
     (output / "JAVA-SCREEN-SECURITY-AUDIT.md").write_text(
-        "
-".join(out) + "
-", encoding="utf-8"
+        "\n".join(out) + "\n", encoding="utf-8"
     )
 
 
@@ -871,10 +859,7 @@ def write_autonomous_dataflow(output, target, objdump):
     path = output / "full-disassembly.txt"
     if not objdump or not path.exists():
         (output / "AUTONOMOUS-DATAFLOW.md").write_text(
-            "# Autonomous Dataflow
-
-DISASSEMBLY_UNAVAILABLE
-", encoding="utf-8")
+            "# Autonomous Dataflow\n\nDISASSEMBLY_UNAVAILABLE\n", encoding="utf-8")
         (output / "AUTONOMOUS-DATAFLOW.json").write_text(
             json.dumps({"status": "DISASSEMBLY_UNAVAILABLE"}, indent=2) + "\n",
             encoding="utf-8")
@@ -929,8 +914,7 @@ DISASSEMBLY_UNAVAILABLE
                     "classification":"JNI_DISPATCH_EXCLUDED",
                     "proof_basis":"JNI_On* lifecycle callback with JNIEnv table load",
                     "constructor_evidence":None,
-                    "window":"
-".join(block[max(0,rel_i-8):min(len(block),rel_i+6)])
+                    "window":"\n".join(block[max(0,rel_i-8):min(len(block),rel_i+6)])
                 })
                 continue
 
@@ -1006,8 +990,7 @@ DISASSEMBLY_UNAVAILABLE
                 "dispatch_address":line.split(":",1)[0].strip(),
                 "classification":classification,"proof_basis":proof_basis,
                 "constructor_evidence":constructor_evidence,
-                "window":"
-".join(block[max(0,rel_i-8):min(len(block),rel_i+6)])
+                "window":"\n".join(block[max(0,rel_i-8):min(len(block),rel_i+6)])
             })
 
     proven=[x for x in records if x["classification"] in
@@ -1113,10 +1096,8 @@ def write_runtime_toolchain_preflight(output):
         wrapper_dir.mkdir(parents=True,exist_ok=True)
         wrapper=wrapper_dir/"frida"
         wrapper.write_text(
-            "#!/system/bin/sh
-"
-            "exec "+pdist+" login debian -- /usr/local/bin/frida \"$@\"
-",
+            "#!/system/bin/sh\n"
+            "exec "+pdist+" login debian -- /usr/local/bin/frida \"$@\"\n",
             encoding="utf-8",
         )
         try:
@@ -1144,16 +1125,10 @@ def write_runtime_toolchain_preflight(output):
     result["status"]="CLIENTS_READY" if not missing else "RUNTIME_TOOLCHAIN_INCOMPLETE"
     (output/"RUNTIME-TOOLCHAIN-PREFLIGHT.json").write_text(json.dumps(result,indent=2,sort_keys=True)+"\n",encoding="utf-8")
     (output/"RUNTIME-TOOLCHAIN-PREFLIGHT.md").write_text(
-        "# Runtime Toolchain Preflight
-
-"
-        "Status: "+result["status"]+"
-"
-        "Missing: "+(", ".join(missing) if missing else "NONE")+"
-
-"
-        "Frida installation preference: native Termux package, then Debian/PRoot glibc environment, then native pip fallback.
-",
+        "# Runtime Toolchain Preflight\n\n"
+        "Status: "+result["status"]+"\n"
+        "Missing: "+(", ".join(missing) if missing else "NONE")+"\n\n"
+        "Frida installation preference: native Termux package, then Debian/PRoot glibc environment, then native pip fallback.\n",
         encoding="utf-8")
     return result
 
@@ -1297,25 +1272,13 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     (output / "RUNTIME-PROOF-READINESS.md").write_text(
-        "# Runtime Proof Readiness
-
-"
-        "Package: %s
-Native module: %s
-Target offset: 0x27a510
-"
-        "Expected vptr: 0x717e60
-Expected slot result: 0x27a510
-
-"
-        "Status: %s
-Reason: %s
-
-"
+        "# Runtime Proof Readiness\n\n"
+        "Package: %s\nNative module: %s\nTarget offset: 0x27a510\n"
+        "Expected vptr: 0x717e60\nExpected slot result: 0x27a510\n\n"
+        "Status: %s\nReason: %s\n\n"
         "ADB and Frida client discovery are reported independently. The probe is observational "
         "and does not replace or mutate the target. Runtime proof requires a target entry event "
-        "with both the expected vptr and expected slot result.
-"
+        "with both the expected vptr and expected slot result.\n"
         % (package or "UNKNOWN", module, result["status"], result.get("reason", "NONE")),
         encoding="utf-8",
     )
@@ -1335,19 +1298,11 @@ def write_autonomous_campaign(output, dataflow, runtime, input_apk=None, input_a
     (output / "AUTONOMOUS-CAMPAIGN.json").write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (output / "AUTONOMOUS-CAMPAIGN.md").write_text(
-        "# ReelSec Autonomous Investigation
-
-"
+        "# ReelSec Autonomous Investigation\n\n"
         "Static ABI/vtable resolution, bounded AArch64 data-flow reconstruction, "
-        "and a bounded runtime probe are executed automatically.
-
-"
-        "Static data-flow: %s
-Runtime status: %s
-
-"
-        "No Screenshot-blocking conclusion is emitted without runtime evidence.
-"
+        "and a bounded runtime probe are executed automatically.\n\n"
+        "Static data-flow: %s\nRuntime status: %s\n\n"
+        "No Screenshot-blocking conclusion is emitted without runtime evidence.\n"
         % ("PROVEN" if dataflow.get("proven",0) else "NOT_PROVEN",
            runtime.get("status","NOT_RUN") if runtime else "NOT_RUN"),
         encoding="utf-8")
@@ -1791,8 +1746,7 @@ def main():
         "sign_verify": sign_verify,
         "adb_deploy": adb_deploy,
         "runtime_capture": runtime_capture,
-        "gadget_observation": gadget_observation,
-        "evidence_ledger": evidence_ledger,
+        "gadget_observation": gadget_observation,\n        "evidence_ledger": evidence_ledger,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
@@ -1865,18 +1819,14 @@ def main():
             "0x717f68 FUNCTION_POINTER=0x" + format(ptr, "x"),
         ]
         (output / "CRITICAL-FUNCTION-POINTER.txt").write_text(
-            "
-".join(analysis_lines[-2:]) + "
-",
+            "\n".join(analysis_lines[-2:]) + "\n",
             encoding="utf-8",
         )
     else:
         analysis_lines.append("0x717f68 NOT_FILE_BACKED")
 
     (output / "elf-python-analysis.txt").write_text(
-        "
-".join(analysis_lines) + "
-",
+        "\n".join(analysis_lines) + "\n",
         encoding="utf-8",
     )
 
@@ -1895,15 +1845,11 @@ def main():
             value = struct.unpack_from("<Q", chunk, i)[0]
             qword_lines.append(f"{0x717CE0 + i:016x} -> {value:016x}")
         (output / "vtable-raw-bytes.txt").write_text(
-            "
-".join(raw_lines) + "
-",
+            "\n".join(raw_lines) + "\n",
             encoding="utf-8",
         )
         (output / "vtable-qwords.txt").write_text(
-            "
-".join(qword_lines) + "
-",
+            "\n".join(qword_lines) + "\n",
             encoding="utf-8",
         )
 
@@ -1946,9 +1892,7 @@ def main():
     if not symbol_lines:
         symbol_lines = ["NOT_RESOLVED_BY_SYMBOL_TABLE"]
     (output / "CRITICAL-FUNCTION-SYMBOL.txt").write_text(
-        "
-".join(symbol_lines) + "
-",
+        "\n".join(symbol_lines) + "\n",
         encoding="utf-8",
     )
 
@@ -1997,31 +1941,22 @@ def main():
         "Important: 0x108 is classified as JNI GetMethodID index 33 by the observed call signature; it must not be assumed to be an ActiveDecoder C++ vtable slot.",
     ]
     (output / "PROTECTION-BRIDGE-AUDIT.md").write_text(
-        "
-".join(bridge) + "
-",
+        "\n".join(bridge) + "\n",
         encoding="utf-8",
     )
 
     report = (
-        "# ReelSec VTable / Dispatch Resolution Report
-
-"
-        "Target: " + str(target) + "
-"
-        "SHA-256: " + digest + "
-"
-        "Calculated address-point: 0x717e60
-"
-        "Critical slot: 0x717f68
-"
+        "# ReelSec VTable / Dispatch Resolution Report\n\n"
+        "Target: " + str(target) + "\n"
+        "SHA-256: " + digest + "\n"
+        "Calculated address-point: 0x717e60\n"
+        "Critical slot: 0x717f68\n"
         "Extracted function pointer: " +
         (hex(ptr) if ptr is not None else "NOT_RESOLVED") + "\n\n"
         "The pointer is read directly from the ELF via PT_LOAD mapping. "
         "The target function is then disassembled and resolved against the "
         "symbol table when possible. No Screenshot-blocking claim is made "
-        "from this result alone.
-"
+        "from this result alone.\n"
     )
     (output / "VTable-RESOLUTION-REPORT.md").write_text(
         report,
