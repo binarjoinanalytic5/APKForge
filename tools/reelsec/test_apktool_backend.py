@@ -27,6 +27,21 @@ class ApktoolBackendTests(unittest.TestCase):
         self.assertEqual(result["name"], "apktool-standalone")
         self.assertEqual(result["backend"], "java-classpath")
 
+
+    def test_standalone_decode_command(self):
+        env = {"tools": {"apktool": {
+            "status": "USABLE", "backend": "java-classpath",
+            "path": "/usr/bin/java", "version": "2.7.0-dirty",
+            "classpath": "/root/apktool/*:/root/java/*"
+        }}}
+        selection = select_apktool_backend(env)
+        from apktool_backend import decode_command
+        command = decode_command(selection, "/tmp/original.apk", "/tmp/decoded")
+        self.assertEqual(command[:4], ["/usr/bin/java", "-cp", "/root/apktool/*:/root/java/*"])
+        self.assertEqual(command[4], "brut.apktool.Main")
+        self.assertEqual(command[5], "d")
+        self.assertEqual(command[-2:], ["-o", "/tmp/decoded"])
+
     def test_reject_nonusable_backend(self):
         with self.assertRaises(ApktoolBackendError):
             select_apktool_backend({"tools": {"apktool": {"status": "BROKEN"}}})
