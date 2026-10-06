@@ -1142,15 +1142,128 @@ def write_autonomous_dataflow(output, target, objdump):
     return {"status":"completed","proven":len(proven),"candidates":len(records),
             "cxx_unresolved":len(cxx),"jni_excluded_count":excluded,"constructor_calls":len(ctor_calls)}
 
+def _decode_axml_strings(data):
+    """Decode the Android binary XML string pool (enough for manifest identity)."""
+    if len(data) < 28 or data[:4] != b"\x03\x00\x08\x00":
+        return []
+    try:
+        chunk_type, header_size, chunk_size = struct.unpack_from("<HHI", data, 0)
+        if chunk_type != 0x0003 or header_size < 8 or chunk_size > len(data):
+            return []
+        pos = header_size
+        while pos + 8 <= min(chunk_size, len(data)):
+            ctype, cheader, csize = struct.unpack_from("<HHI", data, pos)
+            if csize < cheader or pos + csize > len(data):
+                break
+            if ctype == 0x0001:  # RES_STRING_POOL_TYPE
+                if cheader < 28 or pos + 28 > len(data):
+                    return []
+                string_count, style_count, flags, strings_start, styles_start = struct.unpack_from(
+                    "<IIIII", data, pos + 8
+                )
+                offsets_start = pos + cheader
+                if offsets_start + 4 * string_count > pos + csize:
+                    return []
+                base = pos + strings_start
+                utf8 = bool(flags & 0x00000100)
+                strings = []
+                for i in range(string_count):
+                    off = struct.unpack_from("<I", data, offsets_start + 4 * i)[0]
+                    at = base + off
+                    if at >= pos + csize:
+                        strings.append("")
+                        continue
+                    try:
+                        if utf8:
+                            def read_len(where):
+                                first = data[where]
+                                if first & 0x80:
+                                    second = data[where + 1]
+                                    return ((first & 0x7f) << 8) | second, 2
+                                return first, 1
+                            u16_len, step = read_len(at)
+                            u8_len, step2 = read_len(at + step)
+                            start = at + step + step2
+                            raw = data[start:start + u8_len]
+                            strings.append(raw.decode("utf-8", errors="replace"))
+                        else:
+                            u16_len = struct.unpack_from("<H", data, at)[0]
+                            if u16_len & 0x8000:
+                                u16_len = ((u16_len & 0x7fff) << 16) | struct.unpack_from("<H", data, at + 2)[0]
+                                start = at + 4
+                            else:
+                                start = at + 2
+                            raw = data[start:start + u16_len * 2]
+                            strings.append(raw.decode("utf-16le", errors="replace"))
+                    except (IndexError, struct.error):
+                        strings.append("")
+                return strings
+            pos += csize
+    except (IndexError, struct.error):
+        return []
+    return []
+
+
+def _decode_binary_manifest_package(data):
+    """Extract manifest/package from Android binary XML without external aapt."""
+    strings = _decode_axml_strings(data)
+    if not strings:
+        return None
+    pos = 8
+    limit = len(data)
+    try:
+        while pos + 8 <= limit:
+            ctype, cheader, csize = struct.unpack_from("<HHI", data, pos)
+            if csize < max(8, cheader) or pos + csize > limit:
+                break
+            if ctype == 0x0102 and cheader >= 16:  # RES_XML_START_ELEMENT_TYPE
+                attr_ext = pos + 16
+                if attr_ext + 20 <= pos + csize:
+                    name_idx = struct.unpack_from("<I", data, attr_ext + 4)[0]
+                    tag = strings[name_idx] if name_idx < len(strings) else ""
+                    if tag == "manifest":
+                        attr_start = struct.unpack_from("<H", data, attr_ext + 8)[0]
+                        attr_size = struct.unpack_from("<H", data, attr_ext + 10)[0]
+                        attr_count = struct.unpack_from("<H", data, attr_ext + 12)[0]
+                        if attr_size < 20:
+                            return None
+                        attrs = pos + attr_start
+                        for i in range(attr_count):
+                            a = attrs + i * attr_size
+                            if a + 20 > pos + csize:
+                                break
+                            name_idx = struct.unpack_from("<I", data, a + 4)[0]
+                            name = strings[name_idx] if name_idx < len(strings) else ""
+                            if name != "package":
+                                continue
+                            value_type = data[a + 15]
+                            value_data = struct.unpack_from("<I", data, a + 16)[0]
+                            if value_type == 0x03 and value_data < len(strings):
+                                value = strings[value_data]
+                                if value:
+                                    return value
+            pos += csize
+    except (IndexError, struct.error):
+        return None
+    return None
+
+
 def _find_package_name(root):
     for path in root.rglob("AndroidManifest.xml"):
         try:
-            text = path.read_text(encoding="utf-8", errors="replace")
+            data = path.read_bytes()
         except OSError:
             continue
+        try:
+            text = data.decode("utf-8")
+        except UnicodeDecodeError:
+            text = ""
         m = re.search(r'\bpackage\s*=\s*"([^"]+)"', text)
         if m:
             return m.group(1), str(path)
+        package = _decode_binary_manifest_package(data)
+        if package:
+            return package, str(path)
     return None, None
 
 
