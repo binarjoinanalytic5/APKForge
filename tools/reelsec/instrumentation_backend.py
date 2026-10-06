@@ -183,7 +183,7 @@ def plan_secshell_injection(decoded_root, application_smali=None):
             "loadlibrary_line": line_no + 1,
             "loadlibrary_anchor": anchor,
             "is_application": True,
-            "has_attach_base_context": True,
+            "has_attach_base_context": has_attach,
         })
 
     if not candidates:
