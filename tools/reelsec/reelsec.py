@@ -915,7 +915,7 @@ def write_autonomous_campaign(output, dataflow, runtime):
 def git_publish(root, report_dir):
     """Publish from a clean worktree based on origin/main; never mutate the investigation checkout."""
     result = {
-        "schema_version": "2.0",
+        "schema_version": "2.1",
         "tool": "ReelSec",
         "version": VERSION,
         "attempted": True,
