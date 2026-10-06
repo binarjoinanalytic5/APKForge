@@ -80,7 +80,8 @@ def _probe_apktool():
             if rc == 0:
                 return {"name": "apktool-standalone", "status": "USABLE",
                         "path": java, "version": out.splitlines()[0] if out else "",
-                        "backend": "java-classpath", "attempts": attempts}
+                        "backend": "java-classpath", "classpath": cp,
+                        "attempts": attempts}
             continue
         rc, out = _run([c, "--version"], 15)
         attempts.append({"backend": "cli", "path": c, "returncode": rc})
