@@ -108,17 +108,109 @@ def run_apktool_decode(selection, apk, output_dir, timeout=None):
     log_path = (output_dir / "reelsec-apktool.log") if output_dir.is_dir() else live_log_path
     log_path.write_text(log, encoding="utf-8", errors="replace")
     if rc != 0:
+        # Full resource decoding is optional for the instrumentation objective.
+        # Retry with Apktool's resource-disabled mode before falling back to raw
+        # ZIP extraction. This preserves a real Smali/manifest analysis root.
+        recovery_dir = output_dir.parent / (output_dir.name + "-no-res")
+        recovery = run_apktool_no_resources_decode(
+            selection, apk, recovery_dir,
+            timeout=min(timeout, 180) if timeout else 180,
+        )
+        if recovery.get("status") == "DECODED_NO_RES":
+            return recovery
         return {"status": "FAILED", "returncode": rc, "command": command,
-                "output_dir": str(output_dir), "log": str(log_path)}
-    required = [output_dir / "AndroidManifest.xml", output_dir / "smali"]
+                "output_dir": str(output_dir), "log": str(log_path),
+                "recovery": recovery}
+    required = [output_dir / "AndroidManifest.xml"]
+    smali_roots = [p for p in output_dir.iterdir() if p.is_dir() and (p.name == "smali" or p.name.startswith("smali_classes"))]
     missing = [str(p) for p in required if not p.exists()]
-    if missing:
+    if missing or not smali_roots:
         return {"status": "FAILED_VALIDATION", "returncode": rc, "command": command,
-                "output_dir": str(output_dir), "missing": missing,
+                "output_dir": str(output_dir),
+                "missing": missing + ([] if smali_roots else ["smali*"]),
                 "log": str(log_path)}
     return {"status": "DECODED", "returncode": rc, "command": command,
             "output_dir": str(output_dir),
             "log": str(output_dir / "reelsec-apktool.log")}
+
+
+def run_apktool_no_resources_decode(selection, apk, output_dir, timeout=None):
+    """Recover a buildable Smali/manifest tree when full resource decoding is too slow.
+
+    This is a real Apktool decode, not a ZIP extraction. Resource decoding is
+    intentionally disabled so large/hostile resource tables cannot block the
+    instrumentation path. The output remains isolated from the original APK.
+    """
+    if timeout is None:
+        timeout = min(APKTOOL_DECODE_TIMEOUT, 180)
+    apk = Path(apk).expanduser().resolve()
+    output_dir = Path(output_dir).expanduser().resolve()
+    if output_dir.exists():
+        try:
+            if any(output_dir.iterdir()):
+                return {
+                    "status": "FAILED_OUTPUT_EXISTS",
+                    "output_dir": str(output_dir),
+                    "reason": "recovery decode directory is non-empty",
+                }
+        except OSError as exc:
+            return {"status": "FAILED", "reason": str(exc)}
+        output_dir.rmdir()
+    output_dir.parent.mkdir(parents=True, exist_ok=True)
+    command = decode_command(selection, apk, output_dir) + ["-r"]
+    live_log_path = output_dir.parent / (output_dir.name + ".apktool-live.log")
+    total_classes = _apk_total_dex_classes(apk)
+    print("      [apktool-recovery] mode=no-res timeout=%ss heartbeat=10s" % timeout, flush=True)
+    started = time.monotonic()
+    rc, log = run_with_heartbeat(
+        command,
+        timeout=timeout,
+        heartbeat=10,
+        label="apktool-recovery",
+        log_path=live_log_path,
+        progress_probe=lambda lp: _apktool_progress(
+            lp, output_dir, apk, total_classes=total_classes,
+            elapsed=int(time.monotonic() - started),
+        ),
+        stage_index=4,
+        total_stages=14,
+        progress_path=output_dir.parent / "PROGRESS.json",
+    )
+    log_path = (output_dir / "reelsec-apktool-recovery.log") if output_dir.is_dir() else live_log_path
+    log_path.write_text(log, encoding="utf-8", errors="replace")
+    if rc != 0:
+        return {
+            "status": "FAILED",
+            "returncode": rc,
+            "command": command,
+            "output_dir": str(output_dir),
+            "log": str(log_path),
+            "mode": "APKTOOL_NO_RES",
+        }
+    required = [output_dir / "AndroidManifest.xml"]
+    smali_roots = [p for p in output_dir.iterdir() if p.is_dir() and (p.name == "smali" or p.name.startswith("smali_classes"))] if output_dir.is_dir() else []
+    missing = [str(p) for p in required if not p.exists()]
+    if missing or not smali_roots:
+        return {
+            "status": "FAILED_VALIDATION",
+            "returncode": rc,
+            "command": command,
+            "output_dir": str(output_dir),
+            "missing": missing + ([] if smali_roots else ["smali*"]),
+            "log": str(log_path),
+            "mode": "APKTOOL_NO_RES",
+        }
+    return {
+        "status": "DECODED_NO_RES",
+        "returncode": rc,
+        "command": command,
+        "output_dir": str(output_dir),
+        "log": str(log_path),
+        "mode": "APKTOOL_NO_RES",
+        "resources_decoded": False,
+        "instrumentable_smali": True,
+        "buildable_with_apktool": True,
+    }
 
 
 def run_raw_apk_extract(apk, output_dir):
