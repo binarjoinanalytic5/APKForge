@@ -1,0 +1,63 @@
+REAL ARM64 XREFS TO CAPTURE/PROTECTION STRINGS
+======================================================================
+
+enableProjection
+  target VA : 0x5a42a6
+  xref VA   : 0xe2f88
+  method    : ADRP+ADD@+0x8
+
+mEnableProjection
+  target VA : 0x59da85
+  xref VA   : 0xfc90c
+  method    : ADRP+ADD
+
+mEnableProjection
+  target VA : 0x59da85
+  xref VA   : 0xfc90c
+  method    : ADRP+ADD@+0x4
+
+CaptureScreen
+  target VA : 0x5a3059
+  xref VA   : 0x130438
+  method    : ADRP+ADD@+0x8
+
+apsaraCaptureScreen
+  target VA : 0x5a611f
+  xref VA   : 0x1467cc
+  method    : ADRP+ADD@+0x10
+
+CaptureScreen
+  target VA : 0x5a3059
+  xref VA   : 0x14bb7c
+  method    : ADRP+ADD@+0xc
+
+enableProjection
+  target VA : 0x5a42a6
+  xref VA   : 0x1fc3b0
+  method    : ADRP+ADD
+
+enableProjection
+  target VA : 0x5a42a6
+  xref VA   : 0x1fc3b0
+  method    : ADRP+ADD@+0x4
+
+enableProjection
+  target VA : 0x5a42a6
+  xref VA   : 0x1fcdd8
+  method    : ADRP+ADD
+
+enableProjection
+  target VA : 0x5a42a6
+  xref VA   : 0x1fcdd8
+  method    : ADRP+ADD@+0x4
+
+ContentProtection
+  target VA : 0x5bb312
+  xref VA   : 0x25e1a0
+  method    : ADRP+ADD@+0xc
+
+setForceInsecureDecoder
+  target VA : 0x5bc62e
+  xref VA   : 0x27af94
+  method    : ADRP+ADD@+0xc
+
