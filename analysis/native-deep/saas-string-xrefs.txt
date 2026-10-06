@@ -1,0 +1,18 @@
+===== STRING OFFSETS =====
+ 59da85 mEnableProjection
+ 5a0623 onCaptureScreen
+ 5a1225 AliyunCorePlayer callback --> CaptureScreen(%ld,%ld)
+ 5a3059 CaptureScreen
+ 5a338c nativeOnCaptureScreen
+ 5a42a6 enableProjection
+ 5a611f apsaraCaptureScreen
+ 5bb2e4 parseContentProtection
+ 5bb312 ContentProtection
+ 5bc2f7 queueSecureInputBuffer or queueInputBuffer error(%d) codecType = %d
+ 5bc62e setForceInsecureDecoder
+ 5bc6fa queueSecureInputBuffer
+ 5bc775 setOutputSurface
+ 5bc7b5 jBuffer is null, queueSecureInputBuffer may mem lack
+ 5bd2d6 captureScreen exception, frameWidth or frameHeight is 0
+ 5f93f0 NSt6__ndk110__function6__funcIZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2NS_9allocatorIS4_EEFvPhiiEEE
+ 5f9490 ZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2
