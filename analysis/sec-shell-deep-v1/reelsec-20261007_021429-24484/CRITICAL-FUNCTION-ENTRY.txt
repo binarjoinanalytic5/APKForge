@@ -1,0 +1,40 @@
+
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_021429-24484/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+00000000002783f4 <_ZN18codecPluginManager13dummyFunctionEv>:
+  27a4d0: 97f9798c     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a4d4: d10083ff     	sub	sp, sp, #0x20
+  27a4d8: a9017bfd     	stp	x29, x30, [sp, #0x10]
+  27a4dc: 910043fd     	add	x29, sp, #0x10
+  27a4e0: d53bd048     	mrs	x8, TPIDR_EL0
+  27a4e4: f9401509     	ldr	x9, [x8, #0x28]
+  27a4e8: f90007e9     	str	x9, [sp, #0x8]
+  27a4ec: f9401508     	ldr	x8, [x8, #0x28]
+  27a4f0: f94007e9     	ldr	x9, [sp, #0x8]
+  27a4f4: eb09011f     	cmp	x8, x9
+  27a4f8: 540000a1     	b.ne	0x27a50c <_ZN18codecPluginManager13dummyFunctionEv+0x2118>
+  27a4fc: a9417bfd     	ldp	x29, x30, [sp, #0x10]
+  27a500: 2a1f03e0     	mov	w0, wzr
+  27a504: 910083ff     	add	sp, sp, #0x20
+  27a508: d65f03c0     	ret
+  27a50c: 97f9797d     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a510: d10083ff     	sub	sp, sp, #0x20
+  27a514: a9017bfd     	stp	x29, x30, [sp, #0x10]
+  27a518: 910043fd     	add	x29, sp, #0x10
+  27a51c: d53bd048     	mrs	x8, TPIDR_EL0
+  27a520: f9401509     	ldr	x9, [x8, #0x28]
+  27a524: f90007e9     	str	x9, [sp, #0x8]
+  27a528: f9401508     	ldr	x8, [x8, #0x28]
+  27a52c: f94007e9     	ldr	x9, [sp, #0x8]
+  27a530: eb09011f     	cmp	x8, x9
+  27a534: 54000081     	b.ne	0x27a544 <_ZN18codecPluginManager13dummyFunctionEv+0x2150>
+  27a538: a9417bfd     	ldp	x29, x30, [sp, #0x10]
+  27a53c: 910083ff     	add	sp, sp, #0x20
+  27a540: d65f03c0     	ret
+  27a544: 97f9796f     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a548: d100c3ff     	sub	sp, sp, #0x30
+  27a54c: a9014ff4     	stp	x20, x19, [sp, #0x10]
+
+[exit=0]
