@@ -63,6 +63,32 @@ def run_apktool_decode(selection, apk, output_dir, timeout=300):
             "output_dir": str(output_dir),
             "log": str(output_dir / "reelsec-apktool.log")}
 
+def inventory_decoded_apk(output_dir):
+    """Create a deterministic inventory of decoded APK analysis inputs."""
+    root = Path(output_dir).resolve()
+    if not root.is_dir():
+        return {"status": "INVALID", "reason": "decoded output directory is missing"}
+
+    manifest = root / "AndroidManifest.xml"
+    smali_dirs = sorted(p for p in root.iterdir() if p.is_dir() and (p.name == "smali" or p.name.startswith("smali_classes")))
+    lib_files = sorted(p for p in root.rglob("*") if p.is_file() and p.suffix == ".so")
+    dex_files = sorted(p for p in root.rglob("*") if p.is_file() and p.suffix == ".dex")
+    smali_files = sum(1 for d in smali_dirs for p in d.rglob("*.smali"))
+    inventory = {
+        "schema_version": "1.0",
+        "status": "READY" if manifest.is_file() and smali_dirs else "INCOMPLETE",
+        "root": str(root),
+        "manifest": str(manifest) if manifest.is_file() else None,
+        "smali_roots": [str(p) for p in smali_dirs],
+        "smali_file_count": smali_files,
+        "native_library_count": len(lib_files),
+        "native_libraries": [str(p.relative_to(root)) for p in lib_files],
+        "dex_count": len(dex_files),
+        "dex_files": [str(p.relative_to(root)) for p in dex_files],
+    }
+    (root.parent / "DECODED-INPUT-INVENTORY.json").write_text(json.dumps(inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return inventory
+
 def run(cmd, cwd=None, timeout=None):
     try:
         p = subprocess.run(
@@ -1504,6 +1530,15 @@ def main():
         encoding="utf-8",
     )
 
+    decoded_inventory = None
+    if decode_result and decode_result.get("status") == "DECODED":
+        decoded_inventory = inventory_decoded_apk(decode_result["output_dir"])
+    elif args.command == "campaign":
+        decoded_inventory = {"status": "BLOCKED", "reason": "decoded APK is unavailable"}
+    (output / "DECODED-INPUT-INVENTORY.json").write_text(
+        json.dumps(decoded_inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
     target = find_target(args.elf)
     manifest = {
         "tool": "ReelSec",
@@ -1517,6 +1552,7 @@ def main():
         "capabilities": capabilities,
         "apktool_backend": apktool_backend,
         "apktool_decode": decode_result,
+        "decoded_input_inventory": decoded_inventory,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
@@ -1742,6 +1778,7 @@ def main():
         critical_function_behavior=critical_behavior,
         autonomous_dataflow=dataflow_result,
         runtime_probe_status=(runtime_result.get("status") if runtime_result else "NOT_RUN"),
+        decoded_input_inventory=decoded_inventory,
     )
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
