@@ -846,6 +846,11 @@ def write_runtime_toolchain_preflight(output):
         rc,out=run([pkg,"install","-y","android-tools"],timeout=90)
         result["actions"].append({"action":"pkg_install_android_tools","returncode":rc,"output":out[-4000:]})
         adb=which("adb"); result["tooling"]["adb_after"]=adb
+    if not frida and pkg:
+        rc,out=run([pkg,"install","-y","frida-tools"],timeout=120)
+        result["actions"].append({"action":"pkg_install_frida_tools","returncode":rc,"output":out[-4000:]})
+        frida=which("frida")
+        result["tooling"]["frida_after_pkg"]=frida
     if not frida and py:
         rc,out=run([py,"-m","pip","install","--user","--disable-pip-version-check","frida-tools"],timeout=120)
         result["actions"].append({"action":"pip_install_frida_tools","returncode":rc,"output":out[-4000:]})
