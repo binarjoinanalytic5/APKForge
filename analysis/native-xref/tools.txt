@@ -1,0 +1,4 @@
+===== TOOLS =====
+/data/data/com.termux/files/usr/bin/llvm-objdump
+/data/data/com.termux/files/usr/bin/llvm-readelf
+/data/data/com.termux/files/usr/bin/objdump
