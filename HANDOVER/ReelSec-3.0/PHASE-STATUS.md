@@ -92,3 +92,24 @@ Run the remote bootstrap entrypoint from the current checkout:
 
 This route is expected to preserve local investigation changes while executing the current `main` ReelSec 3.0 package. The first required evidence gates are capability resolution, Apktool backend selection, isolated decode, decoded inventory, and input provenance. Build/sign/install/runtime stages remain independently gated by their required explicit test configuration.
 
+## Phone / Termux validation — 2026-10-06 23:01 — decode collision corrected
+
+The first full campaign reached the environment resolver successfully, selected the standalone Apktool Java-classpath backend, and queried the connected ADB device successfully. The decode stage itself returned non-zero because the requested `decoded-apk` directory already existed; Apktool correctly refused to reuse it.
+
+The old campaign behavior then fell back to the repository's pre-existing `apktool-src` tree. That fallback was unsafe for campaign provenance because it could make a report look like it analyzed `original.apk` while actually analyzing a previously prepared tree. The resulting run is therefore treated as a historical diagnostic, not as a valid decoded-APK campaign proof.
+
+ReelSec `main` now:
+- gives default campaign output directories a process-specific suffix to avoid same-second report collisions;
+- refuses to overwrite non-empty decode directories;
+- fails closed with `BLOCKED_DECODE_FAILED` when campaign decoding is unavailable;
+- explicitly records `NO_REPOSITORY_ROOT_FALLBACK`;
+- binds the Java/screen audit and runtime probe to the decoded campaign root when decode succeeds;
+- records target-relative path and target SHA-256 in input provenance;
+- treats a non-zero Apktool build return code as build failure instead of validating a potentially stale artifact;
+- normalizes several JSON/text newline writers that had been emitting literal backslash sequences.
+
+The previous campaign remains useful as a capability snapshot only: ADB was usable, Apktool standalone was selected, Frida connected but external spawn was blocked by jailed-Android restrictions, and the static data-flow count remained `473` candidates with `0` proven target data-flow paths.
+
+## Next gate
+
+The next run must produce a genuine `DECODED` result and `READY` inventory before any native target analysis is accepted. After that, the engineering sequence is: controlled telemetry mutation -> successful isolated build -> signing -> guarded deployment -> Frida Gadget observation/event ingestion -> target/vtable runtime validation -> bounded behavioral correlation. No instrumented observation will be promoted to original-APK runtime proof.
