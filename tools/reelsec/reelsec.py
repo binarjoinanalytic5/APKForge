@@ -622,161 +622,154 @@ def _parse_adrp_add_value(lines, index, reg):
 
 
 def write_autonomous_dataflow(output, target, objdump):
+    """Bounded AArch64 data-flow reconstruction with constructor provenance."""
     path = output / "full-disassembly.txt"
     if not objdump or not path.exists():
         (output / "AUTONOMOUS-DATAFLOW.md").write_text(
-            "# Autonomous Dataflow\n\nDISASSEMBLY_UNAVAILABLE\n", encoding="utf-8"
-        )
+            "# Autonomous Dataflow\n\nDISASSEMBLY_UNAVAILABLE\n", encoding="utf-8")
         (output / "AUTONOMOUS-DATAFLOW.json").write_text(
             json.dumps({"status": "DISASSEMBLY_UNAVAILABLE"}, indent=2) + "\n",
-            encoding="utf-8",
-        )
-        return {"status": "DISASSEMBLY_UNAVAILABLE", "proven": 0, "candidates": 0}
+            encoding="utf-8")
+        return {"status":"DISASSEMBLY_UNAVAILABLE","proven":0,"candidates":0}
 
     text = path.read_text(encoding="utf-8", errors="replace")
     lines = text.splitlines()
     funcs = _parse_disassembly_functions(text)
-    boundaries = []
-    for n, item in enumerate(funcs):
-        start, addr, label = item
-        end = funcs[n + 1][0] if n + 1 < len(funcs) else len(lines)
-        boundaries.append((start, end, addr, label))
+    boundaries=[]
+    for n,(idx,addr,label) in enumerate(funcs):
+        boundaries.append((idx, funcs[n+1][0] if n+1<len(funcs) else len(lines), addr, label))
 
-    ctor_text = (output / "ActiveDecoder-constructor.txt").read_text(
-        encoding="utf-8", errors="replace"
-    ) if (output / "ActiveDecoder-constructor.txt").exists() else ""
-    ctor_match = re.search(r"^\s*([0-9a-fA-F]+)\s+<[^>]*>:", ctor_text, re.M)
-    ctor_addr = int(ctor_match.group(1), 16) if ctor_match else None
+    # Resolve the real constructor call from machine code, not from the first
+    # symbol heading in a report file (which can be a merged/incorrect symbol).
+    ctor_calls=[]
+    for i,line in enumerate(lines):
+        if re.search(r"\bbl\s+(?:0x)?[0-9a-fA-F]+\s+<[^>]*_ZN13ActiveDecoderC2Ev@plt>", line):
+            ctor_calls.append(i)
+    if not ctor_calls:
+        for i,line in enumerate(lines):
+            if re.search(r"<[^>]*ActiveDecoderC2Ev@plt>", line):
+                ctor_calls.append(i)
 
-    records = []
-    for start, end, faddr, flabel in boundaries:
-        block = lines[start:end]
-        for rel_i, line in enumerate(block):
+    def function_for_line(i):
+        best=None
+        for b in boundaries:
+            if b[0] <= i < b[1]:
+                best=b
+        return best
+
+    records=[]
+    for start_i,end_i,faddr,flabel in boundaries:
+        block=lines[start_i:end_i]
+        for rel_i,line in enumerate(block):
             if not re.search(r"\bldr\s+x8,\s+\[x8,\s+#0x108\]", line):
                 continue
-            window = block[rel_i:min(len(block), rel_i + 6)]
-            if not any(re.search(r"\bblr\s+x8\b", w) for w in window):
+            window=block[rel_i:min(len(block),rel_i+6)]
+            if not any(re.search(r"\bblr\s+x8\b",w) for w in window):
                 continue
 
-            direct_vtable = any(
-                _parse_adrp_add_value(block, j, "x8") == 0x717e60
-                for j in range(max(0, rel_i - 6), rel_i)
-            )
+            # Correctly track explicit construction of the target address-point.
+            direct_vtable=False
+            direct_basis=None
+            for j in range(max(0,rel_i-12),rel_i):
+                m1=re.search(r"\badrp\s+x8,\s+(0x[0-9a-fA-F]+)",block[j])
+                if not m1: continue
+                page=int(m1.group(1),16)
+                for k in range(j+1,min(rel_i,j+4)):
+                    m2=re.search(r"\badd\s+x8,\s+x8,\s+#(0x[0-9a-fA-F]+|\d+)",block[k])
+                    if m2 and page+int(m2.group(1),0)==0x717e50:
+                        # The ABI address-point is x8 + 0x10, so either x9 or
+                        # x8 must be explicitly advanced to 0x717e60 before use.
+                        for q in range(k+1,min(rel_i,k+5)):
+                            if re.search(r"\badd\s+x9,\s+x8,\s+#0x10\b",block[q]):
+                                if any(re.search(r"\bmov\s+x8,\s+x9\b",block[t])
+                                       for t in range(q+1,rel_i)):
+                                    direct_vtable=True
+                                    direct_basis="0x717e50 + 0x10 copied into x8 before +0x108 load"
+                                elif re.search(r"\bldr\s+x9,\s+\[x8,\s+#0x108\]",block[rel_i]):
+                                    direct_vtable=True
+                                    direct_basis="0x717e50 + 0x10 address-point provenance"
+                        break
 
-            vptr_load = any(
-                re.search(r"\bldr\s+x8,\s+\[x19\]", w)
-                for w in block[max(0, rel_i - 8):rel_i]
-            )
-            constructor_chain = False
-            constructor_evidence = None
-            if ctor_addr is not None and vptr_load:
-                ctor_calls = [
-                    j for j in range(max(0, rel_i - 220), rel_i)
-                    if re.search(rf"\bbl\s+(?:0x)?{ctor_addr:x}\b", block[j], re.I)
-                ]
-                if ctor_calls:
-                    call_i = ctor_calls[-1]
-                    capture = next(
-                        (j for j in range(call_i + 1, min(rel_i, call_i + 10))
-                         if re.search(r"\bmov\s+x19,\s+x0\b", block[j])),
-                        None,
-                    )
+            vptr_load_i=None
+            for j in range(max(0,rel_i-12),rel_i):
+                if re.search(r"\bldr\s+x8,\s+\[x19\]",block[j]):
+                    vptr_load_i=j
+            constructor_chain=False
+            constructor_evidence=None
+            if vptr_load_i is not None:
+                abs_candidate=start_i+rel_i
+                prior=[x for x in ctor_calls if x < abs_candidate and abs_candidate-x <= 512]
+                if prior:
+                    call_i=prior[-1]
+                    # Find x19 <- x0 after constructor and before candidate.
+                    capture=None
+                    for j in range(call_i+1,abs_candidate):
+                        if re.search(r"\bmov\s+x19,\s+x0\b",lines[j]):
+                            capture=j
                     if capture is not None:
-                        overwritten = any(
-                            _reg_written(block[j], "x19")
-                            for j in range(capture + 1, rel_i)
-                        )
+                        overwritten=False
+                        for j in range(capture+1,abs_candidate):
+                            if re.search(r"\b(?:mov|movz|movk|adrp|adr|add|sub|ldr|ldp|ldur)\s+x19\b",lines[j]):
+                                overwritten=True
+                                break
                         if not overwritten:
-                            constructor_chain = True
-                            constructor_evidence = {
-                                "constructor_call_line": block[call_i].strip(),
-                                "object_capture_line": block[capture].strip(),
-                                "vptr_load_line": next(
-                                    w.strip() for w in block[max(0, rel_i - 8):rel_i]
-                                    if re.search(r"\bldr\s+x8,\s+\[x19\]", w)
-                                ),
+                            constructor_chain=True
+                            constructor_evidence={
+                                "constructor_call":lines[call_i].strip(),
+                                "object_capture":lines[capture].strip(),
+                                "vptr_load":lines[start_i+vptr_load_i].strip(),
+                                "distance_in_instructions":abs_candidate-call_i,
                             }
 
             if direct_vtable:
-                classification = "PROVEN_STATIC_TARGET_SLOT_LOAD"
-                proof_basis = "literal 0x717e60 address-point is constructed before [x8,#0x108]"
+                classification="PROVEN_STATIC_TARGET_SLOT_LOAD"
+                proof_basis=direct_basis
             elif constructor_chain:
-                classification = "PROVEN_TARGET_VTABLE_DATAFLOW"
-                proof_basis = "target constructor -> x19 capture -> [x19] vptr load -> +0x108 -> blr"
-            elif vptr_load:
-                classification = "CXX_VPTR_DATAFLOW_UNRESOLVED"
-                proof_basis = "object-vptr load found but target vtable value is not independently established"
+                classification="PROVEN_TARGET_VTABLE_DATAFLOW"
+                proof_basis="ActiveDecoder constructor -> x19 object -> [x19] vptr -> +0x108 -> blr"
+            elif vptr_load_i is not None:
+                classification="CXX_VPTR_DATAFLOW_UNRESOLVED"
+                proof_basis="object-vptr load found but constructor provenance is not established"
             else:
-                classification = "UNRESOLVED_0x108_DATAFLOW"
-                proof_basis = "no target-vtable provenance established"
+                classification="UNRESOLVED_0x108_DATAFLOW"
+                proof_basis="no target-vtable provenance established"
 
             records.append({
-                "function_address": hex(faddr),
-                "function": flabel,
-                "dispatch_address": line.split(":", 1)[0].strip(),
-                "classification": classification,
-                "proof_basis": proof_basis,
-                "constructor_evidence": constructor_evidence,
-                "window": "\n".join(block[max(0, rel_i - 8):min(len(block), rel_i + 6)]),
+                "function_address":hex(faddr),"function":flabel,
+                "dispatch_address":line.split(":",1)[0].strip(),
+                "classification":classification,"proof_basis":proof_basis,
+                "constructor_evidence":constructor_evidence,
+                "window":"\n".join(block[max(0,rel_i-8):min(len(block),rel_i+6)])
             })
 
-    proven = [x for x in records if x["classification"] in (
-        "PROVEN_STATIC_TARGET_SLOT_LOAD", "PROVEN_TARGET_VTABLE_DATAFLOW"
-    )]
-    cxx = [x for x in records if x["classification"] == "CXX_VPTR_DATAFLOW_UNRESOLVED"]
-
-    payload = {
-        "schema_version": "2.1",
-        "target_vtable": "0x717e60",
-        "target_slot": "0x717f68",
-        "target_function": "0x27a510",
-        "constructor_entry": hex(ctor_addr) if ctor_addr is not None else None,
-        "candidate_count": len(records),
-        "proven_target_dataflow_count": len(proven),
-        "cxx_unresolved_count": len(cxx),
-        "records": records,
-    }
-    (output / "AUTONOMOUS-DATAFLOW.json").write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
-
-    report = [
-        "# Autonomous Dataflow Proof",
-        "",
-        "Target vtable address-point: 0x717e60",
-        "Target slot: 0x717f68 (+0x108)",
-        "Target function: 0x27a510",
-        "",
-        "Bounded intra-function AArch64 data-flow reconstruction; register names alone never prove the target.",
-        "",
-        "Candidate dispatches analysed: %d" % len(records),
-        "PROVEN target data-flow: %d" % len(proven),
-        "C++ vptr candidates still unresolved: %d" % len(cxx),
-        "",
-    ]
+    proven=[x for x in records if x["classification"] in
+            ("PROVEN_STATIC_TARGET_SLOT_LOAD","PROVEN_TARGET_VTABLE_DATAFLOW")]
+    cxx=[x for x in records if x["classification"]=="CXX_VPTR_DATAFLOW_UNRESOLVED"]
+    payload={"schema_version":"2.2","target_vtable":"0x717e60",
+             "target_slot":"0x717f68","target_function":"0x27a510",
+             "constructor_call_count":len(ctor_calls),
+             "candidate_count":len(records),
+             "proven_target_dataflow_count":len(proven),
+             "cxx_unresolved_count":len(cxx),"records":records}
+    (output/"AUTONOMOUS-DATAFLOW.json").write_text(
+        json.dumps(payload,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+    report=["# Autonomous Dataflow Proof","","Target vtable address-point: 0x717e60",
+            "Target slot: 0x717f68 (+0x108)","Target function: 0x27a510","",
+            "Constructor call sites resolved from machine code: %d"%len(ctor_calls),
+            "Candidate dispatches analysed: %d"%len(records),
+            "PROVEN target data-flow: %d"%len(proven),
+            "C++ vptr candidates still unresolved: %d"%len(cxx),"",
+            "The analyzer never treats x19 naming alone as proof.",""]
     for item in records:
-        report += [
-            "## %s — %s" % (item["dispatch_address"], item["classification"]),
-            "Function: %s" % item["function"],
-            "Basis: " + item["proof_basis"],
-            "ASM:",
-            item["window"],
-            "",
-        ]
-    report += [
-        "RESULT: " + (
-            "PROVEN_TARGET_VTABLE_DATAFLOW_FOUND" if proven
-            else "NO_PROVEN_TARGET_VTABLE_DATAFLOW_FOUND"
-        ),
-        "",
-        "Static data-flow is distinct from runtime execution.",
-    ]
-    (output / "AUTONOMOUS-DATAFLOW.md").write_text(
-        "\n".join(report) + "\n", encoding="utf-8"
-    )
-    return {"status": "completed", "proven": len(proven),
-            "candidates": len(records), "cxx_unresolved": len(cxx)}
-
+        report += ["## %s — %s"%(item["dispatch_address"],item["classification"]),
+                   "Function: %s"%item["function"],"Basis: "+item["proof_basis"],
+                   "ASM:",item["window"],""]
+    report += ["RESULT: "+("PROVEN_TARGET_VTABLE_DATAFLOW_FOUND" if proven
+                           else "NO_PROVEN_TARGET_VTABLE_DATAFLOW_FOUND"),
+               "","Static data-flow is distinct from runtime execution."]
+    (output/"AUTONOMOUS-DATAFLOW.md").write_text("\n".join(report)+"\n",encoding="utf-8")
+    return {"status":"completed","proven":len(proven),"candidates":len(records),
+            "cxx_unresolved":len(cxx),"constructor_calls":len(ctor_calls)}
 
 def _find_package_name(root):
     for path in root.rglob("AndroidManifest.xml"):
