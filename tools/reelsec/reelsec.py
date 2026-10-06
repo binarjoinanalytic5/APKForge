@@ -188,7 +188,8 @@ def git_publish(root, report_dir):
         return result
 
     rc, out = run([
-        git, "commit", "--no-verify",
+        git, "-c", "user.name=ReelSec", "-c", "user.email=reelsec@users.noreply.github.com",
+        "commit", "--no-verify",
         "-m", "ReelSec: automated security analysis " + timestamp,
     ], cwd=root)
     if rc != 0:
@@ -455,7 +456,8 @@ def main():
         status_rel = (output / "PUBLISH-STATUS.json").relative_to(ROOT).as_posix()
         run(["git", "add", "--", status_rel], cwd=ROOT)
         rc2, out2 = run([
-            "git", "commit", "--no-verify",
+            git, "-c", "user.name=ReelSec", "-c", "user.email=reelsec@users.noreply.github.com",
+            "commit", "--no-verify",
             "-m", "ReelSec: record publication status " + time.strftime("%Y%m%d_%H%M%S"),
         ], cwd=ROOT)
         if rc2 == 0:
