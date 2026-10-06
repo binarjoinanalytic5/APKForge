@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
-VERSION = "2.2.0"
+VERSION = "2.2.1"
 PROBES = [
     "elf",
     "symbols",
@@ -59,6 +59,66 @@ def which(*names):
         if value:
             return value
     return None
+
+def parse_adb_devices(output):
+    """Parse adb devices output without assuming tabs or a particular renderer."""
+    records = []
+    for raw in (output or "").splitlines():
+        line = raw.strip()
+        if not line or line.lower().startswith("list of devices attached"):
+            continue
+        parts = line.split()
+        if len(parts) < 2 or parts[1] != "device":
+            continue
+
+        attributes = {}
+        for token in parts[2:]:
+            if ":" not in token:
+                continue
+            key, value = token.split(":", 1)
+            if key and value:
+                attributes[key] = value
+
+        records.append({
+            "serial": parts[0],
+            "state": parts[1],
+            "attributes": attributes,
+            "raw": line,
+        })
+    return records
+
+
+def resolve_runtime_clients(preflight):
+    """Use the exact client paths discovered by preflight, then PATH fallback."""
+    tooling = (preflight or {}).get("tooling", {})
+
+    adb_candidates = (
+        ("adb_after", tooling.get("adb_after")),
+        ("adb", tooling.get("adb")),
+    )
+
+    frida_candidates = (
+        ("frida_after_proot", tooling.get("frida_after_proot")),
+        ("frida_after_pkg", tooling.get("frida_after_pkg")),
+        ("frida_after", tooling.get("frida_after")),
+        ("frida", tooling.get("frida")),
+    )
+
+    def choose(candidates, fallback_name):
+        for source, value in candidates:
+            if value and Path(value).is_file():
+                return str(Path(value)), "preflight." + source
+
+        fallback = which(fallback_name)
+        if fallback:
+            return fallback, "PATH." + fallback_name
+
+        return None, None
+
+    adb, adb_source = choose(adb_candidates, "adb")
+    frida, frida_source = choose(frida_candidates, "frida")
+    return adb, adb_source, frida, frida_source
+
 
 def sha256_file(path):
     h = hashlib.sha256()
@@ -980,52 +1040,102 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
     result = {"status":"NOT_ATTEMPTED","package":package,"manifest":manifest,
               "module":module,"tooling":preflight.get("tooling",{}),"events":[],
               "preflight_status":preflight.get("status")}
-    adb, frida = which("adb"), which("frida")
-    result["tooling"].update(adb=adb, frida=frida)
+    result["tooling"] = result["tooling"].copy()
+
+    adb, adb_source, frida, frida_source = resolve_runtime_clients(preflight)
+    result["tooling"].update(
+        adb=adb,
+        adb_source=adb_source,
+        frida=frida,
+        frida_source=frida_source,
+    )
 
     missing=[]
-    if not package: missing.append("package_manifest")
-    if not adb: missing.append("adb")
-    if not frida: missing.append("frida_cli")
+    if not package:
+        missing.append("package_manifest")
+    if not adb:
+        missing.append("adb")
+    if not frida:
+        missing.append("frida_cli")
+
     result["missing_requirements"]=missing
+
     if missing:
         result["status"]="RUNTIME_ENVIRONMENT_UNAVAILABLE"
         result["reason"]="missing: " + ",".join(missing)
     else:
-        rc, devices = run([adb, "devices", "-l"])
-        active=[x for x in devices.splitlines()
-                if x.strip() and not x.startswith("List of devices") and "\tdevice" in x]
-        result["tooling"]["adb_devices"]=active
-        if not active:
+        adb_rc, adb_output = run([adb, "devices", "-l"])
+        adb_records = parse_adb_devices(adb_output)
+
+        result["tooling"].update(
+            adb_returncode=adb_rc,
+            adb_devices=[record["raw"] for record in adb_records],
+            adb_device_records=adb_records,
+            adb_output_tail=adb_output[-4000:],
+        )
+
+        if adb_rc != 0:
+            result["status"]="ADB_QUERY_FAILED"
+            result["reason"]="adb devices -l returned non-zero exit status"
+        elif not adb_records:
             result["status"]="NO_ONLINE_ANDROID_DEVICE"
-            result["reason"]="adb is installed but no online device is available"
+            result["reason"]="adb is installed and queried successfully, but no device is in state=device"
         else:
-            rc, out = run([frida,"-U","-f",package,"-l",str(script),"--no-pause"], timeout=18)
-            result["frida_exit"]=rc
-            result["frida_output"]=out[-12000:]
+            result["execution_attempted"] = True
+
+            frida_rc, frida_output = run(
+                [frida, "-U", "-f", package, "-l", str(script), "--no-pause"],
+                timeout=18,
+            )
+
+            result["frida_exit"]=frida_rc
+            result["frida_output"]=frida_output[-12000:]
+
             events=[]
-            for line in out.splitlines():
+            for line in frida_output.splitlines():
                 try:
                     item=json.loads(line)
                 except Exception:
                     continue
+
                 payload=item.get("payload") if isinstance(item, dict) else None
+
                 if isinstance(payload, dict):
                     events.append(payload)
                 elif isinstance(item, dict) and item.get("event"):
                     events.append(item)
+
             result["events"]=events
-            matches=[e for e in events
-                     if e.get("event")=="TARGET_FUNCTION_ENTER"
-                     and e.get("target_vptr_match") is True
-                     and e.get("target_slot_match") is True]
+
+            matches=[
+                e for e in events
+                if e.get("event")=="TARGET_FUNCTION_ENTER"
+                and e.get("target_vptr_match") is True
+                and e.get("target_slot_match") is True
+            ]
+
             result["runtime_matches"]=len(matches)
+
             if matches:
                 result["status"]="PROVEN_RUNTIME_TARGET_DISPATCH"
-            elif rc == 124:
+            elif frida_rc == 124:
                 result["status"]="RUNTIME_PROBE_TIMEOUT_NO_TARGET_OBSERVED"
+                result["reason"]="Frida probe exceeded the bounded 18s execution window"
+            elif frida_rc != 0:
+                lowered=frida_output.lower()
+                if (
+                    "frida-server" in lowered
+                    or "unable to connect to remote" in lowered
+                    or "unable to communicate" in lowered
+                ):
+                    result["status"]="FRIDA_BACKEND_UNAVAILABLE"
+                    result["reason"]="Frida could not establish an Android instrumentation backend"
+                else:
+                    result["status"]="FRIDA_PROBE_FAILED"
+                    result["reason"]="Frida runtime probe exited non-zero"
             else:
                 result["status"]="RUNTIME_TARGET_NOT_OBSERVED"
+                result["reason"]="Frida probe ran, but no target entry satisfied the full vptr+slot proof predicate"
 
     (output / "RUNTIME-PROBE.json").write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -1034,9 +1144,11 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
         "# Runtime Proof Readiness\n\n"
         "Package: %s\nNative module: %s\nTarget offset: 0x27a510\n"
         "Expected vptr: 0x717e60\nExpected slot result: 0x27a510\n\n"
-        "Status: %s\n\n"
-        "The probe is observational and does not replace or mutate the target.\n"
-        % (package or "UNKNOWN", module, result["status"]),
+        "Status: %s\nReason: %s\n\n"
+        "ADB and Frida client discovery are reported independently. The probe is observational "
+        "and does not replace or mutate the target. Runtime proof requires a target entry event "
+        "with both the expected vptr and expected slot result.\n"
+        % (package or "UNKNOWN", module, result["status"], result.get("reason", "NONE")),
         encoding="utf-8",
     )
     return result
