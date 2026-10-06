@@ -337,29 +337,31 @@ def write_vtable_class_correlation(output, data):
     second = read_pointer(data, address_point + 0x8)[0]
 
     ctor_path = output / "ActiveDecoder-constructor.txt"
-    text = ctor_path.read_text(encoding="utf-8", errors="replace") if ctor_path.exists() else ""
+    ctor_text = ctor_path.read_text(encoding="utf-8", errors="replace") if ctor_path.exists() else ""
+    dtor_path = output / "ActiveDecoder-destructor.txt"
+    dtor_text = dtor_path.read_text(encoding="utf-8", errors="replace") if dtor_path.exists() else ""
 
-    has_ctor = bool(re.search(r"bl\s+0xdfbd0\s+<.*ActiveDecoderC2Ev", text))
-    has_ctor_vptr = bool(re.search(
-        r"\bstr\s+x9,\s+\[x19\]|\bstr\s+x9,\s+\[x19\]",
-        text,
-    ))
-    has_dtor = bool(re.search(r"\bbl\s+0xddc20\s+<.*ActiveDecoderD2Ev", text))
+    has_ctor = bool(re.search(r"bl\s+0xdfbd0\s+<.*ActiveDecoderC2Ev", ctor_text))
+    has_ctor_vptr = bool(re.search(r"\bstr\s+x9,\s+\[x19\]", ctor_text))
+    has_dtor = bool(re.search(r"\bbl\s+0xddc20\s+<.*ActiveDecoderD2Ev", dtor_text))
     has_dtor_vptr = bool(re.search(
-        r"\bf9000268\b.*\bstr\s+x8,\s+\[x19\]|\bstr\s+x8,\s+\[x19\]",
-        text,
+        r"\badd\s+x8,\s+x9,\s+#0x10\b.*\n.*\bstr\s+x8,\s+\[x19\]",
+        dtor_text,
+        re.S,
     ))
+
     rtti = read_pointer(data, address_point - 0x8)[0]
     name_ptr = read_pointer(data, rtti + 0x8)[0] if rtti else None
     type_name = cstring_at(data, name_ptr) if name_ptr else None
 
     evidence = [
         ("RTTI type is mediaCodecDecoder", bool(type_name and "mediaCodecDecoder" in type_name)),
-        ("vtable entry[0] is destructor candidate 0x2785bc", first == 0x2785BC),
-        ("vtable entry[1] is destructor candidate 0x278768", second == 0x278768),
+        ("vtable entry[0] == destructor candidate 0x2785bc", first == 0x2785BC),
+        ("vtable entry[1] == destructor candidate 0x278768", second == 0x278768),
         ("constructor calls ActiveDecoderC2Ev", has_ctor),
         ("constructor stores vptr into [x19]", has_ctor_vptr),
         ("destructor calls ActiveDecoderD2Ev", has_dtor),
+        ("destructor restores vptr into [x19]", has_dtor_vptr),
     ]
     proven = all(ok for _, ok in evidence)
 
@@ -386,6 +388,87 @@ def write_vtable_class_correlation(output, data):
     ]
     (output / "VTABLE-CLASS-CORRELATION.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     return proven
+
+def write_remaining_dispatch_audit(output, objdump, target):
+    """Scan the full executable text for +0x108 indirect-dispatch candidates."""
+    if not objdump:
+        (output / "REMAINING-DISPATCH-AUDIT.md").write_text(
+            "# Remaining Dispatch Audit\n\nOBJDUMP_NOT_FOUND\n", encoding="utf-8"
+        )
+        return False
+
+    rc, full = run([objdump, "-d", str(target)])
+    (output / "full-disassembly.txt").write_text(
+        full + "\n[exit=" + str(rc) + "]\n", encoding="utf-8"
+    )
+
+    lines = full.splitlines()
+    candidates = []
+    direct_target = []
+    current_label = "UNKNOWN"
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if re.search(r"^0*[0-9a-fA-F]+\s+<.*>:$", stripped):
+            current_label = stripped
+        if re.search(r"\bbl\s+(?:0x)?27a510\b", line, re.I):
+            direct_target.append(line.strip())
+        if re.search(r"\bldr\s+x8,\s+\[x8,\s+#0x108\]", line):
+            window = lines[i:min(len(lines), i + 5)]
+            if any(re.search(r"\bblr\s+x8\b", w) for w in window):
+                prev = lines[max(0, i - 6):i]
+                has_object_vptr = any(re.search(r"\bldr\s+x8,\s+\[x19\]", w) for w in prev)
+                has_env_receiver = any(re.search(r"\bmov\s+x0,\s+x19\b", w) for w in window)
+                candidates.append({
+                    "address": stripped.split(":", 1)[0],
+                    "label": current_label,
+                    "object_vptr_predecessor": has_object_vptr,
+                    "jni_receiver_pattern": has_env_receiver,
+                    "window": "\n".join(prev[-3:] + window[:5]),
+                })
+
+    proven_object = [c for c in candidates if c["object_vptr_predecessor"] and not c["jni_receiver_pattern"]]
+    jni_like = [c for c in candidates if c["jni_receiver_pattern"]]
+    unresolved = [c for c in candidates if c not in proven_object and c not in jni_like]
+
+    out = [
+        "# Remaining Dispatch Audit",
+        "",
+        "Goal: prove or disprove a concrete C++ object -> vptr -> +0x108 -> indirect call path.",
+        "Full disassembly return code: %d" % rc,
+        "Candidate +0x108 indirect dispatches: %d" % len(candidates),
+        "JNI-like +0x108 candidates: %d" % len(jni_like),
+        "Proven-object C++ +0x108 candidates: %d" % len(proven_object),
+        "Unresolved candidates: %d" % len(unresolved),
+        "Direct BL to 0x27a510: %d" % len(direct_target),
+        "",
+        "Classification rule:",
+        "- JNI_LIKELY requires the observed JNIEnv-style receiver handoff (mov x0, x19) around the +0x108 dispatch.",
+        "- PROVEN_CXX_OBJECT requires an object-vptr predecessor without that JNI receiver pattern.",
+        "- UNRESOLVED requires manual/data-flow reconstruction.",
+        "",
+    ]
+    for item in candidates:
+        cls = "PROVEN_CXX_OBJECT" if item in proven_object else ("JNI_LIKELY" if item in jni_like else "UNRESOLVED")
+        out += [
+            "## 0x" + item["address"],
+            "Classification: " + cls,
+            "Function: " + item["label"],
+            "ASM:",
+            item["window"],
+            "",
+        ]
+    if not candidates:
+        out.append("No +0x108 indirect-dispatch candidates were found in the executable text.")
+    out += [
+        "RESULT: " + (
+            "NO_PROVEN_CXX_RUNTIME_DISPATCH_FOUND"
+            if not proven_object else "PROVEN_CXX_RUNTIME_DISPATCH_CANDIDATE_FOUND"
+        ),
+        "",
+        "This is a static scan. It cannot prove runtime execution/non-execution by itself.",
+    ]
+    (output / "REMAINING-DISPATCH-AUDIT.md").write_text("\n".join(out) + "\n", encoding="utf-8")
+    return bool(proven_object)
 
 def write_native_security_api_audit(output, strings_text, symbols_text):
     keys = [
@@ -489,6 +572,7 @@ def git_publish(root, report_dir):
         "VTABLE-ABI-ANALYSIS.md",
         "CRITICAL-FUNCTION-BEHAVIOR.md",
         "VTABLE-CLASS-CORRELATION.md",
+        "REMAINING-DISPATCH-AUDIT.md",
         "NATIVE-SECURITY-API-AUDIT.md",
         "JAVA-SCREEN-SECURITY-AUDIT.md",
     ]
@@ -791,8 +875,10 @@ def main():
         dispatch_text = (output / "dispatch-sites.txt").read_text(encoding="utf-8", errors="replace")
         jni_semantic_found = write_jni_semantic_analysis(output, dispatch_text)
         disassemble(objdump, target, 0x2783C0, 0x278500, output / "ActiveDecoder-constructor.txt")
+        disassemble(objdump, target, 0x2785BC, 0x2786B0, output / "ActiveDecoder-destructor.txt")
         write_vtable_object_proof(output)
         write_vtable_class_correlation(output, data)
+        write_remaining_dispatch_audit(output, objdump, target)
         disassemble(objdump, target, 0x112E80, 0x113000, output / "onCaptureScreen-dispatch.txt")
 
         if ptr is not None:
