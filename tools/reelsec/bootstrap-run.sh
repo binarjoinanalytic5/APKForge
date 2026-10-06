@@ -35,7 +35,9 @@ fi
 # Clean and already synchronized: run the checked-out tool.
 if [ "$LOCAL" = "$REMOTE_SHA" ] && [ -f "$TOOL" ]; then
   chmod +x "$TOOL" "$WRAPPER" 2>/dev/null || true
-  exec python3 "$TOOL" "$@"
+  # We already fetched origin/main above; tell ReelSec to reuse that ref so
+  # one bootstrap invocation performs exactly one network fetch.
+  REELSEC_ROOT="$ROOT" REELSEC_ORIGIN_READY="$REMOTE/$BRANCH" exec python3 "$TOOL" "$@"
 fi
 
 # Dirty tree: do not merge, reset, rebase, stash, or overwrite anything.
