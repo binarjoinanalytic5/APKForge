@@ -1,0 +1,29 @@
+AUTO-DEEP-V2 FILE MANIFEST
+Generated: 2026-10-06T14:21:03+03:00
+
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/FINAL-REPORT.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/contexts/CaptureScreen.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/contexts/ContentProtection.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/contexts/apsaraCaptureScreen.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/contexts/enableProjection.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/contexts/mEnableProjection.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/contexts/nativeOnCaptureScreen.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/contexts/onCaptureScreen.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/contexts/setForceInsecureDecoder.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/contexts/xref-context.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/metadata/MANIFEST.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/metadata/elf-header.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/metadata/elf-relocations.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/metadata/elf-sections.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/metadata/elf-symbols.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/metadata/full-run.log
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/security/elf-security-relocations.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/security/elf-security-symbols.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/security/global-apk-security-hits.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/security/java-smali-security-hits.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/security/jni-capture-disassembly-hits.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/security/manifest-resource-security-hits.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/security/native-security-strings.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/targets/exact-targets.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/xrefs/confirmed-arm64-xrefs.txt
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep-v2/xrefs/resolve_targets.py

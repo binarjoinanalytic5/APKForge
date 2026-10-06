@@ -1,0 +1,420 @@
+173:_ZN12VidStsSource16setSecurityTokenERKNSt6__ndk112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEE
+201:_ZN12VidMpsSource16setSecurityTokenERKNSt6__ndk112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEE
+216:_ZN13LiveStsSource16setSecurityTokenERKNSt6__ndk112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEE
+313:_ZNK12VidStsSource16getSecurityTokenEv
+320:_ZNK13LiveStsSource16getSecurityTokenEv
+345:_ZN10KeyManager14getDrmMagicKeyEv
+912:_ZNK12VidMpsSource16getSecurityTokenEv
+1285:_ZN14codecPrototype6createERK11Stream_metamiPKN6Cicada7DrmInfoE
+1290:_ZN6Cicada14avcodecDecoder12init_decoderEPK11Stream_metaPvmPKNS_7DrmInfoE
+1317:_ZN13ActiveDecoder4openEPK11Stream_metaPvmPKN6Cicada7DrmInfoE
+1348:_ZN6Cicada19DrmHandlerPrototype9isSupportEPKNS_7DrmInfoE
+1377:ANativeWindow_acquire
+1378:ANativeWindow_release
+1416:ANativeWindow_getWidth
+1417:ANativeWindow_getHeight
+1418:ANativeWindow_fromSurface
+1429:eglCreatePbufferSurface
+1433:eglDestroySurface
+1437:eglCreateWindowSurface
+1476:_ZN6Cicada19DrmHandlerPrototype6createERKNS_7DrmInfoE
+1477:_ZN6Cicada19DrmHandlerPrototype12addPrototypeEPS0_
+1478:_ZN6Cicada19DrmHandlerPrototype15drmHandlerQueueE
+1479:_ZN6Cicada19DrmHandlerPrototype9_nextSlotE
+1480:_ZTSN6Cicada19DrmHandlerPrototypeE
+1481:_ZTIN6Cicada19DrmHandlerPrototypeE
+11752:java/security/MessageDigest
+11754:(Ljava/lang/String;)Ljava/security/MessageDigest;
+11841:mEnableProjection
+11871:protected.privateService.data.premiumVerifyCb
+11891:protected.network.http.http2
+11893:protected.network.multi.pipeline
+11896:public.capture.strategy.scale
+11900:protected.audio.render.change_format
+11901:protected.audio.render.change_format.fmt
+11902:protected.audio.render.change_format.channels
+11903:protected.audio.render.change_format.sample_rate
+11904:protected.decode.codecplugin.
+11906:protected.network.cache.local
+11907:protected.network.cache.local.saveDir
+11908:protected.network.cache.local.bufferMemoryKB
+11909:protected.network.cache.local.expireMin
+11910:protected.network.cache.local.maxCapacityMB
+11911:protected.network.cache.local.freeStorageMB
+11913:protected.network.cache.local.urlHashCb
+11914:protected.network.cache.local.urlHashCbUserData
+11919:protected.network.data.processCb
+11920:protected.network.data.releaseCb
+11923:protected.network.dns.httpdns.enhanced
+11925:protected.network.networkbalance
+11927:protected.network.switchNIC
+11929:protected.network.enhancedNetworkbalance
+11931:protected.network.bufferToLocalCache
+11934:public.crash.strategy.captureCrash
+11936:protected.ipAccessor.clientSwitch
+11941:protected.IpResolveType
+12216:surfaceChanged
+12330:onCaptureScreen
+12355:nSetSurface
+12356:(Landroid/view/Surface;)V
+12426:nSurfaceChanged
+12471:AliyunCorePlayer callback --> CaptureScreen(%ld,%ld)
+12557:getSecurityToken
+12560:setSecurityToken
+12818:CaptureScreen
+12856:nativeOnCaptureScreen
+12868:requestDrm complete, len:%d, data:%s
+12906:requestDRMLicense: CDMData is null or dataLen <= 0
+12907:CDMData is null or empty, please check DRM configuration
+12908:requestDRMLicense: VOD DRM certId is empty, will try to proceed without it
+12909:requestDRMLicense: Live DRM certificate URL is empty
+12910:Live DRM certificate URL is empty, please configure DRM certificate URL
+12917:DRMMagicKey
+13010:enableProjection
+13239:", "projectionLicenseEnable":"
+13244:apsaraCaptureScreen
+13387:protected.license.premium.checkPremiumAddrUserData
+13475:crash_strategy_is_capture_crash
+13531:http2_windows_size
+13649:public.network.http2.windows.size
+13661:protected.local.cache.cleaner
+13727:crash monitor allow capture : %d
+13748:crashMonitor capture success, crashFilePath 
+13749:crashMonitor capture failed
+13750:protected.network.preconnect.interval
+13751:protected.network.preconnect.request
+13752:protected.network.preconnect.domain
+13753:protected.network.preconnect.idle
+13791:protected.networkQuality.checkShallDegradeAddr
+13792:protected.networkQuality.maybeGetABetterIpAddr
+13932:tbDrmDemuxer
+13936:tbDRMKey
+13939:TbDrmMuxer
+13947:tbDrm
+13948:tbDrmDec
+13951:tbDrmTs
+13963:tbDrm_read_close 
+13967:drmMagicKey
+14180:RECORDING
+14181:SCHEDULED_EVENT_SENDER_AND_RECORDING_FOR_PLAYER
+14218:protected.playEvent.user.destroyAsync
+14238:protected.playEvent.user.stop
+14239:protected.playEvent.user.destroy
+14377:securityToken
+14507:InvalidSecurityToken.Malformed
+14508:InvalidSecurityToken.MismatchWithAccessKey
+14511:InvalidSecurityToken.Expired
+14552:GetDRMLicense
+14553:DRMType
+14555:SecurityToken
+14600:DescribeDRMLicense
+14611:mSecurityToken
+14715:InvalidParameter.DRMNotActivated
+14716:DRMAuthError
+15048:captureCrash
+15417:On Android: TextureView may cause decoder init failure for DRM content
+15418:If on Android, use SurfaceView instead of TextureView for DRM content
+15441:DRM-protected content cannot be decrypted without proper keys
+15443:For DRM content, ensure proper license/key acquisition
+15457:DRM scheme not supported on this device
+15460:The device's DRM system is outdated
+15462:Use a certified device for DRM-protected content
+15464:Contact the device manufacturer for DRM support information
+15465:DRM key is expired or invalid
+15470:Third-party DRM callback (requestKey) returned incorrect data
+15473:For third-party DRM, check the DrmCallback.requestKey implementation
+15474:Renew the DRM license and retry playback
+15475:DRM key response is null
+15478:Third-party DRM callback returned null
+15482:For third-party DRM, ensure the requestKey callback returns valid data
+15484:DRM certificate URL is not configured or empty
+15485:The DRM certificate URL was not set before playback (e.g., FairPlay application certificate URL)
+15489:Set the DRM certificate URL via setDrmConfig or the corresponding API before calling prepare()
+15490:For URL-based playback of DRM content, ensure the certificate URL is provided in the player configuration
+15491:Check the documentation for the correct way to configure the DRM certificate URL for your DRM scheme
+15492:DRM key request failed due to network error
+15493:Network is unstable or disconnected when requesting the DRM key
+15494:The DRM key server is unreachable or overloaded
+15498:Verify the DRM key server URL is accessible from the device
+15501:DRM key server returned an error
+15502:The DRM key server returned HTTP 4xx or 5xx
+15505:The DRM entitlement for this content has been revoked
+15506:Check the DRM key server response code and message
+15508:Contact the DRM provider to check if the content entitlement is valid
+15510:DRM key server response is invalid or cannot be parsed
+15511:The DRM key server returned malformed JSON/XML
+15515:Verify the DRM key server is returning well-formed responses
+15519:DRM content key has expired
+15520:The DRM key expiration time has passed
+15524:Renew the DRM key and retry playback
+15526:For offline keys, ensure the renewal window has not passed
+15527:Contact the content provider to extend the DRM key validity
+15537:DRM scheme does not match the media encryption type
+15540:The media uses Alibaba Cloud private encryption but the player is configured for commercial DRM
+15541:The DRM type specified in the player configuration does not match the actual encryption
+15542:Ensure the DRM scheme matches the media format (Widevine + DASH, FairPlay + HLS)
+15545:Verify the player DRM configuration matches the content encryption type
+15673:ProcessSetViewMsg: failed to get JNIEnv, cannot construct surface handle
+16202:parseContentProtection
+16204:ContentProtection
+16372:initDrmHandler failed, ret=%d
+16382:queueSecureInputBuffer or queueInputBuffer error(%d) codecType = %d
+16396:failed to initDrmHandler state=SESSION_STATE_IDLE
+16397:failed to initDrmHandler state=SESSION_STATE_ERROR, code=%d
+16398:failed to initDrmHandler try again
+16401:setDrmInfo
+16403:setForceInsecureDecoder
+16414:queueSecureInputBuffer
+16420:setOutputSurface
+16422:jBuffer is null, queueSecureInputBuffer may mem lack
+16446:bytes_of_protected_data
+16509:surface:%p, mInvalid:%d, queue size:%zu, may drop frame
+16511:capture cost time : capture = %ld ms
+16512:captureScreen exception, frameWidth or frameHeight is 0
+16514:createGLSurface failed
+16523:u_projection
+16540:com/cicada/player/utils/DecoderSurfaceTexture
+16541:DecoderSurface
+16542:Could not find surfaceTextureClass
+16543:createSurface
+16544:(IJ)Landroid/view/Surface;
+16551:faild tod create surface
+16552:mSurfaceTexture is nullptr
+16554:failed to create surfaceTexture obj
+16555:failed to create surfaceTexture
+16556:failed to create Surface obj
+16557:failed to create Surface
+16558:NativeWindow
+16559:AndroidSurfaceHandle: invalid params env=%p jSurface=%p
+16560:AndroidSurfaceHandle: NewGlobalRef failed
+16561:AndroidSurfaceHandle: ANativeWindow_fromSurface returned null
+16562:AndroidSurfaceHandle::~AndroidSurfaceHandle: failed to get JNIEnv for DeleteGlobalRef
+16584:protected.audio.render.hw.tempo
+16602:Device supports BT.2020 PQ. Will attempt to create HDR10 surface.
+16603:Device does not support EGL_EXT_gl_colorspace_bt2020_pq. Creating standard SDR surface.
+16605:Video is HLG and device supports extension. Creating BT.2020 HLG surface.
+16606:Device does not support EGL_EXT_gl_colorspace_bt2020_hlg. Creating standard SDR surface.
+16616:eglCreatePbufferSurface: 0x%X
+16618:eglMakeCurrent: display(%p) surface(%p) context(%p)
+16621:Output surface is null, not rendering!
+16623:eglDestroySurface: 0x%x
+16624:Native window handle is null!
+16625:EGLContext CreateSurface mDisplay %p mConfig %p window %p 
+16627:Video is SDR. Creating standard SDR surface.
+16628:Retrying to create surface with default attributes...
+16629:EGLContext eglCreateWindowSurface finally failed!
+16630:EGLContext eglCreateWindowSurface surface: %p
+16631:EGLContext eglDestroySurface eglSurface %p
+16722:WideVineDrmHandler
+16725:com/cicada/player/utils/media/DrmSessionManager
+16729:isForceInsecureDecoder
+16731:drm changeState, objectId=%ld
+16733:drm prepared OK
+16734:drm requestProvision, objectId=%ld
+16736:drm requestKey, objectId=%ld
+16745:protected.networkBalanceServer.get.getCurrent
+16746:protected.networkBalanceServer.get.getCurrentTotal
+17349:DRM key is expired or invalid, please check your configuration. If it's a third DRM, please provide correct DrmCallback.requestKey implementation.
+17350:DRM key is null, please check your configuration. If it's a third DRM, please provide correct DrmCallback.requestKey implementation.
+17351:DRM provision response is null as request to Google failed.
+17352:DRM resource busy
+17353:DRM session released.
+17354:DRM provision failed, your device/system doesn't pass Google's Widevine provision.
+17355:DRM media's security level is too high, can't play in this device, you can lower your media's security level and try again.
+17356:DRM cert is null, please check your configuration. If it's a third DRM, please provide correct AVPDrmDelegate.requestCert implementation.
+17358:DRM init decoder failed, please use SurfaceView instead of TextureView and try again.
+17360:DRM key request network failed, please check your network connection.
+17361:DRM key server returned an error response, please check your license server configuration.
+17362:DRM key response parse failed, the server response format is invalid.
+17363:DRM key has expired, please refresh the playback session or obtain a new license.
+17364:unknown drm error
+17387:protected.
+17882:CertInvalid but current low security and initializing, so return success. bizId(%d), sdkcode(%d), licenseFrom(%d)
+17883:Fault Tolerant: LowSecurity And Initializing: 
+17885:license expired and current low security but license from server, so return expire(%d). bizId(%d), sdkCode(%d)
+17886:license expired(%d) but current low security and license not from server, so return success. bizId(%d), sdkCode(%d)
+17887:Fault Tolerant: LowSecurity And NotServerLicense And Expired: 
+17888:license verify result in low security: %d. bizId(%d), sdkCode(%d)
+17889:license feature expire and current low security but license from server, so return expire. bizId(%d), sdkCode(%d), feature(%d)
+17890:license feature expire but current low security and license not from server, so return success. bizId(%d), sdkCode(%d), feature(%d)
+17891:license feature(%d) verify result in low security: %d. bizId(%d), sdkCode(%d)
+17899:license expired(%d) but current middle security and new install and license from builtin, so return success. bizId(%d), sdkCode(%d)
+17900:Fault Tolerant: MiddleSecurity And BuiltinLicense And Expired: 
+17902:license expired(%d) but current middle security and long time no usage, so return success. bizId(%d), sdkCode(%d)
+17903:Fault Tolerant: MiddleSecurity And LongTimeNoUsage: 
+17904:license verify result(%d) in middle security. bizId(%d), sdkCode(%d)
+17906:license feature expired but current middle security and new install and license from builtin, so return success. bizId(%d), sdkCode(%d)
+17908:license feature(%d) expired but current middle security and long time no usage, so return success. bizId(%d), sdkCode(%d)
+17909:license feature(%d) verify resutl(%d) in middle security. bizId(%d), sdkCode(%d)
+17959:Windows
+18385:WINDOW_UPDATE: window_size_increment == 0
+18386:WINDOW_UPDATE to idle stream
+18387:WINDOW_UPADATE to reserved stream
+18400:SETTINGS: too large SETTINGS_INITIAL_WINDOW_SIZE
+18411:session->remote_window_size > 0
+18500:INADEQUATE_SECURITY
+18588:strict-transport-security
+18774:content-security-polic
+18775:upgrade-insecure-request
+18839:content-security-policy
+18847:upgrade-insecure-requests
+18967:settings->max_window <= NGTCP2_MAX_VARINT
+18968:settings->max_stream_window <= NGTCP2_MAX_VARINT
+19064:processing buffered protected packet
+19145:persistent congestion loss_window=%lu congestion_period=%lu
+19338:congestion_window
+19942:insufficient security
+20192:secure memory buffer
+20484:RSA Data Security, Inc.
+20486:RSA Data Security, Inc. PKCS
+20800:id-smime-aa-securityLabel
+20987:security
+20988:Security
+21077:simpleSecurityObject
+21134:Secure Electronic Transactions
+21230:setext-pinSecure
+21270:secure device signature
+21796:secureShellClient
+21798:secureShellServer
+22055:IEEE Security in Storage Working Group
+22895:parseCrashDescContent failed: captureResult(%s) is invalid
+22955:crash capture is close
+22963:alivc_java_crash_capture.cc:57
+22965:alivc_java_crash_capture.cc:59
+22967:alivc_java_crash_capture.cc:96
+22969:alivc_java_crash_capture.cc:104
+22971:alivc_java_crash_capture.cc:110
+22977:alivc_java_crash_capture.cc:123
+22986:alivc_java_crash_capture.cc:154
+22989:alivc_java_crash_capture.cc:176
+22991:alivc_java_crash_capture.cc:182
+22993:alivc_java_crash_capture.cc:184
+22995:alivc_java_crash_capture.cc:194
+22997:alivc_java_crash_capture.cc:198
+22999:alivc_java_crash_capture.cc:208
+23001:alivc_java_crash_capture.cc:212
+23003:alivc_java_crash_capture.cc:224
+23005:alivc_java_crash_capture.cc:228
+23007:alivc_java_crash_capture.cc:239
+23009:alivc_java_crash_capture.cc:243
+23038:alivc_native_crash_capture.cc:21
+23179:alivc_linux_native_crash_capture.cc:249
+23181:alivc_linux_native_crash_capture.cc:255
+23183:alivc_linux_native_crash_capture.cc:262
+23185:alivc_linux_native_crash_capture.cc:267
+23187:alivc_linux_native_crash_capture.cc:271
+23189:alivc_linux_native_crash_capture.cc:282
+23191:alivc_linux_native_crash_capture.cc:428
+23193:alivc_linux_native_crash_capture.cc:437
+23195:alivc_linux_native_crash_capture.cc:484
+23197:alivc_linux_native_crash_capture.cc:493
+23199:alivc_linux_native_crash_capture.cc:496
+23201:alivc_linux_native_crash_capture.cc:504
+23203:alivc_linux_native_crash_capture.cc:508
+23205:alivc_linux_native_crash_capture.cc:512
+23207:alivc_linux_native_crash_capture.cc:521
+23209:alivc_linux_native_crash_capture.cc:524
+23211:alivc_linux_native_crash_capture.cc:529
+23213:alivc_linux_native_crash_capture.cc:575
+23214:alivc_linux_native_crash_capture.cc:582
+23216:alivc_linux_native_crash_capture.cc:594
+23218:alivc_linux_native_crash_capture.cc:595
+23220:alivc_linux_native_crash_capture.cc:600
+23222:alivc_linux_native_crash_capture.cc:603
+23224:alivc_linux_native_crash_capture.cc:608
+23227:alivc_linux_native_crash_capture.cc:619
+23228:alivc_linux_native_crash_capture.cc:624
+23230:alivc_linux_native_crash_capture.cc:629
+23232:alivc_linux_native_crash_capture.cc:634
+23234:alivc_linux_native_crash_capture.cc:639
+23236:alivc_linux_native_crash_capture.cc:643
+23238:alivc_linux_native_crash_capture.cc:645
+23240:alivc_linux_native_crash_capture.cc:658
+23242:alivc_linux_native_crash_capture.cc:708
+23244:alivc_linux_native_crash_capture.cc:718
+23246:alivc_linux_native_crash_capture.cc:733
+23248:alivc_linux_native_crash_capture.cc:739
+23250:alivc_linux_native_crash_capture.cc:753
+23252:alivc_linux_native_crash_capture.cc:771
+23254:alivc_linux_native_crash_capture.cc:789
+23256:alivc_linux_native_crash_capture.cc:805
+23258:alivc_linux_native_crash_capture.cc:810
+23260:alivc_linux_native_crash_capture.cc:813
+23262:alivc_linux_native_crash_capture.cc:815
+23264:alivc_linux_native_crash_capture.cc:818
+23266:alivc_linux_native_crash_capture.cc:821
+23268:alivc_linux_native_crash_capture.cc:828
+23270:alivc_linux_native_crash_capture.cc:847
+23272:alivc_linux_native_crash_capture.cc:855
+23274:alivc_linux_native_crash_capture.cc:860
+23276:alivc_linux_native_crash_capture.cc:866
+23278:alivc_linux_native_crash_capture.cc:186
+23280:alivc_linux_native_crash_capture.cc:192
+23281:alivc_linux_native_crash_capture.cc:199
+23283:alivc_linux_native_crash_capture.cc:202
+23285:alivc_linux_native_crash_capture.cc:210
+23287:alivc_linux_native_crash_capture.cc:150
+23289:alivc_linux_native_crash_capture.cc:153
+23291:alivc_linux_native_crash_capture.cc:159
+23293:alivc_linux_native_crash_capture.cc:172
+23295:alivc_linux_native_crash_capture.cc:177
+23515:alivc_crash_capture.cc:37
+23516:Capture.Init: %p
+23737:, securityToken: 
+23871:x-acs-security-token
+23883:x-acs-security-token:
+23920:permessage-deflate; client_max_window_bits
+24429:NSt6__ndk110__function6__funcIZN10NativeBase14java_ConstructEP7_JNIEnvP8_jobjectE4$_37NS_9allocatorIS7_EEFNS_10unique_ptrIN6Cicada15DrmResponseDataENS_14default_deleteISC_EEEERKNSB_15DrmRequestParamEEEE
+24430:NSt6__ndk110__function6__baseIFNS_10unique_ptrIN6Cicada15DrmResponseDataENS_14default_deleteIS4_EEEERKNS3_15DrmRequestParamEEEE
+24489:NSt6__ndk110__function6__funcIZN7AVPSaas21requestLiveDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES5_PSF_E3$_0NSD_ISJ_EEFvSH_RK18LiveDRMLicenseInfoEEE
+24490:NSt6__ndk110__function6__baseIFvRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEERK18LiveDRMLicenseInfoEEE
+24491:ZN7AVPSaas21requestLiveDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNSt6__ndk112basic_stringIcNS7_11char_traitsIcEENS7_9allocatorIcEEEES2_PSD_E3$_0
+24492:NSt6__ndk110__function6__funcIZN7AVPSaas21requestLiveDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES5_PSF_E3$_1NSD_ISJ_EEFviSH_SH_EEE
+24493:ZN7AVPSaas21requestLiveDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNSt6__ndk112basic_stringIcNS7_11char_traitsIcEENS7_9allocatorIcEEEES2_PSD_E3$_1
+24494:NSt6__ndk110__function6__funcIZN7AVPSaas20requestVodDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES5_PSF_E3$_3NSD_ISJ_EEFvSH_RK14DRMLicenseInfoEEE
+24495:NSt6__ndk110__function6__baseIFvRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEERK14DRMLicenseInfoEEE
+24496:ZN7AVPSaas20requestVodDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNSt6__ndk112basic_stringIcNS7_11char_traitsIcEENS7_9allocatorIcEEEES2_PSD_E3$_3
+24497:NSt6__ndk110__function6__funcIZN7AVPSaas20requestVodDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEES5_PSF_E3$_4NSD_ISJ_EEFviSH_SH_EEE
+24498:ZN7AVPSaas20requestVodDRMLicenseEPPcPiN6Cicada7DRMTypeEPKclRKNSt6__ndk112basic_stringIcNS7_11char_traitsIcEENS7_9allocatorIcEEEES2_PSD_E3$_4
+24632:NSt6__ndk110__function6__funcIZN7AVPBase10initPlayerEvE4$_44NS_9allocatorIS3_EEFNS_10unique_ptrIN6Cicada15DrmResponseDataENS_14default_deleteIS8_EEEERKNS7_15DrmRequestParamEEEE
+24695:N6Cicada12tbDrmDemuxerE
+24696:10TbDrmMuxer
+24917:20GetDRMLicenseRequest
+24989:NSt6__ndk110__function6__funcIZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2NS_9allocatorIS4_EEFvPhiiEEE
+24991:ZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2
+25003:NSt6__ndk110__function6__funcIZN6Cicada18SMPAVDeviceManager12setUpDecoderEmPK11Stream_metaPvNS3_10deviceTypeEjE3$_0NS_9allocatorIS9_EEFNS_10shared_ptrINS2_10DrmHandlerEEERKNS2_7DrmInfoEEEE
+25004:NSt6__ndk110__function6__baseIFNS_10shared_ptrIN6Cicada10DrmHandlerEEERKNS3_7DrmInfoEEEE
+25015:NSt6__ndk120__shared_ptr_emplaceIN6Cicada20AndroidSurfaceHandleENS_9allocatorIS2_EEEE
+25093:N6Cicada10DrmHandlerE
+25098:NSt6__ndk110__function6__funcIZN13ActiveDecoder4openEPK11Stream_metaPvmPKN6Cicada7DrmInfoEE3$_0NS_9allocatorISB_EEFivEEE
+25099:ZN13ActiveDecoder4openEPK11Stream_metaPvmPKN6Cicada7DrmInfoEE3$_0
+25113:        uniform mat4 u_projection;
+25128:            gl_Position = u_projection * vec4(a_position, 0.0, 1.0);
+25338:        uniform mat4 u_projection;
+25341:            gl_Position = u_projection * vec4(a_position, 0.0, 1.0);
+25604:N6Cicada22DecoderSurfaceCallbackE
+25644:N6Cicada18WideVineDrmHandlerE
+25645:N6Cicada19DrmHandlerPrototypeE
+25646:NSt6__ndk123enable_shared_from_thisIN6Cicada18WideVineDrmHandlerEEE
+25647:NSt6__ndk120__shared_ptr_emplaceIN6Cicada18WideVineDrmHandlerENS_9allocatorIS2_EEEE
+26721:__Secure-
+26724:secure
+26959:Strict-Transport-Security:
+26976:[%d] nghttp2 set_local_window_size(%d) failed: %s(%d)
+26977:[%d] nghttp2_submit_window_update() failed: %s(%d)
+26978:[%d] local window update by %d
+26979:[%d] nghttp2_session_set_local_window_size() failed: %s(%d)
+26980:[%d] local window size now %d
+26986:[%d] flush -> %d, h2 windows %d-%d (stream-conn), buffers %zu-%zu (stream-conn)
+26987:flush -> %d, connection-window=%d, nw_send_buffer(%zu)
+27025:[%d] cf_recv(len=%zu) -> %d, %zu, window=%d/%d, connection %d/%d
+27035:[%d] cf_send(len=%zu) -> %d, %zu, eos=%d, h2 windows %d-%d (stream-conn), buffers %zu-%zu (stream-conn)
+27036:cf_send(len=%zu) -> %d, %zu, connection-window=%d, nw_send_buffer(%zu)
+27055:FRAME[WINDOW_UPDATE, incr=%d]
+27072:nghttp2_session_set_local_window_size() failed: %s(%d)
+27084:[%d] DATA, window=%d/%d
+27549:[%d] increase window by %zu
+27553:[%d] cf_send(len=%zu) -> %d, %zu, h2 windows %d-%d (stream-conn), buffers %zu-%zu (stream-conn)
+27674:nghttp2_increase_local_window_size
+27700:nghttp2_frame_pack_window_update
+28806:Ant Secure Compiler build211110 (based on LLVM 4.0.1)

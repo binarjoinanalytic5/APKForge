@@ -1,0 +1,21 @@
+36559:00000000000f8664 <JNI_OnLoad>:
+36684:   f8854: 34000720     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36687:   f8860: 340006c0     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36690:   f886c: 34000660     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36693:   f8878: 34000600     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36696:   f8884: 340005a0     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36699:   f8890: 34000540     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36702:   f889c: 340004e0     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36705:   f88a8: 34000480     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36708:   f88b4: 34000420     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36711:   f88c0: 340003c0     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36716:   f88d4: 34000320     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36719:   f88e0: 340002c0     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36722:   f88ec: 34000260     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36725:   f88f8: 34000200     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36728:   f8904: 340001a0     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36731:   f8910: 34000140     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36734:   f891c: 340000e0     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36737:   f8928: 34000080     	cbz	w0, 0xf8938 <JNI_OnLoad+0x2d4>
+36740:   f8934: 14000002     	b	0xf893c <JNI_OnLoad+0x2d8>
+36745:   f8948: 540000c1     	b.ne	0xf8960 <JNI_OnLoad+0x2fc>

@@ -1,0 +1,35 @@
+======================================================================
+AUTO DEEP V2 — FINAL REPORT
+======================================================================
+
+IMPORTANT:
+This report identifies native references and security indicators.
+It does NOT claim that an API/string is the actual screenshot blocker
+unless the surrounding execution context establishes that fact.
+
+FILES:
+exact targets lines      : 40
+confirmed xref lines     : 143
+native security hits     : 420
+Java/Smali security hits : 7
+global APK security hits : 0
+
+IMPORTANT TARGETS PRESENT IN XREF REPORT:
+CaptureScreen                    2
+nativeOnCaptureScreen            0
+onCaptureScreen                  1
+apsaraCaptureScreen              1
+enableProjection                 3
+mEnableProjection                1
+ContentProtection                1
+setForceInsecureDecoder          1
+
+INTERPRETATION RULE:
+CaptureScreen has at least one native ARM64 code reference.
+enableProjection has at least one native ARM64 code reference.
+ContentProtection has at least one native ARM64 code reference.
+setForceInsecureDecoder has at least one native ARM64 code reference.
+
+NEXT VERIFICATION:
+The decisive step is correlating these XREFs with calls/branches and
+the JNI/component path, not merely matching strings.

@@ -1,0 +1,4 @@
+?? .gitignore
+?? analysis-apktool.log
+?? analysis-jadx.log
+?? analysis/auto-deep-v2/

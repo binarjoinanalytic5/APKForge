@@ -1,0 +1,143 @@
+============================================================
+CONFIRMED ARM64 XREFS
+============================================================
+confirmed=23
+
+TARGET : 0x59da85
+NAME   : mEnableProjection
+XREF   : 0xfc90c
+METHOD : ADRP+ADD@+0x4
+CODE   : adrp	x2, 0x59d000 <__cxa_demangle+0x182b4> || add	x2, x2, #0xa85
+
+TARGET : 0x5a0623
+NAME   : onCaptureScreen
+XREF   : 0x112f0c
+METHOD : ADRP+ADD@+0xc
+CODE   : adrp	x2, 0x5a0000 || add	x2, x2, #0x623
+
+TARGET : 0x5a3059
+NAME   : CaptureScreen
+XREF   : 0x130438
+METHOD : ADRP+ADD@+0x8
+CODE   : adrp	x10, 0x5a3000 || add	x10, x10, #0x59
+
+TARGET : 0x5a3059
+NAME   : CaptureScreen
+XREF   : 0x14bb7c
+METHOD : ADRP+ADD@+0xc
+CODE   : adrp	x3, 0x5a3000 || add	x3, x3, #0x59
+
+TARGET : 0x5a42a6
+NAME   : enableProjection
+XREF   : 0xe2f88
+METHOD : ADRP+ADD@+0x8
+CODE   : adrp	x10, 0x5a4000 || add	x10, x10, #0x2a6
+
+TARGET : 0x5a42a6
+NAME   : enableProjection
+XREF   : 0x1fc3b0
+METHOD : ADRP+ADD@+0x4
+CODE   : adrp	x1, 0x5a4000 || add	x1, x1, #0x2a6
+
+TARGET : 0x5a42a6
+NAME   : enableProjection
+XREF   : 0x1fcdd8
+METHOD : ADRP+ADD@+0x4
+CODE   : adrp	x1, 0x5a4000 || add	x1, x1, #0x2a6
+
+TARGET : 0x5a611f
+NAME   : apsaraCaptureScreen
+XREF   : 0x1467cc
+METHOD : ADRP+ADD@+0x10
+CODE   : adrp	x3, 0x5a6000 || add	x3, x3, #0x11f
+
+TARGET : 0x5acbf4
+NAME   : RECORDING
+XREF   : 0x1a6ad8
+METHOD : ADRP+ADD@+0x4
+CODE   : adrp	x10, 0x5ac000 || add	x10, x10, #0xbf4
+
+TARGET : 0x5acbfe
+NAME   : SCHEDULED_EVENT_SENDER_AND_RECORDING_FOR_PLAYER
+XREF   : 0x1a6b1c
+METHOD : ADRP+ADD@+0x4
+CODE   : adrp	x9, 0x5ac000 || add	x9, x9, #0xbfe
+
+TARGET : 0x5b7616
+NAME   : ProcessSetViewMsg
+XREF   : 0x233230
+METHOD : ADRP+ADD@+0x8
+CODE   : adrp	x2, 0x5b7000 || add	x2, x2, #0x616
+
+TARGET : 0x5b7645
+NAME   : ProcessSetViewMsg
+XREF   : 0x2332e8
+METHOD : ADRP+ADD@+0x8
+CODE   : adrp	x2, 0x5b7000 || add	x2, x2, #0x645
+
+TARGET : 0x5bb312
+NAME   : ContentProtection
+XREF   : 0x25e1a0
+METHOD : ADRP+ADD@+0xc
+CODE   : adrp	x1, 0x5bb000 || add	x1, x1, #0x312
+
+TARGET : 0x5bc2f7
+NAME   : queueSecureInputBuffer
+XREF   : 0x279ac0
+METHOD : ADRP+ADD@+0x8
+CODE   : adrp	x2, 0x5bc000 || add	x2, x2, #0x2f7
+
+TARGET : 0x5bc62e
+NAME   : setForceInsecureDecoder
+XREF   : 0x27af94
+METHOD : ADRP+ADD@+0xc
+CODE   : adrp	x2, 0x5bc000 || add	x2, x2, #0x62e
+
+TARGET : 0x5bc6fa
+NAME   : queueSecureInputBuffer
+XREF   : 0x27b148
+METHOD : ADRP+ADD@+0xc
+CODE   : adrp	x2, 0x5bc000 || add	x2, x2, #0x6fa
+
+TARGET : 0x5bc775
+NAME   : setOutputSurface
+XREF   : 0x27b220
+METHOD : ADRP+ADD@+0xc
+CODE   : adrp	x2, 0x5bc000 || add	x2, x2, #0x775
+
+TARGET : 0x5bc991
+NAME   : bytes_of_protected_data
+XREF   : 0x27ca28
+METHOD : ADRP+ADD@+0x4
+CODE   : adrp	x2, 0x5bc000 || add	x2, x2, #0x991
+
+TARGET : 0x5bd2b1
+NAME   : capture cost time
+XREF   : 0x281e34
+METHOD : ADRP+ADD@+0xc
+CODE   : adrp	x2, 0x5bd000 || add	x2, x2, #0x2b1
+
+TARGET : 0x5bd2d6
+NAME   : captureScreen exception, frameWidth or frameHeight is 0
+XREF   : 0x281ff0
+METHOD : ADRP+ADD@+0x8
+CODE   : adrp	x2, 0x5bd000 || add	x2, x2, #0x2d6
+
+TARGET : 0x5bd33c
+NAME   : createGLSurface failed
+XREF   : 0x2825c8
+METHOD : ADRP+ADD@+0x8
+CODE   : adrp	x2, 0x5bd000 || add	x2, x2, #0x33c
+
+TARGET : 0x5bd42c
+NAME   : u_projection
+XREF   : 0x2833b4
+METHOD : ADRP+ADD@+0x4
+CODE   : adrp	x1, 0x5bd000 || add	x1, x1, #0x42c
+
+TARGET : 0x5bd42c
+NAME   : u_projection
+XREF   : 0x284618
+METHOD : ADRP+ADD@+0x4
+CODE   : adrp	x1, 0x5bd000 || add	x1, x1, #0x42c
+

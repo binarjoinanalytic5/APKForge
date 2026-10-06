@@ -1,0 +1,40 @@
+0x5a0625	5899813	CaptureScreen
+0x5a1243	5902915	CaptureScreen
+0x5a3059	5910617	CaptureScreen
+0x5a3394	5911444	CaptureScreen
+0x5a6125	5923109	CaptureScreen
+0x5f942b	6263851	CaptureScreen
+0x5f94ad	6263981	CaptureScreen
+0x5a338c	5911436	nativeOnCaptureScreen
+0x5a0623	5899811	onCaptureScreen
+0x5a611f	5923103	apsaraCaptureScreen
+0x5a42a6	5915302	enableProjection
+0x59da85	5888645	mEnableProjection
+0x5a6079	5922937	projectionLicenseEnable
+0x5bd2b1	6017713	capture cost time
+0x5bd2d6	6017750	captureScreen exception, frameWidth or frameHeight is 0
+0x5bd33c	6017852	createGLSurface failed
+0x5bd42c	6018092	u_projection
+0x5fb1cf	6271439	u_projection
+0x5fb3c3	6271939	u_projection
+0x5fd879	6281337	u_projection
+0x5fd8d5	6281429	u_projection
+0x5b7616	5994006	ProcessSetViewMsg
+0x5b7645	5994053	ProcessSetViewMsg
+0x5bb2e4	6009572	parseContentProtection
+0x5bb2e9	6009577	ContentProtection
+0x5bb312	6009618	ContentProtection
+0x5bc62e	6014510	setForceInsecureDecoder
+0x5bc2f7	6013687	queueSecureInputBuffer
+0x5bc6fa	6014714	queueSecureInputBuffer
+0x5bc7c6	6014918	queueSecureInputBuffer
+0x5bc775	6014837	setOutputSurface
+0x5bc991	6015377	bytes_of_protected_data
+NOT_FOUND	Movie/video screen capture
+NOT_FOUND	During recording
+0x5acbf4	5950452	RECORDING
+0x5acc19	5950489	RECORDING
+0x5acbfe	5950462	SCHEDULED_EVENT_SENDER_AND_RECORDING_FOR_PLAYER
+NOT_FOUND	gj_NativePlayer_onCaptureScreen
+NOT_FOUND	gj_playerconfig_EnableProjection
+NOT_FOUND	Strategy_IsCaptureCrash

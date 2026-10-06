@@ -1,0 +1,1380 @@
+
+######################################################################
+XREF CONTEXT: 0xe2f88
+######################################################################
+   e2f28: f9042be9     	str	x9, [sp, #0x850]
+   e2f2c: f9043be8     	str	x8, [sp, #0x870]
+   e2f30: 3d8223e1     	str	q1, [sp, #0x880]
+   e2f34: 392203eb     	strb	w11, [sp, #0x880]
+   e2f38: f9044bff     	str	xzr, [sp, #0x890]
+   e2f3c: 3d800180     	str	q0, [x12]
+   e2f40: b000260c     	adrp	x12, 0x5a3000
+   e2f44: d0003168     	adrp	x8, 0x710000 <_ZTV8VodAsset+0xdc0>
+   e2f48: 912a518c     	add	x12, x12, #0xa94
+   e2f4c: 9120c68d     	add	x13, x20, #0x831
+   e2f50: 91294108     	add	x8, x8, #0xa50
+   e2f54: 3dc00180     	ldr	q0, [x12]
+   e2f58: 91210289     	add	x9, x20, #0x840
+   e2f5c: b90001aa     	str	w10, [x13]
+   e2f60: 9122068a     	add	x10, x20, #0x881
+   e2f64: 528caecd     	mov	w13, #0x6576            // =25974
+   e2f68: 91004108     	add	x8, x8, #0x10
+   e2f6c: 392257ff     	strb	wzr, [sp, #0x895]
+   e2f70: f90453e8     	str	x8, [sp, #0x8a0]
+   e2f74: f90463e9     	str	x9, [sp, #0x8c0]
+   e2f78: f90473ff     	str	xzr, [sp, #0x8e0]
+   e2f7c: 3d8237e1     	str	q1, [sp, #0x8d0]
+   e2f80: 392343f6     	strb	w22, [sp, #0x8d0]
+   e2f84: 7900014d     	strh	w13, [x10]
+   e2f88: d000260a     	adrp	x10, 0x5a4000
+   e2f8c: 9121c68b     	add	x11, x20, #0x871
+   e2f90: 910a994a     	add	x10, x10, #0x2a6
+   e2f94: 3d800160     	str	q0, [x11]
+   e2f98: 3dc00140     	ldr	q0, [x10]
+   e2f9c: 9122428c     	add	x12, x20, #0x890
+   e2fa0: d0003168     	adrp	x8, 0x710000 <_ZTV8VodAsset+0xdc0>
+   e2fa4: 912aa108     	add	x8, x8, #0xaa8
+   e2fa8: f9048bec     	str	x12, [sp, #0x910]
+   e2fac: d000260c     	adrp	x12, 0x5a4000
+   e2fb0: 91230689     	add	x9, x20, #0x8c1
+   e2fb4: d000316b     	adrp	x11, 0x710000 <_ZTV8VodAsset+0xdc0>
+   e2fb8: 91004108     	add	x8, x8, #0x10
+   e2fbc: 910add8c     	add	x12, x12, #0x2b7
+   e2fc0: 912c016b     	add	x11, x11, #0xb00
+   e2fc4: 39238fff     	strb	wzr, [sp, #0x8e3]
+   e2fc8: f9047be8     	str	x8, [sp, #0x8f0]
+   e2fcc: 3d824be1     	str	q1, [sp, #0x920]
+   e2fd0: 392483f8     	strb	w24, [sp, #0x920]
+   e2fd4: f9049bff     	str	xzr, [sp, #0x930]
+   e2fd8: 3d800120     	str	q0, [x9]
+   e2fdc: 3dc00180     	ldr	q0, [x12]
+   e2fe0: 9100416b     	add	x11, x11, #0x10
+   e2fe4: f904a3eb     	str	x11, [sp, #0x940]
+   e2fe8: d000260b     	adrp	x11, 0x5a4000
+   e2fec: 9123828d     	add	x13, x20, #0x8e0
+   e2ff0: 9124468a     	add	x10, x20, #0x911
+   e2ff4: 910b296b     	add	x11, x11, #0x2ca
+   e2ff8: 3924c7ff     	strb	wzr, [sp, #0x931]
+   e2ffc: f904b3ed     	str	x13, [sp, #0x960]
+   e3000: 3d825fe1     	str	q1, [sp, #0x970]
+   e3004: 3925c3f6     	strb	w22, [sp, #0x970]
+
+######################################################################
+XREF CONTEXT: 0xfc90c
+######################################################################
+   fc8ac: aa1303e0     	mov	x0, x19
+   fc8b0: aa1503e3     	mov	x3, x21
+   fc8b4: d63f0100     	blr	x8
+   fc8b8: f9005b00     	str	x0, [x24, #0xb0]
+   fc8bc: f9400268     	ldr	x8, [x19]
+   fc8c0: f9466ae1     	ldr	x1, [x23, #0xcd0]
+   fc8c4: b0002502     	adrp	x2, 0x59d000 <__cxa_demangle+0x182b4>
+   fc8c8: 91296442     	add	x2, x2, #0xa59
+   fc8cc: f9417908     	ldr	x8, [x8, #0x2f0]
+   fc8d0: aa1303e0     	mov	x0, x19
+   fc8d4: aa1503e3     	mov	x3, x21
+   fc8d8: d63f0100     	blr	x8
+   fc8dc: f9005f00     	str	x0, [x24, #0xb8]
+   fc8e0: f9400268     	ldr	x8, [x19]
+   fc8e4: f9466ae1     	ldr	x1, [x23, #0xcd0]
+   fc8e8: b0002502     	adrp	x2, 0x59d000 <__cxa_demangle+0x182b4>
+   fc8ec: 9129bc42     	add	x2, x2, #0xa6f
+   fc8f0: f9417908     	ldr	x8, [x8, #0x2f0]
+   fc8f4: aa1303e0     	mov	x0, x19
+   fc8f8: aa1503e3     	mov	x3, x21
+   fc8fc: d63f0100     	blr	x8
+   fc900: f9006300     	str	x0, [x24, #0xc0]
+   fc904: f9400268     	ldr	x8, [x19]
+   fc908: f9466ae1     	ldr	x1, [x23, #0xcd0]
+   fc90c: b0002502     	adrp	x2, 0x59d000 <__cxa_demangle+0x182b4>
+   fc910: 912a1442     	add	x2, x2, #0xa85
+   fc914: f9417908     	ldr	x8, [x8, #0x2f0]
+   fc918: aa1303e0     	mov	x0, x19
+   fc91c: aa1503e3     	mov	x3, x21
+   fc920: d63f0100     	blr	x8
+   fc924: f9006700     	str	x0, [x24, #0xc8]
+   fc928: f9400268     	ldr	x8, [x19]
+   fc92c: f9466ae1     	ldr	x1, [x23, #0xcd0]
+   fc930: b0002502     	adrp	x2, 0x59d000 <__cxa_demangle+0x182b4>
+   fc934: 912a5c42     	add	x2, x2, #0xa97
+   fc938: f9417908     	ldr	x8, [x8, #0x2f0]
+   fc93c: aa1303e0     	mov	x0, x19
+   fc940: aa1503e3     	mov	x3, x21
+   fc944: d63f0100     	blr	x8
+   fc948: f9006b00     	str	x0, [x24, #0xd0]
+   fc94c: f9400268     	ldr	x8, [x19]
+   fc950: f9466ae1     	ldr	x1, [x23, #0xcd0]
+   fc954: b0002502     	adrp	x2, 0x59d000 <__cxa_demangle+0x182b4>
+   fc958: 912a9042     	add	x2, x2, #0xaa4
+   fc95c: f9417908     	ldr	x8, [x8, #0x2f0]
+   fc960: aa1303e0     	mov	x0, x19
+   fc964: aa1503e3     	mov	x3, x21
+   fc968: d63f0100     	blr	x8
+   fc96c: f9006f00     	str	x0, [x24, #0xd8]
+   fc970: f9400268     	ldr	x8, [x19]
+   fc974: f9466ae1     	ldr	x1, [x23, #0xcd0]
+   fc978: b0002502     	adrp	x2, 0x59d000 <__cxa_demangle+0x182b4>
+   fc97c: 912ad842     	add	x2, x2, #0xab6
+   fc980: f9417908     	ldr	x8, [x8, #0x2f0]
+   fc984: aa1303e0     	mov	x0, x19
+   fc988: aa1403e3     	mov	x3, x20
+
+######################################################################
+XREF CONTEXT: 0x112f0c
+######################################################################
+  112eac: 91272063     	add	x3, x3, #0x9c8
+  112eb0: aa1303e0     	mov	x0, x19
+  112eb4: d63f0100     	blr	x8
+  112eb8: f9007b40     	str	x0, [x26, #0xf0]
+  112ebc: f9400268     	ldr	x8, [x19]
+  112ec0: f9439721     	ldr	x1, [x25, #0x728]
+  112ec4: d0002462     	adrp	x2, 0x5a0000
+  112ec8: 9117c842     	add	x2, x2, #0x5f2
+  112ecc: f9408508     	ldr	x8, [x8, #0x108]
+  112ed0: aa1303e0     	mov	x0, x19
+  112ed4: aa1503e3     	mov	x3, x21
+  112ed8: d63f0100     	blr	x8
+  112edc: f9007f40     	str	x0, [x26, #0xf8]
+  112ee0: f9400268     	ldr	x8, [x19]
+  112ee4: f9439721     	ldr	x1, [x25, #0x728]
+  112ee8: d0002462     	adrp	x2, 0x5a0000
+  112eec: 91182c42     	add	x2, x2, #0x60b
+  112ef0: f9408508     	ldr	x8, [x8, #0x108]
+  112ef4: aa1303e0     	mov	x0, x19
+  112ef8: aa1503e3     	mov	x3, x21
+  112efc: d63f0100     	blr	x8
+  112f00: f9008340     	str	x0, [x26, #0x100]
+  112f04: f9400268     	ldr	x8, [x19]
+  112f08: f9439721     	ldr	x1, [x25, #0x728]
+  112f0c: d0002462     	adrp	x2, 0x5a0000
+  112f10: d0002463     	adrp	x3, 0x5a0000
+  112f14: f9408508     	ldr	x8, [x8, #0x108]
+  112f18: 91188c42     	add	x2, x2, #0x623
+  112f1c: 9118cc63     	add	x3, x3, #0x633
+  112f20: aa1303e0     	mov	x0, x19
+  112f24: d63f0100     	blr	x8
+  112f28: f9004b40     	str	x0, [x26, #0x90]
+  112f2c: f9400268     	ldr	x8, [x19]
+  112f30: f9439721     	ldr	x1, [x25, #0x728]
+  112f34: d0002462     	adrp	x2, 0x5a0000
+  112f38: 9118ec42     	add	x2, x2, #0x63b
+  112f3c: f9408508     	ldr	x8, [x8, #0x108]
+  112f40: aa1303e0     	mov	x0, x19
+  112f44: aa1403e3     	mov	x3, x20
+  112f48: d63f0100     	blr	x8
+  112f4c: f9003b40     	str	x0, [x26, #0x70]
+  112f50: f9400268     	ldr	x8, [x19]
+  112f54: f9439721     	ldr	x1, [x25, #0x728]
+  112f58: d0002462     	adrp	x2, 0x5a0000
+  112f5c: d0002463     	adrp	x3, 0x5a0000
+  112f60: f941c508     	ldr	x8, [x8, #0x388]
+  112f64: 91192c42     	add	x2, x2, #0x64b
+  112f68: 91197c63     	add	x3, x3, #0x65f
+  112f6c: aa1303e0     	mov	x0, x19
+  112f70: d63f0100     	blr	x8
+  112f74: f9008740     	str	x0, [x26, #0x108]
+  112f78: f9400268     	ldr	x8, [x19]
+  112f7c: f9439721     	ldr	x1, [x25, #0x728]
+  112f80: d0002474     	adrp	x20, 0x5a0000
+  112f84: d0002462     	adrp	x2, 0x5a0000
+  112f88: f9408508     	ldr	x8, [x8, #0x108]
+
+######################################################################
+XREF CONTEXT: 0x130438
+######################################################################
+  1303d8: f9000fe9     	str	x9, [sp, #0x18]
+  1303dc: a9007fff     	stp	xzr, xzr, [sp]
+  1303e0: f9000bff     	str	xzr, [sp, #0x10]
+  1303e4: 390003e8     	strb	w8, [sp]
+  1303e8: 780093ea     	sturh	w10, [sp, #0x9]
+  1303ec: f80013eb     	stur	x11, [sp, #0x1]
+  1303f0: 97fffc0f     	bl	0x12f42c <_ZN6Cicada18MediaPreloadConfigaSEOS0_+0x3138>
+  1303f4: 2a0003f3     	mov	w19, w0
+  1303f8: 910003e0     	mov	x0, sp
+  1303fc: 97ff2086     	bl	0xf8614 <.text+0x17d54>
+  130400: f9401688     	ldr	x8, [x20, #0x28]
+  130404: f9400fe9     	ldr	x9, [sp, #0x18]
+  130408: eb09011f     	cmp	x8, x9
+  13040c: 540000c1     	b.ne	0x130424 <_ZN6Cicada18MediaPreloadConfigaSEOS0_+0x4130>
+  130410: 12000260     	and	w0, w19, #0x1
+  130414: a9437bfd     	ldp	x29, x30, [sp, #0x30]
+  130418: a9424ff4     	ldp	x20, x19, [sp, #0x20]
+  13041c: 910103ff     	add	sp, sp, #0x40
+  130420: d65f03c0     	ret
+  130424: 97fea1b7     	bl	0xd8b00 <__stack_chk_fail@plt>
+  130428: d10103ff     	sub	sp, sp, #0x40
+  13042c: f90013f3     	str	x19, [sp, #0x20]
+  130430: a9037bfd     	stp	x29, x30, [sp, #0x30]
+  130434: 9100c3fd     	add	x29, sp, #0x30
+  130438: f000238a     	adrp	x10, 0x5a3000
+  13043c: d53bd053     	mrs	x19, TPIDR_EL0
+  130440: 9101654a     	add	x10, x10, #0x59
+  130444: f9401669     	ldr	x9, [x19, #0x28]
+  130448: f940014b     	ldr	x11, [x10]
+  13044c: f840514a     	ldur	x10, [x10, #0x5]
+  130450: 52800348     	mov	w8, #0x1a               // =26
+  130454: 910003e1     	mov	x1, sp
+  130458: f9000fe9     	str	x9, [sp, #0x18]
+  13045c: a9007fff     	stp	xzr, xzr, [sp]
+  130460: f9000bff     	str	xzr, [sp, #0x10]
+  130464: 390003e8     	strb	w8, [sp]
+  130468: f80013eb     	stur	x11, [sp, #0x1]
+  13046c: f80063ea     	stur	x10, [sp, #0x6]
+  130470: 39003bff     	strb	wzr, [sp, #0xe]
+  130474: 97fff7bd     	bl	0x12e368 <_ZN6Cicada18MediaPreloadConfigaSEOS0_+0x2074>
+  130478: 910003e0     	mov	x0, sp
+  13047c: 97ff2066     	bl	0xf8614 <.text+0x17d54>
+  130480: f9401668     	ldr	x8, [x19, #0x28]
+  130484: f9400fe9     	ldr	x9, [sp, #0x18]
+  130488: eb09011f     	cmp	x8, x9
+  13048c: 540000a1     	b.ne	0x1304a0 <_ZN6Cicada18MediaPreloadConfigaSEOS0_+0x41ac>
+  130490: a9437bfd     	ldp	x29, x30, [sp, #0x30]
+  130494: f94013f3     	ldr	x19, [sp, #0x20]
+  130498: 910103ff     	add	sp, sp, #0x40
+  13049c: d65f03c0     	ret
+  1304a0: 97fea198     	bl	0xd8b00 <__stack_chk_fail@plt>
+  1304a4: d10143ff     	sub	sp, sp, #0x50
+  1304a8: a90257f6     	stp	x22, x21, [sp, #0x20]
+  1304ac: a9034ff4     	stp	x20, x19, [sp, #0x30]
+  1304b0: a9047bfd     	stp	x29, x30, [sp, #0x40]
+  1304b4: 910103fd     	add	x29, sp, #0x40
+
+######################################################################
+XREF CONTEXT: 0x1467cc
+######################################################################
+  14676c: b90ebab4     	str	w20, [x21, #0xeb8]
+  146770: 94053898     	bl	0x2949d0 <_ZN6Cicada19DrmHandlerPrototype9isSupportEPKNS_7DrmInfoE+0x2418>
+  146774: f9430aa8     	ldr	x8, [x21, #0x610]
+  146778: b4000108     	cbz	x8, 0x146798 <_ZN17AvaliablePlayInfoaSEOS_+0x7978>
+  14677c: aa1403e1     	mov	x1, x20
+  146780: aa1303e2     	mov	x2, x19
+  146784: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  146788: a9414ff4     	ldp	x20, x19, [sp, #0x10]
+  14678c: 9117c2a0     	add	x0, x21, #0x5f0
+  146790: f84307f5     	ldr	x21, [sp], #0x30
+  146794: 1400165c     	b	0x14c104 <_ZN13SaasMediaInfoaSERKS_+0x1ed0>
+  146798: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  14679c: a9414ff4     	ldp	x20, x19, [sp, #0x10]
+  1467a0: f84307f5     	ldr	x21, [sp], #0x30
+  1467a4: d65f03c0     	ret
+  1467a8: a9bd57f6     	stp	x22, x21, [sp, #-0x30]!
+  1467ac: a9014ff4     	stp	x20, x19, [sp, #0x10]
+  1467b0: a9027bfd     	stp	x29, x30, [sp, #0x20]
+  1467b4: 910083fd     	add	x29, sp, #0x20
+  1467b8: aa0303f5     	mov	x21, x3
+  1467bc: aa0203f3     	mov	x19, x2
+  1467c0: aa0103f4     	mov	x20, x1
+  1467c4: d00022e1     	adrp	x1, 0x5a4000
+  1467c8: f00022e2     	adrp	x2, 0x5a5000
+  1467cc: 90002303     	adrp	x3, 0x5a6000
+  1467d0: aa0003f6     	mov	x22, x0
+  1467d4: 910ec021     	add	x1, x1, #0x3b0
+  1467d8: 9100c842     	add	x2, x2, #0x32
+  1467dc: 91047c63     	add	x3, x3, #0x11f
+  1467e0: 321b03e0     	orr	w0, wzr, #0x20
+  1467e4: aa1503e4     	mov	x4, x21
+  1467e8: 97fe5da6     	bl	0xdde80 <__log_print@plt>
+  1467ec: f9448aa8     	ldr	x8, [x21, #0x910]
+  1467f0: b4000128     	cbz	x8, 0x146814 <_ZN17AvaliablePlayInfoaSEOS_+0x79f4>
+  1467f4: aa1403e2     	mov	x2, x20
+  1467f8: aa1303e3     	mov	x3, x19
+  1467fc: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  146800: a9414ff4     	ldp	x20, x19, [sp, #0x10]
+  146804: 9123c2a0     	add	x0, x21, #0x8f0
+  146808: aa1603e1     	mov	x1, x22
+  14680c: a8c357f6     	ldp	x22, x21, [sp], #0x30
+  146810: 140014f3     	b	0x14bbdc <_ZN13SaasMediaInfoaSERKS_+0x19a8>
+  146814: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  146818: a9414ff4     	ldp	x20, x19, [sp, #0x10]
+  14681c: a8c357f6     	ldp	x22, x21, [sp], #0x30
+  146820: d65f03c0     	ret
+  146824: d10243ff     	sub	sp, sp, #0x90
+  146828: a9055ff8     	stp	x24, x23, [sp, #0x50]
+  14682c: a90657f6     	stp	x22, x21, [sp, #0x60]
+  146830: a9074ff4     	stp	x20, x19, [sp, #0x70]
+  146834: a9087bfd     	stp	x29, x30, [sp, #0x80]
+  146838: 910203fd     	add	x29, sp, #0x80
+  14683c: d53bd058     	mrs	x24, TPIDR_EL0
+  146840: f9401708     	ldr	x8, [x24, #0x28]
+  146844: aa0203f3     	mov	x19, x2
+  146848: f1005c1f     	cmp	x0, #0x17
+
+######################################################################
+XREF CONTEXT: 0x14bb7c
+######################################################################
+  14bb1c: b24103e9     	orr	x9, xzr, #0x8000000000000000
+  14bb20: 321c03ea     	orr	w10, wzr, #0x10
+  14bb24: f901dd09     	str	x9, [x8, #0x3b8]
+  14bb28: b903c10a     	str	w10, [x8, #0x3c0]
+  14bb2c: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  14bb30: a9414ff4     	ldp	x20, x19, [sp, #0x10]
+  14bb34: f84307f5     	ldr	x21, [sp], #0x30
+  14bb38: d65f03c0     	ret
+  14bb3c: aa1303e3     	mov	x3, x19
+  14bb40: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  14bb44: a9414ff4     	ldp	x20, x19, [sp, #0x10]
+  14bb48: b00022c1     	adrp	x1, 0x5a4000
+  14bb4c: b00022c2     	adrp	x2, 0x5a4000
+  14bb50: 910ec021     	add	x1, x1, #0x3b0
+  14bb54: 913bb042     	add	x2, x2, #0xeec
+  14bb58: 321c03e0     	orr	w0, wzr, #0x10
+  14bb5c: f84307f5     	ldr	x21, [sp], #0x30
+  14bb60: 17fe48c8     	b	0xdde80 <__log_print@plt>
+  14bb64: f81e0ff3     	str	x19, [sp, #-0x20]!
+  14bb68: a9017bfd     	stp	x29, x30, [sp, #0x10]
+  14bb6c: 910043fd     	add	x29, sp, #0x10
+  14bb70: aa0003f3     	mov	x19, x0
+  14bb74: b00022c1     	adrp	x1, 0x5a4000
+  14bb78: 900022c2     	adrp	x2, 0x5a3000
+  14bb7c: 900022c3     	adrp	x3, 0x5a3000
+  14bb80: 910ec021     	add	x1, x1, #0x3b0
+  14bb84: 91124c42     	add	x2, x2, #0x493
+  14bb88: 91016463     	add	x3, x3, #0x59
+  14bb8c: 321b03e0     	orr	w0, wzr, #0x20
+  14bb90: aa1303e4     	mov	x4, x19
+  14bb94: 97fe48bb     	bl	0xdde80 <__log_print@plt>
+  14bb98: f944da60     	ldr	x0, [x19, #0x9b0]
+  14bb9c: b4000080     	cbz	x0, 0x14bbac <_ZN13SaasMediaInfoaSERKS_+0x1978>
+  14bba0: a9417bfd     	ldp	x29, x30, [sp, #0x10]
+  14bba4: f84207f3     	ldr	x19, [sp], #0x20
+  14bba8: 1402b3e2     	b	0x1f8b30 <_ZN6Cicada14globalSettings16getIpResolveTypeEv+0x47ac>
+  14bbac: f9448a68     	ldr	x8, [x19, #0x910]
+  14bbb0: b4000108     	cbz	x8, 0x14bbd0 <_ZN13SaasMediaInfoaSERKS_+0x199c>
+  14bbb4: a9417bfd     	ldp	x29, x30, [sp, #0x10]
+  14bbb8: 9123c260     	add	x0, x19, #0x8f0
+  14bbbc: aa1f03e1     	mov	x1, xzr
+  14bbc0: aa1f03e2     	mov	x2, xzr
+  14bbc4: aa1f03e3     	mov	x3, xzr
+  14bbc8: f84207f3     	ldr	x19, [sp], #0x20
+  14bbcc: 14000004     	b	0x14bbdc <_ZN13SaasMediaInfoaSERKS_+0x19a8>
+  14bbd0: a9417bfd     	ldp	x29, x30, [sp, #0x10]
+  14bbd4: f84207f3     	ldr	x19, [sp], #0x20
+  14bbd8: d65f03c0     	ret
+  14bbdc: d10103ff     	sub	sp, sp, #0x40
+  14bbe0: f90013f3     	str	x19, [sp, #0x20]
+  14bbe4: a9037bfd     	stp	x29, x30, [sp, #0x30]
+  14bbe8: 9100c3fd     	add	x29, sp, #0x30
+  14bbec: d53bd053     	mrs	x19, TPIDR_EL0
+  14bbf0: f9401668     	ldr	x8, [x19, #0x28]
+  14bbf4: f9000fe8     	str	x8, [sp, #0x18]
+  14bbf8: a90087e2     	stp	x2, x1, [sp, #0x8]
+
+######################################################################
+XREF CONTEXT: 0x1a6ad8
+######################################################################
+  1a6a78: d10403ff     	sub	sp, sp, #0x100
+  1a6a7c: a90d57f6     	stp	x22, x21, [sp, #0xd0]
+  1a6a80: a90e4ff4     	stp	x20, x19, [sp, #0xe0]
+  1a6a84: a90f7bfd     	stp	x29, x30, [sp, #0xf0]
+  1a6a88: 9103c3fd     	add	x29, sp, #0xf0
+  1a6a8c: d53bd055     	mrs	x21, TPIDR_EL0
+  1a6a90: f94016a8     	ldr	x8, [x21, #0x28]
+  1a6a94: 52820a09     	mov	w9, #0x1050             // =4176
+  1a6a98: 8b090014     	add	x20, x0, x9
+  1a6a9c: aa0003f3     	mov	x19, x0
+  1a6aa0: aa1403e0     	mov	x0, x20
+  1a6aa4: d10183b6     	sub	x22, x29, #0x60
+  1a6aa8: f90007e8     	str	x8, [sp, #0x8]
+  1a6aac: 97fcc83d     	bl	0xd8ba0 <_ZNSt6__ndk15mutex4lockEv@plt>
+  1a6ab0: 91002268     	add	x8, x19, #0x8
+  1a6ab4: aa1403e0     	mov	x0, x20
+  1a6ab8: 089ffd1f     	stlrb	wzr, [x8]
+  1a6abc: 97fcc83d     	bl	0xd8bb0 <_ZNSt6__ndk15mutex6unlockEv@plt>
+  1a6ac0: 52822a08     	mov	w8, #0x1150             // =4432
+  1a6ac4: 8b080274     	add	x20, x19, x8
+  1a6ac8: aa1403e0     	mov	x0, x20
+  1a6acc: 97fcc835     	bl	0xd8ba0 <_ZNSt6__ndk15mutex4lockEv@plt>
+  1a6ad0: f948be68     	ldr	x8, [x19, #0x1178]
+  1a6ad4: b5000768     	cbnz	x8, 0x1a6bc0 <_ZN8AfString9to_stringIfEENSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEET_+0x460>
+  1a6ad8: d000202a     	adrp	x10, 0x5ac000
+  1a6adc: 912fd14a     	add	x10, x10, #0xbf4
+  1a6ae0: b0002b68     	adrp	x8, 0x713000 <_ZTV11FfmpegMuxer+0x3b0>
+  1a6ae4: f940014a     	ldr	x10, [x10]
+  1a6ae8: 912d0108     	add	x8, x8, #0xb40
+  1a6aec: 91004108     	add	x8, x8, #0x10
+  1a6af0: 52800249     	mov	w9, #0x12               // =18
+  1a6af4: a93a4fa8     	stp	x8, x19, [x29, #-0x60]
+  1a6af8: 528008e8     	mov	w8, #0x47               // =71
+  1a6afc: 321c07e0     	orr	w0, wzr, #0x30
+  1a6b00: a902ffff     	stp	xzr, xzr, [sp, #0x28]
+  1a6b04: f9001fff     	str	xzr, [sp, #0x38]
+  1a6b08: f81c03b6     	stur	x22, [x29, #-0x40]
+  1a6b0c: 3900a3e9     	strb	w9, [sp, #0x28]
+  1a6b10: 780313e8     	sturh	w8, [sp, #0x31]
+  1a6b14: f80293ea     	stur	x10, [sp, #0x29]
+  1a6b18: 97fcc816     	bl	0xd8b70 <_Znwm@plt>
+  1a6b1c: d0002029     	adrp	x9, 0x5ac000
+  1a6b20: 912ff929     	add	x9, x9, #0xbfe
+  1a6b24: d0002228     	adrp	x8, 0x5ec000
+  1a6b28: 3cc1f121     	ldur	q1, [x9, #0x1f]
+  1a6b2c: ad400d22     	ldp	q2, q3, [x9]
+  1a6b30: 3dc09d00     	ldr	q0, [x8, #0x270]
+  1a6b34: f90013e0     	str	x0, [sp, #0x20]
+  1a6b38: 3c81f001     	stur	q1, [x0, #0x1f]
+  1a6b3c: ad000c02     	stp	q2, q3, [x0]
+  1a6b40: 3900bc1f     	strb	wzr, [x0, #0x2f]
+  1a6b44: 910103e0     	add	x0, sp, #0x40
+  1a6b48: 9100a3e1     	add	x1, sp, #0x28
+  1a6b4c: 910043e2     	add	x2, sp, #0x10
+  1a6b50: 3d8007e0     	str	q0, [sp, #0x10]
+  1a6b54: 940df1fb     	bl	0x523340 <_ZN3mpf7CasBaseD2Ev+0x30a68>
+
+######################################################################
+XREF CONTEXT: 0x1a6b1c
+######################################################################
+  1a6abc: 97fcc83d     	bl	0xd8bb0 <_ZNSt6__ndk15mutex6unlockEv@plt>
+  1a6ac0: 52822a08     	mov	w8, #0x1150             // =4432
+  1a6ac4: 8b080274     	add	x20, x19, x8
+  1a6ac8: aa1403e0     	mov	x0, x20
+  1a6acc: 97fcc835     	bl	0xd8ba0 <_ZNSt6__ndk15mutex4lockEv@plt>
+  1a6ad0: f948be68     	ldr	x8, [x19, #0x1178]
+  1a6ad4: b5000768     	cbnz	x8, 0x1a6bc0 <_ZN8AfString9to_stringIfEENSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEET_+0x460>
+  1a6ad8: d000202a     	adrp	x10, 0x5ac000
+  1a6adc: 912fd14a     	add	x10, x10, #0xbf4
+  1a6ae0: b0002b68     	adrp	x8, 0x713000 <_ZTV11FfmpegMuxer+0x3b0>
+  1a6ae4: f940014a     	ldr	x10, [x10]
+  1a6ae8: 912d0108     	add	x8, x8, #0xb40
+  1a6aec: 91004108     	add	x8, x8, #0x10
+  1a6af0: 52800249     	mov	w9, #0x12               // =18
+  1a6af4: a93a4fa8     	stp	x8, x19, [x29, #-0x60]
+  1a6af8: 528008e8     	mov	w8, #0x47               // =71
+  1a6afc: 321c07e0     	orr	w0, wzr, #0x30
+  1a6b00: a902ffff     	stp	xzr, xzr, [sp, #0x28]
+  1a6b04: f9001fff     	str	xzr, [sp, #0x38]
+  1a6b08: f81c03b6     	stur	x22, [x29, #-0x40]
+  1a6b0c: 3900a3e9     	strb	w9, [sp, #0x28]
+  1a6b10: 780313e8     	sturh	w8, [sp, #0x31]
+  1a6b14: f80293ea     	stur	x10, [sp, #0x29]
+  1a6b18: 97fcc816     	bl	0xd8b70 <_Znwm@plt>
+  1a6b1c: d0002029     	adrp	x9, 0x5ac000
+  1a6b20: 912ff929     	add	x9, x9, #0xbfe
+  1a6b24: d0002228     	adrp	x8, 0x5ec000
+  1a6b28: 3cc1f121     	ldur	q1, [x9, #0x1f]
+  1a6b2c: ad400d22     	ldp	q2, q3, [x9]
+  1a6b30: 3dc09d00     	ldr	q0, [x8, #0x270]
+  1a6b34: f90013e0     	str	x0, [sp, #0x20]
+  1a6b38: 3c81f001     	stur	q1, [x0, #0x1f]
+  1a6b3c: ad000c02     	stp	q2, q3, [x0]
+  1a6b40: 3900bc1f     	strb	wzr, [x0, #0x2f]
+  1a6b44: 910103e0     	add	x0, sp, #0x40
+  1a6b48: 9100a3e1     	add	x1, sp, #0x28
+  1a6b4c: 910043e2     	add	x2, sp, #0x10
+  1a6b50: 3d8007e0     	str	q0, [sp, #0x10]
+  1a6b54: 940df1fb     	bl	0x523340 <_ZN3mpf7CasBaseD2Ev+0x30a68>
+  1a6b58: 9101c3e8     	add	x8, sp, #0x70
+  1a6b5c: d10183a0     	sub	x0, x29, #0x60
+  1a6b60: 52807d01     	mov	w1, #0x3e8              // =1000
+  1a6b64: 92800002     	mov	x2, #-0x1               // =-1
+  1a6b68: 320003e3     	orr	w3, wzr, #0x1
+  1a6b6c: 910103e4     	add	x4, sp, #0x40
+  1a6b70: 940df197     	bl	0x5231cc <_ZN3mpf7CasBaseD2Ev+0x308f4>
+  1a6b74: a94727e8     	ldp	x8, x9, [sp, #0x70]
+  1a6b78: a9077fff     	stp	xzr, xzr, [sp, #0x70]
+  1a6b7c: 52822f0a     	mov	w10, #0x1178            // =4472
+  1a6b80: 3cea6a60     	ldr	q0, [x19, x10]
+  1a6b84: d101c3a0     	sub	x0, x29, #0x70
+  1a6b88: f908be68     	str	x8, [x19, #0x1178]
+  1a6b8c: 3c9903a0     	stur	q0, [x29, #-0x70]
+  1a6b90: f908c269     	str	x9, [x19, #0x1180]
+  1a6b94: 940565e8     	bl	0x300334 <_ZN6avbase10build_info21GetAIOTargetShortNameEv+0x2080>
+  1a6b98: 9101c3e0     	add	x0, sp, #0x70
+
+######################################################################
+XREF CONTEXT: 0x1fc3b0
+######################################################################
+  1fc350: 39435a82     	ldrb	w2, [x20, #0xd6]
+  1fc354: 910023e1     	add	x1, sp, #0x8
+  1fc358: aa1503e0     	mov	x0, x21
+  1fc35c: f9401508     	ldr	x8, [x8, #0x28]
+  1fc360: d63f0100     	blr	x8
+  1fc364: 910023e0     	add	x0, sp, #0x8
+  1fc368: 97fbf0ab     	bl	0xf8614 <.text+0x17d54>
+  1fc36c: f94013f5     	ldr	x21, [sp, #0x20]
+  1fc370: 90001d41     	adrp	x1, 0x5a4000
+  1fc374: 910a4421     	add	x1, x1, #0x291
+  1fc378: 910023e0     	add	x0, sp, #0x8
+  1fc37c: 52800282     	mov	w2, #0x14               // =20
+  1fc380: a900ffff     	stp	xzr, xzr, [sp, #0x8]
+  1fc384: f9000fff     	str	xzr, [sp, #0x18]
+  1fc388: 97fbf3d4     	bl	0xf92d8 <JNI_OnUnload+0x974>
+  1fc38c: f94002a8     	ldr	x8, [x21]
+  1fc390: 39435e82     	ldrb	w2, [x20, #0xd7]
+  1fc394: 910023e1     	add	x1, sp, #0x8
+  1fc398: aa1503e0     	mov	x0, x21
+  1fc39c: f9401508     	ldr	x8, [x8, #0x28]
+  1fc3a0: d63f0100     	blr	x8
+  1fc3a4: 910023e0     	add	x0, sp, #0x8
+  1fc3a8: 97fbf09b     	bl	0xf8614 <.text+0x17d54>
+  1fc3ac: f94013f5     	ldr	x21, [sp, #0x20]
+  1fc3b0: 90001d41     	adrp	x1, 0x5a4000
+  1fc3b4: 910a9821     	add	x1, x1, #0x2a6
+  1fc3b8: 910023e0     	add	x0, sp, #0x8
+  1fc3bc: 321c03e2     	orr	w2, wzr, #0x10
+  1fc3c0: a900ffff     	stp	xzr, xzr, [sp, #0x8]
+  1fc3c4: f9000fff     	str	xzr, [sp, #0x18]
+  1fc3c8: 97fbf3c4     	bl	0xf92d8 <JNI_OnUnload+0x974>
+  1fc3cc: f94002a8     	ldr	x8, [x21]
+  1fc3d0: 39436682     	ldrb	w2, [x20, #0xd9]
+  1fc3d4: 910023e1     	add	x1, sp, #0x8
+  1fc3d8: aa1503e0     	mov	x0, x21
+  1fc3dc: f9401508     	ldr	x8, [x8, #0x28]
+  1fc3e0: d63f0100     	blr	x8
+  1fc3e4: 910023e0     	add	x0, sp, #0x8
+  1fc3e8: 97fbf08b     	bl	0xf8614 <.text+0x17d54>
+  1fc3ec: f94013f5     	ldr	x21, [sp, #0x20]
+  1fc3f0: 90001d41     	adrp	x1, 0x5a4000
+  1fc3f4: 910adc21     	add	x1, x1, #0x2b7
+  1fc3f8: 910023e0     	add	x0, sp, #0x8
+  1fc3fc: 52800242     	mov	w2, #0x12               // =18
+  1fc400: a900ffff     	stp	xzr, xzr, [sp, #0x8]
+  1fc404: f9000fff     	str	xzr, [sp, #0x18]
+  1fc408: 97fbf3b4     	bl	0xf92d8 <JNI_OnUnload+0x974>
+  1fc40c: f94002a8     	ldr	x8, [x21]
+  1fc410: f9407282     	ldr	x2, [x20, #0xe0]
+  1fc414: 910023e1     	add	x1, sp, #0x8
+  1fc418: aa1503e0     	mov	x0, x21
+  1fc41c: f9401108     	ldr	x8, [x8, #0x20]
+  1fc420: d63f0100     	blr	x8
+  1fc424: 910023e0     	add	x0, sp, #0x8
+  1fc428: 97fbf07b     	bl	0xf8614 <.text+0x17d54>
+  1fc42c: f94013f5     	ldr	x21, [sp, #0x20]
+
+######################################################################
+XREF CONTEXT: 0x1fcdd8
+######################################################################
+  1fcd78: 97fb863e     	bl	0xde670 <_ZN14CicadaJSONItem8addValueERKNSt6__ndk112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEEb@plt>
+  1fcd7c: 910003e0     	mov	x0, sp
+  1fcd80: 97fbee25     	bl	0xf8614 <.text+0x17d54>
+  1fcd84: 39435e88     	ldrb	w8, [x20, #0xd7]
+  1fcd88: 39435ea9     	ldrb	w9, [x21, #0xd7]
+  1fcd8c: 6b09011f     	cmp	w8, w9
+  1fcd90: 540001c0     	b.eq	0x1fcdc8 <_ZN6Cicada17MediaPlayerConfig15getModifyConfigERKS0_S2_+0x848>
+  1fcd94: 90001d41     	adrp	x1, 0x5a4000
+  1fcd98: 910a4421     	add	x1, x1, #0x291
+  1fcd9c: 910003e0     	mov	x0, sp
+  1fcda0: 52800282     	mov	w2, #0x14               // =20
+  1fcda4: a9007fff     	stp	xzr, xzr, [sp]
+  1fcda8: f9000bff     	str	xzr, [sp, #0x10]
+  1fcdac: 97fbf14b     	bl	0xf92d8 <JNI_OnUnload+0x974>
+  1fcdb0: 39435ea2     	ldrb	w2, [x21, #0xd7]
+  1fcdb4: 910003e1     	mov	x1, sp
+  1fcdb8: aa1303e0     	mov	x0, x19
+  1fcdbc: 97fb862d     	bl	0xde670 <_ZN14CicadaJSONItem8addValueERKNSt6__ndk112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEEb@plt>
+  1fcdc0: 910003e0     	mov	x0, sp
+  1fcdc4: 97fbee14     	bl	0xf8614 <.text+0x17d54>
+  1fcdc8: 39436688     	ldrb	w8, [x20, #0xd9]
+  1fcdcc: 394366a9     	ldrb	w9, [x21, #0xd9]
+  1fcdd0: 6b09011f     	cmp	w8, w9
+  1fcdd4: 540001c0     	b.eq	0x1fce0c <_ZN6Cicada17MediaPlayerConfig15getModifyConfigERKS0_S2_+0x88c>
+  1fcdd8: 90001d41     	adrp	x1, 0x5a4000
+  1fcddc: 910a9821     	add	x1, x1, #0x2a6
+  1fcde0: 910003e0     	mov	x0, sp
+  1fcde4: 321c03e2     	orr	w2, wzr, #0x10
+  1fcde8: a9007fff     	stp	xzr, xzr, [sp]
+  1fcdec: f9000bff     	str	xzr, [sp, #0x10]
+  1fcdf0: 97fbf13a     	bl	0xf92d8 <JNI_OnUnload+0x974>
+  1fcdf4: 394366a2     	ldrb	w2, [x21, #0xd9]
+  1fcdf8: 910003e1     	mov	x1, sp
+  1fcdfc: aa1303e0     	mov	x0, x19
+  1fce00: 97fb861c     	bl	0xde670 <_ZN14CicadaJSONItem8addValueERKNSt6__ndk112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEEb@plt>
+  1fce04: 910003e0     	mov	x0, sp
+  1fce08: 97fbee03     	bl	0xf8614 <.text+0x17d54>
+  1fce0c: f9407288     	ldr	x8, [x20, #0xe0]
+  1fce10: f94072a9     	ldr	x9, [x21, #0xe0]
+  1fce14: eb09011f     	cmp	x8, x9
+  1fce18: 540001e0     	b.eq	0x1fce54 <_ZN6Cicada17MediaPlayerConfig15getModifyConfigERKS0_S2_+0x8d4>
+  1fce1c: 90001d41     	adrp	x1, 0x5a4000
+  1fce20: 910adc21     	add	x1, x1, #0x2b7
+  1fce24: 910003e0     	mov	x0, sp
+  1fce28: 52800242     	mov	w2, #0x12               // =18
+  1fce2c: a9007fff     	stp	xzr, xzr, [sp]
+  1fce30: f9000bff     	str	xzr, [sp, #0x10]
+  1fce34: 97fbf129     	bl	0xf92d8 <JNI_OnUnload+0x974>
+  1fce38: fd4072a0     	ldr	d0, [x21, #0xe0]
+  1fce3c: 910003e1     	mov	x1, sp
+  1fce40: aa1303e0     	mov	x0, x19
+  1fce44: 5e61d800     	scvtf	d0, d0
+  1fce48: 97fb852e     	bl	0xde300 <_ZN14CicadaJSONItem8addValueERKNSt6__ndk112basic_stringIcNS0_11char_traitsIcEENS0_9allocatorIcEEEEd@plt>
+  1fce4c: 910003e0     	mov	x0, sp
+  1fce50: 97fbedf1     	bl	0xf8614 <.text+0x17d54>
+  1fce54: f9407688     	ldr	x8, [x20, #0xe8]
+
+######################################################################
+XREF CONTEXT: 0x233230
+######################################################################
+  2331d0: eb09011f     	cmp	x8, x9
+  2331d4: 540000a1     	b.ne	0x2331e8 <_ZN6Cicada21CicadaPlayerPrototype6createEPKNS_7optionsE+0x2f4fc>
+  2331d8: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  2331dc: f9400bf3     	ldr	x19, [sp, #0x10]
+  2331e0: 9100c3ff     	add	sp, sp, #0x30
+  2331e4: d65f03c0     	ret
+  2331e8: 97fa9646     	bl	0xd8b00 <__stack_chk_fail@plt>
+  2331ec: d10243ff     	sub	sp, sp, #0x90
+  2331f0: a9055ff8     	stp	x24, x23, [sp, #0x50]
+  2331f4: a90657f6     	stp	x22, x21, [sp, #0x60]
+  2331f8: a9074ff4     	stp	x20, x19, [sp, #0x70]
+  2331fc: a9087bfd     	stp	x29, x30, [sp, #0x80]
+  233200: 910203fd     	add	x29, sp, #0x80
+  233204: d53bd058     	mrs	x24, TPIDR_EL0
+  233208: f9401708     	ldr	x8, [x24, #0x28]
+  23320c: aa0003f3     	mov	x19, x0
+  233210: aa0103f5     	mov	x21, x1
+  233214: f81c83a8     	stur	x8, [x29, #-0x38]
+  233218: f9400408     	ldr	x8, [x0, #0x8]
+  23321c: 9105d108     	add	x8, x8, #0x174
+  233220: 88dffd08     	ldar	w8, [x8]
+  233224: 7100251f     	cmp	w8, #0x9
+  233228: 54000101     	b.ne	0x233248 <_ZN6Cicada21CicadaPlayerPrototype6createEPKNS_7optionsE+0x2f55c>
+  23322c: d0001b41     	adrp	x1, 0x59d000 <__cxa_demangle+0x182b4>
+  233230: 90001c22     	adrp	x2, 0x5b7000
+  233234: 912f8021     	add	x1, x1, #0xbe0
+  233238: 91185842     	add	x2, x2, #0x616
+  23323c: 321d07e0     	orr	w0, wzr, #0x18
+  233240: 97faab10     	bl	0xdde80 <__log_print@plt>
+  233244: 14000069     	b	0x2333e8 <_ZN6Cicada21CicadaPlayerPrototype6createEPKNS_7optionsE+0x2f6fc>
+  233248: a9027fff     	stp	xzr, xzr, [sp, #0x20]
+  23324c: b4000595     	cbz	x21, 0x2332fc <_ZN6Cicada21CicadaPlayerPrototype6createEPKNS_7optionsE+0x2f610>
+  233250: 910063e0     	add	x0, sp, #0x18
+  233254: 94031fda     	bl	0x2fb1bc <_ZN12TextureFrameD0Ev+0xc76c>
+  233258: f9400ff4     	ldr	x20, [sp, #0x18]
+  23325c: b4000454     	cbz	x20, 0x2332e4 <_ZN6Cicada21CicadaPlayerPrototype6createEPKNS_7optionsE+0x2f5f8>
+  233260: 52800500     	mov	w0, #0x28               // =40
+  233264: 97fa9643     	bl	0xd8b70 <_Znwm@plt>
+  233268: d0002708     	adrp	x8, 0x715000 <_ZTV19PlayInfoRequestSaas+0xc18>
+  23326c: 91290108     	add	x8, x8, #0xa40
+  233270: 91004108     	add	x8, x8, #0x10
+  233274: 91006017     	add	x23, x0, #0x18
+  233278: aa0003f6     	mov	x22, x0
+  23327c: a900fc1f     	stp	xzr, xzr, [x0, #0x8]
+  233280: f9000008     	str	x8, [x0]
+  233284: aa1703e0     	mov	x0, x23
+  233288: aa1403e1     	mov	x1, x20
+  23328c: aa1503e2     	mov	x2, x21
+  233290: 940148f0     	bl	0x285650 <_ZN6Cicada19jniOnFrameAvailableEP7_JNIEnvP7_jclassl+0x7ac>
+  233294: 3dc00be0     	ldr	q0, [sp, #0x20]
+  233298: 9100c3e0     	add	x0, sp, #0x30
+  23329c: a900ffff     	stp	xzr, xzr, [sp, #0x8]
+  2332a0: a9025bf7     	stp	x23, x22, [sp, #0x20]
+  2332a4: 3d800fe0     	str	q0, [sp, #0x30]
+  2332a8: 97ff0419     	bl	0x1f430c <_ZNK17AvaliablePlayInfo23droppedPlayInfoToStringEv+0x16bfc>
+  2332ac: 910023e0     	add	x0, sp, #0x8
+
+######################################################################
+XREF CONTEXT: 0x2332e8
+######################################################################
+  233288: aa1403e1     	mov	x1, x20
+  23328c: aa1503e2     	mov	x2, x21
+  233290: 940148f0     	bl	0x285650 <_ZN6Cicada19jniOnFrameAvailableEP7_JNIEnvP7_jclassl+0x7ac>
+  233294: 3dc00be0     	ldr	q0, [sp, #0x20]
+  233298: 9100c3e0     	add	x0, sp, #0x30
+  23329c: a900ffff     	stp	xzr, xzr, [sp, #0x8]
+  2332a0: a9025bf7     	stp	x23, x22, [sp, #0x20]
+  2332a4: 3d800fe0     	str	q0, [sp, #0x30]
+  2332a8: 97ff0419     	bl	0x1f430c <_ZNK17AvaliablePlayInfo23droppedPlayInfoToStringEv+0x16bfc>
+  2332ac: 910023e0     	add	x0, sp, #0x8
+  2332b0: 97ff0417     	bl	0x1f430c <_ZNK17AvaliablePlayInfo23droppedPlayInfoToStringEv+0x16bfc>
+  2332b4: f94013e8     	ldr	x8, [sp, #0x20]
+  2332b8: f9400109     	ldr	x9, [x8]
+  2332bc: b5000209     	cbnz	x9, 0x2332fc <_ZN6Cicada21CicadaPlayerPrototype6createEPKNS_7optionsE+0x2f610>
+  2332c0: f94017e9     	ldr	x9, [sp, #0x28]
+  2332c4: 9100c3e0     	add	x0, sp, #0x30
+  2332c8: a900ffff     	stp	xzr, xzr, [sp, #0x8]
+  2332cc: a9027fff     	stp	xzr, xzr, [sp, #0x20]
+  2332d0: a90327e8     	stp	x8, x9, [sp, #0x30]
+  2332d4: 97ff040e     	bl	0x1f430c <_ZNK17AvaliablePlayInfo23droppedPlayInfoToStringEv+0x16bfc>
+  2332d8: 910023e0     	add	x0, sp, #0x8
+  2332dc: 97ff040c     	bl	0x1f430c <_ZNK17AvaliablePlayInfo23droppedPlayInfoToStringEv+0x16bfc>
+  2332e0: 14000007     	b	0x2332fc <_ZN6Cicada21CicadaPlayerPrototype6createEPKNS_7optionsE+0x2f610>
+  2332e4: d0001b41     	adrp	x1, 0x59d000 <__cxa_demangle+0x182b4>
+  2332e8: 90001c22     	adrp	x2, 0x5b7000
+  2332ec: 912f8021     	add	x1, x1, #0xbe0
+  2332f0: 91191442     	add	x2, x2, #0x645
+  2332f4: 321c03e0     	orr	w0, wzr, #0x10
+  2332f8: 97faaae2     	bl	0xdde80 <__log_print@plt>
+  2332fc: f9400668     	ldr	x8, [x19, #0x8]
+  233300: 9111b114     	add	x20, x8, #0x46c
+  233304: aa1403e0     	mov	x0, x20
+  233308: 97fa9626     	bl	0xd8ba0 <_ZNSt6__ndk15mutex4lockEv@plt>
+  23330c: f9400668     	ldr	x8, [x19, #0x8]
+  233310: f9420908     	ldr	x8, [x8, #0x410]
+  233314: 91024108     	add	x8, x8, #0x90
+  233318: c89ffd15     	stlr	x21, [x8]
+  23331c: f9400668     	ldr	x8, [x19, #0x8]
+  233320: a94227f6     	ldp	x22, x9, [sp, #0x20]
+  233324: f9420908     	ldr	x8, [x8, #0x410]
+  233328: a90327f6     	stp	x22, x9, [sp, #0x30]
+  23332c: b40000e9     	cbz	x9, 0x233348 <_ZN6Cicada21CicadaPlayerPrototype6createEPKNS_7optionsE+0x2f65c>
+  233330: 91002129     	add	x9, x9, #0x8
+  233334: c85f7d2a     	ldxr	x10, [x9]
+  233338: 9100054a     	add	x10, x10, #0x1
+  23333c: c80b7d2a     	stxr	w11, x10, [x9]
+  233340: 35ffffab     	cbnz	w11, 0x233334 <_ZN6Cicada21CicadaPlayerPrototype6createEPKNS_7optionsE+0x2f648>
+  233344: f9401fe9     	ldr	x9, [sp, #0x38]
+  233348: f9404d0a     	ldr	x10, [x8, #0x98]
+  23334c: 9100c3e0     	add	x0, sp, #0x30
+  233350: f9001bea     	str	x10, [sp, #0x30]
+  233354: f940510a     	ldr	x10, [x8, #0xa0]
+  233358: a909a516     	stp	x22, x9, [x8, #0x98]
+  23335c: f9001fea     	str	x10, [sp, #0x38]
+  233360: 97ff03eb     	bl	0x1f430c <_ZNK17AvaliablePlayInfo23droppedPlayInfoToStringEv+0x16bfc>
+  233364: f9400668     	ldr	x8, [x19, #0x8]
+
+######################################################################
+XREF CONTEXT: 0x25e1a0
+######################################################################
+  25e140: 7100001f     	cmp	w0, #0x0
+  25e144: 1a9f17e8     	cset	w8, eq
+  25e148: d101e3a0     	sub	x0, x29, #0x78
+  25e14c: 3903a368     	strb	w8, [x27, #0xe8]
+  25e150: 97fa6931     	bl	0xf8614 <.text+0x17d54>
+  25e154: f94002e1     	ldr	x1, [x23]
+  25e158: aa1503e0     	mov	x0, x21
+  25e15c: aa1b03e2     	mov	x2, x27
+  25e160: 940004b1     	bl	0x25f424 <_ZN6Cicada12avAESEncrypt7encryptEPhPKhiS1_+0x15130>
+  25e164: f94002e1     	ldr	x1, [x23]
+  25e168: 910183e3     	add	x3, sp, #0x60
+  25e16c: aa1503e0     	mov	x0, x21
+  25e170: aa1b03e2     	mov	x2, x27
+  25e174: 94000248     	bl	0x25ea94 <_ZN6Cicada12avAESEncrypt7encryptEPhPKhiS1_+0x147a0>
+  25e178: f94002f6     	ldr	x22, [x23]
+  25e17c: b0001ae5     	adrp	x5, 0x5bb000
+  25e180: 321c07e0     	orr	w0, wzr, #0x30
+  25e184: 528022c4     	mov	w4, #0x116              // =278
+  25e188: aa1903e1     	mov	x1, x25
+  25e18c: aa1803e2     	mov	x2, x24
+  25e190: aa1903e3     	mov	x3, x25
+  25e194: 910b90a5     	add	x5, x5, #0x2e4
+  25e198: 97f9ff3a     	bl	0xdde80 <__log_print@plt>
+  25e19c: b40010b6     	cbz	x22, 0x25e3b0 <_ZN6Cicada12avAESEncrypt7encryptEPhPKhiS1_+0x140bc>
+  25e1a0: b0001ae1     	adrp	x1, 0x5bb000
+  25e1a4: d10243a0     	sub	x0, x29, #0x90
+  25e1a8: 52800222     	mov	w2, #0x11               // =17
+  25e1ac: 910c4821     	add	x1, x1, #0x312
+  25e1b0: a9377fbf     	stp	xzr, xzr, [x29, #-0x90]
+  25e1b4: f81803bf     	stur	xzr, [x29, #-0x80]
+  25e1b8: 97fa6c48     	bl	0xf92d8 <JNI_OnUnload+0x974>
+  25e1bc: d101e3a8     	sub	x8, x29, #0x78
+  25e1c0: d10243a1     	sub	x1, x29, #0x90
+  25e1c4: aa1603e0     	mov	x0, x22
+  25e1c8: 2a1f03e2     	mov	w2, wzr
+  25e1cc: 94024234     	bl	0x2eea9c <_ZN12TextureFrameD0Ev+0x4c>
+  25e1d0: d10243a0     	sub	x0, x29, #0x90
+  25e1d4: 97fa6910     	bl	0xf8614 <.text+0x17d54>
+  25e1d8: a978a3b4     	ldp	x20, x8, [x29, #-0x78]
+  25e1dc: 14000009     	b	0x25e200 <_ZN6Cicada12avAESEncrypt7encryptEPhPKhiS1_+0x13f0c>
+  25e1e0: 910203e0     	add	x0, sp, #0x80
+  25e1e4: 97fa690c     	bl	0xf8614 <.text+0x17d54>
+  25e1e8: 910263e0     	add	x0, sp, #0x98
+  25e1ec: 97fa690a     	bl	0xf8614 <.text+0x17d54>
+  25e1f0: d10243a0     	sub	x0, x29, #0x90
+  25e1f4: 97fa6908     	bl	0xf8614 <.text+0x17d54>
+  25e1f8: f85903a8     	ldur	x8, [x29, #-0x70]
+  25e1fc: 91002294     	add	x20, x20, #0x8
+  25e200: eb08029f     	cmp	x20, x8
+  25e204: 54000d00     	b.eq	0x25e3a4 <_ZN6Cicada12avAESEncrypt7encryptEPhPKhiS1_+0x140b0>
+  25e208: a9377fbf     	stp	xzr, xzr, [x29, #-0x90]
+  25e20c: f81803bf     	stur	xzr, [x29, #-0x80]
+  25e210: f9400296     	ldr	x22, [x20]
+  25e214: b0001ae1     	adrp	x1, 0x5bb000
+  25e218: 910263e0     	add	x0, sp, #0x98
+  25e21c: 52800162     	mov	w2, #0xb                // =11
+
+######################################################################
+XREF CONTEXT: 0x279ac0
+######################################################################
+  279a60: b94017e8     	ldr	w8, [sp, #0x14]
+  279a64: f9415660     	ldr	x0, [x19, #0x2a8]
+  279a68: 9100a3e4     	add	x4, sp, #0x28
+  279a6c: f100033f     	cmp	x25, #0x0
+  279a70: 1a8802e8     	csel	w8, w23, w8, eq
+  279a74: 9a9902c2     	csel	x2, x22, x25, eq
+  279a78: 93407d03     	sxtw	x3, w8
+  279a7c: 2a1503e1     	mov	w1, w21
+  279a80: 2a1f03e6     	mov	w6, wzr
+  279a84: 940008b9     	bl	0x27bd68 <_ZN18codecPluginManager13dummyFunctionEv+0x3974>
+  279a88: 2a0003f5     	mov	w21, w0
+  279a8c: aa1903e0     	mov	x0, x25
+  279a90: 97f97cd4     	bl	0xd8de0 <free@plt>
+  279a94: f9403fe8     	ldr	x8, [sp, #0x78]
+  279a98: b4000068     	cbz	x8, 0x279aa4 <_ZN18codecPluginManager13dummyFunctionEv+0x16b0>
+  279a9c: aa1803e0     	mov	x0, x24
+  279aa0: 9400038b     	bl	0x27a8cc <_ZN18codecPluginManager13dummyFunctionEv+0x24d8>
+  279aa4: aa1803e0     	mov	x0, x24
+  279aa8: 94000389     	bl	0x27a8cc <_ZN18codecPluginManager13dummyFunctionEv+0x24d8>
+  279aac: 9100a3e0     	add	x0, sp, #0x28
+  279ab0: 97f9fad9     	bl	0xf8614 <.text+0x17d54>
+  279ab4: 36f80135     	tbz	w21, #0x1f, 0x279ad8 <_ZN18codecPluginManager13dummyFunctionEv+0x16e4>
+  279ab8: b9426664     	ldr	w4, [x19, #0x264]
+  279abc: f0001a01     	adrp	x1, 0x5bc000
+  279ac0: f0001a02     	adrp	x2, 0x5bc000
+  279ac4: 91004c21     	add	x1, x1, #0x13
+  279ac8: 910bdc42     	add	x2, x2, #0x2f7
+  279acc: 321c03e0     	orr	w0, wzr, #0x10
+  279ad0: 2a1503e3     	mov	w3, w21
+  279ad4: 97f990eb     	bl	0xdde80 <__log_print@plt>
+  279ad8: b942de68     	ldr	w8, [x19, #0x2dc]
+  279adc: 11000508     	add	w8, w8, #0x1
+  279ae0: b902de68     	str	w8, [x19, #0x2dc]
+  279ae4: b9431668     	ldr	w8, [x19, #0x314]
+  279ae8: 7100051f     	cmp	w8, #0x1
+  279aec: 54000281     	b.ne	0x279b3c <_ZN18codecPluginManager13dummyFunctionEv+0x1748>
+  279af0: 910ba276     	add	x22, x19, #0x2e8
+  279af4: aa1603e0     	mov	x0, x22
+  279af8: 97f97c2a     	bl	0xd8ba0 <_ZNSt6__ndk15mutex4lockEv@plt>
+  279afc: f9400280     	ldr	x0, [x20]
+  279b00: b4000160     	cbz	x0, 0x279b2c <_ZN18codecPluginManager13dummyFunctionEv+0x1738>
+  279b04: f9400008     	ldr	x8, [x0]
+  279b08: f9403508     	ldr	x8, [x8, #0x68]
+  279b0c: d63f0100     	blr	x8
+  279b10: f9400803     	ldr	x3, [x0, #0x10]
+  279b14: f0001a01     	adrp	x1, 0x5bc000
+  279b18: f0001a02     	adrp	x2, 0x5bc000
+  279b1c: 91004c21     	add	x1, x1, #0x13
+  279b20: 910cec42     	add	x2, x2, #0x33b
+  279b24: 321b03e0     	orr	w0, wzr, #0x20
+  279b28: 97f990d6     	bl	0xdde80 <__log_print@plt>
+  279b2c: 321f03e8     	orr	w8, wzr, #0x2
+  279b30: aa1603e0     	mov	x0, x22
+  279b34: b9031668     	str	w8, [x19, #0x314]
+  279b38: 97f97c1e     	bl	0xd8bb0 <_ZNSt6__ndk15mutex6unlockEv@plt>
+  279b3c: 31017ebf     	cmn	w21, #0x5f
+
+######################################################################
+XREF CONTEXT: 0x27af94
+######################################################################
+  27af34: f9400268     	ldr	x8, [x19]
+  27af38: f94132c1     	ldr	x1, [x22, #0x260]
+  27af3c: d0001a02     	adrp	x2, 0x5bc000
+  27af40: f0001903     	adrp	x3, 0x59d000 <__cxa_demangle+0x182b4>
+  27af44: f9408508     	ldr	x8, [x8, #0x108]
+  27af48: 9117d842     	add	x2, x2, #0x5f6
+  27af4c: 9138e063     	add	x3, x3, #0xe38
+  27af50: aa1303e0     	mov	x0, x19
+  27af54: d63f0100     	blr	x8
+  27af58: 90002688     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27af5c: f9013900     	str	x0, [x8, #0x270]
+  27af60: f9400268     	ldr	x8, [x19]
+  27af64: f94132c1     	ldr	x1, [x22, #0x260]
+  27af68: d0001a02     	adrp	x2, 0x5bc000
+  27af6c: d0001a03     	adrp	x3, 0x5bc000
+  27af70: f9408508     	ldr	x8, [x8, #0x108]
+  27af74: 91182c42     	add	x2, x2, #0x60b
+  27af78: 91185863     	add	x3, x3, #0x616
+  27af7c: aa1303e0     	mov	x0, x19
+  27af80: d63f0100     	blr	x8
+  27af84: 90002688     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27af88: f9013d00     	str	x0, [x8, #0x278]
+  27af8c: f9400268     	ldr	x8, [x19]
+  27af90: f94132c1     	ldr	x1, [x22, #0x260]
+  27af94: d0001a02     	adrp	x2, 0x5bc000
+  27af98: f0001903     	adrp	x3, 0x59d000 <__cxa_demangle+0x182b4>
+  27af9c: f9408508     	ldr	x8, [x8, #0x108]
+  27afa0: 9118b842     	add	x2, x2, #0x62e
+  27afa4: 9139c463     	add	x3, x3, #0xe71
+  27afa8: aa1303e0     	mov	x0, x19
+  27afac: d63f0100     	blr	x8
+  27afb0: 90002688     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27afb4: f9014100     	str	x0, [x8, #0x280]
+  27afb8: f9400268     	ldr	x8, [x19]
+  27afbc: f94132c1     	ldr	x1, [x22, #0x260]
+  27afc0: d0001a02     	adrp	x2, 0x5bc000
+  27afc4: d0001a03     	adrp	x3, 0x5bc000
+  27afc8: f9408508     	ldr	x8, [x8, #0x108]
+  27afcc: 91191842     	add	x2, x2, #0x646
+  27afd0: 91195463     	add	x3, x3, #0x655
+  27afd4: aa1303e0     	mov	x0, x19
+  27afd8: d63f0100     	blr	x8
+  27afdc: 90002688     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27afe0: f9014500     	str	x0, [x8, #0x288]
+  27afe4: f9400268     	ldr	x8, [x19]
+  27afe8: f94132c1     	ldr	x1, [x22, #0x260]
+  27afec: d0001a02     	adrp	x2, 0x5bc000
+  27aff0: d0001a03     	adrp	x3, 0x5bc000
+  27aff4: f9408508     	ldr	x8, [x8, #0x108]
+  27aff8: 911a0442     	add	x2, x2, #0x681
+  27affc: 911a4063     	add	x3, x3, #0x690
+  27b000: aa1303e0     	mov	x0, x19
+  27b004: d63f0100     	blr	x8
+  27b008: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b00c: f9014900     	str	x0, [x8, #0x290]
+  27b010: f9400268     	ldr	x8, [x19]
+
+######################################################################
+XREF CONTEXT: 0x27b148
+######################################################################
+  27b0e8: f94132c1     	ldr	x1, [x22, #0x260]
+  27b0ec: b0001a14     	adrp	x20, 0x5bc000
+  27b0f0: b0001a02     	adrp	x2, 0x5bc000
+  27b0f4: f9408508     	ldr	x8, [x8, #0x108]
+  27b0f8: 911b6e94     	add	x20, x20, #0x6db
+  27b0fc: 911b0c42     	add	x2, x2, #0x6c3
+  27b100: aa1303e0     	mov	x0, x19
+  27b104: aa1403e3     	mov	x3, x20
+  27b108: d63f0100     	blr	x8
+  27b10c: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b110: f9016100     	str	x0, [x8, #0x2c0]
+  27b114: f9400268     	ldr	x8, [x19]
+  27b118: f94132c1     	ldr	x1, [x22, #0x260]
+  27b11c: b0001a02     	adrp	x2, 0x5bc000
+  27b120: b0001a03     	adrp	x3, 0x5bc000
+  27b124: f9408508     	ldr	x8, [x8, #0x108]
+  27b128: 911b8042     	add	x2, x2, #0x6e0
+  27b12c: 911bc463     	add	x3, x3, #0x6f1
+  27b130: aa1303e0     	mov	x0, x19
+  27b134: d63f0100     	blr	x8
+  27b138: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b13c: f9016500     	str	x0, [x8, #0x2c8]
+  27b140: f9400268     	ldr	x8, [x19]
+  27b144: f94132c1     	ldr	x1, [x22, #0x260]
+  27b148: b0001a02     	adrp	x2, 0x5bc000
+  27b14c: b0001a03     	adrp	x3, 0x5bc000
+  27b150: f9408508     	ldr	x8, [x8, #0x108]
+  27b154: 911be842     	add	x2, x2, #0x6fa
+  27b158: 911c4463     	add	x3, x3, #0x711
+  27b15c: aa1303e0     	mov	x0, x19
+  27b160: d63f0100     	blr	x8
+  27b164: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b168: f9016900     	str	x0, [x8, #0x2d0]
+  27b16c: f9400268     	ldr	x8, [x19]
+  27b170: f94132c1     	ldr	x1, [x22, #0x260]
+  27b174: b0001a02     	adrp	x2, 0x5bc000
+  27b178: 911cb042     	add	x2, x2, #0x72c
+  27b17c: f9408508     	ldr	x8, [x8, #0x108]
+  27b180: aa1303e0     	mov	x0, x19
+  27b184: aa1403e3     	mov	x3, x20
+  27b188: d63f0100     	blr	x8
+  27b18c: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b190: f9016d00     	str	x0, [x8, #0x2d8]
+  27b194: f9400268     	ldr	x8, [x19]
+  27b198: f94132c1     	ldr	x1, [x22, #0x260]
+  27b19c: 90001934     	adrp	x20, 0x59f000
+  27b1a0: b0001a02     	adrp	x2, 0x5bc000
+  27b1a4: f9408508     	ldr	x8, [x8, #0x108]
+  27b1a8: 91189694     	add	x20, x20, #0x625
+  27b1ac: 911d1442     	add	x2, x2, #0x745
+  27b1b0: aa1303e0     	mov	x0, x19
+  27b1b4: aa1403e3     	mov	x3, x20
+  27b1b8: d63f0100     	blr	x8
+  27b1bc: f0002677     	adrp	x23, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b1c0: 910bc2f7     	add	x23, x23, #0x2f0
+  27b1c4: f90002e0     	str	x0, [x23]
+
+######################################################################
+XREF CONTEXT: 0x27b220
+######################################################################
+  27b1c0: 910bc2f7     	add	x23, x23, #0x2f0
+  27b1c4: f90002e0     	str	x0, [x23]
+  27b1c8: f9400268     	ldr	x8, [x19]
+  27b1cc: f94132c1     	ldr	x1, [x22, #0x260]
+  27b1d0: b0001a02     	adrp	x2, 0x5bc000
+  27b1d4: 911d6442     	add	x2, x2, #0x759
+  27b1d8: f9408508     	ldr	x8, [x8, #0x108]
+  27b1dc: aa1303e0     	mov	x0, x19
+  27b1e0: aa1403e3     	mov	x3, x20
+  27b1e4: d63f0100     	blr	x8
+  27b1e8: f90006e0     	str	x0, [x23, #0x8]
+  27b1ec: f9400268     	ldr	x8, [x19]
+  27b1f0: f94132c1     	ldr	x1, [x22, #0x260]
+  27b1f4: b0001a02     	adrp	x2, 0x5bc000
+  27b1f8: f0001903     	adrp	x3, 0x59e000
+  27b1fc: f9408508     	ldr	x8, [x8, #0x108]
+  27b200: 911d9842     	add	x2, x2, #0x766
+  27b204: 91389c63     	add	x3, x3, #0xe27
+  27b208: aa1303e0     	mov	x0, x19
+  27b20c: d63f0100     	blr	x8
+  27b210: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b214: f9017100     	str	x0, [x8, #0x2e0]
+  27b218: f9400268     	ldr	x8, [x19]
+  27b21c: f94132c1     	ldr	x1, [x22, #0x260]
+  27b220: b0001a02     	adrp	x2, 0x5bc000
+  27b224: f0001923     	adrp	x3, 0x5a2000
+  27b228: f9408508     	ldr	x8, [x8, #0x108]
+  27b22c: 911dd442     	add	x2, x2, #0x775
+  27b230: 91192863     	add	x3, x3, #0x64a
+  27b234: aa1303e0     	mov	x0, x19
+  27b238: d63f0100     	blr	x8
+  27b23c: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b240: f9017500     	str	x0, [x8, #0x2e8]
+  27b244: 910023e0     	add	x0, sp, #0x8
+  27b248: 94020069     	bl	0x2fb3ec <_ZN12JniException14clearExceptionEP7_JNIEnv+0xa4>
+  27b24c: f94016a8     	ldr	x8, [x21, #0x28]
+  27b250: f9400fe9     	ldr	x9, [sp, #0x18]
+  27b254: eb09011f     	cmp	x8, x9
+  27b258: 540000e1     	b.ne	0x27b274 <_ZN18codecPluginManager13dummyFunctionEv+0x2e80>
+  27b25c: a9457bfd     	ldp	x29, x30, [sp, #0x50]
+  27b260: a9444ff4     	ldp	x20, x19, [sp, #0x40]
+  27b264: a94357f6     	ldp	x22, x21, [sp, #0x30]
+  27b268: f94013f7     	ldr	x23, [sp, #0x20]
+  27b26c: 910183ff     	add	sp, sp, #0x60
+  27b270: d65f03c0     	ret
+  27b274: 97f97623     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27b278: d100c3ff     	sub	sp, sp, #0x30
+  27b27c: a9014ff4     	stp	x20, x19, [sp, #0x10]
+  27b280: a9027bfd     	stp	x29, x30, [sp, #0x20]
+  27b284: 910083fd     	add	x29, sp, #0x20
+  27b288: d53bd053     	mrs	x19, TPIDR_EL0
+  27b28c: f9401668     	ldr	x8, [x19, #0x28]
+  27b290: f90007e8     	str	x8, [sp, #0x8]
+  27b294: b4000100     	cbz	x0, 0x27b2b4 <_ZN18codecPluginManager13dummyFunctionEv+0x2ec0>
+  27b298: f0002674     	adrp	x20, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b29c: f9413281     	ldr	x1, [x20, #0x260]
+
+######################################################################
+XREF CONTEXT: 0x27ca28
+######################################################################
+  27c9c8: b0001902     	adrp	x2, 0x59d000 <__cxa_demangle+0x182b4>
+  27c9cc: b0001903     	adrp	x3, 0x59d000 <__cxa_demangle+0x182b4>
+  27c9d0: aa0003e1     	mov	x1, x0
+  27c9d4: f9408508     	ldr	x8, [x8, #0x108]
+  27c9d8: 91141042     	add	x2, x2, #0x504
+  27c9dc: 91142c63     	add	x3, x3, #0x50b
+  27c9e0: aa1303e0     	mov	x0, x19
+  27c9e4: d63f0100     	blr	x8
+  27c9e8: d0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27c9ec: f901fd00     	str	x0, [x8, #0x3f8]
+  27c9f0: f9400268     	ldr	x8, [x19]
+  27c9f4: f941fac1     	ldr	x1, [x22, #0x3f0]
+  27c9f8: b0001914     	adrp	x20, 0x59d000 <__cxa_demangle+0x182b4>
+  27c9fc: 90001a02     	adrp	x2, 0x5bc000
+  27ca00: f9417908     	ldr	x8, [x8, #0x2f0]
+  27ca04: 9117ee94     	add	x20, x20, #0x5fb
+  27ca08: 9125f442     	add	x2, x2, #0x97d
+  27ca0c: aa1303e0     	mov	x0, x19
+  27ca10: aa1403e3     	mov	x3, x20
+  27ca14: d63f0100     	blr	x8
+  27ca18: d0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27ca1c: f9020100     	str	x0, [x8, #0x400]
+  27ca20: f9400268     	ldr	x8, [x19]
+  27ca24: f941fac1     	ldr	x1, [x22, #0x3f0]
+  27ca28: 90001a02     	adrp	x2, 0x5bc000
+  27ca2c: 91264442     	add	x2, x2, #0x991
+  27ca30: f9417908     	ldr	x8, [x8, #0x2f0]
+  27ca34: aa1303e0     	mov	x0, x19
+  27ca38: aa1403e3     	mov	x3, x20
+  27ca3c: d63f0100     	blr	x8
+  27ca40: d0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27ca44: f9020500     	str	x0, [x8, #0x408]
+  27ca48: 910023e0     	add	x0, sp, #0x8
+  27ca4c: 9401fa68     	bl	0x2fb3ec <_ZN12JniException14clearExceptionEP7_JNIEnv+0xa4>
+  27ca50: f94016a8     	ldr	x8, [x21, #0x28]
+  27ca54: f9400fe9     	ldr	x9, [sp, #0x18]
+  27ca58: eb09011f     	cmp	x8, x9
+  27ca5c: 540000c1     	b.ne	0x27ca74 <_ZN18codecPluginManager13dummyFunctionEv+0x4680>
+  27ca60: a9447bfd     	ldp	x29, x30, [sp, #0x40]
+  27ca64: a9434ff4     	ldp	x20, x19, [sp, #0x30]
+  27ca68: a94257f6     	ldp	x22, x21, [sp, #0x20]
+  27ca6c: 910143ff     	add	sp, sp, #0x50
+  27ca70: d65f03c0     	ret
+  27ca74: 97f97023     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27ca78: d10103ff     	sub	sp, sp, #0x40
+  27ca7c: f9000bf5     	str	x21, [sp, #0x10]
+  27ca80: a9024ff4     	stp	x20, x19, [sp, #0x20]
+  27ca84: a9037bfd     	stp	x29, x30, [sp, #0x30]
+  27ca88: 9100c3fd     	add	x29, sp, #0x30
+  27ca8c: d53bd054     	mrs	x20, TPIDR_EL0
+  27ca90: f9401688     	ldr	x8, [x20, #0x28]
+  27ca94: d0002675     	adrp	x21, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27ca98: aa0003f3     	mov	x19, x0
+  27ca9c: f90007e8     	str	x8, [sp, #0x8]
+  27caa0: f941daa1     	ldr	x1, [x21, #0x3b0]
+  27caa4: b40000c1     	cbz	x1, 0x27cabc <_ZN18codecPluginManager13dummyFunctionEv+0x46c8>
+
+######################################################################
+XREF CONTEXT: 0x281e34
+######################################################################
+  281dd4: 1e18f808     	fcvtzs	w8, s0, #0x2
+  281dd8: 93407d1c     	sxtw	x28, w8
+  281ddc: aa1c03e0     	mov	x0, x28
+  281de0: 97f95c08     	bl	0xd8e00 <malloc@plt>
+  281de4: 2a1f03e1     	mov	w1, wzr
+  281de8: aa1c03e2     	mov	x2, x28
+  281dec: aa0003fb     	mov	x27, x0
+  281df0: 97f95b80     	bl	0xd8bf0 <memset@plt>
+  281df4: 52819ea0     	mov	w0, #0xcf5              // =3317
+  281df8: 320003e1     	orr	w1, wzr, #0x1
+  281dfc: 97f977c9     	bl	0xdfd20 <glPixelStorei@plt>
+  281e00: 1e38011c     	fcvtzs	w28, s8
+  281e04: 1e380136     	fcvtzs	w22, s9
+  281e08: 1e380140     	fcvtzs	w0, s10
+  281e0c: 1e380161     	fcvtzs	w1, s11
+  281e10: 52832104     	mov	w4, #0x1908             // =6408
+  281e14: 52828025     	mov	w5, #0x1401             // =5121
+  281e18: 2a1c03e2     	mov	w2, w28
+  281e1c: 2a1603e3     	mov	w3, w22
+  281e20: aa1b03e6     	mov	x6, x27
+  281e24: 97f977c3     	bl	0xdfd30 <glReadPixels@plt>
+  281e28: 97f97282     	bl	0xde830 <af_getsteady_ms@plt>
+  281e2c: f94007e8     	ldr	x8, [sp, #0x8]
+  281e30: 900019e1     	adrp	x1, 0x5bd000
+  281e34: 900019e2     	adrp	x2, 0x5bd000
+  281e38: 9102f821     	add	x1, x1, #0xbe
+  281e3c: cb080003     	sub	x3, x0, x8
+  281e40: 910ac442     	add	x2, x2, #0x2b1
+  281e44: 321c07e0     	orr	w0, wzr, #0x30
+  281e48: 97f9700e     	bl	0xdde80 <__log_print@plt>
+  281e4c: f90013fb     	str	x27, [sp, #0x20]
+  281e50: 292d73b6     	stp	w22, w28, [x29, #-0x98]
+  281e54: f940e260     	ldr	x0, [x19, #0x1c0]
+  281e58: b4001100     	cbz	x0, 0x282078 <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x2b60>
+  281e5c: f9400008     	ldr	x8, [x0]
+  281e60: 910083e1     	add	x1, sp, #0x20
+  281e64: d10253a2     	sub	x2, x29, #0x94
+  281e68: d10263a3     	sub	x3, x29, #0x98
+  281e6c: f9401908     	ldr	x8, [x8, #0x30]
+  281e70: d63f0100     	blr	x8
+  281e74: aa1b03e0     	mov	x0, x27
+  281e78: 97f95bda     	bl	0xd8de0 <free@plt>
+  281e7c: f9415660     	ldr	x0, [x19, #0x2a8]
+  281e80: 3906427f     	strb	wzr, [x19, #0x190]
+  281e84: 91012268     	add	x8, x19, #0x48
+  281e88: 88dffd01     	ldar	w1, [x8]
+  281e8c: f9400008     	ldr	x8, [x0]
+  281e90: f9401d08     	ldr	x8, [x8, #0x38]
+  281e94: d63f0100     	blr	x8
+  281e98: f9415660     	ldr	x0, [x19, #0x2a8]
+  281e9c: 2a1703e1     	mov	w1, w23
+  281ea0: f9400008     	ldr	x8, [x0]
+  281ea4: f9402108     	ldr	x8, [x8, #0x40]
+  281ea8: d63f0100     	blr	x8
+  281eac: f9415660     	ldr	x0, [x19, #0x2a8]
+  281eb0: d102a3a1     	sub	x1, x29, #0xa8
+
+######################################################################
+XREF CONTEXT: 0x281ff0
+######################################################################
+  281f90: aa1c03e4     	mov	x4, x28
+  281f94: 97f96fbb     	bl	0xdde80 <__log_print@plt>
+  281f98: f85603a0     	ldur	x0, [x29, #-0xa0]
+  281f9c: f81603bf     	stur	xzr, [x29, #-0xa0]
+  281fa0: b4000080     	cbz	x0, 0x281fb0 <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x2a98>
+  281fa4: f9400008     	ldr	x8, [x0]
+  281fa8: f9400508     	ldr	x8, [x8, #0x8]
+  281fac: d63f0100     	blr	x8
+  281fb0: 34ffcb9b     	cbz	w27, 0x281920 <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x2408>
+  281fb4: f9412668     	ldr	x8, [x19, #0x248]
+  281fb8: 91000508     	add	x8, x8, #0x1
+  281fbc: f9012668     	str	x8, [x19, #0x248]
+  281fc0: 17fffe58     	b	0x281920 <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x2408>
+  281fc4: 2a0803eb     	mov	w11, w8
+  281fc8: 2a0d03e8     	mov	w8, w13
+  281fcc: 1e220188     	scvtf	s8, w12
+  281fd0: 1e220149     	scvtf	s9, w10
+  281fd4: 340000cb     	cbz	w11, 0x281fec <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x2ad4>
+  281fd8: 340000a8     	cbz	w8, 0x281fec <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x2ad4>
+  281fdc: 1e2703ea     	fmov	s10, wzr
+  281fe0: 34000189     	cbz	w9, 0x282010 <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x2af8>
+  281fe4: 1e2703eb     	fmov	s11, wzr
+  281fe8: 17ffff7a     	b	0x281dd0 <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x28b8>
+  281fec: 900019e1     	adrp	x1, 0x5bd000
+  281ff0: 900019e2     	adrp	x2, 0x5bd000
+  281ff4: 9102f821     	add	x1, x1, #0xbe
+  281ff8: 910b5842     	add	x2, x2, #0x2d6
+  281ffc: 321c03e0     	orr	w0, wzr, #0x10
+  282000: 97f96fa0     	bl	0xdde80 <__log_print@plt>
+  282004: 1e2703eb     	fmov	s11, wzr
+  282008: 1e2703ea     	fmov	s10, wzr
+  28200c: 17ffff71     	b	0x281dd0 <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x28b8>
+  282010: 1e620180     	scvtf	d0, w12
+  282014: 1e620101     	scvtf	d1, w8
+  282018: 1e620142     	scvtf	d2, w10
+  28201c: 1e620163     	scvtf	d3, w11
+  282020: 1e611800     	fdiv	d0, d0, d1
+  282024: 1e631842     	fdiv	d2, d2, d3
+  282028: 1e624001     	fcvt	s1, d0
+  28202c: 1e624040     	fcvt	s0, d2
+  282030: 1e202020     	fcmp	s1, s0
+  282034: 5400010a     	b.ge	0x282054 <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x2b3c>
+  282038: 1e220160     	scvtf	s0, w11
+  28203c: 1e210800     	fmul	s0, s0, s1
+  282040: 1e203921     	fsub	s1, s9, s0
+  282044: 1e2c1002     	fmov	s2, #0.50000000
+  282048: 1e22082b     	fmul	s11, s1, s2
+  28204c: 4ea01c09     	mov	v9.16b, v0.16b
+  282050: 17ffff60     	b	0x281dd0 <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x28b8>
+  282054: 1e220101     	scvtf	s1, w8
+  282058: 1e200820     	fmul	s0, s1, s0
+  28205c: 1e2c1002     	fmov	s2, #0.50000000
+  282060: 1e203901     	fsub	s1, s8, s0
+  282064: 1e22082a     	fmul	s10, s1, s2
+  282068: 1e2703eb     	fmov	s11, wzr
+  28206c: 4ea01c08     	mov	v8.16b, v0.16b
+
+######################################################################
+XREF CONTEXT: 0x2825c8
+######################################################################
+  282568: a9014ff4     	stp	x20, x19, [sp, #0x10]
+  28256c: a9027bfd     	stp	x29, x30, [sp, #0x20]
+  282570: 910083fd     	add	x29, sp, #0x20
+  282574: f940a813     	ldr	x19, [x0, #0x150]
+  282578: aa0003f5     	mov	x21, x0
+  28257c: b4000633     	cbz	x19, 0x282640 <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x3128>
+  282580: f9400268     	ldr	x8, [x19]
+  282584: 910562b4     	add	x20, x21, #0x158
+  282588: aa1303e0     	mov	x0, x19
+  28258c: aa1403e1     	mov	x1, x20
+  282590: f9403508     	ldr	x8, [x8, #0x68]
+  282594: d63f0100     	blr	x8
+  282598: f9400268     	ldr	x8, [x19]
+  28259c: aa1303e0     	mov	x0, x19
+  2825a0: aa1f03e1     	mov	x1, xzr
+  2825a4: f9401908     	ldr	x8, [x8, #0x30]
+  2825a8: d63f0100     	blr	x8
+  2825ac: f9400268     	ldr	x8, [x19]
+  2825b0: aa1303e0     	mov	x0, x19
+  2825b4: f9403108     	ldr	x8, [x8, #0x60]
+  2825b8: d63f0100     	blr	x8
+  2825bc: f900aea0     	str	x0, [x21, #0x158]
+  2825c0: b50000e0     	cbnz	x0, 0x2825dc <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x30c4>
+  2825c4: f00019c1     	adrp	x1, 0x5bd000
+  2825c8: f00019c2     	adrp	x2, 0x5bd000
+  2825cc: 9102f821     	add	x1, x1, #0xbe
+  2825d0: 910cf042     	add	x2, x2, #0x33c
+  2825d4: 321c03e0     	orr	w0, wzr, #0x10
+  2825d8: 97f96e2a     	bl	0xdde80 <__log_print@plt>
+  2825dc: f9400268     	ldr	x8, [x19]
+  2825e0: aa1303e0     	mov	x0, x19
+  2825e4: f9403d08     	ldr	x8, [x8, #0x78]
+  2825e8: d63f0100     	blr	x8
+  2825ec: f9400268     	ldr	x8, [x19]
+  2825f0: 2a0003f5     	mov	w21, w0
+  2825f4: aa1303e0     	mov	x0, x19
+  2825f8: f9404108     	ldr	x8, [x8, #0x80]
+  2825fc: d63f0100     	blr	x8
+  282600: f00019c1     	adrp	x1, 0x5bd000
+  282604: f00019c2     	adrp	x2, 0x5bd000
+  282608: 2a0003e4     	mov	w4, w0
+  28260c: 9102f821     	add	x1, x1, #0xbe
+  282610: 910d4c42     	add	x2, x2, #0x353
+  282614: 321b03e0     	orr	w0, wzr, #0x20
+  282618: 2a1503e3     	mov	w3, w21
+  28261c: 97f96e19     	bl	0xdde80 <__log_print@plt>
+  282620: f9400268     	ldr	x8, [x19]
+  282624: f9400281     	ldr	x1, [x20]
+  282628: aa1303e0     	mov	x0, x19
+  28262c: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  282630: f9401902     	ldr	x2, [x8, #0x30]
+  282634: a9414ff4     	ldp	x20, x19, [sp, #0x10]
+  282638: f84307f5     	ldr	x21, [sp], #0x30
+  28263c: d61f0040     	br	x2
+  282640: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  282644: a9414ff4     	ldp	x20, x19, [sp, #0x10]
+
+######################################################################
+XREF CONTEXT: 0x2833b4
+######################################################################
+  283354: 540019c1     	b.ne	0x28368c <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x4174>
+  283358: 2a1403e0     	mov	w0, w20
+  28335c: a9537bfd     	ldp	x29, x30, [sp, #0x130]
+  283360: a9524ff4     	ldp	x20, x19, [sp, #0x120]
+  283364: a95157fc     	ldp	x28, x21, [sp, #0x110]
+  283368: 910503ff     	add	sp, sp, #0x140
+  28336c: d65f03c0     	ret
+  283370: 294c8660     	ldp	w0, w1, [x19, #0x64]
+  283374: 97f95c3b     	bl	0xda460 <glAttachShader@plt>
+  283378: b9406660     	ldr	w0, [x19, #0x64]
+  28337c: b9406e61     	ldr	w1, [x19, #0x6c]
+  283380: 97f95c38     	bl	0xda460 <glAttachShader@plt>
+  283384: b9406660     	ldr	w0, [x19, #0x64]
+  283388: 97f95c3a     	bl	0xda470 <glLinkProgram@plt>
+  28338c: b9406660     	ldr	w0, [x19, #0x64]
+  283390: 52917041     	mov	w1, #0x8b82             // =35714
+  283394: 910013e2     	add	x2, sp, #0x4
+  283398: 97f95c3a     	bl	0xda480 <glGetProgramiv@plt>
+  28339c: b94007e8     	ldr	w8, [sp, #0x4]
+  2833a0: 7100051f     	cmp	w8, #0x1
+  2833a4: 540014a1     	b.ne	0x283638 <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x4120>
+  2833a8: b9406660     	ldr	w0, [x19, #0x64]
+  2833ac: 97f95be1     	bl	0xda330 <glUseProgram@plt>
+  2833b0: b9406660     	ldr	w0, [x19, #0x64]
+  2833b4: d00019c1     	adrp	x1, 0x5bd000
+  2833b8: 9110b021     	add	x1, x1, #0x42c
+  2833bc: 97f95bad     	bl	0xda270 <glGetUniformLocation@plt>
+  2833c0: b9406668     	ldr	w8, [x19, #0x64]
+  2833c4: d00019c1     	adrp	x1, 0x5bd000
+  2833c8: b9007260     	str	w0, [x19, #0x70]
+  2833cc: 9110e421     	add	x1, x1, #0x439
+  2833d0: 2a0803e0     	mov	w0, w8
+  2833d4: 97f95ba7     	bl	0xda270 <glGetUniformLocation@plt>
+  2833d8: b9406668     	ldr	w8, [x19, #0x64]
+  2833dc: d00019c1     	adrp	x1, 0x5bd000
+  2833e0: b9007660     	str	w0, [x19, #0x74]
+  2833e4: 91111421     	add	x1, x1, #0x445
+  2833e8: 2a0803e0     	mov	w0, w8
+  2833ec: 97f95ba1     	bl	0xda270 <glGetUniformLocation@plt>
+  2833f0: b9406668     	ldr	w8, [x19, #0x64]
+  2833f4: d00019c1     	adrp	x1, 0x5bd000
+  2833f8: b9007a60     	str	w0, [x19, #0x78]
+  2833fc: 91114421     	add	x1, x1, #0x451
+  283400: 2a0803e0     	mov	w0, w8
+  283404: 97f95b8f     	bl	0xda240 <glGetAttribLocation@plt>
+  283408: b9406668     	ldr	w8, [x19, #0x64]
+  28340c: d00019c1     	adrp	x1, 0x5bd000
+  283410: b9007e60     	str	w0, [x19, #0x7c]
+  283414: 91117021     	add	x1, x1, #0x45c
+  283418: 2a0803e0     	mov	w0, w8
+  28341c: 97f95b89     	bl	0xda240 <glGetAttribLocation@plt>
+  283420: b9406668     	ldr	w8, [x19, #0x64]
+  283424: d00019c1     	adrp	x1, 0x5bd000
+  283428: b9008260     	str	w0, [x19, #0x80]
+  28342c: 91119c21     	add	x1, x1, #0x467
+  283430: 2a0803e0     	mov	w0, w8
+
+######################################################################
+XREF CONTEXT: 0x284618
+######################################################################
+  2845b8: b940b661     	ldr	w1, [x19, #0xb4]
+  2845bc: 97f957a9     	bl	0xda460 <glAttachShader@plt>
+  2845c0: b940ae60     	ldr	w0, [x19, #0xac]
+  2845c4: b00019c2     	adrp	x2, 0x5bd000
+  2845c8: 91114442     	add	x2, x2, #0x451
+  2845cc: 2a1f03e1     	mov	w1, wzr
+  2845d0: 97f96e0c     	bl	0xdfe00 <glBindAttribLocation@plt>
+  2845d4: b940ae60     	ldr	w0, [x19, #0xac]
+  2845d8: b00019c2     	adrp	x2, 0x5bd000
+  2845dc: 91117042     	add	x2, x2, #0x45c
+  2845e0: 320003e1     	orr	w1, wzr, #0x1
+  2845e4: 97f96e07     	bl	0xdfe00 <glBindAttribLocation@plt>
+  2845e8: b940ae60     	ldr	w0, [x19, #0xac]
+  2845ec: 97f957a1     	bl	0xda470 <glLinkProgram@plt>
+  2845f0: b940ae60     	ldr	w0, [x19, #0xac]
+  2845f4: 52917041     	mov	w1, #0x8b82             // =35714
+  2845f8: 910053e2     	add	x2, sp, #0x14
+  2845fc: 97f957a1     	bl	0xda480 <glGetProgramiv@plt>
+  284600: b94017e8     	ldr	w8, [sp, #0x14]
+  284604: 7100051f     	cmp	w8, #0x1
+  284608: 54000c01     	b.ne	0x284788 <_ZN6Cicada12ICodecPlugin12setCodecNameERKNSt6__ndk112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEE+0x5270>
+  28460c: b940ae60     	ldr	w0, [x19, #0xac]
+  284610: 97f95748     	bl	0xda330 <glUseProgram@plt>
+  284614: b940ae60     	ldr	w0, [x19, #0xac]
+  284618: b00019c1     	adrp	x1, 0x5bd000
+  28461c: 9110b021     	add	x1, x1, #0x42c
+  284620: 97f95714     	bl	0xda270 <glGetUniformLocation@plt>
+  284624: b940ae68     	ldr	w8, [x19, #0xac]
+  284628: b00019c1     	adrp	x1, 0x5bd000
+  28462c: b900ba60     	str	w0, [x19, #0xb8]
+  284630: 9110e421     	add	x1, x1, #0x439
+  284634: 2a0803e0     	mov	w0, w8
+  284638: 97f9570e     	bl	0xda270 <glGetUniformLocation@plt>
+  28463c: b940ae68     	ldr	w8, [x19, #0xac]
+  284640: b00019c1     	adrp	x1, 0x5bd000
+  284644: b900be60     	str	w0, [x19, #0xbc]
+  284648: 91111421     	add	x1, x1, #0x445
+  28464c: 2a0803e0     	mov	w0, w8
+  284650: 97f95708     	bl	0xda270 <glGetUniformLocation@plt>
+  284654: f0001b28     	adrp	x8, 0x5eb000
+  284658: fd461d00     	ldr	d0, [x8, #0xc38]
+  28465c: b940ae68     	ldr	w8, [x19, #0xac]
+  284660: b00019c1     	adrp	x1, 0x5bd000
+  284664: b900c260     	str	w0, [x19, #0xc0]
+  284668: 91119c21     	add	x1, x1, #0x467
+  28466c: 2a0803e0     	mov	w0, w8
+  284670: fc0c4260     	stur	d0, [x19, #0xc4]
+  284674: 97f956ff     	bl	0xda270 <glGetUniformLocation@plt>
+  284678: b940ae68     	ldr	w8, [x19, #0xac]
+  28467c: b00019c1     	adrp	x1, 0x5bd000
+  284680: b900da60     	str	w0, [x19, #0xd8]
+  284684: 9111b421     	add	x1, x1, #0x46d
+  284688: 2a0803e0     	mov	w0, w8
+  28468c: 97f956f9     	bl	0xda270 <glGetUniformLocation@plt>
+  284690: b940ae68     	ldr	w8, [x19, #0xac]
+  284694: b00019c1     	adrp	x1, 0x5bd000

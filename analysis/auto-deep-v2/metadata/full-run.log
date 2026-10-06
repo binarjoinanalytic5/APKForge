@@ -1,0 +1,13 @@
+============================================================
+AUTO DEEP V2 — CAPTURE / DRM / SCREEN SECURITY
+============================================================
+2026-10-06T14:20:30+03:00
+
+APK-SHA256:
+e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278  /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk
+LIB-SHA256:
+a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4  /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/lib/arm64-v8a/libsaasCorePlayer.so
+DISASSEMBLY-SHA256:
+c85c1adfdc5ea0ceafcbfb74cd9cb86cfe17b93181b50aff4686ec50f9571c62  /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/auto-deep/raw/libsaasCorePlayer-disassembly.txt
+grep: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/resources/lib/armeabi-v7a/libsaasCorePlayer.so: binary file matches
+grep: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/resources/lib/arm64-v8a/libsaasCorePlayer.so: binary file matches
