@@ -3,15 +3,24 @@
 
 This module never signs the original APK. It requires an explicit isolated
 artifact and an explicit signing backend/key configuration.
+
+For unattended signing, apksigner password input must come from environment
+variables so the subprocess never blocks on stdin. Password values themselves
+are never embedded in commands or manifests.
 """
 import hashlib
 import json
+import os
 import subprocess
 from pathlib import Path
 
 
 class SignVerifyError(RuntimeError):
     pass
+
+
+KEYSTORE_PASSWORD_ENV = "REELSEC_TEST_KEYSTORE_PASSWORD"
+KEY_PASSWORD_ENV = "REELSEC_TEST_KEY_PASSWORD"
 
 
 def sha256_file(path):
@@ -22,16 +31,37 @@ def sha256_file(path):
     return h.hexdigest()
 
 
-def sign_command(apksigner, unsigned_apk, signed_apk, keystore, alias):
+def _password_ref(env_name):
+    value = os.environ.get(env_name)
+    if not value:
+        raise SignVerifyError(
+            "%s unavailable; unattended signing requires an explicit password environment variable"
+            % env_name
+        )
+    return "env:" + env_name
+
+
+def sign_command(apksigner, unsigned_apk, signed_apk, keystore, alias,
+                 keystore_password_env=KEYSTORE_PASSWORD_ENV,
+                 key_password_env=KEY_PASSWORD_ENV):
     for value, name in (
         (apksigner, "apksigner"), (unsigned_apk, "unsigned APK"),
         (signed_apk, "signed APK"), (keystore, "keystore"), (alias, "alias"),
+        (keystore_password_env, "keystore password environment variable"),
+        (key_password_env, "key password environment variable"),
     ):
         if not value:
             raise SignVerifyError("%s is required" % name)
+
+    ks_pass = _password_ref(keystore_password_env)
+    key_pass = _password_ref(key_password_env)
     return [
-        str(apksigner), "sign", "--ks", str(keystore),
-        "--ks-key-alias", str(alias), "--out", str(signed_apk),
+        str(apksigner), "sign",
+        "--ks", str(keystore),
+        "--ks-key-alias", str(alias),
+        "--ks-pass", ks_pass,
+        "--key-pass", key_pass,
+        "--out", str(signed_apk),
         str(unsigned_apk),
     ]
 
