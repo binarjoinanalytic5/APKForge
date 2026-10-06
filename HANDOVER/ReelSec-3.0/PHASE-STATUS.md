@@ -30,6 +30,12 @@ The campaign can now prepare an isolated decoded working tree under the campaign
 
 The actual mutation helper is deliberately separate from the copy operation and is not invoked automatically yet. This keeps copy creation, mutation, build/signing, and runtime proof as independent evidence gates.
 
+## Completed in this stage
+
+A signing and verification gate is now present for the isolated build artifact. It requires an explicit `apksigner` capability and an explicit test keystore via `REELSEC_TEST_KEYSTORE`; it never signs `original.apk`. The signed APK is a separate artifact and receives its own SHA-256 identity record in `SIGN-VERIFY.json`.
+
+If the signer or test keystore is unavailable, the campaign records `BLOCKED_OR_FAILED` rather than treating the unsigned APK as ready for device deployment.
+
 ## Next engineering gate
 
-Implement the **controlled mutation + build/sign/verify pipeline**. It must mutate only the isolated copy, validate Smali syntax/build output, preserve the original APK SHA-256, and produce a separately identifiable signed artifact.
+Implement the **controlled mutation + build/sign/verify pipeline** end-to-end, then add the ADB deployment gate. Deployment must require a successfully signed artifact and explicit test-device targeting; no deployment of the original APK should be performed by ReelSec.
