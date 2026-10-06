@@ -56,6 +56,46 @@ class CriticalBoundaryTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 reelsec.write_critical_behavior(out, 0x27A510)
 
+    def test_autonomous_dataflow_proves_direct_target_slot(self):
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td)
+            (out / "full-disassembly.txt").write_text(
+                "1000 <ctor>:\n"
+                "1000: ret\n"
+                "2000 <caller>:\n"
+                "2000: adrp x8, 0x717000\n"
+                "2004: add x8, x8, #0xe60\n"
+                "2008: ldr x8, [x8, #0x108]\n"
+                "200c: blr x8\n"
+                "2010: ret\n",
+                encoding="utf-8",
+            )
+            (out / "ActiveDecoder-constructor.txt").write_text(
+                "1000 <ctor>:\n1000: ret\n", encoding="utf-8"
+            )
+            result = reelsec.write_autonomous_dataflow(out, object(), "objdump")
+            self.assertEqual(result["proven"], 1)
+            report = (out / "AUTONOMOUS-DATAFLOW.md").read_text(encoding="utf-8")
+            self.assertIn("PROVEN_TARGET_VTABLE_DATAFLOW_FOUND", report)
+
+    def test_autonomous_dataflow_does_not_promote_x19_alone(self):
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td)
+            (out / "full-disassembly.txt").write_text(
+                "2000 <caller>:\n"
+                "2000: ldr x8, [x19]\n"
+                "2004: ldr x8, [x8, #0x108]\n"
+                "2008: blr x8\n"
+                "200c: ret\n",
+                encoding="utf-8",
+            )
+            (out / "ActiveDecoder-constructor.txt").write_text(
+                "1000 <ctor>:\n1000: ret\n", encoding="utf-8"
+            )
+            result = reelsec.write_autonomous_dataflow(out, object(), "objdump")
+            self.assertEqual(result["proven"], 0)
+            self.assertEqual(result["cxx_unresolved"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()
