@@ -1,0 +1,6 @@
+{
+  "candidate_count": 0,
+  "discovered_candidates": [],
+  "reason": "SecShell Application/loadLibrary anchor not found by structural discovery",
+  "status": "BLOCKED"
+}
