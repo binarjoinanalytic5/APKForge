@@ -84,3 +84,22 @@ def validate_target_observation(event, expected_module, expected_offset):
     if result["runtime_observed"]:
         result["proof_class"] = "TARGET_EXECUTION_OBSERVED"
     return result
+
+
+def validate_vtable_dispatch(event, expected):
+    """Validate the observed vtable/slot/target tuple without inferring causality."""
+    if not isinstance(event, dict) or not isinstance(expected, dict):
+        raise GadgetObserverError("event and expected relationship must be objects")
+    checks = {
+        "vtable_match": event.get("vtable") == expected.get("vtable"),
+        "slot_match": event.get("slot") == expected.get("slot"),
+        "target_match": event.get("target") == expected.get("target"),
+    }
+    checks["dispatch_relationship_observed"] = all(checks.values())
+    checks["causal_proof"] = False
+    checks["proof_class"] = (
+        "VTABLE_DISPATCH_OBSERVED"
+        if checks["dispatch_relationship_observed"]
+        else "OBSERVED"
+    )
+    return checks
