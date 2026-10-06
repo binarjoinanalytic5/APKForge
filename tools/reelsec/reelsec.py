@@ -236,6 +236,28 @@ def find_target(explicit, search_root=None):
             return p
     return None
 
+def build_input_provenance(input_apk, input_apk_sha256, analysis_root, target):
+    """Bind analysis artifacts to their input source without claiming causality."""
+    root = Path(analysis_root).resolve()
+    target_path = Path(target).resolve() if target else None
+    relation = "UNKNOWN"
+    if target_path:
+        try:
+            target_path.relative_to(root)
+            relation = "WITHIN_ANALYSIS_ROOT"
+        except ValueError:
+            relation = "OUTSIDE_ANALYSIS_ROOT"
+    return {
+        "schema_version": "1.0",
+        "input_apk": str(Path(input_apk).resolve()) if input_apk else None,
+        "input_apk_sha256": input_apk_sha256,
+        "analysis_root": str(root),
+        "target": str(target_path) if target_path else None,
+        "target_relation": relation,
+        "evidence_scope": "static-analysis-input-provenance",
+        "causality_proven": False,
+    }
+
 def load_segments(data):
     if len(data) < 64 or data[:4] != b"\x7fELF" or data[4] != 2 or data[5] != 1:
         return []
@@ -1543,6 +1565,8 @@ def main():
     analysis_root = Path(decoded_inventory["root"]).resolve() if decoded_inventory and decoded_inventory.get("status") == "READY" else ROOT
     target = find_target(args.elf, analysis_root)
     target_source = "decoded-apk" if analysis_root != ROOT else "repository-root-fallback"
+    input_provenance = build_input_provenance(input_apk, input_apk_sha256, analysis_root, target)
+    (output / "INPUT-PROVENANCE.json").write_text(json.dumps(input_provenance, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     manifest = {
         "tool": "ReelSec",
         "version": VERSION,
@@ -1558,6 +1582,7 @@ def main():
         "decoded_input_inventory": decoded_inventory,
         "analysis_root": str(analysis_root),
         "target_source": target_source,
+        "input_provenance": input_provenance,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
@@ -1786,6 +1811,7 @@ def main():
         decoded_input_inventory=decoded_inventory,
         analysis_root=str(analysis_root),
         target_source=target_source,
+        input_provenance=input_provenance,
     )
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
