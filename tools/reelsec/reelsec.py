@@ -296,10 +296,38 @@ def write_critical_behavior(output, ptr):
         "Classification: " + cls,
         "This is body-local evidence only; it does not prove Screenshot blocking."
     ]
+    (output / "CRITICAL-FUNCTION-BODY.txt").write_text(
+        "\n".join(body_lines) + "\n", encoding="utf-8"
+    )
     (output / "CRITICAL-FUNCTION-BEHAVIOR.md").write_text(
         "\n".join(out) + "\n", encoding="utf-8"
     )
     return cls
+
+def write_vtable_object_proof(output):
+    p = output / "ActiveDecoder-constructor.txt"
+    text = p.read_text(encoding="utf-8", errors="replace") if p.exists() else ""
+    has_base_ctor = bool(re.search(r"bl\s+0xdfbd0\s+<.*ActiveDecoderC2Ev", text))
+    has_vtable_base = bool(re.search(r"adrp x8, 0x717000", text))
+    has_vtable_add = bool(re.search(r"add x8, x8, #0xe50", text))
+    has_address_point = bool(re.search(r"add x9, x8, #0x10", text))
+    has_vptr_store = bool(re.search(r"str x9, \[x19\]", text))
+    proven = has_base_ctor and has_vtable_base and has_vtable_add and has_address_point and has_vptr_store
+    out = [
+        "# VTable Object Proof",
+        "",
+        "Object register: x19",
+        "Base constructor call observed: %s" % ("YES" if has_base_ctor else "NO"),
+        "VTable base computation 0x717000 + 0xe50 observed: %s" % ("YES" if has_vtable_base and has_vtable_add else "NO"),
+        "Address-point computation 0x717e50 + 0x10 = 0x717e60 observed: %s" % ("YES" if has_address_point else "NO"),
+        "vptr store [x19] observed: %s" % ("YES" if has_vptr_store else "NO"),
+        "",
+        "RESULT: " + ("PROVEN_OBJECT_VPTR_TO_0x717E60" if proven else "NOT_PROVEN"),
+        "",
+        "This proves the constructor path writes the recovered vtable address-point into the object register; it does not by itself prove which virtual method is invoked at runtime.",
+    ]
+    (output / "VTABLE-OBJECT-PROOF.md").write_text("\n".join(out) + "\n", encoding="utf-8")
+    return proven
 
 def write_native_security_api_audit(output, strings_text, symbols_text):
     keys = [
@@ -704,6 +732,7 @@ def main():
         dispatch_text = (output / "dispatch-sites.txt").read_text(encoding="utf-8", errors="replace")
         jni_semantic_found = write_jni_semantic_analysis(output, dispatch_text)
         disassemble(objdump, target, 0x2783C0, 0x278500, output / "ActiveDecoder-constructor.txt")
+        write_vtable_object_proof(output)
         disassemble(objdump, target, 0x112E80, 0x113000, output / "onCaptureScreen-dispatch.txt")
 
         if ptr is not None:
