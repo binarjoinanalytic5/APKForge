@@ -706,7 +706,7 @@ def write_autonomous_dataflow(output, target, objdump):
             if (
                 flabel.startswith("JNI_On") and
                 any(re.search(r"\bldr\s+x8,\s+\[x20\]", block[j])
-                    for j in range(max(0, rel_i-3), rel_i))
+                    for j in range(max(0, rel_i-12), rel_i))
             ):
                 records.append({
                     "function_address":hex(faddr),
