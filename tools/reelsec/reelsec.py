@@ -405,15 +405,24 @@ def git_publish(root, report_dir):
         result["details"] = "missing=" + ",".join(missing)
         return result
 
-    rc, out = run([git, "fetch", "--quiet", "origin", "main"], cwd=root)
-    if rc != 0:
-        result["status"] = "FETCH_FAILED"
-        result["details"] = out
-        return result
-    rc, base = run([git, "rev-parse", "origin/main"], cwd=root)
+    # bootstrap-run.sh already fetched origin/main successfully. Reuse that
+    # ref when it is available instead of performing a second network fetch.
+    # Direct invocations still refresh origin/main as a fallback.
+    ready_ref = os.environ.get("REELSEC_ORIGIN_READY", "")
+    if ready_ref:
+        rc, base = run([git, "rev-parse", ready_ref], cwd=root)
+        if rc != 0:
+            ready_ref = ""
+    if not ready_ref:
+        rc, out = run([git, "fetch", "--quiet", "origin", "main"], cwd=root)
+        if rc != 0:
+            result["status"] = "FETCH_FAILED"
+            result["details"] = out
+            return result
+        rc, base = run([git, "rev-parse", "origin/main"], cwd=root)
     if rc != 0:
         result["status"] = "BASE_RESOLUTION_FAILED"
-        result["details"] = out + base
+        result["details"] = base
         return result
 
     timestamp = time.strftime("%Y%m%d_%H%M%S")
@@ -464,10 +473,18 @@ def git_publish(root, report_dir):
 
         rc, head = run([git, "rev-parse", "HEAD"], cwd=worktree)
         result["report_commit"] = head.strip()
-        rc, out = run([git, "push", "origin", "HEAD:refs/heads/" + branch], cwd=worktree)
+        last_out = ""
+        rc = 1
+        for attempt in range(1, 4):
+            rc, out = run([git, "push", "origin", "HEAD:refs/heads/" + branch], cwd=worktree)
+            last_out = out
+            if rc == 0:
+                break
+            if attempt < 3:
+                time.sleep(2 * attempt)
         if rc != 0:
             result["status"] = "REPORT_PUSH_FAILED"
-            result["details"] = out
+            result["details"] = "push_attempts=3\n" + last_out
             return result
 
         rc, remote_head = run([git, "ls-remote", "--heads", "origin", "refs/heads/" + branch], cwd=root)
@@ -511,10 +528,18 @@ def git_publish(root, report_dir):
             return result
         result["status_commit"] = status_head.strip()
 
-        rc, out = run([git, "push", "origin", "HEAD:refs/heads/" + branch], cwd=worktree)
+        last_out = ""
+        rc = 1
+        for attempt in range(1, 4):
+            rc, out = run([git, "push", "origin", "HEAD:refs/heads/" + branch], cwd=worktree)
+            last_out = out
+            if rc == 0:
+                break
+            if attempt < 3:
+                time.sleep(2 * attempt)
         if rc != 0:
             result["status"] = "STATUS_PUSH_FAILED"
-            result["details"] = out
+            result["details"] = "push_attempts=3\n" + last_out
             return result
 
         rc, remote_head = run([git, "ls-remote", "--heads", "origin", "refs/heads/" + branch], cwd=root)
