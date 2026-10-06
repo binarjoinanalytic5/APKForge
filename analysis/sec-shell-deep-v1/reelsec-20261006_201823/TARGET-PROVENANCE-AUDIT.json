@@ -1,0 +1,30 @@
+{
+  "schema_version": "2.3",
+  "target": "0x27a510",
+  "address_point": "0x717e60",
+  "slot": "0x717f68",
+  "rtti": "0x71f4d0",
+  "type_name": "N6Cicada17mediaCodecDecoderE",
+  "target_symbol": null,
+  "previous_function": {
+    "addr": 2589684,
+    "size": 56,
+    "type": "FUNC",
+    "name": "_ZN18codecPluginManager13dummyFunctionEv"
+  },
+  "next_function": {
+    "addr": 2608444,
+    "size": 88,
+    "type": "FUNC",
+    "name": "_ZN14codecPrototype12addPrototypeEPS_"
+  },
+  "active_decoder_base_vtable": {
+    "addr": 7438360,
+    "size": 288,
+    "type": "OBJECT",
+    "name": "_ZTV13ActiveDecoder"
+  },
+  "active_decoder_base_address_point": "0x718028",
+  "active_decoder_base_slot_pointer": "0x27eca8",
+  "base_relation": "DIFFERENT_ADDRESS_POINT"
+}\n
