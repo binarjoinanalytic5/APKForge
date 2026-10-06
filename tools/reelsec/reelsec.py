@@ -17,6 +17,7 @@ from instrumentation_backend import plan_secshell_injection
 from instrumented_copy import prepare_instrumented_copy
 from build_verify import apktool_build_command, verify_artifact
 from sign_verify import artifact_identity, sign_command, verify_command, run_checked
+from adb_deploy import install_command, device_check_command
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
 VERSION = "3.0.0"
@@ -1651,6 +1652,35 @@ def main():
             encoding="utf-8",
         )
 
+    adb_deploy = {"status": "NOT_DEPLOYED"}
+    if sign_verify.get("status") == "SIGNED_VERIFIED":
+        try:
+            adb = capabilities.get("tools", {}).get("adb", {}).get("path")
+            serial = os.environ.get("REELSEC_TEST_DEVICE")
+            if not adb or not serial:
+                raise RuntimeError("ADB or REELSEC_TEST_DEVICE unavailable")
+            state_cmd = device_check_command(adb, serial)
+            state_output = run_checked(state_cmd)
+            if "device" not in state_output.strip().splitlines()[-1:]:
+                raise RuntimeError("test device is not in adb device state")
+            install_cmd = install_command(adb, serial, sign_verify["signed_path"])
+            install_output = run_checked(install_cmd)
+            adb_deploy = {
+                "status": "INSTALLED",
+                "serial": serial,
+                "artifact": sign_verify["signed_path"],
+                "artifact_sha256": sign_verify["signed_sha256"],
+                "device_check_command": state_cmd,
+                "install_command": install_cmd,
+                "install_output_tail": install_output[-2000:],
+            }
+        except Exception as exc:
+            adb_deploy = {"status": "BLOCKED_OR_FAILED", "error": str(exc)}
+        (output / "ADB-DEPLOY.json").write_text(
+            json.dumps(adb_deploy, indent=2, sort_keys=True) + "\\n",
+            encoding="utf-8",
+        )
+
     analysis_root = Path(decoded_inventory["root"]).resolve() if decoded_inventory and decoded_inventory.get("status") == "READY" else ROOT
     target = find_target(args.elf, analysis_root)
     target_source = "decoded-apk" if analysis_root != ROOT else "repository-root-fallback"
@@ -1676,6 +1706,7 @@ def main():
         "instrumented_copy": instrumented_copy,
         "build_verify": build_verify,
         "sign_verify": sign_verify,
+        "adb_deploy": adb_deploy,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
