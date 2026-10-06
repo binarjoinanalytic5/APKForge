@@ -1,0 +1,18 @@
+{
+  "mode": "AUTONOMOUS",
+  "runtime_status": "RUNTIME_ENVIRONMENT_UNAVAILABLE",
+  "schema_version": "2.3",
+  "static_dataflow": {
+    "candidates": 473,
+    "constructor_calls": 4,
+    "cxx_unresolved": 354,
+    "jni_excluded_count": 0,
+    "proven": 0,
+    "status": "completed"
+  },
+  "truth_rules": {
+    "runtime_execution": "PROVEN only when target entry observes vptr=0x717e60 and slot=0x27a510",
+    "screenshot_blocking": "never inferred from pointer presence alone",
+    "static_target_slot": "PROVEN"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "events": [],
+  "manifest": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/AndroidManifest.xml",
+  "missing_requirements": [
+    "frida_cli"
+  ],
+  "module": "libsaasCorePlayer.so",
+  "package": "com.newleaf.app.android.victor",
+  "preflight_status": "RUNTIME_TOOLCHAIN_INCOMPLETE",
+  "reason": "missing: frida_cli",
+  "status": "RUNTIME_ENVIRONMENT_UNAVAILABLE",
+  "tooling": {
+    "adb": "/data/data/com.termux/files/usr/bin/adb",
+    "adb_after": "/data/data/com.termux/files/usr/bin/adb",
+    "frida": null,
+    "frida_after": null,
+    "pkg": "/data/data/com.termux/files/usr/bin/pkg",
+    "python": "/data/data/com.termux/files/usr/bin/python"
+  }
+}
