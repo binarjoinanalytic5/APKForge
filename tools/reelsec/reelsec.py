@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 
 from environment import write_capability_matrix
-from apktool_backend import ApktoolBackendError, select_apktool_backend
+from apktool_backend import ApktoolBackendError, select_apktool_backend, decode_command
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
 VERSION = "3.0.0"
@@ -37,6 +37,31 @@ PROBES = [
     "environment-capability",
     "campaign-cli",
 ]
+
+def run_apktool_decode(selection, apk, output_dir, timeout=300):
+    """Decode APK into an isolated output directory and verify the result."""
+    apk = Path(apk).expanduser().resolve()
+    output_dir = Path(output_dir).expanduser().resolve()
+    if not apk.is_file():
+        raise ApktoolBackendError("APK input does not exist: %s" % apk)
+    if output_dir == apk.parent:
+        raise ApktoolBackendError("Decode output must not be the APK directory")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    command = decode_command(selection, apk, output_dir)
+    rc, log = run(command, timeout=timeout)
+    (output_dir / "reelsec-apktool.log").write_text(log, encoding="utf-8", errors="replace")
+    if rc != 0:
+        return {"status": "FAILED", "returncode": rc, "command": command,
+                "output_dir": str(output_dir), "log": str(output_dir / "reelsec-apktool.log")}
+    required = [output_dir / "AndroidManifest.xml", output_dir / "smali"]
+    missing = [str(p) for p in required if not p.exists()]
+    if missing:
+        return {"status": "FAILED_VALIDATION", "returncode": rc, "command": command,
+                "output_dir": str(output_dir), "missing": missing,
+                "log": str(output_dir / "reelsec-apktool.log")}
+    return {"status": "DECODED", "returncode": rc, "command": command,
+            "output_dir": str(output_dir),
+            "log": str(output_dir / "reelsec-apktool.log")}
 
 def run(cmd, cwd=None, timeout=None):
     try:
