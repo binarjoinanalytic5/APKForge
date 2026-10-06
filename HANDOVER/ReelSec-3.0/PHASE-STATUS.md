@@ -36,6 +36,12 @@ A signing and verification gate is now present for the isolated build artifact. 
 
 If the signer or test keystore is unavailable, the campaign records `BLOCKED_OR_FAILED` rather than treating the unsigned APK as ready for device deployment.
 
+## Completed in this stage
+
+A guarded ADB deployment gate is now present. Deployment requires a successfully verified signed artifact and an explicit `REELSEC_TEST_DEVICE` serial. The gate performs an ADB state check before installation and records the artifact SHA-256 and install command in `ADB-DEPLOY.json`.
+
+The gate has no path that installs `original.apk`; it only accepts the signed artifact produced by the signing stage.
+
 ## Next engineering gate
 
-Implement the **controlled mutation + build/sign/verify pipeline** end-to-end, then add the ADB deployment gate. Deployment must require a successfully signed artifact and explicit test-device targeting; no deployment of the original APK should be performed by ReelSec.
+Add the runtime observation/capture layer. It should collect passive device evidence (logcat/process/package state) first, then add controlled Frida Gadget observation when the instrumented build provides Gadget. Runtime classifications must remain separate for original and instrumented artifacts.
