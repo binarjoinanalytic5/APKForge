@@ -308,10 +308,11 @@ def write_vtable_object_proof(output):
     p = output / "ActiveDecoder-constructor.txt"
     text = p.read_text(encoding="utf-8", errors="replace") if p.exists() else ""
     has_base_ctor = bool(re.search(r"bl\s+0xdfbd0\s+<.*ActiveDecoderC2Ev", text))
-    has_vtable_base = bool(re.search(r"adrp x8, 0x717000", text))
-    has_vtable_add = bool(re.search(r"add x8, x8, #0xe50", text))
-    has_address_point = bool(re.search(r"add x9, x8, #0x10", text))
-    has_vptr_store = bool(re.search(r"str x9, \[x19\]", text))
+    # objdump may separate mnemonic/operands with tabs or variable whitespace.
+    has_vtable_base = bool(re.search(r"\badrp\s+x8,\s+0x717000\b", text))
+    has_vtable_add = bool(re.search(r"\badd\s+x8,\s+x8,\s+#0xe50\b", text))
+    has_address_point = bool(re.search(r"\badd\s+x9,\s+x8,\s+#0x10\b", text))
+    has_vptr_store = bool(re.search(r"\bstr\s+x9,\s+\[x19\]", text))
     proven = has_base_ctor and has_vtable_base and has_vtable_add and has_address_point and has_vptr_store
     out = [
         "# VTable Object Proof",
