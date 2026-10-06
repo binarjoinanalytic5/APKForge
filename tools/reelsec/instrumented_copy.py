@@ -95,29 +95,40 @@ def apply_text_probe(work_dir, target_smali):
     text = target.read_text(encoding="utf-8", errors="replace")
     if "ReelSec-Instrumentation" in text:
         raise InstrumentedCopyError("instrumentation marker already present")
-    pattern = re.compile(
-        r"^(?P<indent>\\s*)invoke-static\\s+\\{(?P<registers>[^}]+)\\},\\s*"
-        r"Ljava/lang/System;->loadLibrary\\(Ljava/lang/String;\\)V\\s*$",
-        re.MULTILINE,
-    )
-    match = pattern.search(text)
-    if not match:
-        raise InstrumentedCopyError("expected SecShell loadLibrary Smali invoke not found")
+
+    lines = text.splitlines()
+    anchor_index = None
+    anchor_line = None
+    for i, line in enumerate(lines):
+        if "Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V" in line:
+            anchor_index = i
+            anchor_line = line.strip()
+            break
+    if anchor_index is None:
+        raise InstrumentedCopyError("System.loadLibrary anchor not found")
 
     updated, register_base = _reserve_probe_registers(text, 2)
+    probe_lines = updated.splitlines()
+    # Re-find the same anchor after register declaration expansion.
+    anchor_index = next(
+        (i for i, line in enumerate(probe_lines)
+         if "Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V" in line),
+        None,
+    )
+    if anchor_index is None:
+        raise InstrumentedCopyError("System.loadLibrary anchor disappeared after register update")
+
     probe_v0 = register_base
     probe_v1 = register_base + 1
-    anchor = match.group(0).strip()
-    indent = match.group("indent")
-    replacement = (
-        anchor + "\n"
-        + indent + "const-string v%d, \"ReelSec-Instrumentation\"\n" % probe_v0
-        + indent + "const-string v%d, \"SecShell loadLibrary reached\"\n" % probe_v1
-        + indent + "invoke-static {v%d, v%d}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I"
-          % (probe_v0, probe_v1)
-    )
-    updated = text.replace(match.group(0), replacement, 1)
+    probe_lines[anchor_index + 1:anchor_index + 1] = [
+        '    const-string v%d, "ReelSec-Instrumentation"' % probe_v0,
+        '    const-string v%d, "SecShell loadLibrary reached"' % probe_v1,
+        '    invoke-static {v%d, v%d}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I'
+        % (probe_v0, probe_v1),
+    ]
+    updated = "\n".join(probe_lines) + ("\n" if text.endswith("\n") else "")
     target.write_text(updated, encoding="utf-8")
+
 
     manifest_path = work / "INSTRUMENTED-COPY-MANIFEST.json"
     if not manifest_path.is_file():
