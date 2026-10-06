@@ -24,6 +24,16 @@ offline-device        offline
         self.assertEqual(records[0]["attributes"]["model"], "SM_N986U")
         self.assertEqual(records[0]["attributes"]["transport_id"], "1")
 
+    def test_frida_failure_classifies_jailed_android_as_gadget_required(self):
+        output = """     ____
+Connected to SM N986U (id=192.168.8.8:42025)
+Spawning `com.newleaf.app.android.victor`...
+Failed to spawn: need Gadget to attach on jailed Android; its default location is: /root/.cache/frida/gadget-android-arm64.so
+"""
+        status, reason = MODULE.classify_frida_failure(output)
+        self.assertEqual(status, "FRIDA_GADGET_REQUIRED")
+        self.assertIn("jailed device", reason)
+
     def test_runtime_client_resolution_prefers_preflight_paths(self):
         with tempfile.TemporaryDirectory() as td:
             base = Path(td)
