@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
-VERSION = "2.2.1"
+VERSION = "2.2.2"
 PROBES = [
     "elf",
     "symbols",
@@ -1084,7 +1084,7 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
             result["execution_attempted"] = True
 
             frida_rc, frida_output = run(
-                [frida, "-U", "-f", package, "-l", str(script), "--no-pause"],
+                [frida, "-U", "-f", package, "-l", str(script)],
                 timeout=18,
             )
 
