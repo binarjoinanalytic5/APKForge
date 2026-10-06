@@ -1249,6 +1249,8 @@ def git_publish(root, report_dir):
         "TARGET-PROVENANCE-AUDIT.json",
         "RUNTIME-TOOLCHAIN-PREFLIGHT.md",
         "RUNTIME-TOOLCHAIN-PREFLIGHT.json",
+        "CAPABILITY-MATRIX.md",
+        "CAPABILITY-MATRIX.json",
         "RUNTIME-PROOF-READINESS.md",
         "RUNTIME-PROBE.json",
         "AUTONOMOUS-CAMPAIGN.md",
