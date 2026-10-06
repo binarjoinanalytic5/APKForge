@@ -1,0 +1,289 @@
+{
+  "tool": "ReelSec",
+  "version": "3.0.0",
+  "probes": [
+    "elf",
+    "symbols",
+    "strings",
+    "vtable",
+    "dispatch",
+    "critical-function",
+    "protection-bridge",
+    "vtable-abi",
+    "critical-function-behavior",
+    "native-security-api",
+    "java-screen-security",
+    "auto-publish",
+    "autonomous-dataflow",
+    "runtime-proof-readiness",
+    "runtime-frida-probe",
+    "target-provenance",
+    "runtime-toolchain-preflight",
+    "environment-capability",
+    "campaign-cli"
+  ],
+  "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261006_232304-19932/raw-apk/lib/arm64-v8a/libsaasCorePlayer.so",
+  "created_at": "2026-10-06T23:23:11+0300",
+  "mode": "campaign",
+  "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+  "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+  "capabilities": {
+    "schema_version": "1.0",
+    "resolver": "ReelSec Environment Resolver",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00",
+    "tools": {
+      "java": {
+        "name": "java",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "openjdk 21.0.12 2026-07-21",
+        "returncode": 0
+      },
+      "python": {
+        "name": "python",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/python3.14",
+        "version": "Python 3.14.6",
+        "returncode": 0
+      },
+      "adb": {
+        "name": "adb",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/adb",
+        "version": "Android Debug Bridge version 1.0.41",
+        "returncode": 0,
+        "device_query": "USABLE",
+        "devices": [
+          "192.168.8.8:42025      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+        ]
+      },
+      "apktool": {
+        "name": "apktool-standalone",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "2.7.0-dirty",
+        "backend": "java-classpath",
+        "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+        "attempts": [
+          {
+            "backend": "cli",
+            "path": "/data/data/com.termux/files/usr/bin/apktool",
+            "returncode": 1
+          },
+          {
+            "backend": "java-classpath",
+            "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+            "returncode": 0
+          }
+        ]
+      },
+      "frida": {
+        "name": "frida",
+        "status": "MISSING",
+        "path": null
+      },
+      "signing": {
+        "zipalign": {
+          "name": "zipalign",
+          "status": "BROKEN",
+          "path": "/data/data/com.termux/files/usr/bin/zipalign",
+          "version": null,
+          "returncode": 127
+        },
+        "apksigner": {
+          "name": "apksigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/bin/apksigner",
+          "version": "0.9",
+          "returncode": 0
+        },
+        "jarsigner": {
+          "name": "jarsigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+          "version": "jarsigner 21.0.12",
+          "returncode": 0
+        }
+      }
+    },
+    "device": {
+      "online_count": 1,
+      "state": "USABLE",
+      "records": [
+        "192.168.8.8:42025      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+      ]
+    },
+    "policy": {
+      "available_is_not_usable": true,
+      "resolver_does_not_install": true,
+      "original_apk_is_immutable": true
+    }
+  },
+  "apktool_backend": {
+    "name": "apktool-standalone",
+    "backend": "java-classpath",
+    "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+    "version": "2.7.0-dirty",
+    "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+    "status": "SELECTED"
+  },
+  "apktool_decode": {
+    "status": "DECODE_FAILED_RAW_FALLBACK",
+    "returncode": 1,
+    "command": [
+      "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "-cp",
+      "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "brut.apktool.Main",
+      "d",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+      "-o",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261006_232304-19932/decoded-apk"
+    ],
+    "output_dir": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261006_232304-19932/decoded-apk",
+    "log": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261006_232304-19932/decoded-apk/reelsec-apktool.log",
+    "raw_fallback": {
+      "status": "RAW_EXTRACTED",
+      "mode": "RAW_APK_ZIP_EXTRACTION",
+      "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+      "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+      "output_dir": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261006_232304-19932/raw-apk",
+      "extracted_files": 3885,
+      "skipped_members": [],
+      "decoded": false,
+      "instrumentable_smali": false,
+      "buildable_with_apktool": false,
+      "mutates_original_apk": false
+    }
+  },
+  "decoded_input_inventory": {
+    "schema_version": "1.1",
+    "status": "READY_NATIVE_ONLY",
+    "analysis_mode": "RAW_NATIVE_EXTRACTION",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261006_232304-19932/raw-apk",
+    "manifest": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261006_232304-19932/raw-apk/AndroidManifest.xml",
+    "smali_roots": [],
+    "smali_file_count": 0,
+    "native_library_count": 50,
+    "native_libraries": [
+      "lib/arm64-v8a/libSecShell-x86.so",
+      "lib/arm64-v8a/libSecShell.so",
+      "lib/arm64-v8a/libalinetworkdiagnosis.so",
+      "lib/arm64-v8a/libalivcffmpeg.so",
+      "lib/arm64-v8a/libapplovin-native-crash-reporter.so",
+      "lib/arm64-v8a/libbuffer_pgl.so",
+      "lib/arm64-v8a/libc++_shared.so",
+      "lib/arm64-v8a/libcrashlytics-common.so",
+      "lib/arm64-v8a/libcrashlytics-handler.so",
+      "lib/arm64-v8a/libcrashlytics-trampoline.so",
+      "lib/arm64-v8a/libcrashlytics.so",
+      "lib/arm64-v8a/libdatastore_shared_counter.so",
+      "lib/arm64-v8a/libfile_lock_pgl.so",
+      "lib/arm64-v8a/libmarsxlog.so",
+      "lib/arm64-v8a/libmku_aaab.so",
+      "lib/arm64-v8a/libmmkv.so",
+      "lib/arm64-v8a/libnms.so",
+      "lib/arm64-v8a/libpglarmor.so",
+      "lib/arm64-v8a/libprotect.so",
+      "lib/arm64-v8a/libsaasCorePlayer.so",
+      "lib/arm64-v8a/libsaasDownloader.so",
+      "lib/arm64-v8a/libsls_producer.so",
+      "lib/arm64-v8a/libstupid.so",
+      "lib/arm64-v8a/libtapjoy.so",
+      "lib/arm64-v8a/libtt_ugen_layout.so",
+      "lib/armeabi-v7a/libSecShell-x86.so",
+      "lib/armeabi-v7a/libSecShell.so",
+      "lib/armeabi-v7a/libalinetworkdiagnosis.so",
+      "lib/armeabi-v7a/libalivcffmpeg.so",
+      "lib/armeabi-v7a/libapplovin-native-crash-reporter.so",
+      "lib/armeabi-v7a/libbuffer_pgl.so",
+      "lib/armeabi-v7a/libc++_shared.so",
+      "lib/armeabi-v7a/libcrashlytics-common.so",
+      "lib/armeabi-v7a/libcrashlytics-handler.so",
+      "lib/armeabi-v7a/libcrashlytics-trampoline.so",
+      "lib/armeabi-v7a/libcrashlytics.so",
+      "lib/armeabi-v7a/libdatastore_shared_counter.so",
+      "lib/armeabi-v7a/libfile_lock_pgl.so",
+      "lib/armeabi-v7a/libmarsxlog.so",
+      "lib/armeabi-v7a/libmku_aaab.so",
+      "lib/armeabi-v7a/libmmkv.so",
+      "lib/armeabi-v7a/libnms.so",
+      "lib/armeabi-v7a/libpglarmor.so",
+      "lib/armeabi-v7a/libprotect.so",
+      "lib/armeabi-v7a/libsaasCorePlayer.so",
+      "lib/armeabi-v7a/libsaasDownloader.so",
+      "lib/armeabi-v7a/libsls_producer.so",
+      "lib/armeabi-v7a/libstupid.so",
+      "lib/armeabi-v7a/libtapjoy.so",
+      "lib/armeabi-v7a/libtt_ugen_layout.so"
+    ],
+    "dex_count": 1,
+    "dex_files": [
+      "classes.dex"
+    ]
+  },
+  "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261006_232304-19932/raw-apk",
+  "target_source": "raw-apk-extract",
+  "input_provenance": {
+    "schema_version": "1.1",
+    "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+    "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+    "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261006_232304-19932/raw-apk",
+    "analysis_root_kind": "raw_apk_extraction_from_input",
+    "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261006_232304-19932/raw-apk/lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_relative_path": "lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+    "target_relation": "WITHIN_ANALYSIS_ROOT",
+    "evidence_scope": "raw-apk-native-static-analysis",
+    "causality_proven": false
+  },
+  "instrumentation_plan": {
+    "status": "BLOCKED",
+    "reason": "SecShell AW.smali anchor not found",
+    "candidate_count": 0
+  },
+  "instrumented_copy": {
+    "status": "NOT_PREPARED"
+  },
+  "build_verify": {
+    "status": "NOT_BUILT"
+  },
+  "sign_verify": {
+    "status": "NOT_SIGNED"
+  },
+  "adb_deploy": {
+    "status": "NOT_DEPLOYED"
+  },
+  "runtime_capture": {
+    "status": "NOT_CAPTURED"
+  },
+  "gadget_observation": {
+    "status": "NOT_PLANNED"
+  },
+  "evidence_ledger": {
+    "status": "NOT_READY"
+  },
+  "status": "completed",
+  "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+  "critical_pointer": "0x27a510",
+  "jni_semantic_found": true,
+  "vtable_abi": {
+    "address_point": "0x717e60",
+    "slot": "0x717f68",
+    "rtti": "0x71f4d0",
+    "type_name": "N6Cicada17mediaCodecDecoderE",
+    "container_vtable": null,
+    "pointer": "0x27a510",
+    "function_symbol": null
+  },
+  "critical_function_behavior": "NO_SECURITY_OPERATION_OBSERVED",
+  "autonomous_dataflow": {
+    "status": "completed",
+    "proven": 0,
+    "candidates": 473,
+    "cxx_unresolved": 354,
+    "jni_excluded_count": 6,
+    "constructor_calls": 4
+  },
+  "runtime_probe_status": "RUNTIME_ENVIRONMENT_UNAVAILABLE"
+}
