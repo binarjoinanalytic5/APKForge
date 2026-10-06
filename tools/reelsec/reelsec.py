@@ -21,6 +21,10 @@ PROBES = [
     "dispatch",
     "critical-function",
     "protection-bridge",
+    "vtable-abi",
+    "critical-function-behavior",
+    "native-security-api",
+    "java-screen-security",
     "auto-publish",
 ]
 
@@ -178,6 +182,72 @@ def write_jni_semantic_analysis(output, dispatch_text):
         report.append('No matching 0x108 JNI argument pattern was found.')
     (output / 'JNI-SEMANTIC-ANALYSIS.md').write_text('\n'.join(report) + '\n', encoding='utf-8')
     return bool(hits)
+def cstring_at(data, va):
+    off = va_to_offset(data, va)
+    if off is None or off >= len(data):
+        return None
+    end = data.find(b"\x00", off)
+    raw = data[off:end if end != -1 else len(data)]
+    return raw.decode("ascii", errors="ignore")
+
+def write_vtable_abi_analysis(output, data, symbols_text):
+    address_point = 0x717e60
+    slot = 0x717f68
+    symbols = []
+    for line in symbols_text.splitlines():
+        fields = line.split()
+        if len(fields) < 8:
+            continue
+        try:
+            symbols.append((int(fields[1], 16), int(fields[2]), fields[3], fields[-1]))
+        except ValueError:
+            pass
+
+    container = None
+    for value, size, typ, name in symbols:
+        if typ == "OBJECT" and "_ZTV" in name and value <= address_point < value + max(size, 1):
+            container = (value, size, name)
+            break
+
+    top = read_pointer(data, address_point - 0x10)[0]
+    rtti = read_pointer(data, address_point - 0x8)[0]
+    name_ptr = read_pointer(data, rtti + 0x8)[0] if rtti else None
+    type_name = cstring_at(data, name_ptr) if name_ptr else None
+    ptr = read_pointer(data, slot)[0]
+
+    func = None
+    for value, size, typ, name in symbols:
+        if typ == "FUNC" and value <= ptr < value + max(size, 1):
+            func = (value, size, name)
+            break
+
+    out = [
+        "# VTable ABI Analysis",
+        "",
+        "Address-point: 0x%x" % address_point,
+        "Critical slot: 0x%x" % slot,
+        "Slot offset: +0x108",
+        "Offset-to-top: %s" % (hex(top) if top is not None else "UNRESOLVED"),
+        "RTTI pointer: %s" % (hex(rtti) if rtti is not None else "UNRESOLVED"),
+        "RTTI name pointer: %s" % (hex(name_ptr) if name_ptr is not None else "UNRESOLVED"),
+        "RTTI type name: %s" % (type_name or "UNRESOLVED"),
+        "Container vtable symbol: %s" % (container[2] if container else "UNRESOLVED"),
+        "Function pointer: %s" % (hex(ptr) if ptr is not None else "UNRESOLVED"),
+        "Function symbol: %s" % (func[2] if func else "NOT_RESOLVED_BY_SYMBOL_TABLE"),
+        "",
+        "This ABI resolution is independent of the JNI +0x108 analysis.",
+    ]
+    (output / "VTABLE-ABI-ANALYSIS.md").write_text("\n".join(out) + "\n", encoding="utf-8")
+    return {
+        "address_point": hex(address_point),
+        "slot": hex(slot),
+        "rtti": hex(rtti) if rtti is not None else None,
+        "type_name": type_name,
+        "container_vtable": container[2] if container else None,
+        "pointer": hex(ptr) if ptr is not None else None,
+        "function_symbol": func[2] if func else None,
+    }
+
 def git_publish(root, report_dir):
     """Publish from a clean worktree based on origin/main; never mutate the investigation checkout."""
     result = {
@@ -479,6 +549,8 @@ def main():
         )
 
     jni_semantic_found = False
+    vtable_abi = write_vtable_abi_analysis(output, data, symbols_text)
+    critical_behavior = "NOT_RUN"
     if objdump:
         disassemble(objdump, target, 0x27AE80, 0x27B280, output / "dispatch-sites.txt")
         dispatch_text = (output / "dispatch-sites.txt").read_text(encoding="utf-8", errors="replace")
@@ -578,6 +650,8 @@ def main():
         target_sha256=digest,
         critical_pointer=(hex(ptr) if ptr is not None else None),
         jni_semantic_found=jni_semantic_found,
+        vtable_abi=vtable_abi,
+        critical_function_behavior=critical_behavior,
     )
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
