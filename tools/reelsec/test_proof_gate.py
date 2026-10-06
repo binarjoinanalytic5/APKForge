@@ -16,7 +16,7 @@ from proof_gate import (
 class ProofGateTests(unittest.TestCase):
     def test_static_never_becomes_runtime(self):
         provenance = {"target_relation": "WITHIN_ANALYSIS_ROOT"}
-        self.assertEqual(classify_target_evidence(provenance), PROVEN_STATIC)
+        self.assertEqual(classify_target_evidence(provenance), UNPROVEN)
 
     def test_original_runtime_requires_execution(self):
         provenance = {"target_relation": "WITHIN_ANALYSIS_ROOT"}
