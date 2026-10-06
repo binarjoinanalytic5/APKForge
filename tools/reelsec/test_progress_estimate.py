@@ -12,6 +12,12 @@ SPEC.loader.exec_module(MODULE)
 
 
 class ProgressEstimateTests(unittest.TestCase):
+    def test_activity_signal_distinguishes_process_work_from_quiet_output(self):
+        self.assertEqual(MODULE._activity_signal(120, 8), "CPU+LOG")
+        self.assertEqual(MODULE._activity_signal(0, 8), "CPU")
+        self.assertEqual(MODULE._activity_signal(64, 0), "LOG")
+        self.assertEqual(MODULE._activity_signal(0, 0), "QUIET")
+
     def test_baksmali_progress_uses_decoded_class_ratio(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
