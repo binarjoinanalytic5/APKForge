@@ -830,9 +830,14 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
     adb, frida = which("adb"), which("frida")
     result["tooling"].update(adb=adb, frida=frida)
 
-    if not adb or not frida or not package:
+    missing=[]
+    if not package: missing.append("package_manifest")
+    if not adb: missing.append("adb")
+    if not frida: missing.append("frida_cli")
+    result["missing_requirements"]=missing
+    if missing:
         result["status"]="RUNTIME_ENVIRONMENT_UNAVAILABLE"
-        result["reason"]="requires package manifest, adb, and frida"
+        result["reason"]="missing: " + ",".join(missing)
     else:
         rc, devices = run([adb, "devices", "-l"])
         active=[x for x in devices.splitlines()
