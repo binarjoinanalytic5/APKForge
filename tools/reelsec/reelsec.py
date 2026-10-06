@@ -15,6 +15,7 @@ from environment import write_capability_matrix
 from apktool_backend import ApktoolBackendError, select_apktool_backend, decode_command
 from instrumentation_backend import plan_secshell_injection, find_secshell_application
 from instrumented_copy import prepare_instrumented_copy, apply_text_probe
+from gadget_embed import embed_frida_gadget
 from build_verify import apktool_build_command, verify_artifact
 from sign_verify import artifact_identity, sign_command, verify_command, run_checked
 from adb_deploy import (
@@ -2450,6 +2451,21 @@ def main():
             instrumented_copy = apply_text_probe(
                 instrumented_copy_root, copied_target
             )
+            gadget_path = os.environ.get("REELSEC_FRIDA_GADGET", "").strip()
+            if gadget_path:
+                gadget_abi = os.environ.get("REELSEC_FRIDA_GADGET_ABI", "arm64-v8a").strip()
+                gadget_port = _positive_int_env("REELSEC_FRIDA_GADGET_PORT", 27042)
+                instrumented_copy = embed_frida_gadget(
+                    instrumented_copy_root,
+                    copied_target,
+                    gadget_path,
+                    abi=gadget_abi,
+                    port=gadget_port,
+                )
+                instrumented_copy["gadget_enabled"] = True
+                instrumented_copy["gadget_source"] = str(Path(gadget_path).expanduser().resolve())
+            else:
+                instrumented_copy["gadget_enabled"] = False
             instrumented_copy["instrumentation_target"] = str(copied_target)
         except Exception as exc:
             instrumented_copy = {"status": "FAILED", "error": str(exc)}
