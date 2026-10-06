@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout android:clipChildren="false" android:clipToPadding="false" android:layout_width="-1" android:layout_height="-1"
+  xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:mv="http://schemas.android.com/apk/res-auto">
+    <TextView android:gravity="0x00000011" android:id="@2131364269" android:padding="0.0dip" android:layout_width="-2" android:layout_height="-2" android:singleLine="true" android:includeFontPadding="false" mv:layout_constrainedWidth="true" mv:layout_constraintBottom_toBottomOf="parent" mv:layout_constraintEnd_toEndOf="parent" mv:layout_constraintStart_toStartOf="parent" mv:layout_constraintTop_toTopOf="parent" />
+    <androidx.appcompat.widget.AppCompatImageView android:id="@2131362864" android:padding="0.0dip" android:layout_width="-2" android:layout_height="28.0dip" android:scaleType="6" mv:layout_constrainedWidth="true" mv:layout_constraintBottom_toBottomOf="parent" mv:layout_constraintEnd_toEndOf="parent" mv:layout_constraintStart_toStartOf="parent" mv:layout_constraintTop_toTopOf="parent" />
+    <ImageView android:id="@2131362828" android:background="@2131231300" android:visibility="2" android:layout_width="6.0dip" android:layout_height="6.0dip" android:layout_marginTop="1.0dip" android:layout_marginRight="-3.0dip" android:layoutDirection="0" mv:layout_constraintRight_toRightOf="parent" mv:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

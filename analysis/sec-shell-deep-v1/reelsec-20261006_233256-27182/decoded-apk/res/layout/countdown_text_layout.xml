@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:orientation="0" android:tag="" android:layout_width="-2" android:layout_height="-2"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <TextView android:textSize="13.0sp" android:textColor="@2131099774" android:gravity="0x00000011" android:id="@2131364034" android:background="@2131231080" android:layout_width="20.0dip" android:layout_height="18.0dip" />
+    <TextView android:textSize="13.0sp" android:textColor="#ffc9c9c9" android:gravity="0x00000011" android:id="@2131364049" android:layout_width="-2" android:layout_height="18.0dip" android:text="" android:layout_marginStart="4.0dip" android:layout_marginEnd="4.0dip" />
+    <TextView android:textSize="13.0sp" android:textColor="@2131099774" android:gravity="0x00000011" android:id="@2131364078" android:background="@2131231080" android:layout_width="20.0dip" android:layout_height="18.0dip" />
+    <TextView android:textSize="13.0sp" android:textColor="#ffc9c9c9" android:gravity="0x00000011" android:layout_width="-2" android:layout_height="18.0dip" android:text="" android:layout_marginStart="4.0dip" android:layout_marginEnd="4.0dip" />
+    <TextView android:textSize="13.0sp" android:textColor="@2131099774" android:gravity="0x00000011" android:id="@2131364217" android:background="@2131231080" android:layout_width="20.0dip" android:layout_height="18.0dip" />
+</LinearLayout>
