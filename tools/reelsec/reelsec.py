@@ -1746,7 +1746,8 @@ def main():
         "sign_verify": sign_verify,
         "adb_deploy": adb_deploy,
         "runtime_capture": runtime_capture,
-        "gadget_observation": gadget_observation,\n        "evidence_ledger": evidence_ledger,
+        "gadget_observation": gadget_observation,
+        "evidence_ledger": evidence_ledger,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
