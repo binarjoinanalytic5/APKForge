@@ -28,6 +28,7 @@ def select_apktool_backend(environment):
         "backend": backend,
         "path": item.get("path"),
         "version": item.get("version"),
+        "classpath": item.get("classpath"),
         "status": "SELECTED",
     }
 
@@ -43,8 +44,11 @@ def decode_command(selection, apk, output_dir):
     output_dir = str(Path(output_dir).resolve())
     if selection["backend"] == "cli":
         return [selection["path"], "d", apk, "-o", output_dir]
-    # The standalone Ubuntu installation is invoked through the discovered
-    # Java binary and its classpath encoded by the environment probe.
-    raise ApktoolBackendError(
-        "Standalone Java-classpath decode command requires its classpath metadata"
-    )
+    java = selection.get("path")
+    classpath = selection.get("classpath")
+    if not java or not classpath:
+        raise ApktoolBackendError("Standalone backend is missing Java/classpath metadata")
+    return [
+        java, "-cp", classpath, "brut.apktool.Main",
+        "d", apk, "-o", output_dir
+    ]
