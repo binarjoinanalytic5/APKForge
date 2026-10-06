@@ -701,6 +701,24 @@ def write_autonomous_dataflow(output, target, objdump):
             if not any(re.search(r"\bblr\s+x8\b",w) for w in window):
                 continue
 
+            # Clear JNI lifecycle callbacks use JNIEnv* dispatch tables; do
+            # not count these as unresolved C++ object-vtable candidates.
+            if (
+                flabel.startswith("JNI_On") and
+                any(re.search(r"\bldr\s+x8,\s+\[x20\]", block[j])
+                    for j in range(max(0, rel_i-3), rel_i))
+            ):
+                records.append({
+                    "function_address":hex(faddr),
+                    "function":flabel,
+                    "dispatch_address":line.split(":",1)[0].strip(),
+                    "classification":"JNI_DISPATCH_EXCLUDED",
+                    "proof_basis":"JNI_On* lifecycle callback with JNIEnv table load",
+                    "constructor_evidence":None,
+                    "window":"\n".join(block[max(0,rel_i-8):min(len(block),rel_i+6)])
+                })
+                continue
+
             # Correctly track explicit construction of the target address-point.
             direct_vtable=False
             direct_basis=None
@@ -1433,35 +1451,3 @@ def main():
         target_sha256=digest,
         critical_pointer=(hex(ptr) if ptr is not None else None),
         jni_semantic_found=jni_semantic_found,
-        vtable_abi=vtable_abi,
-        critical_function_behavior=critical_behavior,
-        autonomous_dataflow=dataflow_result,
-        runtime_probe_status=(runtime_result.get("status") if runtime_result else "NOT_RUN"),
-    )
-    (output / "manifest.json").write_text(
-        json.dumps(manifest, indent=2),
-        encoding="utf-8",
-    )
-
-    publish = None if args.no_publish else git_publish(ROOT, output)
-    if publish and not (output / "PUBLISH-STATUS.json").exists():
-        (output / "PUBLISH-STATUS.json").write_text(
-            json.dumps(publish, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-        )
-
-    print("REPORT=" + str(output))
-    print("FUNCTION_POINTER=" + (hex(ptr) if ptr is not None else "NOT_RESOLVED"))
-    if symbol_lines:
-        print("SYMBOL=" + symbol_lines[0])
-    if publish:
-        print("PUBLISH_STATUS=" + publish["status"])
-        print("PUBLISH_BRANCH=" + str(publish["branch"]))
-        print("PUBLISH_REPORT_COMMIT=" + str(publish["report_commit"]))
-        print("PUBLISH_STATUS_COMMIT=" + str(publish["status_commit"]))
-    print("TARGET_PROVENANCE_STATUS=" + str(target_provenance.get("base_relation") if target_provenance else "NOT_RUN"))
-    print("AUTONOMOUS_DATAFLOW_PROVEN=" + str(bool(dataflow_result.get("proven", 0))))
-    print("RUNTIME_PROOF_STATUS=" + str(runtime_result.get("status") if runtime_result else "NOT_RUN"))
-
-if __name__ == "__main__":
-    main()
