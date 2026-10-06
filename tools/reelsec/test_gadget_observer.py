@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from gadget_observer import (
     GadgetObserverError,
     observation_record,
+    validate_target_observation,
     plan_gadget_observation,
 )
 
@@ -34,6 +35,13 @@ class GadgetObserverTests(unittest.TestCase):
             result = observation_record(plan, {"target_hit": True})
             self.assertEqual(result["proof_class"], "OBSERVED")
             self.assertFalse(result["causal_proof"])
+
+    def test_target_observation_requires_matching_module_and_offset(self):
+        event = {"target_executed": True, "module": "libsaasCorePlayer.so", "offset": "0x27a510"}
+        result = validate_target_observation(event, "libsaasCorePlayer.so", "0x27a510")
+        self.assertTrue(result["runtime_observed"])
+        self.assertEqual(result["proof_class"], "TARGET_EXECUTION_OBSERVED")
+        self.assertFalse(result["causal_proof"])
 
     def test_missing_artifact_rejected(self):
         with self.assertRaises(GadgetObserverError):
