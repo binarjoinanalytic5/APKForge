@@ -44,12 +44,10 @@ class CampaignOrchestrationTests(unittest.TestCase):
                     timeout=10,
                 )
 
-            self.assertEqual(result["status"], "DECODED_NO_RES")
-            self.assertEqual(result["mode"], "APKTOOL_NO_RES")
-            recovery = root / "decoded-no-res"
-            self.assertTrue((recovery / "AndroidManifest.xml").is_file())
-            self.assertTrue((recovery / "smali").is_dir())
-            self.assertTrue(result["instrumentable_smali"])
+            self.assertEqual(result["status"], "DECODED")
+            self.assertTrue((output / "AndroidManifest.xml").is_file())
+            self.assertTrue((output / "smali").is_dir())
+            self.assertTrue((output / "reelsec-apktool.log").is_file())
 
     def test_decode_recovers_with_no_resources_after_full_decode_failure(self):
         with tempfile.TemporaryDirectory() as td:
@@ -87,15 +85,27 @@ class CampaignOrchestrationTests(unittest.TestCase):
             self.assertTrue((recovery / "AndroidManifest.xml").is_file())
             self.assertTrue((recovery / "smali" / "Example.smali").is_file())
 
-    def test_decode_no_res_is_accepted_as_campaign_analysis_root(self):
-        inventory = {
-            "status": "READY",
-            "root": "/tmp/reelsec-no-res",
-            "decode_mode": "APKTOOL_NO_RES",
-            "resources_decoded": False,
-        }
-        self.assertIn(inventory["status"], ("READY", "READY_NATIVE_ONLY"))
-        self.assertEqual(inventory["decode_mode"], "APKTOOL_NO_RES")
+    def test_no_res_first_is_default_instrumentation_path(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            apk = root / "original.apk"
+            apk.write_bytes(b"fake-apk")
+            tool = self._fake_apktool(root)
+            output = root / "decoded"
+
+            result = MODULE.run_apktool_decode(
+                {"backend": "cli", "path": str(tool)},
+                apk,
+                output,
+                timeout=10,
+            )
+
+            self.assertEqual(result["status"], "DECODED_NO_RES")
+            self.assertEqual(result["selection_strategy"], "NO_RES_FIRST")
+            self.assertTrue(result["instrumentable_smali"])
+            recovery = root / "decoded-no-res"
+            self.assertTrue((recovery / "AndroidManifest.xml").is_file())
+            self.assertTrue((recovery / "smali").is_dir())
 
     def test_decode_refuses_nonempty_existing_output(self):
         with tempfile.TemporaryDirectory() as td:
