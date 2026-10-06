@@ -1,0 +1,8 @@
+{
+  "attempted": true,
+  "status": "PUBLISHED",
+  "branch": "reelsec/reports/20261006_172546",
+  "commit": "12ce78ffd2af371b4efe99539ca19bda5369d8a9",
+  "remote": "origin/reelsec/reports/20261006_172546",
+  "details": "remote: \nremote: Create a pull request for 'reelsec/reports/20261006_172546' on GitHub by visiting:        \nremote:      https://github.com/binarjoinanalytic5/ReelShort-v4.2.00-analysis/pull/new/reelsec/reports/20261006_172546        \nremote: \nTo https://github.com/binarjoinanalytic5/ReelShort-v4.2.00-analysis.git\n * [new branch]      HEAD -> reelsec/reports/20261006_172546\nbranch 'main' set up to track 'origin/reelsec/reports/20261006_172546'.\n"
+}
