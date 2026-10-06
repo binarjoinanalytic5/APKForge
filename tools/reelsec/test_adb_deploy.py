@@ -12,6 +12,7 @@ from adb_deploy import (
     adb_command,
     install_command,
     resolve_test_device,
+    is_signature_mismatch_error,
 )
 
 
@@ -31,6 +32,19 @@ class AdbDeployTests(unittest.TestCase):
     def test_missing_artifact_rejected(self):
         with self.assertRaises(AdbDeployError):
             install_command("/usr/bin/adb", "SERIAL", "/missing.apk")
+
+
+    def test_signature_mismatch_is_classified(self):
+        self.assertTrue(
+            is_signature_mismatch_error(
+                "Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE: Existing package signatures do not match]"
+            )
+        )
+        self.assertFalse(
+            is_signature_mismatch_error(
+                "Failure [INSTALL_FAILED_VERSION_DOWNGRADE]"
+            )
+        )
 
 
     def _completed(self, output, returncode=0):
