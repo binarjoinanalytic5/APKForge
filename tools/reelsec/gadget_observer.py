@@ -61,3 +61,26 @@ def write_plan(path, plan):
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(plan, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return p
+
+
+def validate_target_observation(event, expected_module, expected_offset):
+    """Validate an observation without claiming causality."""
+    if not isinstance(event, dict):
+        raise GadgetObserverError("observation event must be an object")
+    module = event.get("module")
+    offset = event.get("offset")
+    executed = bool(event.get("target_executed"))
+    result = {
+        "target_executed": executed,
+        "module_match": module == expected_module,
+        "offset_match": offset == expected_offset,
+        "runtime_observed": False,
+        "causal_proof": False,
+        "proof_class": "OBSERVED",
+    }
+    result["runtime_observed"] = (
+        executed and result["module_match"] and result["offset_match"]
+    )
+    if result["runtime_observed"]:
+        result["proof_class"] = "TARGET_EXECUTION_OBSERVED"
+    return result
