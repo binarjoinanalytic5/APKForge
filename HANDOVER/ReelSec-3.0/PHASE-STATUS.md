@@ -242,3 +242,11 @@ The original APK and decoded source remain untouched. The copied manifest record
 
 Implementation commits: `e79f52519b3bfa1025ca7cda194decf8659db72f`, `eb7ff8336dde87855be693fa21387e6c90c3c27f`
 Test-fixture correction: `83fa850a21ff3a73748faff57736adcab1bea200`
+
+
+## SecShell Smali Anchor Parser Fix — 2026-10-07
+
+The first no-res campaign reached a valid `READY` inventory but incorrectly blocked Stage 6 because the detector searched for the Java source spelling `System.loadLibrary` inside Smali. The actual Smali form is `Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V`. The detector and mutation backend now parse that Smali invocation generically, independent of the source register name, and record the exact matched invoke as evidence.
+
+Implementation: `58653f9c818ad5bc4f6d6bd48f0ab436124804eb`, `9a5f6bbebbe328fdddaa1b066d20d7332c53cb0d`
+Regression coverage: `2434a4ae97da0e903c4757a79c7718162ecdf11d`
