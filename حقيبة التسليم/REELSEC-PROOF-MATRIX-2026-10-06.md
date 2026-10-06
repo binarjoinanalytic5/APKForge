@@ -162,3 +162,94 @@ A final runtime claim requires at least one of:
 Without such evidence, the correct status remains:
 RUNTIME_DISPATCH = NOT_PROVEN
 SCREENSHOT_BLOCKING = NOT_PROVEN
+
+## I. Latest execution — 2026-10-06 19:21
+
+Bootstrap report:
+`analysis/sec-shell-deep-v1/reelsec-20261006_192103`
+
+Published branch:
+`reelsec/reports/20261006_192128-7058`
+
+Published report commit:
+`49a1fe6867f080ed3ec2ee7337125dfe819007ce`
+
+### I.1 Newly proven lifecycle correlation
+
+The latest report proves:
+`PROVEN_RTTI_VTABLE_CONSTRUCTOR_DESTRUCTOR_CORRELATION`
+
+Evidence:
+- RTTI type = `N6Cicada17mediaCodecDecoderE`
+- vtable entry[0] = `0x2785bc`
+- vtable entry[1] = `0x278768`
+- constructor calls `ActiveDecoderC2Ev`
+- constructor installs vptr
+- destructor calls `ActiveDecoderD2Ev`
+- destructor restores the vptr
+
+This upgrades the lifecycle correlation from the earlier instrumentation failure to PROVEN.
+
+### I.2 Dispatch scan result and correction
+
+The first full scan reported:
+- 376 candidate +0x108 indirect dispatches
+- 271 JNI-like
+- 12 `PROVEN_CXX_OBJECT`
+- 93 unresolved
+
+The 12-count label was too strong. Manual inspection showed that Java/JNI functions were included because the scanner used only local register heuristics. At least the following examples are clearly JNI/Java contexts:
+- `0x1236e0` … `0x123804` inside `JavaVodAsset::init`
+- `0x124cf0` … `0x124d30` inside `JavaVodPlayInfo::init`
+- `0x2872a0` inside `Cicada::jniOnFrameAvailable`
+
+Two C++ candidates in the old set are unrelated to the target vtable:
+- `0x20aa84` inside `CicadaPlayerPrototype::create`
+- `0x275744` inside `Cicada::hls::TagFactory::createTagByName`
+
+Therefore the old `PROVEN_CXX_OBJECT` count MUST NOT be treated as target-object proof.
+
+### I.3 New authoritative dispatch rule
+
+Commit:
+`2c71313fa765706df4c999ab43b15c0cedfa70ae`
+
+The analyzer now classifies:
+- `JNI_LIKELY`
+- `PROVEN_TARGET_VTABLE`
+- `CXX_DISPATCH_CANDIDATE_UNRESOLVED_VTABLE`
+- `INDIRECT_0x108_UNRESOLVED`
+
+Critical rule:
+`PROVEN_TARGET_VTABLE` is impossible unless an independent data-flow proof establishes that the loaded vptr equals `0x717e60`.
+
+Register naming such as `x19` and the presence of `ldr [x19]` are NOT sufficient.
+
+### I.4 Current truth after correction
+
+PROVEN:
+- static target vtable address-point `0x717e60`
+- RTTI `mediaCodecDecoder`
+- constructor installation of `0x717e60`
+- lifecycle correlation with constructor/destructor
+- static slot `0x717f68 (+0x108) -> 0x27a510`
+- exact body/boundary of `0x27a510`
+- JNI +0x108 pattern and semantic distinction
+
+NOT PROVEN:
+- any call site dynamically loading the target's vptr and proving that its value is `0x717e60`
+- indirect call resolving to `0x27a510`
+- runtime execution of `0x27a510`
+- Screenshot blocking caused by `0x27a510`
+
+### I.5 Required next step
+
+Run the corrected ReelSec revision and inspect:
+`REMAINING-DISPATCH-AUDIT.md`
+
+The desired result for the current evidence is either:
+- `NO_PROVEN_TARGET_VTABLE_DISPATCH_FOUND`, with C++ candidates retained for manual data-flow work; or
+- `PROVEN_TARGET_VTABLE_DISPATCH_FOUND` only when the scanner has independently established the exact `0x717e60` vptr value at the dispatch site.
+
+Any security conclusion remains blocked until that proof exists.
+
