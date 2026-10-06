@@ -15,6 +15,7 @@ from environment import write_capability_matrix
 from apktool_backend import ApktoolBackendError, select_apktool_backend, decode_command
 from instrumentation_backend import plan_secshell_injection
 from instrumented_copy import prepare_instrumented_copy
+from build_verify import apktool_build_command, verify_artifact
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
 VERSION = "3.0.0"
@@ -1605,6 +1606,21 @@ def main():
             encoding="utf-8",
         )
 
+    build_verify = {"status": "NOT_BUILT"}
+    if instrumented_copy.get("status") == "COPIED":
+        try:
+            built_apk = output / "instrumented-unsigned.apk"
+            build_cmd = apktool_build_command(apktool_selection, instrumented_copy_root, built_apk)
+            run(build_cmd, cwd=ROOT, timeout=300)
+            build_verify = verify_artifact(built_apk)
+            build_verify["command"] = build_cmd
+        except Exception as exc:
+            build_verify = {"status": "FAILED", "error": str(exc)}
+        (output / "BUILD-VERIFY.json").write_text(
+            json.dumps(build_verify, indent=2, sort_keys=True) + "\\n",
+            encoding="utf-8",
+        )
+
     analysis_root = Path(decoded_inventory["root"]).resolve() if decoded_inventory and decoded_inventory.get("status") == "READY" else ROOT
     target = find_target(args.elf, analysis_root)
     target_source = "decoded-apk" if analysis_root != ROOT else "repository-root-fallback"
@@ -1628,6 +1644,7 @@ def main():
         "input_provenance": input_provenance,
         "instrumentation_plan": instrumentation_plan,
         "instrumented_copy": instrumented_copy,
+        "build_verify": build_verify,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
