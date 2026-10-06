@@ -31,7 +31,7 @@ PROBES = [
     "runtime-frida-probe",
 ]
 
-def run(cmd, cwd=None):
+def run(cmd, cwd=None, timeout=None):
     try:
         p = subprocess.run(
             cmd,
@@ -40,8 +40,14 @@ def run(cmd, cwd=None):
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             check=False,
+            timeout=timeout,
         )
         return p.returncode, p.stdout
+    except subprocess.TimeoutExpired as exc:
+        output = exc.stdout or ""
+        if isinstance(output, bytes):
+            output = output.decode("utf-8", errors="replace")
+        return 124, str(output) + "\n[timeout=%ss]\n" % timeout
     except Exception as exc:
         return 127, str(exc) + "\n"
 
@@ -843,15 +849,32 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
             result["status"]="NO_ONLINE_ANDROID_DEVICE"
             result["reason"]="adb is installed but no online device is available"
         else:
-            rc, out = run([frida,"-U","-f",package,"-l",str(script),"--no-pause"])
+            rc, out = run([frida,"-U","-f",package,"-l",str(script),"--no-pause"], timeout=18)
             result["frida_exit"]=rc
             result["frida_output"]=out[-12000:]
-            matches=[x for x in out.splitlines()
-                     if '"event":"TARGET_FUNCTION_ENTER"' in x
-                     and '"target_vptr_match":true' in x
-                     and '"target_slot_match":true' in x]
+            events=[]
+            for line in out.splitlines():
+                try:
+                    item=json.loads(line)
+                except Exception:
+                    continue
+                payload=item.get("payload") if isinstance(item, dict) else None
+                if isinstance(payload, dict):
+                    events.append(payload)
+                elif isinstance(item, dict) and item.get("event"):
+                    events.append(item)
+            result["events"]=events
+            matches=[e for e in events
+                     if e.get("event")=="TARGET_FUNCTION_ENTER"
+                     and e.get("target_vptr_match") is True
+                     and e.get("target_slot_match") is True]
             result["runtime_matches"]=len(matches)
-            result["status"]="PROVEN_RUNTIME_TARGET_DISPATCH" if matches else "RUNTIME_TARGET_NOT_OBSERVED"
+            if matches:
+                result["status"]="PROVEN_RUNTIME_TARGET_DISPATCH"
+            elif rc == 124:
+                result["status"]="RUNTIME_PROBE_TIMEOUT_NO_TARGET_OBSERVED"
+            else:
+                result["status"]="RUNTIME_TARGET_NOT_OBSERVED"
 
     (output / "RUNTIME-PROBE.json").write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
