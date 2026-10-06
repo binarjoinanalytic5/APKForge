@@ -1,0 +1,38 @@
+{
+  "actions": [
+    {
+      "action": "pkg_install_frida_tools",
+      "output": "No mirror or mirror group selected. You might want to select one by running 'termux-change-repo'\nChecking availability of current mirror:\n[*] https://ftp.fau.de/termux/termux-main: ok\n\nWARNING: apt does not have a stable CLI interface. Use with caution in scripts.\n\nReading package lists...\nBuilding dependency tree...\nReading state information...\nE: Unable to locate package frida-tools\n",
+      "returncode": 100
+    },
+    {
+      "action": "proot_debian_probe",
+      "output": "Error: container 'debian' is not installed.\n",
+      "returncode": 1
+    },
+    {
+      "action": "proot_install_debian",
+      "output": "[*] Installing 'debian:latest' as 'debian'...\n[*] Authenticating with registry (anonymous)...\n[*] Fetching manifest for 'debian'...\n[*] Fetching aarch64 manifest...\n[*] df9831efb49c: Downloading layer 1/1 (47.5 MiB)...\n[*] df9831efb49c: Applying layer 1/1...\n[*] Updating '/etc/resolv.conf'...\n[*] Updating '/etc/hosts'...\n[*] Registering Android-specific UIDs and GIDs...\n[*] Finished installation.\n\nStart shell: proot-distro login debian\n\n",
+      "returncode": 0
+    },
+    {
+      "action": "proot_install_frida_tools",
+      "output": "Collecting frida-tools\n  Downloading frida_tools-14.11.0.tar.gz (4.7 MB)\n     \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 4.7/4.7 MB 771.0 kB/s eta 0:00:00\n  Installing build dependencies: started\n  Installing build dependencies: finished with status 'done'\n  Getting requirements to build wheel: started\n  Getting requirements to build wheel: finished with status 'done'\n  Preparing metadata (pyproject.toml): started\n  Preparing metadata (pyproject.toml): finished with status 'done'\nCollecting colorama<1.0.0,>=0.2.7 (from frida-tools)\n  Downloading colorama-0.4.6-py2.py3-none-any.whl.metadata (17 kB)\nCollecting frida<18.0.0,>=17.10.0 (from frida-tools)\n  Downloading frida-17.22.2-cp37-abi3-manylinux_2_17_aarch64.whl.metadata (2.3 kB)\nCollecting prompt-toolkit<4.0.0,>=2.0.0 (from frida-tools)\n  Downloading prompt_toolkit-3.0.53-py3-none-any.whl.metadata (6.4 kB)\nCollecting pygments<3.0.0,>=2.0.2 (from frida-tools)\n  Downloading pygments-2.21.0-py3-none-any.whl.metadata (2.5 kB)\nCollecting websockets<14.0.0,>=13.0.0 (from frida-tools)\n  Downloading websockets-13.1-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (6.8 kB)\nCollecting wcwidth>=0.1.4 (from prompt-toolkit<4.0.0,>=2.0.0->frida-tools)\n  Downloading wcwidth-0.9.2-cp310-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.whl.metadata (23 kB)\nDownloading colorama-0.4.6-py2.py3-none-any.whl (25 kB)\nDownloading frida-17.22.2-cp37-abi3-manylinux_2_17_aarch64.whl (27.2 MB)\n   \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 27.2/27.2 MB 1.3 MB/s eta 0:00:00\nDownloading prompt_toolkit-3.0.53-py3-none-any.whl (392 kB)\nDownloading pygments-2.21.0-py3-none-any.whl (1.3 MB)\n   \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 1.3/1.3 MB 2.3 MB/s eta 0:00:00\nDownloading websockets-13.1-cp313-cp313-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (165 kB)\nDownloading wcwidth-0.9.2-cp310-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.whl (771 kB)\n   \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 771.6/771.6 kB 3.2 MB/s eta 0:00:00\nBuilding wheels for collected packages: frida-tools\n  Building wheel for frida-tools (pyproject.toml): started\n  Building wheel for frida-tools (pyproject.toml): finished with status 'done'\n  Created wheel for frida-tools: filename=frida_tools-14.11.0-py3-none-any.whl size=4720837 sha256=c654cc74180df1d3147a4d96977e61ed4ee7d79e3a7ca65de01a8032b5b859e0\n  Stored in directory: /tmp/pip-ephem-wheel-cache-fknwuuy6/wheels/82/c1/72/ad53ec2a8c3ccee0a00fa05319360550227b07acced3ed6f34\nSuccessfully built frida-tools\nInstalling collected packages: websockets, wcwidth, pygments, frida, colorama, prompt-toolkit, frida-tools\n\nSuccessfully installed colorama-0.4.6 frida-17.22.2 frida-tools-14.11.0 prompt-toolkit-3.0.53 pygments-2.21.0 wcwidth-0.9.2 websockets-13.1\nWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.\n",
+      "returncode": 0
+    }
+  ],
+  "attempted": true,
+  "missing_requirements": [],
+  "schema_version": "1.2",
+  "status": "CLIENTS_READY",
+  "tooling": {
+    "adb": "/data/data/com.termux/files/usr/bin/adb",
+    "frida": null,
+    "frida_after_pkg": null,
+    "frida_after_proot": "/data/data/com.termux/files/home/.local/bin/frida",
+    "frida_wrapper": "/data/data/com.termux/files/home/.local/bin/frida",
+    "pkg": "/data/data/com.termux/files/usr/bin/pkg",
+    "proot_distro": "/data/data/com.termux/files/usr/bin/proot-distro",
+    "python": "/data/data/com.termux/files/usr/bin/python"
+  }
+}
