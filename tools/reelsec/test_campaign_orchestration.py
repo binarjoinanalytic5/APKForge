@@ -47,6 +47,42 @@ class CampaignOrchestrationTests(unittest.TestCase):
             self.assertTrue((output / "smali").is_dir())
             self.assertTrue((output / "reelsec-apktool.log").is_file())
 
+    def test_decode_recovers_with_no_resources_after_full_decode_failure(self):
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            apk = root / "original.apk"
+            apk.write_bytes(b"fake-apk")
+            tool = root / "fake-apktool-recovery"
+            tool.write_text(
+                "#!/usr/bin/env python3\n"
+                "import pathlib,sys\n"
+                "args=sys.argv\n"
+                "if '-r' not in args:\n"
+                "    raise SystemExit(9)\n"
+                "out=pathlib.Path(args[args.index('-o')+1])\n"
+                "out.mkdir(parents=True, exist_ok=False)\n"
+                "(out/'AndroidManifest.xml').write_text('<manifest package=\\"example.test\\"/>')\n"
+                "(out/'smali').mkdir()\n"
+                "(out/'smali'/'Example.smali').write_text('.class public LExample;')\n",
+                encoding="utf-8",
+            )
+            tool.chmod(tool.stat().st_mode | stat.S_IXUSR)
+            output = root / "decoded"
+
+            result = MODULE.run_apktool_decode(
+                {"backend": "cli", "path": str(tool)},
+                apk,
+                output,
+                timeout=10,
+            )
+
+            self.assertEqual(result["status"], "DECODED_NO_RES")
+            self.assertEqual(result["mode"], "APKTOOL_NO_RES")
+            self.assertTrue(result["instrumentable_smali"])
+            recovery = root / "decoded-no-res"
+            self.assertTrue((recovery / "AndroidManifest.xml").is_file())
+            self.assertTrue((recovery / "smali" / "Example.smali").is_file())
+
     def test_decode_refuses_nonempty_existing_output(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
