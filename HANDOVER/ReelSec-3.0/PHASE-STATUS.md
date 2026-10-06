@@ -50,4 +50,8 @@ Captured evidence is classified as `OBSERVED` with `causal_proof=false`. This is
 
 ## Next engineering gate
 
-Add controlled Frida Gadget observation for the instrumented build, with explicit target/package identity and evidence files that distinguish hook observation from causal proof. Keep the original APK runtime path separate.
+Frida Gadget observation planning is now present for the instrumented artifact. Target runtime observations validate module + offset, and vtable dispatch observations validate the complete tuple `vtable=0x717e60`, `slot=0x108`, `target=0x27a510`. These remain observational evidence and do not claim causality.
+
+## Next engineering gate
+
+Connect actual Gadget hook-event ingestion to these validators, then correlate target/vtable events with a bounded behavioral observation. Only the instrumented artifact may receive this observation hook; original-APK proof remains a separate evidence class.
