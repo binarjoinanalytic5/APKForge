@@ -248,6 +248,112 @@ def write_vtable_abi_analysis(output, data, symbols_text):
         "function_symbol": func[2] if func else None,
     }
 
+def write_critical_behavior(output, ptr):
+    p = output / ("CRITICAL-FUNCTION-0x%X.txt" % ptr)
+    body = p.read_text(encoding="utf-8", errors="replace") if p.exists() else ""
+    lines = body.splitlines()
+    start = None
+    for i, line in enumerate(lines):
+        if line.strip().startswith("%x:" % ptr):
+            start = i
+            break
+
+    body_lines = []
+    if start is not None:
+        for line in lines[start:]:
+            body_lines.append(line)
+            st = line.strip()
+            if st.endswith("d65f03c0      ret") or st.endswith("d65f03c0 ret"):
+                break
+
+    calls = [x for x in body_lines if re.search(r"\b(bl|blr)\b", x)]
+    security = [x for x in body_lines if re.search(
+        r"surface|window|egl|secure|protect|gralloc|buffer|mediacodec|screenshot|record",
+        x, re.I
+    )]
+    cls = "SECURITY_RELATED_OPERATION_PRESENT" if security else "NO_SECURITY_OPERATION_OBSERVED"
+
+    out = [
+        "# Critical Function Behavior",
+        "",
+        "Function: 0x%x" % ptr,
+        "Body extraction: from the recovered prologue to the first return.",
+        "",
+        "Calls:"
+    ] + (calls or ["NONE"]) + [
+        "",
+        "Security-related instructions/text:"
+    ] + (security or ["NONE"]) + [
+        "",
+        "Classification: " + cls,
+        "This is body-local evidence only; it does not prove Screenshot blocking."
+    ]
+    (output / "CRITICAL-FUNCTION-BEHAVIOR.md").write_text(
+        "\n".join(out) + "\n", encoding="utf-8"
+    )
+    return cls
+
+def write_native_security_api_audit(output, strings_text, symbols_text):
+    keys = [
+        "ANativeWindow_fromSurface",
+        "ANativeWindow_setUsage",
+        "ANativeWindow_setBuffersGeometry",
+        "AHardwareBuffer",
+        "AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT",
+        "GRALLOC_USAGE_PROTECTED",
+        "EGL_PROTECTED_CONTENT",
+        "EGL_EXT_protected_content",
+        "AMediaCodec_configure",
+        "MediaCodec.setOutputSurface",
+        "SurfaceControl",
+        "setSecure",
+    ]
+    combined = (strings_text + "\n" + symbols_text).lower()
+    out = ["# Native Security API Audit", ""]
+    for key in keys:
+        out.append("- %s: %s" % (key, "FOUND" if key.lower() in combined else "NOT_FOUND"))
+    out += ["", "Rule: names/imports are indicators, not execution proof."]
+    (output / "NATIVE-SECURITY-API-AUDIT.md").write_text(
+        "\n".join(out) + "\n", encoding="utf-8"
+    )
+
+def write_java_screen_security_audit(output, root):
+    terms = [
+        "FLAG_SECURE",
+        "Window.addFlags",
+        "Window.setFlags",
+        "SurfaceView",
+        "TextureView",
+        "MediaProjection",
+        "createVirtualDisplay",
+        "setOutputSurface",
+        "setForceInsecureDecoder",
+        "queueSecureInputBuffer",
+        "nSetSurface",
+        "nSurfaceChanged",
+        "onCaptureScreen",
+        "nativeOnCaptureScreen",
+        "screenshot",
+        "screen recording",
+    ]
+    out = ["# Java / Smali Screen Security Audit", ""]
+    for term in terms:
+        rc, result = run([
+            "grep", "-RInF",
+            "--exclude-dir=.git",
+            "--include=*.smali",
+            "--include=*.java",
+            "--include=*.kt",
+            term, str(root),
+        ])
+        if rc == 0 and result.strip():
+            out += ["## " + term, ""] + result.splitlines()[:120] + [""]
+    if len(out) == 2:
+        out.append("No Java/Kotlin/Smali evidence matched the monitored screen-security terms.")
+    (output / "JAVA-SCREEN-SECURITY-AUDIT.md").write_text(
+        "\n".join(out) + "\n", encoding="utf-8"
+    )
+
 def git_publish(root, report_dir):
     """Publish from a clean worktree based on origin/main; never mutate the investigation checkout."""
     result = {
@@ -573,6 +679,7 @@ def main():
                 ptr + 0x40,
                 output / "CRITICAL-FUNCTION-ENTRY.txt",
             )
+            critical_behavior = write_critical_behavior(output, ptr)
 
     symbol_matches = resolve_symbol(symbols_text, ptr) if ptr is not None else []
     symbol_lines = [
