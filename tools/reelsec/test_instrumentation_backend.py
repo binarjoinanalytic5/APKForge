@@ -21,12 +21,19 @@ class InstrumentationBackendTests(unittest.TestCase):
             target = root / "smali" / "com" / "SecShell" / "SecShell" / "AW.smali"
             target.parent.mkdir(parents=True)
             target.write_text(
-                "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n"
-                "const-string v0, \"SecShell\"\n",
+                ".class public Lcom/SecShell/SecShell/AW;\n"
+                ".method protected attachBaseContext(Landroid/content/Context;)V\n"
+                "    .locals 6\n"
+                "    const-string v0, \"SecShell\"\n"
+                "    invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n"
+                "    return-void\n"
+                ".end method\n",
                 encoding="utf-8",
             )
             result = plan_secshell_injection(root, target)
             self.assertEqual(result["status"], INSTRUMENTATION_READY)
+            self.assertEqual(result["registers"], ["v0"])
+            self.assertIn("Ljava/lang/System;->loadLibrary", result["anchor"])
             self.assertFalse(result["runtime_proof"])
 
     def test_missing_anchor_is_blocked(self):
