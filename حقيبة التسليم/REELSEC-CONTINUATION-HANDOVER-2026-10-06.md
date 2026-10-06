@@ -147,3 +147,78 @@ ELF SHA: a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4.
 Trigger → Function → Security State → Surface/Window protection → Android compositor/security policy → Screenshot/Recording restriction.
 
 أو تفنيد هذه السلسلة علمياً وتحديد الآلية البديلة.
+
+## 11. Evidence update — 2026-10-06 19:08–19:08+
+
+### 11.1 ReelSec execution
+- Latest bootstrap report: `reelsec-20261006_190810`.
+- Publish branch: `reelsec/reports/20261006_190814-29655`.
+- Report commit: `f2682f6adcd9e0549f5b0bf65057a64321526bbc`.
+- Bootstrap status: `0`.
+- Tool source used: `origin/main:tools/reelsec/reelsec.py`.
+
+### 11.2 Critical function boundary
+`0x27a510` is now extracted into `CRITICAL-FUNCTION-BODY.txt` and terminates at the first ARM64 `ret`:
+- `0x27a510` … `0x27a540: d65f03c0 ret`.
+- No `bl`/`blr` inside the extracted body.
+- No security-related operation observed in the body.
+- This is body-local evidence only; it does not prove or disprove Screenshot blocking.
+
+### 11.3 Constructor-installed vptr — PROVEN
+The latest generated `VTABLE-OBJECT-PROOF.md` is:
+`PROVEN_OBJECT_VPTR_TO_0x717E60`.
+Observed sequence in the constructor path:
+- `ActiveDecoderC2Ev` call at `0x278450`.
+- compute `0x717000 + 0xe50 = 0x717e50`.
+- compute address-point `0x717e50 + 0x10 = 0x717e60`.
+- store `0x717e60` into `[x19]` at `0x27847c`.
+
+### 11.4 Strong class/vtable correlation
+The recovered vtable data and constructor/destructor paths provide a stronger ABI correlation:
+- `0x717e58 -> 0x71f4d0` RTTI pointer.
+- RTTI name resolves to `N6Cicada17mediaCodecDecoderE`.
+- vtable entry `0x717e60 -> 0x2785bc`.
+- next entry `0x717e68 -> 0x278768`.
+- the `0x2785bc` destructor path resets the same `0x717e60` vptr and calls `ActiveDecoderD2Ev`.
+Taken together, this is strong evidence that `0x717e60` is the address point of the RTTI-bearing `mediaCodecDecoder` object/vtable relationship, not merely an arbitrary data table.
+Exact constructor symbol identity is still not trusted because the surrounding symbol table contains malformed/oversized `dummyFunction` ranges.
+
+### 11.5 Slot mapping — PROVEN STATICALLY
+- address-point: `0x717e60`
+- slot: `0x717f68`
+- offset: `+0x108`
+- static pointer stored there: `0x27a510`
+Therefore the static ABI mapping is:
+`mediaCodecDecoder vtable address-point 0x717e60 -> virtual slot +0x108 -> function pointer 0x27a510`.
+
+This proves the target mapping in the ELF. It does NOT prove that execution reached this virtual slot.
+
+### 11.6 JNI +0x108 separation — PROVEN
+The repeated patterns at `0x27af18`, `0x27af9c`, `0x27b150`, `0x27b228` occur in a JNI-registration-style function:
+- `x19` is initialized from incoming `x0` and is used as a `JNIEnv*`-like interface base.
+- `ldr x8, [x19]` followed by `ldr x8, [x8,#0x108]` and `blr x8`.
+- the surrounding arguments match `GetMethodID(env, clazz, name, sig)`.
+- method-name strings include `setForceInsecureDecoder`, `queueSecureInputBuffer`, and `setOutputSurface`.
+These are JNI interface-table index 33 patterns and must NOT be interpreted as evidence that C++ vtable slot `0x108` reaches `0x27a510`.
+
+### 11.7 Current proof state
+PROVEN:
+- ELF target and SHA-256 are stable for this report.
+- `0x717e60` constructor-installed vptr.
+- RTTI type string `mediaCodecDecoder`.
+- strong RTTI + destructor + constructor/destructor vtable correlation.
+- static slot mapping `0x717f68 -> 0x27a510`.
+- exact boundary/body of `0x27a510`.
+
+UNPROVEN:
+- a concrete C++ caller/data-flow path that uses the `mediaCodecDecoder` object and dynamically loads `[vptr+0x108]`.
+- runtime execution of `0x27a510`.
+- any Screenshot-blocking/security semantics attributable to `0x27a510`.
+
+NEXT:
+1. Recover exact function boundaries around the malformed symbol-table region using RET/CFG and preferably unwind/CFI metadata.
+2. Build object/data-flow analysis capable of proving when a register points to the `0x717e60` object before an indirect virtual call.
+3. Search the complete text section for candidate C++ virtual dispatches and classify each candidate as proven-object, unknown-object, or JNI.
+4. Only after a proven C++ dispatch to slot `+0x108` decide whether `0x27a510` is actually executed in the relevant playback/capture path.
+5. Correlate that execution path with Surface/EGL/secure-content APIs before making any Screenshot-blocking claim.
+
