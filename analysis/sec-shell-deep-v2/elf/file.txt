@@ -1,0 +1,11 @@
+=== PATH ===
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/lib/arm64-v8a/libSecShell.so
+
+=== SIZE ===
+-rw-------. 1 u0_a799 u0_a799 1.2M Oct  6 04:29 /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/lib/arm64-v8a/libSecShell.so
+
+=== SHA256 ===
+155da548f25cd2d5d8d8b68511a135927b2706cea48500c11c820c5b99209a62  /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/lib/arm64-v8a/libSecShell.so
+
+=== FILE ===
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/lib/arm64-v8a/libSecShell.so: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, stripped

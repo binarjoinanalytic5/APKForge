@@ -1,0 +1,3 @@
+=== SEARCH ROOTS ===
+FOUND: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources
+FOUND: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali

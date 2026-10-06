@@ -1,0 +1,471 @@
+============================================================
+SEC-SHELL-DEEP-V2 FINAL REPORT
+============================================================
+
+Generated: 2026-10-06T11:39:03Z
+
+=== LIBRARY ===
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/lib/arm64-v8a/libSecShell.so
+155da548f25cd2d5d8d8b68511a135927b2706cea48500c11c820c5b99209a62  /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/lib/arm64-v8a/libSecShell.so
+
+=== TOOLCHAIN ===
+AVAILABLE readelf: /data/data/com.termux/files/usr/bin/readelf
+AVAILABLE llvm-readelf: /data/data/com.termux/files/usr/bin/llvm-readelf
+AVAILABLE objdump: /data/data/com.termux/files/usr/bin/objdump
+AVAILABLE llvm-objdump: /data/data/com.termux/files/usr/bin/llvm-objdump
+AVAILABLE strings: /data/data/com.termux/files/usr/bin/strings
+AVAILABLE grep: /data/data/com.termux/files/usr/bin/grep
+AVAILABLE file: /data/data/com.termux/files/usr/bin/file
+AVAILABLE git: /data/data/com.termux/files/usr/bin/git
+
+=== FILES GENERATED ===
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v2/disasm/errors.txt | 0 bytes
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v2/disasm/full.txt | 134 bytes
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v2/disasm/jni-hits.txt | 0 bytes
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v2/disasm/security-call-hits.txt | 0 bytes
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v2/elf/file.txt | 662 bytes
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v2/elf/report.txt | 4312 bytes
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v2/smali/java-smali-related.txt | 33802 bytes
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v2/smali/search-log.txt | 188 bytes
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v2/smali/secshell-bridge.txt | 38854 bytes
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v2/strings/all.txt | 69396 bytes
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v2/strings/security-hooks.txt | 1635 bytes
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v2/strings/strings-errors.txt | 0 bytes
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v2/summary/FINAL-REPORT.txt | 1017 bytes
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v2/summary/execution.log | 1258 bytes
+
+=== SECURITY STRING COUNT ===
+37 /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v2/strings/security-hooks.txt
+
+=== SECURITY STRING HITS ===
+8:_Z9root_killP7_JNIEnvP7_jclass
+65:_Z24is_miuiinstaller_processP7_JNIEnvP7_jclass
+68:_Z23is_magisk_check_processP7_JNIEnvP7_jclass
+69:_Z33pE5430FAC417FE4F942DD6F870471B819P7_JNIEnvP8_jobjectS2_S2_
+70:_Z10check_rootP7_JNIEnvP7_jclassP8_jobject
+72:_ZN7_JNIEnv9NewObjectEP7_jclassP10_jmethodIDz
+73:_ZN7_JNIEnv16CallObjectMethodEP8_jobjectP10_jmethodIDz
+77:_ZN7_JNIEnv17CallBooleanMethodEP8_jobjectP10_jmethodIDz
+78:_ZN7_JNIEnv13CallIntMethodEP8_jobjectP10_jmethodIDz
+79:_ZN7_JNIEnv14CallVoidMethodEP8_jobjectP10_jmethodIDz
+81:_ZN7_JNIEnv22CallStaticObjectMethodEP7_jclassP10_jmethodIDz
+88:_ZN7_JNIEnv23CallStaticBooleanMethodEP7_jclassP10_jmethodIDz
+94:_Z10add_assetsP7_JNIEnvP8_jobjectPcS3_S3_
+95:_ZN7_JNIEnv20CallStaticVoidMethodEP7_jclassP10_jmethodIDz
+97:_Z34get_AssetManager_by_ActivityThreadP7_JNIEnv
+98:_Z33pAC092F4B1EA47DAB6DBBB1D8AF68275CP7_JNIEnv
+122:_Z33p132BA41AD46135D1CF38303E038A3D00P7_JNIEnviiiPc
+139:JNI_OnLoad
+156:_Z33p85F9E0CD017060FC7A35C4CF25C383E0PcS_P7_JNIEnv
+162:_Z33p41B9D8341AA1BC1BB3EFD056E403A441P7_JNIEnv
+215:mprotect
+216:_ZN7_JNIEnv20CallStaticLongMethodEP7_jclassP10_jmethodIDz
+217:_Z12find_dexfileP7_JNIEnvP7_jclass
+218:_Z33pE0C3DF0194373117D2186BCD6C72C7FBP7_JNIEnvP8_jstringPl
+220:_Z33p4A23104EDA36715F886F78F1991E071EP7_JNIEnvP8_jstring
+229:_Z33p013A5F0264667879DADF43F6A662A07CP7_JNIEnvP8_jstring
+231:_Z33pE4047AAE3A5E37EFE3D8BEE26160DC80P7_JNIEnvP8_jstring
+233:_Z33p79C6BF68D9E9A4533FED36C991BB89FFP7_JNIEnvP8_jstring
+234:_Z6n2wrapP7_JNIEnvP7_jclassiP8_jstring
+336:hookFunAddr_read
+467:ptrace
+485:g_addr_dlopen
+486:g_addr_dlsym
+487:g_addr_do_dlopen
+496:g_addr_dvmdlsym
+497:g_addr_dvmdlopen
+3291:JnIt
+
+=== NATIVE SECURITY IMPORTS ===
+
+=== JNI HITS ===
+
+=== SECURITY CALL HITS ===
+
+=== SECSHELL BRIDGE ===
+=== SecShell bridge ===
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/google/firebase/crashlytics/ndk/CrashpadMain.java:5:    public static native void crashpadMain(String[] strArr);
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/google/firebase/crashlytics/ndk/JniNativeApi.java:31:            System.loadLibrary("crashlytics");
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/google/firebase/crashlytics/ndk/JniNativeApi.java:67:    private native boolean nativeInit(String[] strArr, Object obj);
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/ApplicationC0043AW.java:1:package com.SecShell.SecShell;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/ApplicationC0043AW.java:8:/* JADX INFO: renamed from: com.SecShell.SecShell.AW */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/ApplicationC0043AW.java:37:            C0045H.m152bb(f562mC, f559b, application);
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/ApplicationC0043AW.java:49:            System.loadLibrary(C0045H.is_x86_byso() ? "SecShell-x86" : "SecShell");
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0044CP.java:1:package com.SecShell.SecShell;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0044CP.java:8:/* JADX INFO: renamed from: com.SecShell.SecShell.CP */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/ServiceConnectionC0047b.java:1:package com.SecShell.SecShell;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/ServiceConnectionC0047b.java:11:/* JADX INFO: renamed from: com.SecShell.SecShell.b */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0048c.java:1:package com.SecShell.SecShell;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0048c.java:5:/* JADX INFO: renamed from: com.SecShell.SecShell.c */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:1:package com.SecShell.SecShell;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:16:/* JADX INFO: renamed from: com.SecShell.SecShell.H */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:31:    /* JADX INFO: renamed from: com.SecShell.SecShell.H$a */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:44:                    C0045H.m174p();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:83:    public static native void attach(Application application, Context context);
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:86:    public static native void m151b(Context context, Application application);
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:89:    public static native void m152bb(Context context, Application application, Application application2);
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:102:    public static native void m153c();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:105:    public static native String m154d(String str);
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:108:    public static native Object[] m155e(Object obj, List<IOException> list, String str);
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:122:    public static final native String[] m157f();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:147:    public static final native String[] m160g();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:161:    public static final native String[] m162h();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:164:    public static native void m163i();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:235:            return new com.SecShell.SecShell.r.b(context).h();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:242:    public static final native String[] m165j();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:245:    public static final native String m166k();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:248:    public static final native String m167l();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:251:    public static final native String m168m();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:272:    public static final native int m170mu();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:275:    public static final native String[] m171n();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:302:    public static final native int m173o(Context context);
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:305:    public static final native void m174p();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:308:    public static final native int m175q();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0046a.java:1:package com.SecShell.SecShell;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0046a.java:16:/* JADX INFO: renamed from: com.SecShell.SecShell.a */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0046a.java:23:    /* JADX INFO: renamed from: com.SecShell.SecShell.a$a */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0046a.java:60:    /* JADX INFO: renamed from: com.SecShell.SecShell.a$b */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0046a.java:137:    /* JADX INFO: renamed from: com.SecShell.SecShell.a$c */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/AppComponentFactoryC0042AP.java:1:package com.SecShell.SecShell;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/AppComponentFactoryC0042AP.java:15:/* JADX INFO: renamed from: com.SecShell.SecShell.AP */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:1:.class public final Lcom/SecShell/SecShell/AP;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:24:    iput-object v0, p0, Lcom/SecShell/SecShell/AP;->a:Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:66:    iget-object v0, p0, Lcom/SecShell/SecShell/AP;->a:Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:70:    sget-object v0, Lcom/SecShell/SecShell/H;->ACFNAME:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:81:    sget-object v0, Lcom/SecShell/SecShell/H;->ACFNAME:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:93:    iput-object p1, p0, Lcom/SecShell/SecShell/AP;->a:Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:101:    iget-object p1, p0, Lcom/SecShell/SecShell/AP;->a:Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:156:    iput-object p1, p0, Lcom/SecShell/SecShell/AP;->a:Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:213:    sget-object v0, Lcom/SecShell/SecShell/AW;->d:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:221:    invoke-direct {p0, p1}, Lcom/SecShell/SecShell/AP;->a(Ljava/lang/ClassLoader;)Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:225:    invoke-virtual {p0, v0}, Lcom/SecShell/SecShell/AP;->a(Landroid/app/AppComponentFactory;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:284:    sget-object v0, Lcom/SecShell/SecShell/AW;->d:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:292:    invoke-direct {p0, p1}, Lcom/SecShell/SecShell/AP;->a(Ljava/lang/ClassLoader;)Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:296:    invoke-virtual {p0, v0}, Lcom/SecShell/SecShell/AP;->a(Landroid/app/AppComponentFactory;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:351:    sget-object v0, Lcom/SecShell/SecShell/AW;->d:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:359:    invoke-direct {p0, p1}, Lcom/SecShell/SecShell/AP;->a(Ljava/lang/ClassLoader;)Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:363:    invoke-virtual {p0, v0}, Lcom/SecShell/SecShell/AP;->a(Landroid/app/AppComponentFactory;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:422:    sget-object v0, Lcom/SecShell/SecShell/AW;->d:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:430:    invoke-direct {p0, p1}, Lcom/SecShell/SecShell/AP;->a(Ljava/lang/ClassLoader;)Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:434:    invoke-virtual {p0, v0}, Lcom/SecShell/SecShell/AP;->a(Landroid/app/AppComponentFactory;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:493:    sget-object v0, Lcom/SecShell/SecShell/AW;->d:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:501:    invoke-direct {p0, p1}, Lcom/SecShell/SecShell/AP;->a(Ljava/lang/ClassLoader;)Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:505:    invoke-virtual {p0, v0}, Lcom/SecShell/SecShell/AP;->a(Landroid/app/AppComponentFactory;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:564:    sget-object v0, Lcom/SecShell/SecShell/AW;->d:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:572:    invoke-direct {p0, p1}, Lcom/SecShell/SecShell/AP;->a(Ljava/lang/ClassLoader;)Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:576:    invoke-virtual {p0, v0}, Lcom/SecShell/SecShell/AP;->a(Landroid/app/AppComponentFactory;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/CP.smali:1:.class public Lcom/SecShell/SecShell/CP;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/CP.smali:10:    invoke-static {}, Lcom/SecShell/SecShell/AW;->a()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:1:.class public Lcom/SecShell/SecShell/AW;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:61:    sget-boolean v0, Lcom/SecShell/SecShell/AW;->c:Z
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:65:    sget-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:71:    sput-boolean v1, Lcom/SecShell/SecShell/AW;->c:Z
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:73:    sget-object v1, Lcom/SecShell/SecShell/AW;->mC:Landroid/content/Context;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:75:    sget-object v2, Lcom/SecShell/SecShell/AW;->b:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:77:    invoke-static {v1, v2, v0}, Lcom/SecShell/SecShell/H;->bb(Landroid/content/Context;Landroid/app/Application;Landroid/app/Application;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:119:    sput-object p1, Lcom/SecShell/SecShell/AW;->mC:Landroid/content/Context;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:121:    invoke-static {}, Lcom/SecShell/SecShell/H;->is_x86_byso()Z
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:127:    const-string v0, "SecShell-x86"
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:132:    const-string v0, "SecShell"
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:137:    sput-object p0, Lcom/SecShell/SecShell/AW;->b:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:144:    sget-object v1, Lcom/SecShell/SecShell/H;->APPNAME:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:152:    invoke-static {}, Lcom/SecShell/SecShell/H;->q()I
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:158:    invoke-static {}, Lcom/SecShell/SecShell/H;->mu()I
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:169:    sget-object v1, Lcom/SecShell/SecShell/H;->APPNAME:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:181:    sput-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:190:    sput-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:194:    sget-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:196:    invoke-static {v0, p1}, Lcom/SecShell/SecShell/H;->attach(Landroid/app/Application;Landroid/content/Context;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:235:    sget-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:283:    invoke-static {}, Lcom/SecShell/SecShell/AW;->a()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:287:    sget-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:293:    invoke-static {v0, v1}, Lcom/SecShell/SecShell/H;->attach(Landroid/app/Application;Landroid/content/Context;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:295:    sget-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:342:    sget-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H$a.smali:1:.class Lcom/SecShell/SecShell/H$a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H$a.smali:8:    value = Lcom/SecShell/SecShell/H;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H$a.smali:73:    invoke-static {}, Lcom/SecShell/SecShell/H;->p()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:1:.class public Lcom/SecShell/SecShell/H;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:9:        Lcom/SecShell/SecShell/H$a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:40:    new-instance v1, Lcom/SecShell/SecShell/H$a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:42:    invoke-direct {v1}, Lcom/SecShell/SecShell/H$a;-><init>()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:46:    sput-object v0, Lcom/SecShell/SecShell/H;->mMessenger:Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:50:    sput-object v0, Lcom/SecShell/SecShell/H;->mService:Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:52:    new-instance v0, Lcom/SecShell/SecShell/b;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:54:    invoke-direct {v0}, Lcom/SecShell/SecShell/b;-><init>()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:56:    sput-object v0, Lcom/SecShell/SecShell/H;->sConnection:Landroid/content/ServiceConnection;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:103:    sget-object v0, Lcom/SecShell/SecShell/H;->mService:Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:142:    sput-object p0, Lcom/SecShell/SecShell/H;->mService:Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:181:    sget-object v0, Lcom/SecShell/SecShell/H;->mMessenger:Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:186:.method public static native attach(Landroid/app/Application;Landroid/content/Context;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:189:.method public static native b(Landroid/content/Context;Landroid/app/Application;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:192:.method public static native bb(Landroid/content/Context;Landroid/app/Application;Landroid/app/Application;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:262:.method public static native c()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:265:.method public static native d(Ljava/lang/String;)Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:268:.method public static native e(Ljava/lang/Object;Ljava/util/List;Ljava/lang/String;)[Ljava/lang/Object;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:317:    invoke-static {p0, p1, p2}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/ClassLoader;Ljava/lang/String;Ljava/lang/String;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:322:.method public static final native f()[Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:361:    invoke-static {p0, p1, p2, v0}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/ClassLoader;Ljava/lang/String;Ljava/lang/String;Z)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:400:    invoke-static {p0}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:405:.method public static final native g()[Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:442:    new-instance v0, Lcom/SecShell/SecShell/c;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:446:    invoke-direct {v0, v1, p0}, Lcom/SecShell/SecShell/c;-><init>(Ljava/lang/String;Ljava/lang/ClassLoader;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:451:.method public static final native h()[Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:454:.method public static native i()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:491:    sget-object v0, Lcom/SecShell/SecShell/H;->HAVEX86:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:551:    invoke-static {v0}, Lcom/SecShell/SecShell/H;->bytes2int([B)I
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:689:    new-instance v0, Lcom/SecShell/SecShell/r/b;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:691:    invoke-direct {v0, p0}, Lcom/SecShell/SecShell/r/b;-><init>(Landroid/content/Context;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:693:    invoke-virtual {v0}, Lcom/SecShell/SecShell/r/b;->h()Z
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:700:.method public static final native j()[Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:703:.method public static final native k()Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:706:.method public static final native l()Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:709:.method public static final native m()Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:783:.method public static final native mu()I
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:786:.method public static final native n()[Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:906:    invoke-static {v4, p0}, Lcom/SecShell/SecShell/H;->m([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:921:.method public static final native o(Landroid/content/Context;)I
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:924:.method public static final native p()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:927:.method public static final native q()I
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$a.smali:1:.class final Lcom/SecShell/SecShell/a$a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$a.smali:8:    value = Lcom/SecShell/SecShell/a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$a.smali:61:    invoke-static {p0, p1, p2}, Lcom/SecShell/SecShell/a$a;->b(Ljava/lang/ClassLoader;Ljava/util/List;Ljava/io/File;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$a.smali:138:    invoke-static {p0, v2, v1}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$a.smali:214:    invoke-static {p0, v0}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$a.smali:226:    invoke-static {p0, v0, p2}, Lcom/SecShell/SecShell/a$a;->a(Ljava/lang/Object;Ljava/util/ArrayList;Ljava/io/File;)[Ljava/lang/Object;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$a.smali:232:    invoke-static {p0, p2, p1}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:1:.class final Lcom/SecShell/SecShell/a$b;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:8:    value = Lcom/SecShell/SecShell/a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:61:    invoke-static {p0, p1, p2}, Lcom/SecShell/SecShell/a$b;->b(Ljava/lang/ClassLoader;Ljava/util/List;Ljava/io/File;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:107:    invoke-static {p0, p1, p2, p3}, Lcom/SecShell/SecShell/a$b;->b(Ljava/lang/Object;Ljava/util/ArrayList;Ljava/io/File;Ljava/util/ArrayList;)[Ljava/lang/Object;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:171:    invoke-static {p0, v0}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:187:    invoke-static {p0, v1, p2, v0}, Lcom/SecShell/SecShell/a$b;->b(Ljava/lang/Object;Ljava/util/ArrayList;Ljava/io/File;Ljava/util/ArrayList;)[Ljava/lang/Object;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:209:    invoke-static {p0, v2, p1, p2}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Z)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:239:    invoke-static {p0, p1}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:376:    invoke-static {p0, v4, v5}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:407:    invoke-static {p0, v5, v6}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:1:.class public Lcom/SecShell/SecShell/a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:9:        Lcom/SecShell/SecShell/a$b;,
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:10:        Lcom/SecShell/SecShell/a$a;,
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:11:        Lcom/SecShell/SecShell/a$c;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:36:    sput-object v0, Lcom/SecShell/SecShell/a;->a:Ljava/util/ArrayList;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:80:    invoke-static {p0, p1}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:126:    invoke-static {p0, p1, p2}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:225:    invoke-static {p0, p1}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/ClassLoader;Ljava/lang/String;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:236:    invoke-static {p0, p2, p1}, Lcom/SecShell/SecShell/a$b;->a(Ljava/lang/ClassLoader;Ljava/util/List;Ljava/io/File;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:245:    invoke-static {p0, p2, p1}, Lcom/SecShell/SecShell/a$a;->a(Ljava/lang/ClassLoader;Ljava/util/List;Ljava/io/File;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:250:    invoke-static {p0, p2}, Lcom/SecShell/SecShell/a$c;->a(Ljava/lang/ClassLoader;Ljava/util/List;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:302:    invoke-static {p0, v0}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:314:    invoke-static {p0, v0, p1}, Lcom/SecShell/SecShell/H;->e(Ljava/lang/Object;Ljava/util/List;Ljava/lang/String;)[Ljava/lang/Object;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:322:    invoke-static {p0, v2, p1, v1}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Z)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:352:    invoke-static {p0, p1}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:444:    invoke-static {p0, p1, p2, v0}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/ClassLoader;Ljava/lang/String;Ljava/lang/String;Z)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:504:    invoke-static {p0, v0, p1, p3}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/ClassLoader;Ljava/io/File;Ljava/util/List;Z)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:553:    invoke-static {p0, v1}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:574:    invoke-static {v5, v6}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:599:    sget-object v6, Lcom/SecShell/SecShell/a;->a:Ljava/util/ArrayList;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:615:    invoke-static {p0, v0, v2, v3}, Lcom/SecShell/SecShell/a$b;->a(Ljava/lang/Object;Ljava/util/ArrayList;Ljava/io/File;Ljava/util/ArrayList;)[Ljava/lang/Object;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:668:    invoke-static {p0, p1, p2}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:714:    invoke-static {p0, p1, p2, p3}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Z)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:998:    invoke-static {p0, p1, p2, v0}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Z)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:1044:    invoke-static {p0, p1}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:1:.class final Lcom/SecShell/SecShell/a$c;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:8:    value = Lcom/SecShell/SecShell/a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:60:    invoke-static {p0, p1}, Lcom/SecShell/SecShell/a$c;->b(Ljava/lang/ClassLoader;Ljava/util/List;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:123:    invoke-static {p0, v1}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:213:    invoke-static {p0, p1, v3}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:217:    invoke-static {p0, p1, v4}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:221:    invoke-static {p0, p1, v5}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:225:    invoke-static {p0, p1, v0}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/b.smali:1:.class final Lcom/SecShell/SecShell/b;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/b.smali:11:    value = Lcom/SecShell/SecShell/H;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/b.smali:70:    invoke-static {p1}, Lcom/SecShell/SecShell/H;->access$002(Landroid/os/Messenger;)Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/b.smali:80:    invoke-static {}, Lcom/SecShell/SecShell/H;->access$100()Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/b.smali:86:    invoke-static {}, Lcom/SecShell/SecShell/H;->access$000()Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/c.smali:1:.class Lcom/SecShell/SecShell/c;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/c.smali:20:    iput-object p2, p0, Lcom/SecShell/SecShell/c;->a:Ljava/lang/ClassLoader;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/c.smali:78:    const-class v0, Lcom/SecShell/SecShell/H;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/c.smali:91:    iget-object v0, p0, Lcom/SecShell/SecShell/c;->a:Ljava/lang/ClassLoader;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/c.smali:102:    const-class v0, Lcom/SecShell/SecShell/H1;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/google/firebase/crashlytics/ndk/CrashpadMain.smali:19:.method public static native crashpadMain([Ljava/lang/String;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/google/firebase/crashlytics/ndk/JniNativeApi.smali:319:.method private native nativeInit([Ljava/lang/String;Ljava/lang/Object;)Z
+
+=== JAVA/SMALI SECURITY CORRELATION ===
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/androidx/constraintlayout/motion/widget/MotionLayout.java:4642:                    ((VirtualLayout) helper).captureWidgets();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/androidx/constraintlayout/solver/widgets/VirtualLayout.java:100:        captureWidgets();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/androidx/constraintlayout/solver/widgets/VirtualLayout.java:103:    public void captureWidgets() {
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/androidx/constraintlayout/utils/widget/MotionLabel.java:371:            textPaint.setFlags(Optimizer.OPTIMIZATION_GRAPH_WRAP);
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/androidx/constraintlayout/utils/widget/MotionLabel.java:397:        textPaint.setFlags(Optimizer.OPTIMIZATION_GRAPH_WRAP);
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/androidx/constraintlayout/widget/C0037R.java:3731:        public static final int setFlags = 2130969916;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/androidx/constraintlayout/widget/ConstraintLayout.java:2561:        public void captureLayoutInfos(int i, int i2, int i3, int i4, int i5, int i6) {
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/google/firebase/crashlytics/ndk/CrashpadMain.java:9:            System.load(strArr[1] + "libcrashlytics-handler.so");
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/google/firebase/crashlytics/ndk/JniNativeApi.java:31:            System.loadLibrary("crashlytics");
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/ApplicationC0043AW.java:1:package com.SecShell.SecShell;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/ApplicationC0043AW.java:8:/* JADX INFO: renamed from: com.SecShell.SecShell.AW */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/ApplicationC0043AW.java:49:            System.loadLibrary(C0045H.is_x86_byso() ? "SecShell-x86" : "SecShell");
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0044CP.java:1:package com.SecShell.SecShell;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0044CP.java:8:/* JADX INFO: renamed from: com.SecShell.SecShell.CP */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/ServiceConnectionC0047b.java:1:package com.SecShell.SecShell;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/ServiceConnectionC0047b.java:11:/* JADX INFO: renamed from: com.SecShell.SecShell.b */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0048c.java:1:package com.SecShell.SecShell;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0048c.java:5:/* JADX INFO: renamed from: com.SecShell.SecShell.c */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:1:package com.SecShell.SecShell;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:16:/* JADX INFO: renamed from: com.SecShell.SecShell.H */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:31:    /* JADX INFO: renamed from: com.SecShell.SecShell.H$a */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0045H.java:235:            return new com.SecShell.SecShell.r.b(context).h();
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0046a.java:1:package com.SecShell.SecShell;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0046a.java:16:/* JADX INFO: renamed from: com.SecShell.SecShell.a */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0046a.java:23:    /* JADX INFO: renamed from: com.SecShell.SecShell.a$a */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0046a.java:60:    /* JADX INFO: renamed from: com.SecShell.SecShell.a$b */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/C0046a.java:137:    /* JADX INFO: renamed from: com.SecShell.SecShell.a$c */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/AppComponentFactoryC0042AP.java:1:package com.SecShell.SecShell;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/jadx-src/sources/com/SecShell/SecShell/AppComponentFactoryC0042AP.java:15:/* JADX INFO: renamed from: com.SecShell.SecShell.AP */
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/androidx/constraintlayout/motion/widget/MotionLayout$Model.smali:1153:    invoke-virtual {v0}, Landroidx/constraintlayout/solver/widgets/VirtualLayout;->captureWidgets()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/androidx/constraintlayout/solver/widgets/VirtualLayout.smali:132:.method public captureWidgets()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/androidx/constraintlayout/solver/widgets/VirtualLayout.smali:615:    invoke-virtual {p0}, Landroidx/constraintlayout/solver/widgets/VirtualLayout;->captureWidgets()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/androidx/constraintlayout/utils/widget/MotionLabel.smali:2329:    invoke-virtual {v0, v5}, Landroid/graphics/Paint;->setFlags(I)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/androidx/constraintlayout/widget/ConstraintLayout$Measurer.smali:55:.method public captureLayoutInfos(IIIIII)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:1:.class public final Lcom/SecShell/SecShell/AP;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:24:    iput-object v0, p0, Lcom/SecShell/SecShell/AP;->a:Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:66:    iget-object v0, p0, Lcom/SecShell/SecShell/AP;->a:Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:70:    sget-object v0, Lcom/SecShell/SecShell/H;->ACFNAME:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:81:    sget-object v0, Lcom/SecShell/SecShell/H;->ACFNAME:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:93:    iput-object p1, p0, Lcom/SecShell/SecShell/AP;->a:Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:101:    iget-object p1, p0, Lcom/SecShell/SecShell/AP;->a:Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:156:    iput-object p1, p0, Lcom/SecShell/SecShell/AP;->a:Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:213:    sget-object v0, Lcom/SecShell/SecShell/AW;->d:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:221:    invoke-direct {p0, p1}, Lcom/SecShell/SecShell/AP;->a(Ljava/lang/ClassLoader;)Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:225:    invoke-virtual {p0, v0}, Lcom/SecShell/SecShell/AP;->a(Landroid/app/AppComponentFactory;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:284:    sget-object v0, Lcom/SecShell/SecShell/AW;->d:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:292:    invoke-direct {p0, p1}, Lcom/SecShell/SecShell/AP;->a(Ljava/lang/ClassLoader;)Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:296:    invoke-virtual {p0, v0}, Lcom/SecShell/SecShell/AP;->a(Landroid/app/AppComponentFactory;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:351:    sget-object v0, Lcom/SecShell/SecShell/AW;->d:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:359:    invoke-direct {p0, p1}, Lcom/SecShell/SecShell/AP;->a(Ljava/lang/ClassLoader;)Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:363:    invoke-virtual {p0, v0}, Lcom/SecShell/SecShell/AP;->a(Landroid/app/AppComponentFactory;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:422:    sget-object v0, Lcom/SecShell/SecShell/AW;->d:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:430:    invoke-direct {p0, p1}, Lcom/SecShell/SecShell/AP;->a(Ljava/lang/ClassLoader;)Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:434:    invoke-virtual {p0, v0}, Lcom/SecShell/SecShell/AP;->a(Landroid/app/AppComponentFactory;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:493:    sget-object v0, Lcom/SecShell/SecShell/AW;->d:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:501:    invoke-direct {p0, p1}, Lcom/SecShell/SecShell/AP;->a(Ljava/lang/ClassLoader;)Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:505:    invoke-virtual {p0, v0}, Lcom/SecShell/SecShell/AP;->a(Landroid/app/AppComponentFactory;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:564:    sget-object v0, Lcom/SecShell/SecShell/AW;->d:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:572:    invoke-direct {p0, p1}, Lcom/SecShell/SecShell/AP;->a(Ljava/lang/ClassLoader;)Landroid/app/AppComponentFactory;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AP.smali:576:    invoke-virtual {p0, v0}, Lcom/SecShell/SecShell/AP;->a(Landroid/app/AppComponentFactory;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/CP.smali:1:.class public Lcom/SecShell/SecShell/CP;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/CP.smali:10:    invoke-static {}, Lcom/SecShell/SecShell/AW;->a()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:1:.class public Lcom/SecShell/SecShell/AW;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:61:    sget-boolean v0, Lcom/SecShell/SecShell/AW;->c:Z
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:65:    sget-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:71:    sput-boolean v1, Lcom/SecShell/SecShell/AW;->c:Z
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:73:    sget-object v1, Lcom/SecShell/SecShell/AW;->mC:Landroid/content/Context;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:75:    sget-object v2, Lcom/SecShell/SecShell/AW;->b:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:77:    invoke-static {v1, v2, v0}, Lcom/SecShell/SecShell/H;->bb(Landroid/content/Context;Landroid/app/Application;Landroid/app/Application;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:119:    sput-object p1, Lcom/SecShell/SecShell/AW;->mC:Landroid/content/Context;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:121:    invoke-static {}, Lcom/SecShell/SecShell/H;->is_x86_byso()Z
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:127:    const-string v0, "SecShell-x86"
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:132:    const-string v0, "SecShell"
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:137:    sput-object p0, Lcom/SecShell/SecShell/AW;->b:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:144:    sget-object v1, Lcom/SecShell/SecShell/H;->APPNAME:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:152:    invoke-static {}, Lcom/SecShell/SecShell/H;->q()I
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:158:    invoke-static {}, Lcom/SecShell/SecShell/H;->mu()I
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:169:    sget-object v1, Lcom/SecShell/SecShell/H;->APPNAME:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:181:    sput-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:190:    sput-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:194:    sget-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:196:    invoke-static {v0, p1}, Lcom/SecShell/SecShell/H;->attach(Landroid/app/Application;Landroid/content/Context;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:235:    sget-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:283:    invoke-static {}, Lcom/SecShell/SecShell/AW;->a()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:287:    sget-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:293:    invoke-static {v0, v1}, Lcom/SecShell/SecShell/H;->attach(Landroid/app/Application;Landroid/content/Context;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:295:    sget-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/AW.smali:342:    sget-object v0, Lcom/SecShell/SecShell/AW;->a:Landroid/app/Application;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H$a.smali:1:.class Lcom/SecShell/SecShell/H$a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H$a.smali:8:    value = Lcom/SecShell/SecShell/H;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H$a.smali:73:    invoke-static {}, Lcom/SecShell/SecShell/H;->p()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:1:.class public Lcom/SecShell/SecShell/H;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:9:        Lcom/SecShell/SecShell/H$a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:40:    new-instance v1, Lcom/SecShell/SecShell/H$a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:42:    invoke-direct {v1}, Lcom/SecShell/SecShell/H$a;-><init>()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:46:    sput-object v0, Lcom/SecShell/SecShell/H;->mMessenger:Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:50:    sput-object v0, Lcom/SecShell/SecShell/H;->mService:Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:52:    new-instance v0, Lcom/SecShell/SecShell/b;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:54:    invoke-direct {v0}, Lcom/SecShell/SecShell/b;-><init>()V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:56:    sput-object v0, Lcom/SecShell/SecShell/H;->sConnection:Landroid/content/ServiceConnection;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:103:    sget-object v0, Lcom/SecShell/SecShell/H;->mService:Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:142:    sput-object p0, Lcom/SecShell/SecShell/H;->mService:Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:181:    sget-object v0, Lcom/SecShell/SecShell/H;->mMessenger:Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:317:    invoke-static {p0, p1, p2}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/ClassLoader;Ljava/lang/String;Ljava/lang/String;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:361:    invoke-static {p0, p1, p2, v0}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/ClassLoader;Ljava/lang/String;Ljava/lang/String;Z)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:400:    invoke-static {p0}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:442:    new-instance v0, Lcom/SecShell/SecShell/c;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:446:    invoke-direct {v0, v1, p0}, Lcom/SecShell/SecShell/c;-><init>(Ljava/lang/String;Ljava/lang/ClassLoader;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:491:    sget-object v0, Lcom/SecShell/SecShell/H;->HAVEX86:Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:551:    invoke-static {v0}, Lcom/SecShell/SecShell/H;->bytes2int([B)I
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:689:    new-instance v0, Lcom/SecShell/SecShell/r/b;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:691:    invoke-direct {v0, p0}, Lcom/SecShell/SecShell/r/b;-><init>(Landroid/content/Context;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:693:    invoke-virtual {v0}, Lcom/SecShell/SecShell/r/b;->h()Z
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/H.smali:906:    invoke-static {v4, p0}, Lcom/SecShell/SecShell/H;->m([Ljava/lang/String;Ljava/lang/String;)[Ljava/lang/String;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$a.smali:1:.class final Lcom/SecShell/SecShell/a$a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$a.smali:8:    value = Lcom/SecShell/SecShell/a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$a.smali:61:    invoke-static {p0, p1, p2}, Lcom/SecShell/SecShell/a$a;->b(Ljava/lang/ClassLoader;Ljava/util/List;Ljava/io/File;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$a.smali:138:    invoke-static {p0, v2, v1}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$a.smali:214:    invoke-static {p0, v0}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$a.smali:226:    invoke-static {p0, v0, p2}, Lcom/SecShell/SecShell/a$a;->a(Ljava/lang/Object;Ljava/util/ArrayList;Ljava/io/File;)[Ljava/lang/Object;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$a.smali:232:    invoke-static {p0, p2, p1}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:1:.class final Lcom/SecShell/SecShell/a$b;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:8:    value = Lcom/SecShell/SecShell/a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:61:    invoke-static {p0, p1, p2}, Lcom/SecShell/SecShell/a$b;->b(Ljava/lang/ClassLoader;Ljava/util/List;Ljava/io/File;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:107:    invoke-static {p0, p1, p2, p3}, Lcom/SecShell/SecShell/a$b;->b(Ljava/lang/Object;Ljava/util/ArrayList;Ljava/io/File;Ljava/util/ArrayList;)[Ljava/lang/Object;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:171:    invoke-static {p0, v0}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:187:    invoke-static {p0, v1, p2, v0}, Lcom/SecShell/SecShell/a$b;->b(Ljava/lang/Object;Ljava/util/ArrayList;Ljava/io/File;Ljava/util/ArrayList;)[Ljava/lang/Object;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:209:    invoke-static {p0, v2, p1, p2}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Z)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:239:    invoke-static {p0, p1}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:376:    invoke-static {p0, v4, v5}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$b.smali:407:    invoke-static {p0, v5, v6}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:1:.class public Lcom/SecShell/SecShell/a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:9:        Lcom/SecShell/SecShell/a$b;,
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:10:        Lcom/SecShell/SecShell/a$a;,
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:11:        Lcom/SecShell/SecShell/a$c;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:36:    sput-object v0, Lcom/SecShell/SecShell/a;->a:Ljava/util/ArrayList;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:80:    invoke-static {p0, p1}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:126:    invoke-static {p0, p1, p2}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:225:    invoke-static {p0, p1}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/ClassLoader;Ljava/lang/String;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:236:    invoke-static {p0, p2, p1}, Lcom/SecShell/SecShell/a$b;->a(Ljava/lang/ClassLoader;Ljava/util/List;Ljava/io/File;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:245:    invoke-static {p0, p2, p1}, Lcom/SecShell/SecShell/a$a;->a(Ljava/lang/ClassLoader;Ljava/util/List;Ljava/io/File;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:250:    invoke-static {p0, p2}, Lcom/SecShell/SecShell/a$c;->a(Ljava/lang/ClassLoader;Ljava/util/List;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:302:    invoke-static {p0, v0}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:314:    invoke-static {p0, v0, p1}, Lcom/SecShell/SecShell/H;->e(Ljava/lang/Object;Ljava/util/List;Ljava/lang/String;)[Ljava/lang/Object;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:322:    invoke-static {p0, v2, p1, v1}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Z)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:352:    invoke-static {p0, p1}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:444:    invoke-static {p0, p1, p2, v0}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/ClassLoader;Ljava/lang/String;Ljava/lang/String;Z)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:504:    invoke-static {p0, v0, p1, p3}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/ClassLoader;Ljava/io/File;Ljava/util/List;Z)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:553:    invoke-static {p0, v1}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:574:    invoke-static {v5, v6}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:599:    sget-object v6, Lcom/SecShell/SecShell/a;->a:Ljava/util/ArrayList;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:615:    invoke-static {p0, v0, v2, v3}, Lcom/SecShell/SecShell/a$b;->a(Ljava/lang/Object;Ljava/util/ArrayList;Ljava/io/File;Ljava/util/ArrayList;)[Ljava/lang/Object;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:668:    invoke-static {p0, p1, p2}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:714:    invoke-static {p0, p1, p2, p3}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Z)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:998:    invoke-static {p0, p1, p2, v0}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;Z)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a.smali:1044:    invoke-static {p0, p1}, Lcom/SecShell/SecShell/a;->b(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:1:.class final Lcom/SecShell/SecShell/a$c;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:8:    value = Lcom/SecShell/SecShell/a;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:60:    invoke-static {p0, p1}, Lcom/SecShell/SecShell/a$c;->b(Ljava/lang/ClassLoader;Ljava/util/List;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:123:    invoke-static {p0, v1}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;)Ljava/lang/reflect/Field;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:213:    invoke-static {p0, p1, v3}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:217:    invoke-static {p0, p1, v4}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:221:    invoke-static {p0, p1, v5}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/a$c.smali:225:    invoke-static {p0, p1, v0}, Lcom/SecShell/SecShell/a;->a(Ljava/lang/Object;Ljava/lang/String;[Ljava/lang/Object;)V
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/b.smali:1:.class final Lcom/SecShell/SecShell/b;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/b.smali:11:    value = Lcom/SecShell/SecShell/H;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/b.smali:70:    invoke-static {p1}, Lcom/SecShell/SecShell/H;->access$002(Landroid/os/Messenger;)Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/b.smali:80:    invoke-static {}, Lcom/SecShell/SecShell/H;->access$100()Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/b.smali:86:    invoke-static {}, Lcom/SecShell/SecShell/H;->access$000()Landroid/os/Messenger;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/c.smali:1:.class Lcom/SecShell/SecShell/c;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/c.smali:20:    iput-object p2, p0, Lcom/SecShell/SecShell/c;->a:Ljava/lang/ClassLoader;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/c.smali:78:    const-class v0, Lcom/SecShell/SecShell/H;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/c.smali:91:    iget-object v0, p0, Lcom/SecShell/SecShell/c;->a:Ljava/lang/ClassLoader;
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/apktool-src/smali/com/SecShell/SecShell/c.smali:102:    const-class v0, Lcom/SecShell/SecShell/H1;
+
+============================================================
+END REPORT
+============================================================
