@@ -68,13 +68,15 @@ def run_apktool_decode(selection, apk, output_dir, timeout=300):
                 "reason": "Refusing to reuse a non-empty decode directory; this protects prior campaign evidence.",
             }
         output_dir.rmdir()
-    output_dir.mkdir(parents=True, exist_ok=False)
+    # Apktool must create its own output directory; pre-creating it causes Apktool 2.7 to refuse the decode.
+    output_dir.parent.mkdir(parents=True, exist_ok=True)
     command = decode_command(selection, apk, output_dir)
     rc, log = run(command, timeout=timeout)
-    (output_dir / "reelsec-apktool.log").write_text(log, encoding="utf-8", errors="replace")
+    log_path = (output_dir / "reelsec-apktool.log") if output_dir.is_dir() else (output_dir.parent / (output_dir.name + ".apktool.log"))
+    log_path.write_text(log, encoding="utf-8", errors="replace")
     if rc != 0:
         return {"status": "FAILED", "returncode": rc, "command": command,
-                "output_dir": str(output_dir), "log": str(output_dir / "reelsec-apktool.log")}
+                "output_dir": str(output_dir), "log": str(log_path)}
     required = [output_dir / "AndroidManifest.xml", output_dir / "smali"]
     missing = [str(p) for p in required if not p.exists()]
     if missing:
