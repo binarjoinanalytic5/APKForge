@@ -1610,7 +1610,7 @@ def main():
     if instrumented_copy.get("status") == "COPIED":
         try:
             built_apk = output / "instrumented-unsigned.apk"
-            build_cmd = apktool_build_command(apktool_selection, instrumented_copy_root, built_apk)
+            build_cmd = apktool_build_command(apktool_backend, instrumented_copy_root, built_apk)
             run(build_cmd, cwd=ROOT, timeout=300)
             build_verify = verify_artifact(built_apk)
             build_verify["command"] = build_cmd
