@@ -222,3 +222,13 @@ Regression coverage was added for the full-decode-fails / no-res-recovery path.
 
 Fix commit: `dbe0d8a33dd14d60e16553d915662cc3721160cf`
 Regression-test commit: `2d0305f75e600a33391210f6dc46bd2cd3c334b7`
+
+
+## Decode Strategy Correction — 2026-10-07
+
+The first recovery implementation exposed a state-machine bug: `run_apktool_decode()` correctly returned `DECODED_NO_RES`, but campaign orchestration only accepted `DECODED`, causing a false blocked campaign. This is fixed: `DECODED_NO_RES` is now a valid instrumentable analysis root and is carried forward with explicit `resources_decoded=false` metadata.
+
+The campaign default is now `REELSEC_DECODE_STRATEGY=no-res-first`. This avoids waiting through the known slow resource-decoding phase when the objective is SecShell/Smali instrumentation. The full resource decode remains available with `REELSEC_DECODE_STRATEGY=full-first`. Full decode and recovery timeouts are independently configurable through `REELSEC_APKTOOL_FULL_TIMEOUT` and `REELSEC_APKTOOL_RECOVERY_TIMEOUT`.
+
+Fix commits: `3b9cfcb30ccae3df430b9ad80ba895ab3abf6b73`, `e49a97cd198441f673aaea2c435a45aa56dfbccb`
+Regression coverage: `4d5e6b2a753494afc5acb4d2e9e3e9edd8699011`
