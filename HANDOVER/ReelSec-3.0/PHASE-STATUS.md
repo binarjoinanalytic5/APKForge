@@ -113,3 +113,29 @@ The previous campaign remains useful as a capability snapshot only: ADB was usab
 ## Next gate
 
 The next run must produce a genuine `DECODED` result and `READY` inventory before any native target analysis is accepted. After that, the engineering sequence is: controlled telemetry mutation -> successful isolated build -> signing -> guarded deployment -> Frida Gadget observation/event ingestion -> target/vtable runtime validation -> bounded behavioral correlation. No instrumented observation will be promoted to original-APK runtime proof.
+## Corrective runtime-campaign architecture — 2026-10-06 23:xx
+
+ReelSec main now contains a second, explicitly labeled APK-content fallback:
+
+`Apktool decode -> RAW_APK_ZIP_EXTRACTION -> native/static-only analysis`
+
+The raw path uses Python ZIP extraction with path-traversal checks. It is not a decoded Smali tree and is never represented as `READY`; its inventory state is `READY_NATIVE_ONLY`. Therefore the native target can be analyzed from the supplied APK without pretending resource/Smali decoding succeeded, while instrumentation/build remains blocked until a real decoded tree exists.
+
+The campaign now also propagates `main()` return codes via `SystemExit`, so a campaign blocker is visible to the bootstrap caller instead of being silently reported as exit 0.
+
+Latest source commits:
+
+- 1f20d754019e776221d541633bf8107438ac24cf — safe raw APK fallback + propagated campaign exit status.
+- bcecd34ad55a75d4cb65575f42a82a30873fbdb5 — bootstrap entrypoint status documentation.
+
+Source verification after the patch found no remaining known literal source-newline corruption in `reelsec.py`, and the entrypoint ends with `raise SystemExit(main())`.
+
+The next phone run should therefore either:
+
+`DECODED + READY` — continue to full Smali/native instrumentation pipeline;
+
+or:
+
+`DECODE_FAILED_RAW_FALLBACK + READY_NATIVE_ONLY` — continue honest native/static analysis while keeping instrumentation/build gated.
+
+Only a real decoded tree can unlock the SecShell instrumentation/build stages.
