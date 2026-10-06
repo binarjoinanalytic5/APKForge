@@ -701,6 +701,9 @@ def main():
         encoding="utf-8",
     )
 
+    write_native_security_api_audit(output, strings_text, symbols_text)
+    write_java_screen_security_audit(output, ROOT)
+
     security_text = (output / "security-strings.txt").read_text(
         encoding="utf-8", errors="replace"
     ) if (output / "security-strings.txt").exists() else ""
