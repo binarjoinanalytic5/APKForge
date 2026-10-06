@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
-VERSION = "2.0.0"
+VERSION = "2.1.0"
 PROBES = [
     "elf",
     "symbols",
@@ -26,6 +26,9 @@ PROBES = [
     "native-security-api",
     "java-screen-security",
     "auto-publish",
+    "autonomous-dataflow",
+    "runtime-proof-readiness",
+    "runtime-frida-probe",
 ]
 
 def run(cmd, cwd=None):
@@ -580,6 +583,312 @@ def write_java_screen_security_audit(output, root):
         "\n".join(out) + "\n", encoding="utf-8"
     )
 
+
+def _parse_disassembly_functions(text):
+    funcs = []
+    for i, line in enumerate(text.splitlines()):
+        m = re.match(r"^\s*([0-9a-fA-F]+)\s+<([^>]+)>:\s*$", line.strip())
+        if m:
+            funcs.append((i, int(m.group(1), 16), m.group(2)))
+    return funcs
+
+
+def _reg_written(line, reg):
+    return bool(re.search(
+        rf"\b(?:mov|movz|movk|adrp|adr|add|sub|ldr|ldp|ldur|ldraa|ldrab)\s+{re.escape(reg)}\b",
+        line
+    ))
+
+
+def _parse_adrp_add_value(lines, index, reg):
+    page = None
+    for j in range(max(0, index - 3), index + 1):
+        m = re.search(rf"\badrp\s+{reg},\s+(0x[0-9a-fA-F]+)\b", lines[j])
+        if m:
+            page = int(m.group(1), 16)
+    if page is None:
+        return None
+    for j in range(max(0, index - 2), min(len(lines), index + 2)):
+        m = re.search(rf"\badd\s+{reg},\s+{reg},\s+#(0x[0-9a-fA-F]+|\d+)\b", lines[j])
+        if m:
+            return page + int(m.group(1), 0)
+    return None
+
+
+def write_autonomous_dataflow(output, target, objdump):
+    path = output / "full-disassembly.txt"
+    if not objdump or not path.exists():
+        (output / "AUTONOMOUS-DATAFLOW.md").write_text(
+            "# Autonomous Dataflow\n\nDISASSEMBLY_UNAVAILABLE\n", encoding="utf-8"
+        )
+        (output / "AUTONOMOUS-DATAFLOW.json").write_text(
+            json.dumps({"status": "DISASSEMBLY_UNAVAILABLE"}, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        return {"status": "DISASSEMBLY_UNAVAILABLE", "proven": 0, "candidates": 0}
+
+    text = path.read_text(encoding="utf-8", errors="replace")
+    lines = text.splitlines()
+    funcs = _parse_disassembly_functions(text)
+    boundaries = []
+    for n, item in enumerate(funcs):
+        start, addr, label = item
+        end = funcs[n + 1][0] if n + 1 < len(funcs) else len(lines)
+        boundaries.append((start, end, addr, label))
+
+    ctor_text = (output / "ActiveDecoder-constructor.txt").read_text(
+        encoding="utf-8", errors="replace"
+    ) if (output / "ActiveDecoder-constructor.txt").exists() else ""
+    ctor_match = re.search(r"^\s*([0-9a-fA-F]+)\s+<[^>]*>:", ctor_text, re.M)
+    ctor_addr = int(ctor_match.group(1), 16) if ctor_match else None
+
+    records = []
+    for start, end, faddr, flabel in boundaries:
+        block = lines[start:end]
+        for rel_i, line in enumerate(block):
+            if not re.search(r"\bldr\s+x8,\s+\[x8,\s+#0x108\]", line):
+                continue
+            window = block[rel_i:min(len(block), rel_i + 6)]
+            if not any(re.search(r"\bblr\s+x8\b", w) for w in window):
+                continue
+
+            direct_vtable = any(
+                _parse_adrp_add_value(block, j, "x8") == 0x717e60
+                for j in range(max(0, rel_i - 6), rel_i)
+            )
+
+            vptr_load = any(
+                re.search(r"\bldr\s+x8,\s+\[x19\]", w)
+                for w in block[max(0, rel_i - 8):rel_i]
+            )
+            constructor_chain = False
+            constructor_evidence = None
+            if ctor_addr is not None and vptr_load:
+                ctor_calls = [
+                    j for j in range(max(0, rel_i - 220), rel_i)
+                    if re.search(rf"\bbl\s+(?:0x)?{ctor_addr:x}\b", block[j], re.I)
+                ]
+                if ctor_calls:
+                    call_i = ctor_calls[-1]
+                    capture = next(
+                        (j for j in range(call_i + 1, min(rel_i, call_i + 10))
+                         if re.search(r"\bmov\s+x19,\s+x0\b", block[j])),
+                        None,
+                    )
+                    if capture is not None:
+                        overwritten = any(
+                            _reg_written(block[j], "x19")
+                            for j in range(capture + 1, rel_i)
+                        )
+                        if not overwritten:
+                            constructor_chain = True
+                            constructor_evidence = {
+                                "constructor_call_line": block[call_i].strip(),
+                                "object_capture_line": block[capture].strip(),
+                                "vptr_load_line": next(
+                                    w.strip() for w in block[max(0, rel_i - 8):rel_i]
+                                    if re.search(r"\bldr\s+x8,\s+\[x19\]", w)
+                                ),
+                            }
+
+            if direct_vtable:
+                classification = "PROVEN_STATIC_TARGET_SLOT_LOAD"
+                proof_basis = "literal 0x717e60 address-point is constructed before [x8,#0x108]"
+            elif constructor_chain:
+                classification = "PROVEN_TARGET_VTABLE_DATAFLOW"
+                proof_basis = "target constructor -> x19 capture -> [x19] vptr load -> +0x108 -> blr"
+            elif vptr_load:
+                classification = "CXX_VPTR_DATAFLOW_UNRESOLVED"
+                proof_basis = "object-vptr load found but target vtable value is not independently established"
+            else:
+                classification = "UNRESOLVED_0x108_DATAFLOW"
+                proof_basis = "no target-vtable provenance established"
+
+            records.append({
+                "function_address": hex(faddr),
+                "function": flabel,
+                "dispatch_address": line.split(":", 1)[0].strip(),
+                "classification": classification,
+                "proof_basis": proof_basis,
+                "constructor_evidence": constructor_evidence,
+                "window": "\n".join(block[max(0, rel_i - 8):min(len(block), rel_i + 6)]),
+            })
+
+    proven = [x for x in records if x["classification"] in (
+        "PROVEN_STATIC_TARGET_SLOT_LOAD", "PROVEN_TARGET_VTABLE_DATAFLOW"
+    )]
+    cxx = [x for x in records if x["classification"] == "CXX_VPTR_DATAFLOW_UNRESOLVED"]
+
+    payload = {
+        "schema_version": "2.1",
+        "target_vtable": "0x717e60",
+        "target_slot": "0x717f68",
+        "target_function": "0x27a510",
+        "constructor_entry": hex(ctor_addr) if ctor_addr is not None else None,
+        "candidate_count": len(records),
+        "proven_target_dataflow_count": len(proven),
+        "cxx_unresolved_count": len(cxx),
+        "records": records,
+    }
+    (output / "AUTONOMOUS-DATAFLOW.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+
+    report = [
+        "# Autonomous Dataflow Proof",
+        "",
+        "Target vtable address-point: 0x717e60",
+        "Target slot: 0x717f68 (+0x108)",
+        "Target function: 0x27a510",
+        "",
+        "Bounded intra-function AArch64 data-flow reconstruction; register names alone never prove the target.",
+        "",
+        "Candidate dispatches analysed: %d" % len(records),
+        "PROVEN target data-flow: %d" % len(proven),
+        "C++ vptr candidates still unresolved: %d" % len(cxx),
+        "",
+    ]
+    for item in records:
+        report += [
+            "## %s — %s" % (item["dispatch_address"], item["classification"]),
+            "Function: %s" % item["function"],
+            "Basis: " + item["proof_basis"],
+            "ASM:",
+            item["window"],
+            "",
+        ]
+    report += [
+        "RESULT: " + (
+            "PROVEN_TARGET_VTABLE_DATAFLOW_FOUND" if proven
+            else "NO_PROVEN_TARGET_VTABLE_DATAFLOW_FOUND"
+        ),
+        "",
+        "Static data-flow is distinct from runtime execution.",
+    ]
+    (output / "AUTONOMOUS-DATAFLOW.md").write_text(
+        "\n".join(report) + "\n", encoding="utf-8"
+    )
+    return {"status": "completed", "proven": len(proven),
+            "candidates": len(records), "cxx_unresolved": len(cxx)}
+
+
+def _find_package_name(root):
+    for path in root.rglob("AndroidManifest.xml"):
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        m = re.search(r'\bpackage\s*=\s*"([^"]+)"', text)
+        if m:
+            return m.group(1), str(path)
+    return None, None
+
+
+def write_runtime_probe(output, root, target):
+    package, manifest = _find_package_name(root)
+    module = target.name if target else "libsaasCorePlayer.so"
+    script = output / "reelsec-runtime-probe.js"
+    js = r'''const TARGET_OFFSET = ptr("0x27a510");
+const TARGET_VTABLE = ptr("0x717e60");
+const TARGET_SLOT = 0x108;
+const MODULE_NAME = "MODULE_PLACEHOLDER";
+function hookModule(m) {
+  try {
+    const target = m.base.add(TARGET_OFFSET);
+    Interceptor.attach(target, {
+      onEnter(args) {
+        let vptr = ptr("0x0");
+        let slot = ptr("0x0");
+        try { vptr = args[0].readPointer(); } catch (_) {}
+        try { slot = vptr.add(TARGET_SLOT).readPointer(); } catch (_) {}
+        send({event:"TARGET_FUNCTION_ENTER",module:m.name,base:m.base.toString(),
+          pc:this.context.pc.toString(),object:args[0].toString(),vptr:vptr.toString(),
+          slot:slot.toString(),expected_vptr:TARGET_VTABLE.toString(),
+          expected_slot:ptr("0x27a510").toString(),return_address:this.returnAddress.toString(),
+          target_vptr_match:vptr.equals(TARGET_VTABLE),
+          target_slot_match:slot.equals(ptr("0x27a510"))});
+      }
+    });
+    send({event:"HOOK_INSTALLED",module:m.name,base:m.base.toString(),target:target.toString()});
+    return true;
+  } catch(e) { send({event:"HOOK_ERROR",module:m.name,error:String(e)}); return false; }
+}
+let installed=false;
+const existing=Process.findModuleByName(MODULE_NAME);
+if(existing) installed=hookModule(existing);
+if(!installed) Process.attachModuleObserver({onAdded(module){
+  if(!installed && module.name===MODULE_NAME) installed=hookModule(module);
+}});
+send({event:"READY",package:"PACKAGE_PLACEHOLDER",module:MODULE_NAME,target_offset:TARGET_OFFSET.toString()});
+setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();},12000);
+'''
+    js = js.replace("MODULE_PLACEHOLDER", module.replace("\\", "\\\\").replace('"', '\\"'))
+    js = js.replace("PACKAGE_PLACEHOLDER", (package or "UNKNOWN").replace("\\", "\\\\").replace('"', '\\"'))
+    script.write_text(js, encoding="utf-8")
+
+    result = {"status":"NOT_ATTEMPTED","package":package,"manifest":manifest,
+              "module":module,"tooling":{},"events":[]}
+    adb, frida = which("adb"), which("frida")
+    result["tooling"].update(adb=adb, frida=frida)
+
+    if not adb or not frida or not package:
+        result["status"]="RUNTIME_ENVIRONMENT_UNAVAILABLE"
+        result["reason"]="requires package manifest, adb, and frida"
+    else:
+        rc, devices = run([adb, "devices", "-l"])
+        active=[x for x in devices.splitlines()
+                if x.strip() and not x.startswith("List of devices") and "\tdevice" in x]
+        result["tooling"]["adb_devices"]=active
+        if not active:
+            result["status"]="NO_ONLINE_ANDROID_DEVICE"
+            result["reason"]="adb is installed but no online device is available"
+        else:
+            rc, out = run([frida,"-U","-f",package,"-l",str(script),"--no-pause"])
+            result["frida_exit"]=rc
+            result["frida_output"]=out[-12000:]
+            matches=[x for x in out.splitlines()
+                     if '"event":"TARGET_FUNCTION_ENTER"' in x
+                     and '"target_vptr_match":true' in x
+                     and '"target_slot_match":true' in x]
+            result["runtime_matches"]=len(matches)
+            result["status"]="PROVEN_RUNTIME_TARGET_DISPATCH" if matches else "RUNTIME_TARGET_NOT_OBSERVED"
+
+    (output / "RUNTIME-PROBE.json").write_text(
+        json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    (output / "RUNTIME-PROOF-READINESS.md").write_text(
+        "# Runtime Proof Readiness\n\n"
+        "Package: %s\nNative module: %s\nTarget offset: 0x27a510\n"
+        "Expected vptr: 0x717e60\nExpected slot result: 0x27a510\n\n"
+        "Status: %s\n\n"
+        "The probe is observational and does not replace or mutate the target.\n"
+        % (package or "UNKNOWN", module, result["status"]),
+        encoding="utf-8",
+    )
+    return result
+
+
+def write_autonomous_campaign(output, dataflow, runtime):
+    payload={"schema_version":"2.1","mode":"AUTONOMOUS",
+             "static_dataflow":dataflow,
+             "runtime_status":runtime.get("status") if runtime else "NOT_RUN",
+             "truth_rules":{
+                 "static_target_slot":"PROVEN",
+                 "runtime_execution":"PROVEN only when target entry observes vptr=0x717e60 and slot=0x27a510",
+                 "screenshot_blocking":"never inferred from pointer presence alone"}}
+    (output / "AUTONOMOUS-CAMPAIGN.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (output / "AUTONOMOUS-CAMPAIGN.md").write_text(
+        "# ReelSec Autonomous Investigation\n\n"
+        "Static ABI/vtable resolution, bounded AArch64 data-flow reconstruction, "
+        "and a bounded runtime probe are executed automatically.\n\n"
+        "Static data-flow: %s\nRuntime status: %s\n\n"
+        "No Screenshot-blocking conclusion is emitted without runtime evidence.\n"
+        % ("PROVEN" if dataflow.get("proven",0) else "NOT_PROVEN",
+           runtime.get("status","NOT_RUN") if runtime else "NOT_RUN"),
+        encoding="utf-8")
+
+
 def git_publish(root, report_dir):
     """Publish from a clean worktree based on origin/main; never mutate the investigation checkout."""
     result = {
@@ -624,6 +933,12 @@ def git_publish(root, report_dir):
         "REMAINING-DISPATCH-AUDIT.md",
         "NATIVE-SECURITY-API-AUDIT.md",
         "JAVA-SCREEN-SECURITY-AUDIT.md",
+        "AUTONOMOUS-DATAFLOW.md",
+        "AUTONOMOUS-DATAFLOW.json",
+        "RUNTIME-PROOF-READINESS.md",
+        "RUNTIME-PROBE.json",
+        "AUTONOMOUS-CAMPAIGN.md",
+        "AUTONOMOUS-CAMPAIGN.json",
     ]
     result["required_artifacts"] = required
     result["report_path"] = rel
@@ -961,6 +1276,10 @@ def main():
     write_native_security_api_audit(output, strings_text, symbols_text)
     write_java_screen_security_audit(output, ROOT)
 
+    dataflow_result = write_autonomous_dataflow(output, target, objdump)
+    runtime_result = write_runtime_probe(output, ROOT, target)
+    write_autonomous_campaign(output, dataflow_result, runtime_result)
+
     security_text = (output / "security-strings.txt").read_text(
         encoding="utf-8", errors="replace"
     ) if (output / "security-strings.txt").exists() else ""
@@ -1028,6 +1347,8 @@ def main():
         jni_semantic_found=jni_semantic_found,
         vtable_abi=vtable_abi,
         critical_function_behavior=critical_behavior,
+        autonomous_dataflow=dataflow_result,
+        runtime_probe_status=(runtime_result.get("status") if runtime_result else "NOT_RUN"),
     )
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
@@ -1050,6 +1371,8 @@ def main():
         print("PUBLISH_BRANCH=" + str(publish["branch"]))
         print("PUBLISH_REPORT_COMMIT=" + str(publish["report_commit"]))
         print("PUBLISH_STATUS_COMMIT=" + str(publish["status_commit"]))
+    print("AUTONOMOUS_DATAFLOW_PROVEN=" + str(bool(dataflow_result.get("proven", 0))))
+    print("RUNTIME_PROOF_STATUS=" + str(runtime_result.get("status") if runtime_result else "NOT_RUN"))
 
 if __name__ == "__main__":
     main()
