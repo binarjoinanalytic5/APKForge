@@ -1,0 +1,16 @@
+{
+  "artifact": {
+    "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_023644-7970/instrumented-signed.apk",
+    "sha256": "d56a3e00c2e523d02d7d7d298e4418c24ccdc0130c5c8da7435e2310909c5dac"
+  },
+  "causal_proof": false,
+  "mode": "OBSERVATION_ONLY",
+  "module": "libsaasCorePlayer.so",
+  "mutates_original_apk": false,
+  "package": "com.newleaf.app.android.victor",
+  "proof_class": "OBSERVED_ONLY",
+  "requires_gadget": true,
+  "schema_version": 1,
+  "status": "READY",
+  "target_offset": "0x27a510"
+}

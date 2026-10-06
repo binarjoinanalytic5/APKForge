@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+    "-cp",
+    "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+    "brut.apktool.Main",
+    "b",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_023644-7970/instrumented-apk",
+    "-o",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_023644-7970/instrumented-unsigned.apk"
+  ],
+  "output_tail": "I: Using Apktool 2.7.0-dirty\nI: Checking whether sources has changed...\nI: Smaling smali folder into classes.dex...\nI: Checking whether resources has changed...\nI: Copying raw resources...\nI: Copying libs... (/lib)\nI: Copying libs... (/kotlin)\nI: Copying libs... (/META-INF/services)\nI: Building apk file...\nI: Copying unknown files/dir...\nI: Built apk into: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_023644-7970/instrumented-unsigned.apk\n",
+  "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_023644-7970/instrumented-unsigned.apk",
+  "returncode": 0,
+  "sha256": "ec686b875b45948a61efb01b6ea8c081fd025cc86b1eea3138d27a44a412dc28",
+  "size": 50565790,
+  "status": "BUILT"
+}

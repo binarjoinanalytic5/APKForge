@@ -1,0 +1,4 @@
+{
+  "error": "command failed (1): /data/data/com.termux/files/usr/bin/adb -s 192.168.8.8:39927 get-state\nerror: device '192.168.8.8:39927' not found\n",
+  "status": "BLOCKED_OR_FAILED"
+}
