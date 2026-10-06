@@ -1,0 +1,1155 @@
+===== NATIVE LIBRARIES =====
+
+######## apktool-src/lib/arm64-v8a/libSecShell-x86.so ########
+   7ca1 mprotect
+
+######## apktool-src/lib/arm64-v8a/libSecShell.so ########
+   a0df mprotect
+   b2af hookFunAddr_read
+
+######## apktool-src/lib/arm64-v8a/libalinetworkdiagnosis.so ########
+   40b5 record for name: %s
+
+######## apktool-src/lib/arm64-v8a/libalivcffmpeg.so ########
+  15681 ff_aac_eld_window_512
+  15697 ff_aac_eld_window_480
+  1576e ff_kbd_window_init
+  15781 ff_sine_window_init
+  15795 ff_init_ff_sine_windows
+  159dd ff_aac_eld_window_480_fixed
+  159f9 ff_aac_eld_window_512_fixed
+  15f35 ff_ac3_window
+  19923 ff_kbd_window_init_fixed
+  1a25f ff_mpa_synth_window_fixed
+  1a2f6 ff_mpa_synth_window_float
+  1a369 ff_mpa_enwindow
+  1a379 ff_mpadsp_apply_window_fixed
+  1a3c8 ff_mpadsp_apply_window_float
+  1aae0 ff_sine_window_init_fixed
+  1aafa ff_init_ff_sine_windows_fixed
+  1c319 ff_mpadsp_apply_window_fixed_neon
+  1c33b ff_mpadsp_apply_window_float_neon
+  1d66f av_spherical_projection_name
+  215b9 ff_vector_fmul_window_neon
+ 26748b AAC LD is only defined for ONLY_LONG_SEQUENCE but window sequence %d found.
+ 27776e DOVI configuration record
+ 278d43 image/x-xwindowdump
+ 286ed3 Apply default display window from VUI
+ 286f0b stricly apply default display window size
+ 287e45 discarding sps conformance window, original values are l:%u r:%u t:%u b:%u
+ 288143 Invalid default display window
+ 288163 discarding vui default display window, original values are l:%u r:%u t:%u b:%u
+ 288350 Displaying the whole video surface.
+ 293be0 --disable-everything --disable-programs --disable-doc --disable-filters --disable-avdevice --disable-postproc --disable-hwaccels --disable-bzlib --disable-videotoolbox --enable-avresample --enable-pic --enable-decoder=aac --enable-decoder=h264 --enable-decoder=hevc --enable-decoder=mpeg4 --enable-decoder=mp3 --enable-decoder=mp3float --enable-decoder=pcm_s16le --enable-decoder=ac3_at --enable-decoder=eac3_at --enable-decoder=ac3 --enable-decoder=eac3 --enable-demuxer=flv --enable-demuxer=aac --enable-demuxer=live_flv --enable-demuxer=webvtt --enable-demuxer=srt --enable-demuxer=mov --enable-demuxer=mp3 --enable-demuxer=mpegts --enable-demuxer=matroska --enable-demuxer=h264 --enable-demuxer=ass --enable-demuxer=ac3 --enable-demuxer=eac3 --enable-muxer=mp4 --enable-muxer=adts --enable-muxer=mpegts --enable-muxer=mp4 --enable-muxer=adts --enable-muxer=mpegts --enable-parser=aac --enable-parser=h264 --enable-parser=hevc --enable-parser=ac3 --enable-parser=vvc --enable-parser=av3a --enable-protocol=file --enable-protocol=rtmp --enable-bsf=aac_adtstoasc --enable-bsf=h264_mp4toannexb --enable-bsf=hevc_mp4toannexb --enable-bsf=extract_extradata --enable-filter=atempo --enable-filter=aresample --enable-filter=aformat --enable-filter=volume --enable-filter=pan --enable-cross-compile --enable-small --disable-runtime-cpudetect --target-os=linux --arch=arm64 --cross-prefix=aarch64-linux-android- --disable-linux-perf --toolchain=hardened --enable-neon --enable-thumb --as= --cc='aarch64-linux-android-gcc --sysroot=/usr/alibaba/android-ndk-r14b/platforms/android-21/arch-arm64' --extra-cflags='-fdata-sections -ffunction-sections -D_FORTIFY_SOURCE=2 -fstack-protector-all -Os -g' --extra-ldflags= --prefix=/home/admin/.emas/build/55524919/workspace/work/imp-player-cicadaplayer/external/install/ffmpeg/Android/arm64-v8a
+ 296259 select Blackman Nuttall windowed sinc
+ 296286 select Kaiser windowed sinc
+ 2962ae set swr Kaiser window beta
+ 296d29 960/120 MDCT window is not allowed in ADTS
+ 297211 https protocol not found, recompile FFmpeg with openssl, gnutls or securetransport enabled.
+ 297b94 DOVI configuration record: 
+ 29992d Recording Location
+ 299940 During recording
+ 299964 Movie/video screen capture
+ 29b6d5 Missing projection private properties
+ 29e0db Unsupported projection %d. sv3d not written.
+ 2a0133 Missing projection box
+ 2a014b Missing projection header box
+ 2a0189 Unknown projection type: %s
+ 2a0411 <GSpherical:ProjectionType>
+ 2a163a [aax] error in drm blob decryption!
+ 2a737f window acknowledgement size
+ 2a75be Too short window acknowledgement size packet (%d)
+ 2a75f1 Incorrect window acknowledgement size %d
+ 2a761b [DEBUG]Window acknowledgement size = %d
+ 2a86d3 recorded
+ 2a86dc recorded stream
+ 2a8ecc getsockopt in tcp_get_window_size()
+ 2b18a7 drm_prime
+ 2b6004 pot <= atempo->window
+ 2cd990 adrm
+
+######## apktool-src/lib/arm64-v8a/libapplovin-native-crash-reporter.so ########
+
+######## apktool-src/lib/arm64-v8a/libbuffer_pgl.so ########
+
+######## apktool-src/lib/arm64-v8a/libc++_shared.so ########
+
+######## apktool-src/lib/arm64-v8a/libcrashlytics-common.so ########
+   1e38 mprotect
+  157db CodeView record in module too small to contain signature
+  164b6 CodeView record marked as PDB70 missing NUL-terminator in pdb_name
+  17ea5 mprotect
+  19df1 CodeView record in module marked as PDB70 but too small
+
+######## apktool-src/lib/arm64-v8a/libcrashlytics-handler.so ########
+   7e44 Unable to load necessary components to capture crash
+
+######## apktool-src/lib/arm64-v8a/libcrashlytics-trampoline.so ########
+
+######## apktool-src/lib/arm64-v8a/libcrashlytics.so ########
+
+######## apktool-src/lib/arm64-v8a/libdatastore_shared_counter.so ########
+
+######## apktool-src/lib/arm64-v8a/libfile_lock_pgl.so ########
+
+######## apktool-src/lib/arm64-v8a/libmarsxlog.so ########
+
+######## apktool-src/lib/arm64-v8a/libmku_aaab.so ########
+
+######## apktool-src/lib/arm64-v8a/libmmkv.so ########
+  24483 turn on recording expire date for all keys inside [%s] from now %u
+  24ef2 erase previous recorded expire date for all keys inside [%s]
+
+######## apktool-src/lib/arm64-v8a/libnms.so ########
+
+######## apktool-src/lib/arm64-v8a/libpglarmor.so ########
+
+######## apktool-src/lib/arm64-v8a/libprotect.so ########
+  180d2 Java_io_adjoe_protection_DeviceUtils_registerToken
+  18105 _Z7drmInfov
+  18111 Java_io_adjoe_protection_DeviceUtils_drmInfo
+  1813e Java_io_adjoe_protection_DeviceUtils_socName
+  1b45b Java_io_adjoe_protection_DeviceUtils_isEmulator
+  1c381 AMediaDrm_getPropertyByteArray
+  1c3a0 AMediaDrm_createByUUID
+  1c3b7 AMediaDrm_release
+  1c3c9 AMediaDrm_getPropertyString
+  1c7f9 _Z17drmByteArrayToHex18AMediaDrmByteArray
+  33cdc libprotect.so
+
+######## apktool-src/lib/arm64-v8a/libsaasCorePlayer.so ########
+  1acdf _ZN10KeyManager14getDrmMagicKeyEv
+  24c52 _ZN14codecPrototype6createERK11Stream_metamiPKN6Cicada7DrmInfoE
+  24cf9 _ZN6Cicada14avcodecDecoder12init_decoderEPK11Stream_metaPvmPKNS_7DrmInfoE
+  250b4 _ZN13ActiveDecoder4openEPK11Stream_metaPvmPKN6Cicada7DrmInfoE
+  25598 _ZN6Cicada19DrmHandlerPrototype9isSupportEPKNS_7DrmInfoE
+  25991 ANativeWindow_acquire
+  259a7 ANativeWindow_release
+  25c53 ANativeWindow_getWidth
+  25c6a ANativeWindow_getHeight
+  25c82 ANativeWindow_fromSurface
+  25d4d eglCreatePbufferSurface
+  25d8b eglDestroySurface
+  25dcd eglCreateWindowSurface
+  26355 _ZN6Cicada19DrmHandlerPrototype6createERKNS_7DrmInfoE
+  2638b _ZN6Cicada19DrmHandlerPrototype12addPrototypeEPS0_
+  263be _ZN6Cicada19DrmHandlerPrototype15drmHandlerQueueE
+  263f0 _ZN6Cicada19DrmHandlerPrototype9_nextSlotE
+  2641b _ZTSN6Cicada19DrmHandlerPrototypeE
+  2643e _ZTIN6Cicada19DrmHandlerPrototypeE
+  28a16 mprotect
+ 59da85 mEnableProjection
+ 59dd4b protected.privateService.data.premiumVerifyCb
+ 59df8f protected.network.http.http2
+ 59dfc4 protected.network.multi.pipeline
+ 59dff9 public.capture.strategy.scale
+ 59e027 protected.audio.render.change_format
+ 59e04c protected.audio.render.change_format.fmt
+ 59e075 protected.audio.render.change_format.channels
+ 59e0a3 protected.audio.render.change_format.sample_rate
+ 59e0d4 protected.decode.codecplugin.
+ 59e11d protected.network.cache.local
+ 59e13b protected.network.cache.local.saveDir
+ 59e161 protected.network.cache.local.bufferMemoryKB
+ 59e18e protected.network.cache.local.expireMin
+ 59e1b6 protected.network.cache.local.maxCapacityMB
+ 59e1e2 protected.network.cache.local.freeStorageMB
+ 59e23b protected.network.cache.local.urlHashCb
+ 59e263 protected.network.cache.local.urlHashCbUserData
+ 59e337 protected.network.data.processCb
+ 59e358 protected.network.data.releaseCb
+ 59e404 protected.network.dns.httpdns.enhanced
+ 59e448 protected.network.networkbalance
+ 59e481 protected.network.switchNIC
+ 59e4c2 protected.network.enhancedNetworkbalance
+ 59e50c protected.network.bufferToLocalCache
+ 59e55b public.crash.strategy.captureCrash
+ 59e59e protected.ipAccessor.clientSwitch
+ 59e638 protected.IpResolveType
+ 59fb66 surfaceChanged
+ 5a0623 onCaptureScreen
+ 5a0841 nSetSurface
+ 5a084d (Landroid/view/Surface;)V
+ 5a0cbb nSurfaceChanged
+ 5a1225 AliyunCorePlayer callback --> CaptureScreen(%ld,%ld)
+ 5a3059 CaptureScreen
+ 5a338c nativeOnCaptureScreen
+ 5a346e requestDrm complete, len:%d, data:%s
+ 5a38f3 widevine
+ 5a38fc Widevine
+ 5a3905 requestDRMLicense: CDMData is null or dataLen <= 0
+ 5a3938 CDMData is null or empty, please check DRM configuration
+ 5a3971 requestDRMLicense: VOD DRM certId is empty, will try to proceed without it
+ 5a39bc requestDRMLicense: Live DRM certificate URL is empty
+ 5a39f1 Live DRM certificate URL is empty, please configure DRM certificate URL
+ 5a3aa7 DRMMagicKey
+ 5a42a6 enableProjection
+ 5a4dac Widevine-FairPlay
+ 5a6075 ", "projectionLicenseEnable":"
+ 5a611f apsaraCaptureScreen
+ 5a7108 protected.license.premium.checkPremiumAddrUserData
+ 5a7bd3 crash_strategy_is_capture_crash
+ 5a822f http2_windows_size
+ 5a8e8d public.network.http2.windows.size
+ 5a900f protected.local.cache.cleaner
+ 5a971f crash monitor allow capture : %d
+ 5a98fd crashMonitor capture success, crashFilePath 
+ 5a992f crashMonitor capture failed
+ 5a994b protected.network.preconnect.interval
+ 5a9971 protected.network.preconnect.request
+ 5a9996 protected.network.preconnect.domain
+ 5a99ba protected.network.preconnect.idle
+ 5a9d49 protected.networkQuality.checkShallDegradeAddr
+ 5a9d78 protected.networkQuality.maybeGetABetterIpAddr
+ 5aad0c tbDrmDemuxer
+ 5aad45 tbDRMKey
+ 5aad74 TbDrmMuxer
+ 5aaed4 tbDrm
+ 5aaeda tbDrmDec
+ 5aaeff tbDrmTs
+ 5ab0ac tbDrm_read_close 
+ 5ab0ea drmMagicKey
+ 5acbf4 RECORDING
+ 5acbfe SCHEDULED_EVENT_SENDER_AND_RECORDING_FOR_PLAYER
+ 5acded protected.playEvent.user.destroyAsync
+ 5acf2d protected.playEvent.user.stop
+ 5acf4b protected.playEvent.user.destroy
+ 5ae237 GetDRMLicense
+ 5ae245 DRMType
+ 5ae63d DescribeDRMLicense
+ 5aef11 InvalidParameter.DRMNotActivated
+ 5aef32 DRMAuthError
+ 5b0cf4 captureCrash
+ 5b1739 stream is WideVine and occur decode error.
+ 5b2ad1 force switch to hardware decoder, as tunnelRender || isWideVine
+ 5b4394 On Android: TextureView may cause decoder init failure for DRM content
+ 5b43db If on Android, use SurfaceView instead of TextureView for DRM content
+ 5b480c DRM-protected content cannot be decrypted without proper keys
+ 5b4886 For DRM content, ensure proper license/key acquisition
+ 5b4ae9 DRM scheme not supported on this device
+ 5b4b11 The device does not support Widevine L1 or L3
+ 5b4b3f Widevine is not available on the device (e.g., uncertified device)
+ 5b4b82 The device's DRM system is outdated
+ 5b4ba6 Check the device's Widevine certification level
+ 5b4bd6 Use a certified device for DRM-protected content
+ 5b4c51 Contact the device manufacturer for DRM support information
+ 5b4c8d DRM key is expired or invalid
+ 5b4d56 Third-party DRM callback (requestKey) returned incorrect data
+ 5b4e0a For third-party DRM, check the DrmCallback.requestKey implementation
+ 5b4e4f Renew the DRM license and retry playback
+ 5b4e78 DRM key response is null
+ 5b4ef7 Third-party DRM callback returned null
+ 5b4fa6 For third-party DRM, ensure the requestKey callback returns valid data
+ 5b5016 DRM certificate URL is not configured or empty
+ 5b5045 The DRM certificate URL was not set before playback (e.g., FairPlay application certificate URL)
+ 5b5167 Set the DRM certificate URL via setDrmConfig or the corresponding API before calling prepare()
+ 5b51c6 For URL-based playback of DRM content, ensure the certificate URL is provided in the player configuration
+ 5b5230 Check the documentation for the correct way to configure the DRM certificate URL for your DRM scheme
+ 5b5295 DRM key request failed due to network error
+ 5b52c1 Network is unstable or disconnected when requesting the DRM key
+ 5b5301 The DRM key server is unreachable or overloaded
+ 5b53aa Verify the DRM key server URL is accessible from the device
+ 5b5453 DRM key server returned an error
+ 5b5474 The DRM key server returned HTTP 4xx or 5xx
+ 5b551b The DRM entitlement for this content has been revoked
+ 5b5551 Check the DRM key server response code and message
+ 5b55ce Contact the DRM provider to check if the content entitlement is valid
+ 5b5658 DRM key server response is invalid or cannot be parsed
+ 5b568f The DRM key server returned malformed JSON/XML
+ 5b5762 Verify the DRM key server is returning well-formed responses
+ 5b5842 DRM content key has expired
+ 5b585e The DRM key expiration time has passed
+ 5b592b Renew the DRM key and retry playback
+ 5b5979 For offline keys, ensure the renewal window has not passed
+ 5b59b4 Contact the content provider to extend the DRM key validity
+ 5b5c1e DRM scheme does not match the media encryption type
+ 5b5c52 Attempting to play Widevine-encrypted content with an HLS URL (Widevine is typically used with DASH)
+ 5b5d1b The media uses Alibaba Cloud private encryption but the player is configured for commercial DRM
+ 5b5d7b The DRM type specified in the player configuration does not match the actual encryption
+ 5b5dd3 Ensure the DRM scheme matches the media format (Widevine + DASH, FairPlay + HLS)
+ 5b5ecb Verify the player DRM configuration matches the content encryption type
+ 5b7645 ProcessSetViewMsg: failed to get JNIEnv, cannot construct surface handle
+ 5bb2e4 parseContentProtection
+ 5bb312 ContentProtection
+ 5bc1b4 initDrmHandler failed, ret=%d
+ 5bc2f7 queueSecureInputBuffer or queueInputBuffer error(%d) codecType = %d
+ 5bc535 failed to initDrmHandler state=SESSION_STATE_IDLE
+ 5bc567 failed to initDrmHandler state=SESSION_STATE_ERROR, code=%d
+ 5bc5a3 failed to initDrmHandler try again
+ 5bc60b setDrmInfo
+ 5bc62e setForceInsecureDecoder
+ 5bc6fa queueSecureInputBuffer
+ 5bc775 setOutputSurface
+ 5bc7b5 jBuffer is null, queueSecureInputBuffer may mem lack
+ 5bc991 bytes_of_protected_data
+ 5bd256 surface:%p, mInvalid:%d, queue size:%zu, may drop frame
+ 5bd2b1 capture cost time : capture = %ld ms
+ 5bd2d6 captureScreen exception, frameWidth or frameHeight is 0
+ 5bd33c createGLSurface failed
+ 5bd42c u_projection
+ 5bd50c com/cicada/player/utils/DecoderSurfaceTexture
+ 5bd53a DecoderSurface
+ 5bd549 Could not find surfaceTextureClass
+ 5bd56c createSurface
+ 5bd57a (IJ)Landroid/view/Surface;
+ 5bd603 faild tod create surface
+ 5bd61c mSurfaceTexture is nullptr
+ 5bd653 failed to create surfaceTexture obj
+ 5bd677 failed to create surfaceTexture
+ 5bd697 failed to create Surface obj
+ 5bd6b4 failed to create Surface
+ 5bd6cd NativeWindow
+ 5bd6da AndroidSurfaceHandle: invalid params env=%p jSurface=%p
+ 5bd712 AndroidSurfaceHandle: NewGlobalRef failed
+ 5bd73c AndroidSurfaceHandle: ANativeWindow_fromSurface returned null
+ 5bd77a AndroidSurfaceHandle::~AndroidSurfaceHandle: failed to get JNIEnv for DeleteGlobalRef
+ 5bd9eb protected.audio.render.hw.tempo
+ 5bdbda Device supports BT.2020 PQ. Will attempt to create HDR10 surface.
+ 5bdc1c Device does not support EGL_EXT_gl_colorspace_bt2020_pq. Creating standard SDR surface.
+ 5bdc95 Video is HLG and device supports extension. Creating BT.2020 HLG surface.
+ 5bdcdf Device does not support EGL_EXT_gl_colorspace_bt2020_hlg. Creating standard SDR surface.
+ 5bde2f eglCreatePbufferSurface: 0x%X
+ 5bde62 eglMakeCurrent: display(%p) surface(%p) context(%p)
+ 5bdef7 Output surface is null, not rendering!
+ 5bdf40 eglDestroySurface: 0x%x
+ 5bdf58 Native window handle is null!
+ 5bdf76 EGLContext CreateSurface mDisplay %p mConfig %p window %p 
+ 5bdfcb Video is SDR. Creating standard SDR surface.
+ 5bdff8 Retrying to create surface with default attributes...
+ 5be02e EGLContext eglCreateWindowSurface finally failed!
+ 5be060 EGLContext eglCreateWindowSurface surface: %p
+ 5be08e EGLContext eglDestroySurface eglSurface %p
+ 5be9bf WideVineDrmHandler
+ 5bea04 com/cicada/player/utils/media/DrmSessionManager
+ 5bea9e isForceInsecureDecoder
+ 5beaec drm changeState, objectId=%ld
+ 5beb3d drm prepared OK
+ 5beb4d drm requestProvision, objectId=%ld
+ 5beba8 drm requestKey, objectId=%ld
+ 5bec70 protected.networkBalanceServer.get.getCurrent
+ 5bec9e protected.networkBalanceServer.get.getCurrentTotal
+ 5c2ff0 This device/system doesn't support Widevine. You can try other device.
+ 5c3037 DRM key is expired or invalid, please check your configuration. If it's a third DRM, please provide correct DrmCallback.requestKey implementation.
+ 5c30ca DRM key is null, please check your configuration. If it's a third DRM, please provide correct DrmCallback.requestKey implementation.
+ 5c314f DRM provision response is null as request to Google failed.
+ 5c318b DRM resource busy
+ 5c319d DRM session released.
+ 5c31b3 DRM provision failed, your device/system doesn't pass Google's Widevine provision.
+ 5c3206 DRM media's security level is too high, can't play in this device, you can lower your media's security level and try again.
+ 5c3282 DRM cert is null, please check your configuration. If it's a third DRM, please provide correct AVPDrmDelegate.requestCert implementation.
+ 5c3369 DRM init decoder failed, please use SurfaceView instead of TextureView and try again.
+ 5c341d DRM key request network failed, please check your network connection.
+ 5c3463 DRM key server returned an error response, please check your license server configuration.
+ 5c34be DRM key response parse failed, the server response format is invalid.
+ 5c3504 DRM key has expired, please refresh the playback session or obtain a new license.
+ 5c3556 unknown drm error
+ 5c3662 protected.
+ 5c589f PersistentSpaceManager#RecordLogFileFinish [mLogBytesByProcess: %lu, mMaxLogBytesByProcess: %lu, businessType: %s, mLogBytesByBusinessMap: %lu, mMaxLogBytesByBusinessMap: %lu]
+ 5c594f PersistentSpaceManager#RecordLogFileFinish mLogBytesByProcess >= mMaxLogBytesByProcess !!!
+ 5c59aa PersistentSpaceManager#RecordLogFileFinish mLogBytesByBusinessMap[%s] >= mMaxLogBytesByBusinessMap[%s] !!!
+ 5c6325 /.usage.record
+ 5c6334 Read usage record error, maybe someone try to modify. %s
+ 5c636d Read usage record got 0 time. %s
+ 5c638e Read usage record error. can not read file stat. %s
+ 5c63c2 Read usage record error. file stat modify time(%lu) too late then recordTime(%lu)
+ 5c6414 Read usage record error. wrong sign: file(%s) vs check(%s)
+ 5c644f Save usage record error with content(%s) to file(%s)
+ 5c6f92 Windows
+ 5c840c /download.record
+ 5c9f51 WINDOW_UPDATE: window_size_increment == 0
+ 5c9f7b WINDOW_UPDATE to idle stream
+ 5c9f98 WINDOW_UPADATE to reserved stream
+ 5ca13e SETTINGS: too large SETTINGS_INITIAL_WINDOW_SIZE
+ 5ca2f6 session->remote_window_size > 0
+ 5cce5a x-xss-protectio
+ 5cceaa upgrade-insecure-request
+ 5cd404 x-xss-protection
+ 5cd586 upgrade-insecure-requests
+ 5ce5c6 settings->max_window <= NGTCP2_MAX_VARINT
+ 5ce5f0 settings->max_stream_window <= NGTCP2_MAX_VARINT
+ 5cf5ca processing buffered protected packet
+ 5d00cb persistent congestion loss_window=%lu congestion_period=%lu
+ 5d1eda congestion_window
+ 5d569e bad record mac
+ 5d576c record overflow
+ 5d5f86 RecordPadding
+ 5d5f94 record_padding
+ 5d65ba secure memory buffer
+ 5d87fe emailProtection
+ 5d880e E-mail Protection
+ 5da3da aRecord
+ 5da3f7 mXRecord
+ 5da400 nSRecord
+ 5da409 sOARecord
+ 5da413 cNAMERecord
+ 5da5fa Secure Electronic Transactions
+ 5dace7 setext-pinSecure
+ 5dafcb secure device signature
+ 5dd5be secureShellClient
+ 5dd5db secureShellServer
+ 5dfc8e No matching DANE TLSA records
+ 5e1b77 records
+ 5e1bd4 CREATE CRASH RECORDS DIR ERROR!! %s
+ 5e1cb8 CAN NOT getRecordsDir before Setup
+ 5e1f75 parseCrashDescContent failed: captureResult(%s) is invalid
+ 5e24df crash capture is close
+ 5e25c2 alivc_java_crash_capture.cc:57
+ 5e25fe alivc_java_crash_capture.cc:59
+ 5e2637 alivc_java_crash_capture.cc:96
+ 5e266b alivc_java_crash_capture.cc:104
+ 5e26a0 alivc_java_crash_capture.cc:110
+ 5e2748 alivc_java_crash_capture.cc:123
+ 5e27ff alivc_java_crash_capture.cc:154
+ 5e2830 alivc_java_crash_capture.cc:176
+ 5e286d alivc_java_crash_capture.cc:182
+ 5e28b2 alivc_java_crash_capture.cc:184
+ 5e28fa alivc_java_crash_capture.cc:194
+ 5e2929 alivc_java_crash_capture.cc:198
+ 5e2957 alivc_java_crash_capture.cc:208
+ 5e2988 alivc_java_crash_capture.cc:212
+ 5e29b8 alivc_java_crash_capture.cc:224
+ 5e29e9 alivc_java_crash_capture.cc:228
+ 5e2a19 alivc_java_crash_capture.cc:239
+ 5e2a4c alivc_java_crash_capture.cc:243
+ 5e2c24 alivc_native_crash_capture.cc:21
+ 5e39ef alivc_linux_native_crash_capture.cc:249
+ 5e3a3d alivc_linux_native_crash_capture.cc:255
+ 5e3aa4 alivc_linux_native_crash_capture.cc:262
+ 5e3af2 alivc_linux_native_crash_capture.cc:267
+ 5e3b3a alivc_linux_native_crash_capture.cc:271
+ 5e3b75 alivc_linux_native_crash_capture.cc:282
+
+######## apktool-src/lib/arm64-v8a/libsaasDownloader.so ########
+  2a240 16TbDrmFileRemuxer
+
+######## apktool-src/lib/arm64-v8a/libsls_producer.so ########
+
+######## apktool-src/lib/arm64-v8a/libstupid.so ########
+  12ceb mprotect
+  42f07 bytehook_tag
+  43032 bytehook hooked pthread_create successfully
+  431c3  bytehook_stub_t success hook %s: stub=%p
+  432e3 hooked callback: status=%d caller=%s sym=%s new=%p prev=%p
+  43332 bytehook-stack
+  43341 switch: hook(invisible) in %s mode OK: sym %lx, new_addr %lx, orig_addr %lx
+  43486 bytehook init failed rc=%d
+  439d3 bytehook-plt-trampolines
+  43d3a pthread_create hook already installed
+  43da2 libbytehook.so
+  43f8c bytehook unhook failed: rc=%d
+  43faa reloc: CFI hook_single(%s, %s) OK.
+  440d8 bytehook version 1.1.2-rc.0
+  440f8 hook
+  44497 bytehook failed to hook pthread_create
+  44606 switch: unhook in %s mode OK: sym %lx, new_addr %lx, orig_addr %lx
+  4471b RSLogHook
+  44a3d bytehook unhooked pthread_create successfully
+  44ae5 reloc: CFI hook_single(%s, %s) FAILED. errno: %d.
+  44b17 unhook
+  44b1e bytehook: %s_%s(%s, %s, %s, %p) %s
+  44c26 libshadowhook_nothing.so
+  44de7 bytehook init failed: rc=%d
+  45081 reloc: CFI hook_single(%s, %s) NOSYM.
+  450a7 switch: hook in %s mode OK: sym %lx, new_addr %lx, orig_addr %lx
+  451d2 setLogHookLogEnabled
+  4544c %s: bytehook init(mode: %s, debuggable: %s), return: %d, real-init: %s
+  45709 hook %s failed
+  4574c libshadowhook.so
+  45cf6 enabled=1 reuse-existing-hook
+
+######## apktool-src/lib/arm64-v8a/libtapjoy.so ########
+
+######## apktool-src/lib/arm64-v8a/libtt_ugen_layout.so ########
+
+######## apktool-src/lib/armeabi-v7a/libSecShell-x86.so ########
+   5ea5 mprotect
+
+######## apktool-src/lib/armeabi-v7a/libSecShell.so ########
+   66c6 mprotect
+
+######## apktool-src/lib/armeabi-v7a/libalinetworkdiagnosis.so ########
+   41f3 record for name: %s
+
+######## apktool-src/lib/armeabi-v7a/libalivcffmpeg.so ########
+   c661 ff_aac_eld_window_512
+   c677 ff_aac_eld_window_480
+   c6b0 ff_kbd_window_init
+   c6c3 ff_sine_window_init
+   c6d7 ff_init_ff_sine_windows
+   c99e ff_aac_eld_window_480_fixed
+   c9ba ff_aac_eld_window_512_fixed
+   cf4a ff_ac3_window
+  10982 ff_kbd_window_init_fixed
+  112e9 ff_mpa_synth_window_fixed
+  11375 ff_mpa_synth_window_float
+  113d0 ff_mpa_enwindow
+  113e0 ff_mpadsp_apply_window_fixed
+  1142f ff_mpadsp_apply_window_float
+  11b4b ff_sine_window_init_fixed
+  11b65 ff_init_ff_sine_windows_fixed
+  11b83 ff_sine_windows_fixed
+  11c3d ff_sine_windows
+  12494 ff_apply_window_int16_neon
+  14370 ff_mpadsp_apply_window_fixed_armv6
+  157d2 av_spherical_projection_name
+  19693 ff_vector_fmul_window_neon
+  1972b ff_vector_fmul_window_vfp
+ 1dab29 AAC LD is only defined for ONLY_LONG_SEQUENCE but window sequence %d found.
+ 1dc869 DOVI configuration record
+ 1dd957 image/x-xwindowdump
+ 1e191a Apply default display window from VUI
+ 1e1952 stricly apply default display window size
+ 1e1e83 discarding sps conformance window, original values are l:%u r:%u t:%u b:%u
+ 1e2181 Invalid default display window
+ 1e21a1 discarding vui default display window, original values are l:%u r:%u t:%u b:%u
+ 1e238e Displaying the whole video surface.
+ 1e78bc --disable-everything --disable-programs --disable-doc --disable-filters --disable-avdevice --disable-postproc --disable-hwaccels --disable-bzlib --disable-videotoolbox --enable-avresample --enable-pic --enable-decoder=aac --enable-decoder=h264 --enable-decoder=hevc --enable-decoder=mpeg4 --enable-decoder=mp3 --enable-decoder=mp3float --enable-decoder=pcm_s16le --enable-decoder=ac3_at --enable-decoder=eac3_at --enable-decoder=ac3 --enable-decoder=eac3 --enable-demuxer=flv --enable-demuxer=aac --enable-demuxer=live_flv --enable-demuxer=webvtt --enable-demuxer=srt --enable-demuxer=mov --enable-demuxer=mp3 --enable-demuxer=mpegts --enable-demuxer=matroska --enable-demuxer=h264 --enable-demuxer=ass --enable-demuxer=ac3 --enable-demuxer=eac3 --enable-muxer=mp4 --enable-muxer=adts --enable-muxer=mpegts --enable-parser=aac --enable-parser=h264 --enable-parser=hevc --enable-parser=ac3 --enable-parser=vvc --enable-parser=av3a --enable-protocol=file --enable-protocol=rtmp --enable-bsf=aac_adtstoasc --enable-bsf=h264_mp4toannexb --enable-bsf=hevc_mp4toannexb --enable-bsf=extract_extradata --enable-filter=atempo --enable-filter=aresample --enable-filter=aformat --enable-filter=volume --enable-filter=pan --enable-cross-compile --enable-small --disable-runtime-cpudetect --target-os=linux --arch=arm --cross-prefix=arm-linux-androideabi- --disable-linux-perf --toolchain=hardened --enable-neon --enable-thumb --as= --cc='arm-linux-androideabi-gcc --sysroot=/usr/alibaba/android-ndk-r14b/platforms/android-14/arch-arm' --extra-cflags='-fdata-sections -ffunction-sections -march=armv7-a -mcpu=cortex-a8 -mfpu=vfpv3-d16 -mfloat-abi=softfp -mthumb -D_FORTIFY_SOURCE=2 -fstack-protector-all -Os -g' --extra-ldflags= --prefix=/home/admin/.emas/build/55524919/workspace/work/imp-player-cicadaplayer/external/install/ffmpeg/Android/armeabi-v7a
+ 1e961f select Blackman Nuttall windowed sinc
+ 1e964c select Kaiser windowed sinc
+ 1e9674 set swr Kaiser window beta
+ 1e9fc5 960/120 MDCT window is not allowed in ADTS
+ 1ea3f2 https protocol not found, recompile FFmpeg with openssl, gnutls or securetransport enabled.
+ 1ead74 DOVI configuration record: 
+ 1eca3b Recording Location
+ 1eca4e During recording
+ 1eca72 Movie/video screen capture
+ 1ed98a Missing projection private properties
+ 1eedbd Unsupported projection %d. sv3d not written.
+ 1f0a02 Missing projection box
+ 1f0a1a Missing projection header box
+ 1f0a58 Unknown projection type: %s
+ 1f0ce0 <GSpherical:ProjectionType>
+ 1f162a [aax] error in drm blob decryption!
+ 1f6303 window acknowledgement size
+ 1f6401 Window acknowledgement size = %d
+ 1f64b1 Too short window acknowledgement size packet (%d)
+ 1f64e4 Incorrect window acknowledgement size %d
+ 1f650e [DEBUG]Window acknowledgement size = %d
+ 1f761a recorded
+ 1f7623 recorded stream
+ 1f7b74 getsockopt in tcp_get_window_size()
+ 1fc0bf drm_prime
+ 1fd826 pot <= atempo->window
+ 2398c8 adrm)V
+
+######## apktool-src/lib/armeabi-v7a/libapplovin-native-crash-reporter.so ########
+
+######## apktool-src/lib/armeabi-v7a/libbuffer_pgl.so ########
+
+######## apktool-src/lib/armeabi-v7a/libc++_shared.so ########
+
+######## apktool-src/lib/armeabi-v7a/libcrashlytics-common.so ########
+   178f mprotect
+   d232 CodeView record in module too small to contain signature
+   def2 CodeView record marked as PDB70 missing NUL-terminator in pdb_name
+   f5ed mprotect
+  11378 CodeView record in module marked as PDB70 but too small
+
+######## apktool-src/lib/armeabi-v7a/libcrashlytics-handler.so ########
+   4de4 Unable to load necessary components to capture crash
+
+######## apktool-src/lib/armeabi-v7a/libcrashlytics-trampoline.so ########
+
+######## apktool-src/lib/armeabi-v7a/libcrashlytics.so ########
+
+######## apktool-src/lib/armeabi-v7a/libdatastore_shared_counter.so ########
+
+######## apktool-src/lib/armeabi-v7a/libfile_lock_pgl.so ########
+
+######## apktool-src/lib/armeabi-v7a/libmarsxlog.so ########
+
+######## apktool-src/lib/armeabi-v7a/libmku_aaab.so ########
+
+######## apktool-src/lib/armeabi-v7a/libmmkv.so ########
+  1d327 turn on recording expire date for all keys inside [%s] from now %u
+  1dbd9 erase previous recorded expire date for all keys inside [%s]
+  33160 yDRM
+
+######## apktool-src/lib/armeabi-v7a/libnms.so ########
+
+######## apktool-src/lib/armeabi-v7a/libpglarmor.so ########
+
+######## apktool-src/lib/armeabi-v7a/libprotect.so ########
+  13691 Java_io_adjoe_protection_DeviceUtils_registerToken
+  136c4 _Z7drmInfov
+  136d0 Java_io_adjoe_protection_DeviceUtils_drmInfo
+  136fd Java_io_adjoe_protection_DeviceUtils_socName
+  16a4d Java_io_adjoe_protection_DeviceUtils_isEmulator
+  17973 AMediaDrm_getPropertyByteArray
+  17992 AMediaDrm_createByUUID
+  179a9 AMediaDrm_release
+  179bb AMediaDrm_getPropertyString
+  17dfd _Z17drmByteArrayToHex18AMediaDrmByteArray
+  2f2c2 libprotect.so
+
+######## apktool-src/lib/armeabi-v7a/libsaasCorePlayer.so ########
+  13b3f gj_playerconfig_EnableProjection
+  165a2 gj_NativePlayer_onCaptureScreen
+  19e5e _ZN10KeyManager14getDrmMagicKeyEv
+  1d881 _ZN12cloud_config9playersdk5crash23Strategy_IsCaptureCrashE
+  1e305 _ZN12cloud_config9playersdk7network14H2Windows_SizeE
+  27fdf _ZN14codecPrototype6createERK11Stream_metayiPKN6Cicada7DrmInfoE
+  281a0 _ZN13ActiveDecoder4openEPK11Stream_metaPvyPKN6Cicada7DrmInfoE
+  2837d _ZN6Cicada14avcodecDecoder12init_decoderEPK11Stream_metaPvyPKNS_7DrmInfoE
+  284b9 _ZN6Cicada14avcodecDecoder13is_drmSupportEPKNS_7DrmInfoE
+  2884b _ZThn312_N6Cicada14avcodecDecoder13is_drmSupportEPKNS_7DrmInfoE
+  28ae3 _ZN6Cicada19DrmHandlerPrototype9isSupportEPKNS_7DrmInfoE
+  28ca2 jSubsampleEncryptionInfo_bytes_of_protected_data
+  28d96 _ZN13ActiveDecoder12init_decoderEPK11Stream_metaPvyPKN6Cicada7DrmInfoE
+  2929d ANativeWindow_acquire
+  292b3 ANativeWindow_release
+  295dc _ZN6Cicada22gj_ds_midCreateSurfaceE
+  29600 _ZN6Cicada23gj_ds_midSurfaceTextureE
+  29671 ANativeWindow_fromSurface
+  2968b ANativeWindow_getHeight
+  296a3 ANativeWindow_getWidth
+  297aa eglCreatePbufferSurface
+  297c2 eglCreateWindowSurface
+  297eb eglDestroySurface
+  29e57 _ZN6Cicada19DrmHandlerPrototype6createERKNS_7DrmInfoE
+  29e8d _ZN6Cicada19DrmHandlerPrototype12addPrototypeEPS0_
+  29ec0 _ZN6Cicada19DrmHandlerPrototype15drmHandlerQueueE
+  29ef2 _ZN6Cicada19DrmHandlerPrototype9_nextSlotE
+  29f1d _ZN6Cicada18WideVineDrmHandler10sObjectMapE
+  29f49 _ZN6Cicada18WideVineDrmHandler15sObjectMapMutexE
+  29f7a _ZTIN6Cicada19DrmHandlerPrototypeE
+  29f9d _ZTSN6Cicada19DrmHandlerPrototypeE
+  2c030 _ZN9IAFPacket11isProtectedEv
+  2c7d7 _ZN10AVAFPacket11isProtectedEv
+  2c859 _ZN10AVAFPacket12setProtectedEv
+  2d069 mprotect
+ 4d500f mEnableProjection
+ 4d535d protected.privateService.data.premiumVerifyCb
+ 4d55a1 protected.network.http.http2
+ 4d55d6 protected.network.multi.pipeline
+ 4d560b public.capture.strategy.scale
+ 4d5639 protected.audio.render.change_format
+ 4d565e protected.audio.render.change_format.fmt
+ 4d5687 protected.audio.render.change_format.channels
+ 4d56b5 protected.audio.render.change_format.sample_rate
+ 4d56e6 protected.decode.codecplugin.
+ 4d572f protected.network.cache.local
+ 4d574d protected.network.cache.local.saveDir
+ 4d5773 protected.network.cache.local.bufferMemoryKB
+ 4d57a0 protected.network.cache.local.expireMin
+ 4d57c8 protected.network.cache.local.maxCapacityMB
+ 4d57f4 protected.network.cache.local.freeStorageMB
+ 4d584e protected.network.cache.local.urlHashCb
+ 4d5876 protected.network.cache.local.urlHashCbUserData
+ 4d594d protected.network.data.processCb
+ 4d596e protected.network.data.releaseCb
+ 4d5a1a protected.network.dns.httpdns.enhanced
+ 4d5a5e protected.network.networkbalance
+ 4d5a97 protected.network.switchNIC
+ 4d5ad8 protected.network.enhancedNetworkbalance
+ 4d5b22 protected.network.bufferToLocalCache
+ 4d5b71 public.crash.strategy.captureCrash
+ 4d5bb4 protected.ipAccessor.clientSwitch
+ 4d5c4e protected.IpResolveType
+ 4d71cd surfaceChanged
+ 4d7c8d onCaptureScreen
+ 4d7eb0 nSetSurface
+ 4d7ebc (Landroid/view/Surface;)V
+ 4d832a nSurfaceChanged
+ 4d88b0 AliyunCorePlayer callback --> CaptureScreen(%lld,%lld)
+ 4da71c CaptureScreen
+ 4daa61 nativeOnCaptureScreen
+ 4dab43 requestDrm complete, len:%d, data:%s
+ 4dafd9 media.drm.fp.cert.id
+ 4dafee widevine
+ 4db000 Widevine
+ 4db012 requestDRMLicense: CDMData is null or dataLen <= 0
+ 4db045 CDMData is null or empty, please check DRM configuration
+ 4db07e requestDRMLicense: unsupported DRM type %d
+ 4db0a9 Unsupported DRM type, only WideVine and FairPlay are supported
+ 4db0e8 requestDRMLicense: VOD DRM certId is empty, will try to proceed without it
+ 4db133 requestDRMLicense: Live DRM certificate URL is empty
+ 4db168 Live DRM certificate URL is empty, please configure DRM certificate URL
+ 4db21e DRMMagicKey
+ 4dc2ee Widevine-FairPlay
+ 4dd5eb ", "projectionLicenseEnable":"
+ 4dd698 apsaraCaptureScreen
+ 4decd7 PersistentSpaceManager#RecordLogFileFinish [mLogBytesByProcess: %llu, mMaxLogBytesByProcess: %llu, businessType: %s, mLogBytesByBusinessMap: %llu, mMaxLogBytesByBusinessMap: %llu]
+ 4ded8b PersistentSpaceManager#RecordLogFileFinish mLogBytesByProcess >= mMaxLogBytesByProcess !!!
+ 4dede6 PersistentSpaceManager#RecordLogFileFinish mLogBytesByBusinessMap[%s] >= mMaxLogBytesByBusinessMap[%s] !!!
+ 4df270 protected.license.premium.checkPremiumAddrUserData
+ 4e012f /.usage.record
+ 4e013e Read usage record error, maybe someone try to modify. %s
+ 4e0177 Read usage record got 0 time. %s
+ 4e0198 Read usage record error. can not read file stat. %s
+ 4e01cc Read usage record error. file stat modify time(%llu) too late then recordTime(%llu)
+ 4e0220 Read usage record error. wrong sign: file(%s) vs check(%s)
+ 4e025b Save usage record error with content(%s) to file(%s)
+ 4e0b13 Windows
+ 4e1f86 /download.record
+ 4e2f59 crash_strategy_is_capture_crash
+ 4e35b5 http2_windows_size
+ 4e41f3 public.network.http2.windows.size
+ 4e4375 protected.local.cache.cleaner
+ 4e4e06 crash monitor allow capture : %d
+ 4e4ff4 crashMonitor capture success, crashFilePath 
+ 4e5026 crashMonitor capture failed
+ 4e5042 protected.network.preconnect.interval
+ 4e5068 protected.network.preconnect.request
+ 4e508d protected.network.preconnect.domain
+ 4e50b1 protected.network.preconnect.idle
+ 4e5430 protected.networkQuality.checkShallDegradeAddr
+ 4e545f protected.networkQuality.maybeGetABetterIpAddr
+ 4e6408 tbDrmDemuxer
+ 4e6441 tbDRMKey
+ 4e6470 TbDrmMuxer
+ 4e65d0 tbDrm
+ 4e65d6 tbDrmDec
+ 4e65fb tbDrmTs
+ 4e67a8 tbDrm_read_close 
+ 4e67e7 drmMagicKey
+ 4e8364 RECORDING
+ 4e836e SCHEDULED_EVENT_SENDER_AND_RECORDING_FOR_PLAYER
+ 4e85b7 protected.playEvent.user.destroyAsync
+ 4e876f protected.playEvent.user.stop
+ 4e878d protected.playEvent.user.destroy
+ 4e9af6 GetDRMLicense
+ 4e9b04 DRMType
+ 4e9f1e DescribeDRMLicense
+ 4ea7f5 InvalidParameter.DRMNotActivated
+ 4ea816 DRMAuthError
+ 4ebf6c enableProjection
+ 4ec7a7 captureCrash
+ 4ed214 stream is WideVine and occur decode error.
+ 4ee5e9 force switch to hardware decoder, as tunnelRender || isWideVine
+ 4efeb9 On Android: TextureView may cause decoder init failure for DRM content
+ 4eff00 If on Android, use SurfaceView instead of TextureView for DRM content
+ 4f0331 DRM-protected content cannot be decrypted without proper keys
+ 4f03ab For DRM content, ensure proper license/key acquisition
+ 4f060e DRM scheme not supported on this device
+ 4f0636 The device does not support Widevine L1 or L3
+ 4f0664 Widevine is not available on the device (e.g., uncertified device)
+ 4f06a7 The device's DRM system is outdated
+ 4f06cb Check the device's Widevine certification level
+ 4f06fb Use a certified device for DRM-protected content
+ 4f0776 Contact the device manufacturer for DRM support information
+ 4f07b2 DRM key is expired or invalid
+ 4f087b Third-party DRM callback (requestKey) returned incorrect data
+ 4f092f For third-party DRM, check the DrmCallback.requestKey implementation
+ 4f0974 Renew the DRM license and retry playback
+ 4f099d DRM key response is null
+ 4f0a1c Third-party DRM callback returned null
+ 4f0acb For third-party DRM, ensure the requestKey callback returns valid data
+ 4f0b3b DRM certificate URL is not configured or empty
+ 4f0b6a The DRM certificate URL was not set before playback (e.g., FairPlay application certificate URL)
+ 4f0c8c Set the DRM certificate URL via setDrmConfig or the corresponding API before calling prepare()
+ 4f0ceb For URL-based playback of DRM content, ensure the certificate URL is provided in the player configuration
+ 4f0d55 Check the documentation for the correct way to configure the DRM certificate URL for your DRM scheme
+ 4f0dba DRM key request failed due to network error
+ 4f0de6 Network is unstable or disconnected when requesting the DRM key
+ 4f0e26 The DRM key server is unreachable or overloaded
+ 4f0ecf Verify the DRM key server URL is accessible from the device
+ 4f0f78 DRM key server returned an error
+ 4f0f99 The DRM key server returned HTTP 4xx or 5xx
+ 4f1040 The DRM entitlement for this content has been revoked
+ 4f1076 Check the DRM key server response code and message
+ 4f10f3 Contact the DRM provider to check if the content entitlement is valid
+ 4f117d DRM key server response is invalid or cannot be parsed
+ 4f11b4 The DRM key server returned malformed JSON/XML
+ 4f1287 Verify the DRM key server is returning well-formed responses
+ 4f1367 DRM content key has expired
+ 4f1383 The DRM key expiration time has passed
+ 4f1450 Renew the DRM key and retry playback
+ 4f149e For offline keys, ensure the renewal window has not passed
+ 4f14d9 Contact the content provider to extend the DRM key validity
+ 4f1743 DRM scheme does not match the media encryption type
+ 4f1777 Attempting to play Widevine-encrypted content with an HLS URL (Widevine is typically used with DASH)
+ 4f1840 The media uses Alibaba Cloud private encryption but the player is configured for commercial DRM
+ 4f18a0 The DRM type specified in the player configuration does not match the actual encryption
+ 4f18f8 Ensure the DRM scheme matches the media format (Widevine + DASH, FairPlay + HLS)
+ 4f19f0 Verify the player DRM configuration matches the content encryption type
+ 4f3168 ProcessSetViewMsg: failed to get JNIEnv, cannot construct surface handle
+ 4f6ec3 parseContentProtection
+ 4f6efe ContentProtection
+ 4f7ea0 initDrmHandler failed, ret=%d
+ 4f7fe3 queueSecureInputBuffer or queueInputBuffer error(%d) codecType = %d
+ 4f8225 failed to initDrmHandler state=SESSION_STATE_IDLE
+ 4f8257 failed to initDrmHandler state=SESSION_STATE_ERROR, code=%d
+ 4f8293 failed to initDrmHandler try again
+ 4f82fb setDrmInfo
+ 4f831e setForceInsecureDecoder
+ 4f83ea queueSecureInputBuffer
+ 4f8465 setOutputSurface
+ 4f84a5 jBuffer is null, queueSecureInputBuffer may mem lack
+ 4f8681 bytes_of_protected_data
+ 4f8f53 surface:%p, mInvalid:%d, queue size:%zu, may drop frame
+ 4f8fb0 capture cost time : capture = %lld ms
+ 4f8fd6 captureScreen exception, frameWidth or frameHeight is 0
+ 4f903c createGLSurface failed
+ 4f912c u_projection
+ 4f920c com/cicada/player/utils/DecoderSurfaceTexture
+ 4f923a DecoderSurface
+ 4f9249 Could not find surfaceTextureClass
+ 4f926c createSurface
+ 4f927a (IJ)Landroid/view/Surface;
+ 4f92e3 faild tod create surface
+ 4f92fc mSurfaceTexture is nullptr
+ 4f9333 failed to create surfaceTexture obj
+ 4f9357 failed to create surfaceTexture
+ 4f9377 failed to create Surface obj
+ 4f9394 failed to create Surface
+ 4f93ad NativeWindow
+ 4f93ba AndroidSurfaceHandle: invalid params env=%p jSurface=%p
+ 4f93f2 AndroidSurfaceHandle: NewGlobalRef failed
+ 4f941c AndroidSurfaceHandle: ANativeWindow_fromSurface returned null
+ 4f945a AndroidSurfaceHandle::~AndroidSurfaceHandle: failed to get JNIEnv for DeleteGlobalRef
+ 4f96cb protected.audio.render.hw.tempo
+ 4f98c4 Device supports BT.2020 PQ. Will attempt to create HDR10 surface.
+ 4f9906 Device does not support EGL_EXT_gl_colorspace_bt2020_pq. Creating standard SDR surface.
+ 4f997f Video is HLG and device supports extension. Creating BT.2020 HLG surface.
+ 4f99c9 Device does not support EGL_EXT_gl_colorspace_bt2020_hlg. Creating standard SDR surface.
+ 4f9b19 eglCreatePbufferSurface: 0x%X
+ 4f9b4c eglMakeCurrent: display(%p) surface(%p) context(%p)
+ 4f9be1 Output surface is null, not rendering!
+ 4f9c2a eglDestroySurface: 0x%x
+ 4f9c42 Native window handle is null!
+ 4f9c60 EGLContext CreateSurface mDisplay %p mConfig %p window %p 
+ 4f9cb5 Video is SDR. Creating standard SDR surface.
+ 4f9ce2 Retrying to create surface with default attributes...
+ 4f9d18 EGLContext eglCreateWindowSurface finally failed!
+ 4f9d4a EGLContext eglCreateWindowSurface surface: %p
+ 4f9d78 EGLContext eglDestroySurface eglSurface %p
+ 4fa698 WideVineDrmHandler
+ 4fa6df com/cicada/player/utils/media/DrmSessionManager
+ 4fa779 isForceInsecureDecoder
+ 4fa7c7 drm changeState, objectId=%lld
+ 4fa819 drm prepared OK
+ 4fa829 drm requestProvision, objectId=%lld
+ 4fa885 drm requestKey, objectId=%lld
+ 4fa943 protected.networkBalanceServer.get.getCurrent
+ 4fa971 protected.networkBalanceServer.get.getCurrentTotal
+ 4ff078 This device/system doesn't support Widevine. You can try other device.
+ 4ff0bf DRM key is expired or invalid, please check your configuration. If it's a third DRM, please provide correct DrmCallback.requestKey implementation.
+ 4ff152 DRM key is null, please check your configuration. If it's a third DRM, please provide correct DrmCallback.requestKey implementation.
+ 4ff1d7 DRM provision response is null as request to Google failed.
+ 4ff213 DRM resource busy
+ 4ff225 DRM session released.
+ 4ff23b DRM provision failed, your device/system doesn't pass Google's Widevine provision.
+ 4ff28e DRM media's security level is too high, can't play in this device, you can lower your media's security level and try again.
+ 4ff30a DRM cert is null, please check your configuration. If it's a third DRM, please provide correct AVPDrmDelegate.requestCert implementation.
+ 4ff3f1 DRM init decoder failed, please use SurfaceView instead of TextureView and try again.
+ 4ff4a5 DRM key request network failed, please check your network connection.
+ 4ff4eb DRM key server returned an error response, please check your license server configuration.
+ 4ff546 DRM key response parse failed, the server response format is invalid.
+ 4ff58c DRM key has expired, please refresh the playback session or obtain a new license.
+ 4ff5de unknown drm error
+ 4ff674 protected.
+ 501f35 WINDOW_UPDATE: window_size_increment == 0
+ 501f5f WINDOW_UPDATE to idle stream
+ 501f7c WINDOW_UPADATE to reserved stream
+ 502122 SETTINGS: too large SETTINGS_INITIAL_WINDOW_SIZE
+ 5022da session->remote_window_size > 0
+ 504e3c x-xss-protectio
+ 504e8c upgrade-insecure-request
+ 5053e6 x-xss-protection
+ 505568 upgrade-insecure-requests
+ 5065d1 settings->max_window <= NGTCP2_MAX_VARINT
+ 5065fb settings->max_stream_window <= NGTCP2_MAX_VARINT
+ 5075b9 processing buffered protected packet
+ 5080a2 persistent congestion loss_window=%llu congestion_period=%llu
+ 509f69 congestion_window
+ 50d7ad bad record mac
+ 50d87b record overflow
+ 50e095 RecordPadding
+ 50e0a3 record_padding
+ 50e6c9 secure memory buffer
+ 5108fe emailProtection
+ 51090e E-mail Protection
+ 5124da aRecord
+ 5124f7 mXRecord
+ 512500 nSRecord
+ 512509 sOARecord
+ 512513 cNAMERecord
+ 5126fa Secure Electronic Transactions
+ 512de7 setext-pinSecure
+ 5130cb secure device signature
+ 5156be secureShellClient
+ 5156db secureShellServer
+ 517d8f No matching DANE TLSA records
+ 519cb3 records
+ 519d10 CREATE CRASH RECORDS DIR ERROR!! %s
+ 519df4 CAN NOT getRecordsDir before Setup
+ 51a0b1 parseCrashDescContent failed: captureResult(%s) is invalid
+ 51a610 crash capture is close
+ 51a6b1 alivc_java_crash_capture.cc:57
+ 51a6ed alivc_java_crash_capture.cc:59
+ 51a726 alivc_java_crash_capture.cc:96
+ 51a75a alivc_java_crash_capture.cc:104
+ 51a78f alivc_java_crash_capture.cc:110
+ 51a837 alivc_java_crash_capture.cc:123
+ 51a8ee alivc_java_crash_capture.cc:154
+
+######## apktool-src/lib/armeabi-v7a/libsaasDownloader.so ########
+  23040 16TbDrmFileRemuxer
+
+######## apktool-src/lib/armeabi-v7a/libsls_producer.so ########
+
+######## apktool-src/lib/armeabi-v7a/libstupid.so ########
+   e6cf mprotect
+  3a737 bytehook_tag
+  3a86f bytehook hooked pthread_create successfully
+  3a8fd switch: hook in %s mode OK: sym %x, new_addr %x, orig_addr %x
+  3aa2c  bytehook_stub_t success hook %s: stub=%p
+  3ab58 hooked callback: status=%d caller=%s sym=%s new=%p prev=%p
+  3aba7 bytehook-stack
+  3ac89 bytehook init failed rc=%d
+  3af62 switch: hook(invisible) in %s mode OK: sym %x, new_addr %x, orig_addr %x
+  3b0be bytehook-plt-trampolines
+  3b36f pthread_create hook already installed
+  3b3ea libbytehook.so
+  3b548 bytehook unhook failed: rc=%d
+  3b6a5 bytehook version 1.1.2-rc.0
+  3b6c5 hook
+  3b9ec bytehook failed to hook pthread_create
+  3bc03 RSLogHook
+  3be8d bytehook unhooked pthread_create successfully
+  3bf35 unhook
+  3bf3c bytehook: %s_%s(%s, %s, %s, %p) %s
+  3c020 libshadowhook_nothing.so
+  3c1ac bytehook init failed: rc=%d
+  3c2cf switch: unhook in %s mode OK: sym %x, new_addr %x, orig_addr %x
+  3c494 setLogHookLogEnabled
+  3c731 %s: bytehook init(mode: %s, debuggable: %s), return: %d, real-init: %s
+  3c95c hook %s failed
+  3c99f libshadowhook.so
+  3ce4f enabled=1 reuse-existing-hook
+
+######## apktool-src/lib/armeabi-v7a/libtapjoy.so ########
+
+######## apktool-src/lib/armeabi-v7a/libtt_ugen_layout.so ########
+===== NATIVE SYMBOLS =====
+
+######## apktool-src/lib/arm64-v8a/libSecShell-x86.so ########
+
+######## apktool-src/lib/arm64-v8a/libSecShell.so ########
+
+######## apktool-src/lib/arm64-v8a/libalinetworkdiagnosis.so ########
+    84: 000000000000e1b0   492 FUNC    GLOBAL DEFAULT    14 JNI_OnLoad
+
+######## apktool-src/lib/arm64-v8a/libalivcffmpeg.so ########
+    96: 00000000002739c0  7680 OBJECT  GLOBAL DEFAULT    11 ff_aac_eld_window_512
+   267: 0000000000055c78    28 FUNC    GLOBAL DEFAULT    10 ff_init_ff_sine_windows_fixed
+   451: 00000000001540cc   996 FUNC    GLOBAL DEFAULT    10 ff_mpadsp_apply_window_float
+   481: 00000000005025a0  3072 OBJECT  GLOBAL DEFAULT    20 ff_mpa_synth_window_float
+   516: 0000000000052158   168 FUNC    GLOBAL DEFAULT    10 ff_kbd_window_init_fixed
+   657: 000000000026f9e0  7680 OBJECT  GLOBAL DEFAULT    11 ff_aac_eld_window_512_fixed
+   741: 000000000017b300   352 FUNC    GLOBAL DEFAULT    10 ff_mpadsp_apply_window_float_neon
+   811: 0000000000055c98   108 FUNC    GLOBAL DEFAULT    10 ff_sine_window_init
+  1011: 000000000013efe0     8 FUNC    GLOBAL DEFAULT    10 av_jni_set_java_vm
+  1034: 0000000000052020   304 FUNC    GLOBAL DEFAULT    10 ff_kbd_window_init
+  1267: 00000000002e1280   128 OBJECT  GLOBAL DEFAULT    16 ff_sine_windows
+  1424: 00000000001537ec  1044 FUNC    GLOBAL DEFAULT    10 ff_mpadsp_apply_window_fixed
+  1601: 000000000026b040  7200 OBJECT  GLOBAL DEFAULT    11 ff_aac_eld_window_480_fixed
+  1618: 000000000020f8d4   132 FUNC    GLOBAL DEFAULT    10 ff_vector_fmul_window_neon
+  1629: 000000000013efe8     8 FUNC    GLOBAL DEFAULT    10 av_jni_get_java_vm
+  1809: 000000000026d0e0  7200 OBJECT  GLOBAL DEFAULT    11 ff_aac_eld_window_480
+  1848: 0000000000055d10    28 FUNC    GLOBAL DEFAULT    10 ff_init_ff_sine_windows
+  1888: 0000000000055be0   136 FUNC    GLOBAL DEFAULT    10 ff_sine_window_init_fixed
+  2075: 000000000017b104   508 FUNC    GLOBAL DEFAULT    10 ff_mpadsp_apply_window_fixed_neon
+  2192: 0000000000276820   512 OBJECT  GLOBAL DEFAULT    11 ff_ac3_window
+  2264: 00000000005019a0  3072 OBJECT  GLOBAL DEFAULT    20 ff_mpa_synth_window_fixed
+  2519: 000000000028f580  1028 OBJECT  GLOBAL DEFAULT    11 ff_mpa_enwindow
+  2664: 00000000002e1200   128 OBJECT  GLOBAL DEFAULT    16 ff_sine_windows_fixed
+  2762: 0000000000201c28    36 FUNC    GLOBAL DEFAULT    10 av_spherical_projection_name
+
+######## apktool-src/lib/arm64-v8a/libapplovin-native-crash-reporter.so ########
+
+######## apktool-src/lib/arm64-v8a/libbuffer_pgl.so ########
+
+######## apktool-src/lib/arm64-v8a/libc++_shared.so ########
+
+######## apktool-src/lib/arm64-v8a/libcrashlytics-common.so ########
+    61: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND mprotect@LIBC
+
+######## apktool-src/lib/arm64-v8a/libcrashlytics-handler.so ########
+    46: 000000000000f998    36 FUNC    GLOBAL DEFAULT    15 JNI_OnLoad
+    47: 000000000000f9bc   356 FUNC    GLOBAL DEFAULT    15 JNI_Init
+
+######## apktool-src/lib/arm64-v8a/libcrashlytics-trampoline.so ########
+
+######## apktool-src/lib/arm64-v8a/libcrashlytics.so ########
+    52: 00000000000100d0    32 FUNC    GLOBAL DEFAULT    15 JNI_OnLoad
+    58: 00000000000100f0   276 FUNC    GLOBAL DEFAULT    15 JNI_Init
+
+######## apktool-src/lib/arm64-v8a/libdatastore_shared_counter.so ########
+    11: 0000000000000d80    92 FUNC    GLOBAL DEFAULT    14 _Z16ThrowIoExceptionP7_JNIEnvPKc
+
+######## apktool-src/lib/arm64-v8a/libfile_lock_pgl.so ########
+
+######## apktool-src/lib/arm64-v8a/libmarsxlog.so ########
+   132: 0000000000006470   320 FUNC    GLOBAL DEFAULT    11 JNI_OnLoad
+
+######## apktool-src/lib/arm64-v8a/libmku_aaab.so ########
+    51: 00000000000039a0  1832 FUNC    GLOBAL DEFAULT    10 JNI_OnLoad
+
+######## apktool-src/lib/arm64-v8a/libmmkv.so ########
+   136: 000000000003eba0   956 FUNC    GLOBAL DEFAULT    14 JNI_OnLoad
+
+######## apktool-src/lib/arm64-v8a/libnms.so ########
+    39: 0000000000015504   296 FUNC    GLOBAL DEFAULT    14 JNI_OnLoad
+
+######## apktool-src/lib/arm64-v8a/libpglarmor.so ########
+
+######## apktool-src/lib/arm64-v8a/libprotect.so ########
+   222: 000000000007ad9c   164 FUNC    GLOBAL DEFAULT    15 _Z8setExtraP7_JNIEnvP8_jobjectNSt6__ndk112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEES9_
+   321: 000000000008b5d4   984 FUNC    GLOBAL DEFAULT    15 Java_io_adjoe_protection_DeviceUtils_isEmulator
+   407: 000000000007e5cc   196 FUNC    GLOBAL DEFAULT    15 Java_io_adjoe_protection_DeviceUtils_socName
+   419: 000000000007ae40  1528 FUNC    GLOBAL DEFAULT    15 _Z4mudsP7_JNIEnvP8_jobjectNSt6__ndk112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEE
+   579: 000000000007bc48  3536 FUNC    GLOBAL DEFAULT    15 _Z3hefP7_JNIEnvP8_jobjectNSt6__ndk112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEE
+   710: 000000000007e508   196 FUNC    GLOBAL DEFAULT    15 Java_io_adjoe_protection_DeviceUtils_drmInfo
+   924: 000000000008b9ac   156 FUNC    WEAK   DEFAULT    15 _ZN7_JNIEnv13CallIntMethodEP8_jobjectP10_jmethodIDz
+  1094: 000000000007ca18  1612 FUNC    GLOBAL DEFAULT    15 _Z8get_instP7_JNIEnvP8_jobject
+  1114: 000000000007d064   156 FUNC    WEAK   DEFAULT    15 _ZN7_JNIEnv16CallObjectMethodEP8_jobjectP10_jmethodIDz
+  1293: 000000000007de20  1768 FUNC    GLOBAL DEFAULT    15 Java_io_adjoe_protection_DeviceUtils_registerToken
+  1732: 000000000007d100  2704 FUNC    GLOBAL DEFAULT    15 _Z3edtP7_JNIEnvP8_jobjectNSt6__ndk112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEES2_S9_S9_
+  1880: 000000000008ba48  3708 FUNC    WEAK   DEFAULT    15 _ZN8EmulatorC2EP7_JNIEnvP7_jclassiP10_jmethodIDS3_P8_jobject
+
+######## apktool-src/lib/arm64-v8a/libsaasCorePlayer.so ########
+     3: 000000000010376c   208 FUNC    GLOBAL DEFAULT    12 _ZN10JavaLogger4initEP7_JNIEnv
+     4: 00000000000fa194   956 FUNC    GLOBAL DEFAULT    12 _ZN13JavaTrackInfo4initEP7_JNIEnv
+     5: 00000000000fae98   652 FUNC    GLOBAL DEFAULT    12 _ZN13JavaMediaInfo4initEP7_JNIEnv
+     7: 0000000000120b94   932 FUNC    GLOBAL DEFAULT    12 _ZN10JavaVidSts4initEP7_JNIEnv
+     8: 0000000000121860  1032 FUNC    GLOBAL DEFAULT    12 _ZN11JavaVidAuth4initEP7_JNIEnv
+     9: 0000000000122fbc   676 FUNC    GLOBAL DEFAULT    12 _ZN11JavaLiveSts4initEP7_JNIEnv
+    10: 0000000000123544   764 FUNC    GLOBAL DEFAULT    12 _ZN12JavaVodAsset4initEP7_JNIEnv
+    11: 0000000000124910  1756 FUNC    GLOBAL DEFAULT    12 _ZN15JavaVodPlayInfo4initEP7_JNIEnv
+    12: 00000000001039cc   132 FUNC    GLOBAL DEFAULT    12 _ZN10JavaLogger14registerMethodEP7_JNIEnv
+    14: 00000000000fa550    92 FUNC    GLOBAL DEFAULT    12 _ZN13JavaTrackInfo6unInitEP7_JNIEnv
+    15: 00000000000fb124    92 FUNC    GLOBAL DEFAULT    12 _ZN13JavaMediaInfo6unInitEP7_JNIEnv
+    16: 0000000000103958   116 FUNC    GLOBAL DEFAULT    12 _ZN10JavaLogger6unInitEP7_JNIEnv
+    17: 0000000000120f38    92 FUNC    GLOBAL DEFAULT    12 _ZN10JavaVidSts6unInitEP7_JNIEnv
+    18: 0000000000121c68    92 FUNC    GLOBAL DEFAULT    12 _ZN11JavaVidAuth6unInitEP7_JNIEnv
+    19: 0000000000123840   148 FUNC    GLOBAL DEFAULT    12 _ZN12JavaVodAsset6unInitEP7_JNIEnv
+    20: 0000000000124fec   204 FUNC    GLOBAL DEFAULT    12 _ZN15JavaVodPlayInfo6unInitEP7_JNIEnv
+    21: 0000000000123260    92 FUNC    GLOBAL DEFAULT    12 _ZN11JavaLiveSts6unInitEP7_JNIEnv
+    23: 00000000000f8664   768 FUNC    GLOBAL DEFAULT    12 JNI_OnLoad
+    24: 00000000000f8964   504 FUNC    GLOBAL DEFAULT    12 JNI_OnUnload
+    26: 00000000002fb42c   180 FUNC    GLOBAL DEFAULT    12 _ZN12NewStringUTFC1EP7_JNIEnvPKc
+    35: 00000000002fb6e8    96 FUNC    GLOBAL DEFAULT    12 _ZN17GetStringUTFCharsC1EP7_JNIEnvP8_jstring
+    41: 00000000000fa5ac   956 FUNC    GLOBAL DEFAULT    12 _ZN13JavaTrackInfo12getTrackInfoEP7_JNIEnvRK13SaasTrackInfo
+    42: 00000000000fa968   112 FUNC    GLOBAL DEFAULT    12 _ZN13JavaTrackInfo25getStreamIndexByTrackInfoEP7_JNIEnvP8_jobject
+    43: 00000000000fa9d8   724 FUNC    GLOBAL DEFAULT    12 _ZN13JavaTrackInfo13getStreamInfoEP7_JNIEnvP8_jobject
+    47: 00000000000fad48   244 FUNC    GLOBAL DEFAULT    12 _ZN13JavaTrackInfo17getTrackInfoArrayEP7_JNIEnvRKNSt6__ndk16vectorI13SaasTrackInfoNS2_9allocatorIS4_EEEEi
+    48: 00000000000fb180   784 FUNC    GLOBAL DEFAULT    12 _ZN13JavaMediaInfo9convertToEP7_JNIEnvRK13SaasMediaInfo
+    49: 00000000000fb490   344 FUNC    GLOBAL DEFAULT    12 _ZN13JavaMediaInfo15convertToStreamEP7_JNIEnvP8_jobject
+    70: 00000000002fb348    76 FUNC    GLOBAL DEFAULT    12 _ZN12JniException14clearExceptionEP7_JNIEnv
+   113: 0000000000103a50    72 FUNC    GLOBAL DEFAULT    12 _ZN10JavaLogger16java_SetLogLevelEP7_JNIEnvP7_jclassi
+   114: 0000000000103a98   164 FUNC    GLOBAL DEFAULT    12 _ZN10JavaLogger13java_LogPrintEP7_JNIEnvP7_jclassiP8_jstringS5_
+   115: 0000000000103b3c    64 FUNC    GLOBAL DEFAULT    12 _ZN10JavaLogger16java_GetLogLevelEP7_JNIEnvP7_jclass
+   117: 0000000000103b7c    76 FUNC    GLOBAL DEFAULT    12 _ZN10JavaLogger21java_EnableConsoleLogEP7_JNIEnvP7_jclassh
+   118: 0000000000103bc8   100 FUNC    GLOBAL DEFAULT    12 _ZN10JavaLogger17java_SetLogOptionEP7_JNIEnvP7_jclassP8_jstringi
+   160: 0000000000120f94  2252 FUNC    GLOBAL DEFAULT    12 _ZN10JavaVidSts8covertToEP7_JNIEnvP8_jobject
+   178: 0000000000121cc4  2012 FUNC    GLOBAL DEFAULT    12 _ZN11JavaVidAuth8covertToEP7_JNIEnvP8_jobject
+   183: 00000000001224a0   364 FUNC    GLOBAL DEFAULT    12 _ZN11JavaVidAuth9convertToEP7_JNIEnvRK13VidAuthSource
+   199: 00000000001232bc   648 FUNC    GLOBAL DEFAULT    12 _ZN11JavaLiveSts8covertToEP7_JNIEnvP8_jobject
+   211: 00000000001238d4  2012 FUNC    GLOBAL DEFAULT    12 _ZN12JavaVodAsset9convertToEP7_JNIEnvP8_jobject
+   212: 00000000001250b8  5372 FUNC    GLOBAL DEFAULT    12 _ZN15JavaVodPlayInfo9convertToEP7_JNIEnvP8_jobject
+   229: 00000000001266ec  2936 FUNC    GLOBAL DEFAULT    12 _ZN15JavaVodPlayInfo9convertToEP7_JNIEnvRK11VodPlayInfo
+   240: 0000000000127bac   484 FUNC    GLOBAL DEFAULT    12 _ZN19JavaThumbnailHelper22Java_GetThumbnailInfosEP7_JNIEnvP7_jclassP8_jstringS5_
+   643: 00000000002fe03c     4 FUNC    GLOBAL DEFAULT    12 _ZN6avbase4util11AndroidUtil15InitClassLoaderEP7_JNIEnvPKc
+  1369: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND ANativeWindow_acquire
+  1370: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND ANativeWindow_release
+  1407: 0000000000284ea4    16 FUNC    GLOBAL DEFAULT    12 _ZN6Cicada19jniOnFrameAvailableEP7_JNIEnvP7_jclassl
+  1408: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND ANativeWindow_getWidth
+  1409: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND ANativeWindow_getHeight
+  1410: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND ANativeWindow_fromSurface
+  1421: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND eglCreatePbufferSurface
+  1425: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND eglDestroySurface
+  1429: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND eglCreateWindowSurface
+  1756: 00000000002fb42c   180 FUNC    GLOBAL DEFAULT    12 _ZN12NewStringUTFC2EP7_JNIEnvPKc
+  1759: 00000000002fb6e8    96 FUNC    GLOBAL DEFAULT    12 _ZN17GetStringUTFCharsC2EP7_JNIEnvP8_jstring
+  1798: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND mprotect@LIBC
+  1842: 00000000004bbc4c   272 FUNC    GLOBAL DEFAULT    12 _ZN6avbase5crash15onCrashCallbackEP7_JNIEnvP8_jobjectilP8_jstringS6_
+  1843: 00000000004bc054    12 FUNC    GLOBAL DEFAULT    12 _ZN6avbase5crash19onForegroundChangedEP7_JNIEnvP8_jobjecth
+  1844: 00000000004bc060   556 FUNC    GLOBAL DEFAULT    12 _ZN6avbase5crash26onLastCrashNativeTombstoneEP7_JNIEnvP8_jobjectP8_jstring
+
+######## apktool-src/lib/arm64-v8a/libsaasDownloader.so ########
+     3: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND _ZN10JavaLogger4initEP7_JNIEnv
+     4: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND _ZN10JavaVidSts4initEP7_JNIEnv
+     5: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND _ZN13JavaTrackInfo4initEP7_JNIEnv
+     6: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND _ZN13JavaMediaInfo4initEP7_JNIEnv
+     7: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND _ZN10JavaLogger14registerMethodEP7_JNIEnv
+    10: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND _ZN10JavaVidSts6unInitEP7_JNIEnv
+    12: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND _ZN13JavaTrackInfo6unInitEP7_JNIEnv
+    13: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND _ZN13JavaMediaInfo6unInitEP7_JNIEnv
+    15: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND _ZN10JavaLogger6unInitEP7_JNIEnv
+    17: 000000000000ca70   168 FUNC    GLOBAL DEFAULT    12 JNI_OnLoad
+    18: 000000000000cb18   124 FUNC    GLOBAL DEFAULT    12 JNI_OnUnload
+    21: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND _ZN17GetStringUTFCharsC1EP7_JNIEnvP8_jstring
+    24: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND _ZN10JavaVidSts8covertToEP7_JNIEnvP8_jobject
+    25: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND _ZN11JavaVidAuth8covertToEP7_JNIEnvP8_jobject
+    26: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND _ZN12NewStringUTFC1EP7_JNIEnvPKc
+    28: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND _ZN12JniException14clearExceptionEP7_JNIEnv
+    33: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND _ZN13JavaMediaInfo9convertToEP7_JNIEnvRK13SaasMediaInfo
+
+######## apktool-src/lib/arm64-v8a/libsls_producer.so ########
+    94: 000000000000f698   156 FUNC    WEAK   DEFAULT    14 _ZN7_JNIEnv13CallIntMethodEP8_jobjectP10_jmethodIDz
+   104: 000000000000f5fc   156 FUNC    WEAK   DEFAULT    14 _ZN7_JNIEnv22CallStaticObjectMethodEP7_jclassP10_jmethodIDz
+   135: 000000000000f7d0   424 FUNC    GLOBAL DEFAULT    14 JNI_OnLoad
+   149: 000000000000f734   156 FUNC    WEAK   DEFAULT    14 _ZN7_JNIEnv16CallObjectMethodEP8_jobjectP10_jmethodIDz
+
+######## apktool-src/lib/arm64-v8a/libstupid.so ########
+    80: 0000000000000000     0 FUNC    GLOBAL DEFAULT   UND mprotect@LIBC
+  1292: 0000000000073bec   176 FUNC    GLOBAL DEFAULT    14 JNI_OnLoad
+  1702: 0000000000073c9c   312 FUNC    GLOBAL DEFAULT    14 JNI_OnUnload
+
+######## apktool-src/lib/arm64-v8a/libtapjoy.so ########
+   144: 00000000000223d0   136 FUNC    GLOBAL DEFAULT    15 _Z40TJSpendCurrencyListener_CppToJava_createP7_JNIEnvPN6tapjoy23TJSpendCurrencyListenerE
+   159: 00000000000220e8   136 FUNC    GLOBAL DEFAULT    15 _Z41TJEarnedCurrencyListener_CppToJava_createP7_JNIEnvPN6tapjoy24TJEarnedCurrencyListenerE
+   192: 000000000002351c    56 FUNC    GLOBAL DEFAULT    15 _Z9findClassP7_JNIEnvPKc
+   199: 0000000000022804   136 FUNC    GLOBAL DEFAULT    15 _Z36TJSetUserIDListener_CppToJava_createP7_JNIEnvPN6tapjoy19TJSetUserIDListenerE
+   261: 0000000000022214   136 FUNC    GLOBAL DEFAULT    15 _Z45TJGetCurrencyBalanceListener_CppToJava_createP7_JNIEnvPN6tapjoy28TJGetCurrencyBalanceListenerE
+   284: 00000000000226c8   136 FUNC    GLOBAL DEFAULT    15 _Z52TJSetCurrencyAmountRequiredListener_CppToJava_createP7_JNIEnvPN6tapjoy35TJSetCurrencyAmountRequiredListenerE
+   336: 0000000000022940   136 FUNC    GLOBAL DEFAULT    15 _Z36TJPlacementListener_CppToJava_createP7_JNIEnvPN6tapjoy19TJPlacementListenerE
+   366: 0000000000021d38   156 FUNC    WEAK   DEFAULT    15 _ZN7_JNIEnv22CallStaticObjectMethodEP7_jclassP10_jmethodIDz
+   403: 000000000002258c   136 FUNC    GLOBAL DEFAULT    15 _Z45TJSetCurrencyBalanceListener_CppToJava_createP7_JNIEnvPN6tapjoy28TJSetCurrencyBalanceListenerE
+   429: 0000000000023554   156 FUNC    WEAK   DEFAULT    15 _ZN7_JNIEnv16CallObjectMethodEP8_jobjectP10_jmethodIDz
+   526: 0000000000021f2c   136 FUNC    GLOBAL DEFAULT    15 _Z40TJAwardCurrencyListener_CppToJava_createP7_JNIEnvPN6tapjoy23TJAwardCurrencyListenerE
+   537: 0000000000021cb0   136 FUNC    GLOBAL DEFAULT    15 _Z34TJConnectListener_CppToJava_createP7_JNIEnvPN6tapjoy17TJConnectListenerE
+   564: 000000000002316c   116 FUNC    GLOBAL DEFAULT    15 _Z28TJPlacement_CppToJava_createP7_JNIEnv
+
+######## apktool-src/lib/arm64-v8a/libtt_ugen_layout.so ########
+    69: 000000000004489c   120 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni15registerNativesEP7_JNIEnvPKcPK15JNINativeMethodm
+    82: 00000000000445b8   256 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni16YogaJniExceptionC2EP11_jthrowable
+    86: 0000000000044cc0    64 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni12newGlobalRefEP7_JNIEnvP8_jobject
+   109: 000000000004505c    96 FUNC    GLOBAL DEFAULT    15 JNI_OnLoad
+   120: 00000000000445b8   256 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni16YogaJniExceptionC1EP11_jthrowable
+   165: 000000000003c438   232 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni13LayoutContext8ProviderC1EP18PtrJNodeMapVanilla
+   213: 0000000000044578    64 FUNC    WEAK   DEFAULT    15 _ZN8facebook4yoga10vanillajni15ScopedGlobalRefIP11_jthrowableED2Ev
+   245: 0000000000044fd8   132 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni29assertNoPendingJniExceptionIfEP7_JNIEnvb
+   257: 0000000000044b4c   172 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni14callVoidMethodEP7_JNIEnvP8_jobjectP10_jmethodIDz
+   268: 000000000004482c    36 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni16YogaJniExceptionD0Ev
+   276: 0000000000044914    64 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni17getStaticMethodIdEP7_JNIEnvP7_jclassPKcS7_
+   297: 0000000000044bf8   200 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni22callStaticObjectMethodEP7_JNIEnvP7_jclassP10_jmethodIDz
+   308: 0000000000044e94   160 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni13getCurrentEnvEv
+   319: 000000000001e678    47 OBJECT  GLOBAL DEFAULT    11 _ZTSN8facebook4yoga10vanillajni16YogaJniExceptionE
+   320: 00000000000446d4   256 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni16YogaJniExceptionC1ERKS2_
+   339: 00000000000449d4   180 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni14callLongMethodEP7_JNIEnvP8_jobjectP10_jmethodIDz
+   364: 00000000000443d8   416 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni16YogaJniExceptionC1Ev
+   400: 00000000000447d4    88 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni16YogaJniExceptionD1Ev
+   404: 0000000000044a88   196 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni15callFloatMethodEP7_JNIEnvP8_jobjectP10_jmethodIDz
+   420: 000000000003c5f0   176 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni13LayoutContext10getNodeMapEv
+   469: 000000000003d508    24 FUNC    GLOBAL DEFAULT    15 _ZN12YGJNIVanilla15registerNativesEP7_JNIEnv
+   479: 00000000000443d8   416 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni16YogaJniExceptionC2Ev
+   482: 00000000000446d4   256 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni16YogaJniExceptionC2ERKS2_
+   502: 00000000000447d4    88 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni16YogaJniExceptionD2Ev
+   511: 0000000000044850    76 FUNC    GLOBAL DEFAULT    15 _ZNK8facebook4yoga10vanillajni16YogaJniException12getThrowableEv
+   516: 0000000000044f34   164 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni27assertNoPendingJniExceptionEP7_JNIEnv
+   528: 0000000000044e6c    40 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni21logErrorMessageAndDieEPKc
+   565: 000000000006a1b0    24 OBJECT  GLOBAL DEFAULT    17 _ZTIN8facebook4yoga10vanillajni16YogaJniExceptionE
+   570: 0000000000044954    64 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni11getMethodIdEP7_JNIEnvP7_jclassPKcS7_
+   583: 00000000000446b8    28 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni16YogaJniExceptionC2EOS2_
+   587: 0000000000044d40   236 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni17ensureInitializedEPP7_JNIEnvP7_JavaVM
+   606: 000000000003ebe0   156 FUNC    WEAK   DEFAULT    15 _ZN7_JNIEnv9NewObjectEP7_jclassP10_jmethodIDz
+   630: 000000000003c520   208 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni13LayoutContext8ProviderD1Ev
+   641: 000000000003c438   232 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni13LayoutContext8ProviderC2EP18PtrJNodeMapVanilla
+   657: 00000000000446b8    28 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni16YogaJniExceptionC1EOS2_
+   696: 000000000006a188    40 OBJECT  GLOBAL DEFAULT    17 _ZTVN8facebook4yoga10vanillajni16YogaJniExceptionE
+   697: 0000000000044d00    64 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni12newGlobalRefEP7_JNIEnvP11_jthrowable
+   726: 0000000000044994    64 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni10getFieldIdEP7_JNIEnvP7_jclassPKcS7_
+   743: 000000000003c520   208 FUNC    GLOBAL DEFAULT    15 _ZN8facebook4yoga10vanillajni13LayoutContext8ProviderD2Ev
