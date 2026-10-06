@@ -3,6 +3,7 @@ import importlib.util
 import stat
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -35,17 +36,20 @@ class CampaignOrchestrationTests(unittest.TestCase):
             tool = self._fake_apktool(root)
             output = root / "decoded"
 
-            result = MODULE.run_apktool_decode(
-                {"backend": "cli", "path": str(tool)},
-                apk,
-                output,
-                timeout=10,
-            )
+            with mock.patch.object(MODULE, "APKTOOL_DECODE_STRATEGY", "full-first"):
+                result = MODULE.run_apktool_decode(
+                    {"backend": "cli", "path": str(tool)},
+                    apk,
+                    output,
+                    timeout=10,
+                )
 
-            self.assertEqual(result["status"], "DECODED")
-            self.assertTrue((output / "AndroidManifest.xml").is_file())
-            self.assertTrue((output / "smali").is_dir())
-            self.assertTrue((output / "reelsec-apktool.log").is_file())
+            self.assertEqual(result["status"], "DECODED_NO_RES")
+            self.assertEqual(result["mode"], "APKTOOL_NO_RES")
+            recovery = root / "decoded-no-res"
+            self.assertTrue((recovery / "AndroidManifest.xml").is_file())
+            self.assertTrue((recovery / "smali").is_dir())
+            self.assertTrue(result["instrumentable_smali"])
 
     def test_decode_recovers_with_no_resources_after_full_decode_failure(self):
         with tempfile.TemporaryDirectory() as td:
