@@ -87,6 +87,7 @@ def run_apktool_decode(selection, apk, output_dir, timeout=300):
         ),
         stage_index=4,
         total_stages=14,
+        progress_path=output_dir.parent.parent / "PROGRESS.json",
     )
     log_path = (output_dir / "reelsec-apktool.log") if output_dir.is_dir() else live_log_path
     log_path.write_text(log, encoding="utf-8", errors="replace")
@@ -316,7 +317,8 @@ def _apktool_progress(log_path, output_dir, apk_path, total_classes=0, elapsed=0
     }
 
 def run_with_heartbeat(cmd, cwd=None, timeout=None, heartbeat=10, label="process",
-                       log_path=None, progress_probe=None, stage_index=None, total_stages=None):
+                       log_path=None, progress_probe=None, stage_index=None,
+                       total_stages=None, progress_path=None):
     """Run a long process with periodic liveness and optional progress estimates."""
     log_file = Path(log_path).expanduser().resolve() if log_path else None
     if log_file:
@@ -348,27 +350,53 @@ def run_with_heartbeat(cmd, cwd=None, timeout=None, heartbeat=10, label="process
                     size = 0
                 probe = progress_probe(log_file) if progress_probe and log_file else None
                 if probe:
-                    eta_text = (" eta=%ss" % probe["eta_seconds"]) if probe.get("eta_seconds") is not None else " eta=unknown"
                     subpercent = probe.get("percent")
+                    overall_value = None
                     if stage_index is not None and total_stages and subpercent is not None:
                         overall_value = (
                             ((stage_index - 1) + (float(subpercent) / 100.0))
                             / float(total_stages)
                         ) * 100.0
-                        overall_text = "%.1f%%" % overall_value
-                    else:
-                        overall_text = "?"
-                    print(
-                        "      [%s] RUNNING elapsed=%ss process=alive log=%sB overall=%s "
-                        "phase=%s stage=%s%% detail=%s%s" %
-                        (
-                            label, elapsed, size, overall_text,
-                            probe.get("phase", "UNKNOWN"),
-                            probe.get("percent", "?"),
-                            probe.get("detail", ""), eta_text,
-                        ),
-                        flush=True,
+                    eta_text = (
+                        "ETA=%ss" % probe["eta_seconds"]
+                        if probe.get("eta_seconds") is not None else
+                        "ETA=unknown"
                     )
+                    if overall_value is not None:
+                        overall_filled = int(28 * overall_value / 100.0)
+                        overall_bar = "#" * overall_filled + "-" * (28 - overall_filled)
+                        print(
+                            "\r      [%s] [%-28s] %5.1f%% %02d/%02d %-16s RUNNING "
+                            "elapsed=%ss stage=%s%% phase=%s %s %s" %
+                            (
+                                label, overall_bar, overall_value, stage_index, total_stages,
+                                "APK decode" if label == "apktool" else label,
+                                elapsed, probe.get("percent", "?"),
+                                probe.get("phase", "UNKNOWN"),
+                                probe.get("detail", ""), eta_text,
+                            ),
+                            flush=True,
+                        )
+                    else:
+                        print(
+                            "      [%s] RUNNING elapsed=%ss process=alive log=%sB phase=%s %s" %
+                            (label, elapsed, size, probe.get("phase", "UNKNOWN"), eta_text),
+                            flush=True,
+                        )
+                    if progress_path:
+                        try:
+                            progress_state = json.loads(Path(progress_path).read_text(encoding="utf-8"))
+                            progress_state["current_progress_percent"] = overall_value
+                            progress_state["current_progress_mode"] = probe.get("mode", "ESTIMATE")
+                            progress_state["current_phase"] = probe.get("phase")
+                            progress_state["current_detail"] = probe.get("detail")
+                            progress_state["current_eta_seconds"] = probe.get("eta_seconds")
+                            progress_state["last_heartbeat"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+                            Path(progress_path).write_text(
+                                json.dumps(progress_state, indent=2) + "\n", encoding="utf-8"
+                            )
+                        except (OSError, ValueError, TypeError):
+                            pass
                 else:
                     print(
                         "      [%s] RUNNING elapsed=%ss process=alive log=%sB" %
@@ -2044,15 +2072,10 @@ def _progress_render(index, total, name, status, detail="", subpercent=None, sub
     filled = int(width * done / max(1, total))
     bar = "#" * filled + "-" * (width - filled)
     overall = int(100 * done / max(1, total))
-    sub = (" sub=%s%%[%s]" % (
-        int(subpercent),
-        submode,
-    )) if subpercent is not None else ""
+    sub = (" stage=%s%%[%s]" % (int(subpercent), submode)) if subpercent is not None else ""
     print("\r[%-28s] %3d%%  %02d/%02d  %-24s  %-8s  %s%s" %
           (bar, overall, index, total, name, status, detail[:150], sub),
           flush=True)
-    if detail:
-        print("      " + str(detail)[:220], flush=True)
 
 
 def _progress_start(output):
