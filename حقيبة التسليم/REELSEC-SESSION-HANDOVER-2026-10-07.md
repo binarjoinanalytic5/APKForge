@@ -138,3 +138,59 @@ After the signing fix, the expected progression is:
 - Stage 12: bounded runtime evidence
 
 Even after those stages pass, `0x27a510` remains a pointer/dataflow candidate until runtime evidence observes the expected vptr/slot chain. Screenshot protection must not be inferred from the pointer alone.
+
+
+## 15. Campaign 2026-10-07 02:41 — ADB endpoint drift confirmed
+Report:
+`analysis/sec-shell-deep-v1/reelsec-20261007_024159-17548`
+
+Observed host ADB inventory immediately before the campaign:
+`192.168.8.8:32897    device`.
+
+Campaign result:
+- Stages 01–09 passed, including `SIGNED_VERIFIED`.
+- Stage 10 failed because ReelSec still used the stale environment serial `192.168.8.8:39927`.
+- Stage 11 remained `READY`.
+- Stage 12 was `NOT_CAPTURED` because deployment did not complete.
+- Stage 13 remained `dataflow_proven=False` with `FRIDA_GADGET_REQUIRED`.
+- Final status: `COMPLETED_WITH_ISSUES`.
+- Published report commit: `ac1bf2c83efec9d510e190fa6a02a7649e5486e4`.
+- Published status commit: `bf3f989fac292c0f14a2aa641dbde9ae55e0e533`.
+
+Root cause:
+`tools/reelsec/reelsec.py` previously consumed `REELSEC_TEST_DEVICE` literally and did not reconcile it with the current ADB inventory. A wireless ADB reconnect can change the TCP endpoint even when the same test phone remains connected.
+
+## 16. ADB endpoint-drift fix
+Implementation commits on `main`:
+- `2b71ecefc4b153ce3fc840f3ea315b10c2d19913`: add safe current-device resolution to `tools/reelsec/adb_deploy.py`.
+- `c12276e7e6bc2e59e6398ec6058065345d7e6ab4`: make campaign Stage 10 resolve the device from the current ADB inventory before checking/installing.
+- `4a4c216558386e16344306a7758b91f92fb565ef`: add regression tests to `tools/reelsec/test_adb_deploy.py`.
+
+Resolution policy:
+1. If `REELSEC_TEST_DEVICE` exactly matches one current online `device`, use it.
+2. If the configured serial is stale and exactly one online `device` exists, automatically rebind to that sole device and record `AUTO_REBOUND_SINGLE_ONLINE_DEVICE`.
+3. If zero or multiple online devices exist while the configured serial is stale, refuse implicit selection and fail safely.
+4. `REELSEC_TEST_DEVICE=auto` is supported only when exactly one online device exists.
+
+The deployment manifest now records:
+`requested_serial`, `serial`, `device_resolution`, `online_devices`, and the current inventory command.
+
+This fix is specifically for ADB endpoint drift. It does not weaken the proof boundary and does not establish screenshot/recording protection.
+
+## 17. Immediate next campaign
+Do NOT manually change `original.apk`.
+
+Run the current remote bootstrap exactly as before:
+
+```bash
+cd ~/apk-lab/ReelShort-v4.2.00 && \
+git fetch origin main && \
+git show origin/main:tools/reelsec/bootstrap-run.sh | bash -s -- campaign ./original.apk
+```
+
+Expected Stage 10 behavior with the currently observed single online device:
+- requested serial may be the stale `192.168.8.8:39927`;
+- ReelSec should detect current `192.168.8.8:32897`;
+- Stage 10 should use `192.168.8.8:32897` and record `AUTO_REBOUND_SINGLE_ONLINE_DEVICE`.
+
+Success at Stage 10 is still only deployment evidence. Stage 12/runtime and the native proof gate remain the decisive next steps.
