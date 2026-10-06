@@ -19,6 +19,7 @@ from build_verify import apktool_build_command, verify_artifact
 from sign_verify import artifact_identity, sign_command, verify_command, run_checked
 from adb_deploy import install_command, device_check_command
 from runtime_capture import capture_snapshot, bind_artifact
+from gadget_observer import plan_gadget_observation
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
 VERSION = "3.0.0"
@@ -1682,6 +1683,22 @@ def main():
             encoding="utf-8",
         )
 
+    gadget_observation = {"status": "NOT_PLANNED"}
+    if sign_verify.get("status") == "SIGNED_VERIFIED":
+        try:
+            package_name = os.environ.get("REELSEC_TEST_PACKAGE")
+            if not package_name:
+                raise RuntimeError("REELSEC_TEST_PACKAGE unavailable")
+            gadget_observation = plan_gadget_observation(
+                sign_verify["signed_path"], package_name, target_offset="0x27a510"
+            )
+        except Exception as exc:
+            gadget_observation = {"status": "BLOCKED_OR_FAILED", "error": str(exc)}
+        (output / "GADGET-OBSERVATION-PLAN.json").write_text(
+            json.dumps(gadget_observation, indent=2, sort_keys=True) + "\\n",
+            encoding="utf-8",
+        )
+
     runtime_capture = {"status": "NOT_CAPTURED"}
     if adb_deploy.get("status") == "INSTALLED":
         try:
@@ -1727,6 +1744,7 @@ def main():
         "sign_verify": sign_verify,
         "adb_deploy": adb_deploy,
         "runtime_capture": runtime_capture,
+        "gadget_observation": gadget_observation,
     }
     (output / "manifest.json").write_text(
         json.dumps(manifest, indent=2),
