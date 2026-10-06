@@ -47,7 +47,7 @@ fi
 STAGE="$(mktemp -d -t reelsec-remote.XXXXXX)"
 trap 'rm -rf "$STAGE"' EXIT
 
-PY_FILES="$(git ls-tree -r --name-only "$REMOTE/$BRANCH" -- tools/reelsec | grep -E '\\.py$' || true)"
+PY_FILES="$(git ls-tree -r --name-only "$REMOTE/$BRANCH" -- tools/reelsec | grep -E '\.py$' || true)"
 if [ -z "$PY_FILES" ]; then
   echo "ERROR: No ReelSec Python modules found on $REMOTE/$BRANCH."
   exit 1
