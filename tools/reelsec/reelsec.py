@@ -701,8 +701,8 @@ def write_autonomous_dataflow(output, target, objdump):
             if not any(re.search(r"\bblr\s+x8\b",w) for w in window):
                 continue
 
-            # Clear JNI lifecycle callbacks use JNIEnv* dispatch tables; do
-            # not count these as unresolved C++ object-vtable candidates.
+            # Explicit JNI lifecycle dispatches use JNIEnv* tables. They are
+            # excluded from C++ vtable proof candidates.
             if (
                 flabel.startswith("JNI_On") and
                 any(re.search(r"\bldr\s+x8,\s+\[x20\]", block[j])
@@ -802,13 +802,15 @@ def write_autonomous_dataflow(output, target, objdump):
              "constructor_call_count":len(ctor_calls),
              "candidate_count":len(records),
              "proven_target_dataflow_count":len(proven),
-             "cxx_unresolved_count":len(cxx),"records":records}
+             "cxx_unresolved_count":len(cxx),"jni_excluded_count":sum(1 for x in records if x["classification"]=="JNI_DISPATCH_EXCLUDED"),"records":records}
     (output/"AUTONOMOUS-DATAFLOW.json").write_text(
         json.dumps(payload,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+    excluded=sum(1 for x in records if x["classification"]=="JNI_DISPATCH_EXCLUDED")
     report=["# Autonomous Dataflow Proof","","Target vtable address-point: 0x717e60",
             "Target slot: 0x717f68 (+0x108)","Target function: 0x27a510","",
             "Constructor call sites resolved from machine code: %d"%len(ctor_calls),
             "Candidate dispatches analysed: %d"%len(records),
+            "JNI dispatches excluded from C++ proof: %d"%excluded,
             "PROVEN target data-flow: %d"%len(proven),
             "C++ vptr candidates still unresolved: %d"%len(cxx),"",
             "The analyzer never treats x19 naming alone as proof.",""]
@@ -821,7 +823,7 @@ def write_autonomous_dataflow(output, target, objdump):
                "","Static data-flow is distinct from runtime execution."]
     (output/"AUTONOMOUS-DATAFLOW.md").write_text("\n".join(report)+"\n",encoding="utf-8")
     return {"status":"completed","proven":len(proven),"candidates":len(records),
-            "cxx_unresolved":len(cxx),"constructor_calls":len(ctor_calls)}
+            "cxx_unresolved":len(cxx),"jni_excluded_count":excluded,"constructor_calls":len(ctor_calls)}
 
 def _find_package_name(root):
     for path in root.rglob("AndroidManifest.xml"):
@@ -836,6 +838,7 @@ def _find_package_name(root):
 
 
 def write_runtime_toolchain_preflight(output):
+    """Bounded best-effort preparation of local Android/Frida clients."""
     result={"schema_version":"1.1","attempted":True,"actions":[],"tooling":{},"status":"NOT_ATTEMPTED"}
     py=which("python","python3"); pkg=which("pkg"); adb=which("adb"); frida=which("frida")
     result["tooling"].update(adb=adb,frida=frida,python=py,pkg=pkg)
@@ -857,7 +860,9 @@ def write_runtime_toolchain_preflight(output):
     result["missing_requirements"]=missing
     result["status"]="CLIENTS_READY" if not missing else "RUNTIME_TOOLCHAIN_INCOMPLETE"
     (output/"RUNTIME-TOOLCHAIN-PREFLIGHT.json").write_text(json.dumps(result,indent=2,sort_keys=True)+"\n",encoding="utf-8")
-    (output/"RUNTIME-TOOLCHAIN-PREFLIGHT.md").write_text("# Runtime Toolchain Preflight\n\nStatus: "+result["status"]+"\nMissing: "+(", ".join(missing) if missing else "NONE")+"\n",encoding="utf-8")
+    (output/"RUNTIME-TOOLCHAIN-PREFLIGHT.md").write_text(
+        "# Runtime Toolchain Preflight\n\nStatus: "+result["status"]+
+        "\nMissing: "+(", ".join(missing) if missing else "NONE")+"\n",encoding="utf-8")
     return result
 
 
@@ -970,7 +975,7 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
 
 
 def write_autonomous_campaign(output, dataflow, runtime):
-    payload={"schema_version":"2.1","mode":"AUTONOMOUS",
+    payload={"schema_version":"2.3","mode":"AUTONOMOUS",
              "static_dataflow":dataflow,
              "runtime_status":runtime.get("status") if runtime else "NOT_RUN",
              "truth_rules":{
@@ -1451,3 +1456,35 @@ def main():
         target_sha256=digest,
         critical_pointer=(hex(ptr) if ptr is not None else None),
         jni_semantic_found=jni_semantic_found,
+        vtable_abi=vtable_abi,
+        critical_function_behavior=critical_behavior,
+        autonomous_dataflow=dataflow_result,
+        runtime_probe_status=(runtime_result.get("status") if runtime_result else "NOT_RUN"),
+    )
+    (output / "manifest.json").write_text(
+        json.dumps(manifest, indent=2),
+        encoding="utf-8",
+    )
+
+    publish = None if args.no_publish else git_publish(ROOT, output)
+    if publish and not (output / "PUBLISH-STATUS.json").exists():
+        (output / "PUBLISH-STATUS.json").write_text(
+            json.dumps(publish, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+
+    print("REPORT=" + str(output))
+    print("FUNCTION_POINTER=" + (hex(ptr) if ptr is not None else "NOT_RESOLVED"))
+    if symbol_lines:
+        print("SYMBOL=" + symbol_lines[0])
+    if publish:
+        print("PUBLISH_STATUS=" + publish["status"])
+        print("PUBLISH_BRANCH=" + str(publish["branch"]))
+        print("PUBLISH_REPORT_COMMIT=" + str(publish["report_commit"]))
+        print("PUBLISH_STATUS_COMMIT=" + str(publish["status_commit"]))
+    print("TARGET_PROVENANCE_STATUS=" + str(target_provenance.get("base_relation") if target_provenance else "NOT_RUN"))
+    print("AUTONOMOUS_DATAFLOW_PROVEN=" + str(bool(dataflow_result.get("proven", 0))))
+    print("RUNTIME_PROOF_STATUS=" + str(runtime_result.get("status") if runtime_result else "NOT_RUN"))
+
+if __name__ == "__main__":
+    main()
