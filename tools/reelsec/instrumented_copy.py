@@ -53,27 +53,39 @@ def prepare_instrumented_copy(decoded_root, work_dir):
     return manifest
 
 
-def _reserve_probe_registers(text, count=2):
-    """Reserve extra local registers without changing parameter registers."""
-    lines = text.splitlines()
-    for i, line in enumerate(lines):
-        stripped = line.strip()
-        if stripped.startswith(".locals "):
-            try:
-                value = int(stripped.split()[1])
-            except (IndexError, ValueError):
-                raise InstrumentedCopyError("invalid .locals declaration")
-            base = value
-            lines[i] = line.replace(".locals " + str(value), ".locals " + str(value + count), 1)
-            return "\n".join(lines) + ("\n" if text.endswith("\n") else ""), base
-        if stripped.startswith(".registers "):
-            try:
-                total = int(stripped.split()[1])
-            except (IndexError, ValueError):
-                raise InstrumentedCopyError("invalid .registers declaration")
-            lines[i] = line.replace(".registers " + str(total), ".registers " + str(total + count), 1)
-            return "\n".join(lines) + ("\n" if text.endswith("\n") else ""), total
-    raise InstrumentedCopyError("method register declaration not found")
+def _reserve_probe_registers_in_method(text, anchor_match, count=2):
+    """Reserve registers in the method that contains the matched loadLibrary call."""
+    method_matches = list(re.finditer(r"(?m)^\\s*\\.method\\b", text[:anchor_match.start()]))
+    method_start = method_matches[-1].start() if method_matches else -1
+    if method_start < 0:
+        raise InstrumentedCopyError("containing .method declaration not found")
+    method_end_match = re.search(r"(?m)^\\s*\\.end method\\b", text[anchor_match.end():])
+    if not method_end_match:
+        raise InstrumentedCopyError("containing .end method declaration not found")
+    method_end = anchor_match.end() + method_end_match.start()
+    block = text[method_start:method_end]
+    local_match = re.search(r"(?m)^(?P<prefix>\\s*)\\.locals\\s+(?P<count>\\d+)\\s*$", block)
+    if local_match:
+        base = int(local_match.group("count"))
+        new_count = base + count
+        replacement = (
+            local_match.group("prefix") + ".locals " + str(new_count)
+        )
+        block = block[:local_match.start()] + replacement + block[local_match.end():]
+    else:
+        registers_match = re.search(r"(?m)^(?P<prefix>\\s*)\\.registers\\s+(?P<count>\\d+)\\s*$", block)
+        if not registers_match:
+            raise InstrumentedCopyError("method register declaration not found")
+        base = int(registers_match.group("count"))
+        new_count = base + count
+        replacement = (
+            registers_match.group("prefix") + ".registers " + str(new_count)
+        )
+        block = block[:registers_match.start()] + replacement + block[registers_match.end():]
+    updated = text[:method_start] + block + text[method_end:]
+    return updated, base
+
+
 
 
 def apply_text_probe(work_dir, target_smali):
