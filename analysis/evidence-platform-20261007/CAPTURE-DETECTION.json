@@ -1,0 +1,2543 @@
+{
+  "category_counts": {
+    "DRM_PROTECTION": 62,
+    "NATIVE_CAPTURE": 21,
+    "NATIVE_SYMBOLS": 11,
+    "PROTECTED_CONTENT": 8,
+    "SCREEN_CAPTURE_CALLBACKS": 5,
+    "TAMPER_RESISTANCE": 167
+  },
+  "causal_proof": false,
+  "evidence_policy": {
+    "causal_proof_requires": [
+      "runtime observation tied to the exact artifact",
+      "provenance matching the target code path",
+      "observable security decision or capture behavior"
+    ],
+    "context_indicators": [
+      "DRM_PROTECTION",
+      "NATIVE_CAPTURE"
+    ],
+    "strong_indicators": [
+      "FLAG_SECURE",
+      "MEDIA_PROJECTION",
+      "SCREEN_CAPTURE_CALLBACKS",
+      "SURFACE_SECURITY"
+    ]
+  },
+  "files_scanned": 3050,
+  "files_with_hits": 100,
+  "generated_at_epoch": 1791377963.114531,
+  "hidden_dex": [],
+  "hits": [
+    {
+      "file": "lib/arm64-v8a/libSecShell-x86.so",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 1,
+          "family": "magisk",
+          "pattern": "magisk",
+          "string": "_Z23is_magisk_check_processP7_JNIEnvP7_jclass"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 1,
+          "family": "ptrace",
+          "pattern": "\\bptrace\\b",
+          "string": "ptrace"
+        }
+      ],
+      "sha256": "acdf520119e452577c56666924d1a6cf0991116596505171cbd665ad38781e54"
+    },
+    {
+      "file": "lib/arm64-v8a/libSecShell.so",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 1,
+          "family": "magisk",
+          "pattern": "magisk",
+          "string": "_Z23is_magisk_check_processP7_JNIEnvP7_jclass"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 1,
+          "family": "ptrace",
+          "pattern": "\\bptrace\\b",
+          "string": "ptrace"
+        }
+      ],
+      "sha256": "155da548f25cd2d5d8d8b68511a135927b2706cea48500c11c820c5b99209a62"
+    },
+    {
+      "file": "lib/arm64-v8a/libalivcffmpeg.so",
+      "hits": [
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "screen.?capture",
+          "string": "Movie/video screen capture"
+        }
+      ],
+      "sha256": "73b3527f39e93c463f648514b25bdd9d239ddf856ed9ed51d849e5ba29b9ba98"
+    },
+    {
+      "file": "lib/arm64-v8a/libcrashlytics-common.so",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 2,
+          "family": "ptrace",
+          "pattern": "\\bptrace\\b",
+          "string": "ptrace"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 1,
+          "family": "ptrace",
+          "pattern": "\\bptrace\\b",
+          "string": "no ptrace"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 1,
+          "family": "ptrace",
+          "pattern": "\\bptrace\\b",
+          "string": "invalid ptrace scope"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 1,
+          "family": "ptrace",
+          "pattern": "\\bptrace\\b",
+          "string": "Unknown ptrace scope"
+        },
+        {
+          "category": "NATIVE_SYMBOLS",
+          "match_category": "TAMPER_RESISTANCE",
+          "pattern": "\\bptrace\\b",
+          "string": "ptrace",
+          "symbol_defined": false
+        }
+      ],
+      "sha256": "db3c33bc6e1c0d049466280c32bd7419f9708f53ca8f5f95d584ef281996918f"
+    },
+    {
+      "file": "lib/arm64-v8a/libprotect.so",
+      "hits": [
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_getPropertyByteArray"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_createByUUID"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_release"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_getPropertyString"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "MediaDrm",
+          "string": "_Z17drmByteArrayToHex18AMediaDrmByteArray"
+        },
+        {
+          "category": "NATIVE_SYMBOLS",
+          "match_category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_getPropertyByteArray",
+          "symbol_defined": false
+        },
+        {
+          "category": "NATIVE_SYMBOLS",
+          "match_category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_createByUUID",
+          "symbol_defined": false
+        },
+        {
+          "category": "NATIVE_SYMBOLS",
+          "match_category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_release",
+          "symbol_defined": false
+        },
+        {
+          "category": "NATIVE_SYMBOLS",
+          "match_category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_getPropertyString",
+          "symbol_defined": false
+        }
+      ],
+      "sha256": "1725ce0c5528d65eae8e337d6b0878dcdc3565f35314840ace0c5d680b14526b"
+    },
+    {
+      "file": "lib/arm64-v8a/libsaasCorePlayer.so",
+      "hits": [
+        {
+          "category": "SCREEN_CAPTURE_CALLBACKS",
+          "count": 1,
+          "pattern": "onCaptureScreen",
+          "string": "onCaptureScreen"
+        },
+        {
+          "category": "SCREEN_CAPTURE_CALLBACKS",
+          "count": 1,
+          "pattern": "onCaptureScreen",
+          "string": "nativeOnCaptureScreen"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "DrmSession",
+          "string": "com/cicada/player/utils/media/DrmSessionManager"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "widevine"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "Widevine"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "Widevine-FairPlay"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "stream is WideVine and occur decode error."
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "force switch to hardware decoder, as tunnelRender || isWideVine"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "The device does not support Widevine L1 or L3"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "Widevine is not available on the device (e.g., uncertified device)"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "Check the device's Widevine certification level"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "Attempting to play Widevine-encrypted content with an HLS URL (Widevine is typically used with DASH)"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "Ensure the DRM scheme matches the media format (Widevine + DASH, FairPlay + HLS)"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "WideVineDrmHandler"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "This device/system doesn't support Widevine. You can try other device."
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "DRM provision failed, your device/system doesn't pass Google's Widevine provision."
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "NSt6__ndk110__function6__funcIZN7AVPSaas24requestWideVineProvisionEPPcPiRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPKciS5_PSB_E3$_8NS9_ISH_EEFvS3_lEEE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "ZN7AVPSaas24requestWideVineProvisionEPPcPiRKNSt6__ndk112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEEPKciS2_PS9_E3$_8"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "NSt6__ndk110__function6__funcIZN7AVPSaas24requestWideVineProvisionEPPcPiRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPKciS5_PSB_E3$_9NS9_ISH_EEFviSB_EEE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "ZN7AVPSaas24requestWideVineProvisionEPPcPiRKNSt6__ndk112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEEPKciS2_PS9_E3$_9"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "N6Cicada18WideVineDrmHandlerE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "NSt6__ndk123enable_shared_from_thisIN6Cicada18WideVineDrmHandlerEEE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "NSt6__ndk120__shared_ptr_emplaceIN6Cicada18WideVineDrmHandlerENS_9allocatorIS2_EEEE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "edef8ba9",
+          "string": "edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "edef8ba9",
+          "string": "urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "ContentProtection",
+          "string": "parseContentProtection"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "ContentProtection",
+          "string": "ContentProtection"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "setForceInsecureDecoder",
+          "string": "setForceInsecureDecoder"
+        },
+        {
+          "category": "PROTECTED_CONTENT",
+          "count": 1,
+          "pattern": "protected.?content",
+          "string": "DRM-protected content cannot be decrypted without proper keys"
+        },
+        {
+          "category": "PROTECTED_CONTENT",
+          "count": 1,
+          "pattern": "protected.?content",
+          "string": "Use a certified device for DRM-protected content"
+        },
+        {
+          "category": "PROTECTED_CONTENT",
+          "count": 1,
+          "pattern": "secure.?decoder",
+          "string": "setForceInsecureDecoder"
+        },
+        {
+          "category": "PROTECTED_CONTENT",
+          "count": 1,
+          "pattern": "secure.?decoder",
+          "string": "isForceInsecureDecoder"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "nativeOnCaptureScreen",
+          "string": "nativeOnCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "onCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "AliyunCorePlayer callback --> CaptureScreen(%ld,%ld)"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "CaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "nativeOnCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "apsaraCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "captureScreen exception, frameWidth or frameHeight is 0"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "NSt6__ndk110__function6__funcIZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2NS_9allocatorIS4_EEFvPhiiEEE"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "ZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2"
+        }
+      ],
+      "sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4"
+    },
+    {
+      "file": "lib/armeabi-v7a/libSecShell-x86.so",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 1,
+          "family": "magisk",
+          "pattern": "magisk",
+          "string": "_Z23is_magisk_check_processP7_JNIEnvP7_jclass"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 1,
+          "family": "ptrace",
+          "pattern": "\\bptrace\\b",
+          "string": "ptrace"
+        }
+      ],
+      "sha256": "1eeddda50ae53ea345d905ea59dd1219ff5d146837a26c02150321a508547632"
+    },
+    {
+      "file": "lib/armeabi-v7a/libSecShell.so",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 1,
+          "family": "magisk",
+          "pattern": "magisk",
+          "string": "_Z23is_magisk_check_processP7_JNIEnvP7_jclass"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 1,
+          "family": "ptrace",
+          "pattern": "\\bptrace\\b",
+          "string": "ptrace"
+        }
+      ],
+      "sha256": "213548b952b7acb63bb5f18848bb5e01ee8ef3ebbfca87bfbe22e1ee4db4abd3"
+    },
+    {
+      "file": "lib/armeabi-v7a/libalivcffmpeg.so",
+      "hits": [
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "screen.?capture",
+          "string": "Movie/video screen capture"
+        }
+      ],
+      "sha256": "526a26047992adedaed6e8854f42ee8ce296f3b92c399f7196410e15efb7c2bd"
+    },
+    {
+      "file": "lib/armeabi-v7a/libcrashlytics-common.so",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 2,
+          "family": "ptrace",
+          "pattern": "\\bptrace\\b",
+          "string": "ptrace"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 1,
+          "family": "ptrace",
+          "pattern": "\\bptrace\\b",
+          "string": "no ptrace"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 1,
+          "family": "ptrace",
+          "pattern": "\\bptrace\\b",
+          "string": "invalid ptrace scope"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "count": 1,
+          "family": "ptrace",
+          "pattern": "\\bptrace\\b",
+          "string": "Unknown ptrace scope"
+        },
+        {
+          "category": "NATIVE_SYMBOLS",
+          "match_category": "TAMPER_RESISTANCE",
+          "pattern": "\\bptrace\\b",
+          "string": "ptrace",
+          "symbol_defined": false
+        }
+      ],
+      "sha256": "4b8bcec5c0464d7b1741386e30eef9308c43d4ca8f57501ae6734fa48e1c55d2"
+    },
+    {
+      "file": "lib/armeabi-v7a/libprotect.so",
+      "hits": [
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_getPropertyByteArray"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_createByUUID"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_release"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_getPropertyString"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "MediaDrm",
+          "string": "_Z17drmByteArrayToHex18AMediaDrmByteArray"
+        },
+        {
+          "category": "NATIVE_SYMBOLS",
+          "match_category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_getPropertyByteArray",
+          "symbol_defined": false
+        },
+        {
+          "category": "NATIVE_SYMBOLS",
+          "match_category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_createByUUID",
+          "symbol_defined": false
+        },
+        {
+          "category": "NATIVE_SYMBOLS",
+          "match_category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_release",
+          "symbol_defined": false
+        },
+        {
+          "category": "NATIVE_SYMBOLS",
+          "match_category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_getPropertyString",
+          "symbol_defined": false
+        }
+      ],
+      "sha256": "94786c5616331de6f43b68faaa4ad6e6746390a31cbe46dada9d03e644ac7232"
+    },
+    {
+      "file": "lib/armeabi-v7a/libsaasCorePlayer.so",
+      "hits": [
+        {
+          "category": "SCREEN_CAPTURE_CALLBACKS",
+          "count": 1,
+          "pattern": "onCaptureScreen",
+          "string": "gj_NativePlayer_onCaptureScreen"
+        },
+        {
+          "category": "SCREEN_CAPTURE_CALLBACKS",
+          "count": 1,
+          "pattern": "onCaptureScreen",
+          "string": "onCaptureScreen"
+        },
+        {
+          "category": "SCREEN_CAPTURE_CALLBACKS",
+          "count": 1,
+          "pattern": "onCaptureScreen",
+          "string": "nativeOnCaptureScreen"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "DrmSession",
+          "string": "com/cicada/player/utils/media/DrmSessionManager"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "_ZN6Cicada18WideVineDrmHandler10sObjectMapE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "_ZN6Cicada18WideVineDrmHandler15sObjectMapMutexE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "widevine"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "Widevine"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "Unsupported DRM type, only WideVine and FairPlay are supported"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "Widevine-FairPlay"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "stream is WideVine and occur decode error."
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "force switch to hardware decoder, as tunnelRender || isWideVine"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "The device does not support Widevine L1 or L3"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "Widevine is not available on the device (e.g., uncertified device)"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "Check the device's Widevine certification level"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "Attempting to play Widevine-encrypted content with an HLS URL (Widevine is typically used with DASH)"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "Ensure the DRM scheme matches the media format (Widevine + DASH, FairPlay + HLS)"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "WideVineDrmHandler"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "This device/system doesn't support Widevine. You can try other device."
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "DRM provision failed, your device/system doesn't pass Google's Widevine provision."
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "NSt6__ndk110__function6__funcIZN7AVPSaas24requestWideVineProvisionEPPcPiRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPKciS5_PSB_E3$_8NS9_ISH_EEFvS3_xEEE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "ZN7AVPSaas24requestWideVineProvisionEPPcPiRKNSt6__ndk112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEEPKciS2_PS9_E3$_8"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "NSt6__ndk110__function6__funcIZN7AVPSaas24requestWideVineProvisionEPPcPiRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPKciS5_PSB_E3$_9NS9_ISH_EEFviSB_EEE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "Widevine",
+          "string": "ZN7AVPSaas24requestWideVineProvisionEPPcPiRKNSt6__ndk112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEEPKciS2_PS9_E3$_9"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "edef8ba9",
+          "string": "edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "edef8ba9",
+          "string": "urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "ContentProtection",
+          "string": "parseContentProtection"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "ContentProtection",
+          "string": "ContentProtection"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "count": 1,
+          "pattern": "setForceInsecureDecoder",
+          "string": "setForceInsecureDecoder"
+        },
+        {
+          "category": "PROTECTED_CONTENT",
+          "count": 1,
+          "pattern": "protected.?content",
+          "string": "DRM-protected content cannot be decrypted without proper keys"
+        },
+        {
+          "category": "PROTECTED_CONTENT",
+          "count": 1,
+          "pattern": "protected.?content",
+          "string": "Use a certified device for DRM-protected content"
+        },
+        {
+          "category": "PROTECTED_CONTENT",
+          "count": 1,
+          "pattern": "secure.?decoder",
+          "string": "setForceInsecureDecoder"
+        },
+        {
+          "category": "PROTECTED_CONTENT",
+          "count": 1,
+          "pattern": "secure.?decoder",
+          "string": "isForceInsecureDecoder"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "nativeOnCaptureScreen",
+          "string": "nativeOnCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "gj_NativePlayer_onCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "onCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "AliyunCorePlayer callback --> CaptureScreen(%lld,%lld)"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "CaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "nativeOnCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "apsaraCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "captureScreen exception, frameWidth or frameHeight is 0"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "NSt6__ndk110__function6__funcIZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2NS_9allocatorIS4_EEFvPhiiEEE"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "count": 1,
+          "pattern": "captureScreen",
+          "string": "ZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2"
+        },
+        {
+          "category": "NATIVE_SYMBOLS",
+          "match_category": "SCREEN_CAPTURE_CALLBACKS",
+          "pattern": "onCaptureScreen",
+          "string": "gj_NativePlayer_onCaptureScreen",
+          "symbol_defined": true
+        }
+      ],
+      "sha256": "ea99002d1c35783250616c381e04953bf7cbfbfd30054510f408a23a7f753054"
+    },
+    {
+      "file": "res/values/attrs.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 2571,
+          "pattern": "xposed",
+          "sample": "<attr name=\"textInputFilledExposedDropdownMenuStyle\" format=\"reference\" />"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 2575,
+          "pattern": "xposed",
+          "sample": "<attr name=\"textInputOutlinedExposedDropdownMenuStyle\" format=\"reference\" />"
+        }
+      ],
+      "sha256": "8f45e5fdb55ee935dd652c597edc5262df427d993eeac8212fb9fc7e165c52b7"
+    },
+    {
+      "file": "res/values/dimens.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 720,
+          "pattern": "xposed",
+          "sample": "<dimen name=\"mtrl_exposed_dropdown_menu_popup_elevation\">8.0dp</dimen>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 721,
+          "pattern": "xposed",
+          "sample": "<dimen name=\"mtrl_exposed_dropdown_menu_popup_vertical_offset\">1.0dp</dimen>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 722,
+          "pattern": "xposed",
+          "sample": "<dimen name=\"mtrl_exposed_dropdown_menu_popup_vertical_padding\">8.0dp</dimen>"
+        }
+      ],
+      "sha256": "94ecb66f65a3f5483522b65161f68fe559b74072ea3f14bac705ad2d6f192914"
+    },
+    {
+      "file": "res/values/public.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1792,
+          "pattern": "xposed",
+          "sample": "<public type=\"attr\" name=\"textInputFilledExposedDropdownMenuStyle\" id=\"0x7f040686\" />"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1796,
+          "pattern": "xposed",
+          "sample": "<public type=\"attr\" name=\"textInputOutlinedExposedDropdownMenuStyle\" id=\"0x7f04068a\" />"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 4007,
+          "pattern": "xposed",
+          "sample": "<public type=\"dimen\" name=\"mtrl_exposed_dropdown_menu_popup_elevation\" id=\"0x7f070316\" />"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 4008,
+          "pattern": "xposed",
+          "sample": "<public type=\"dimen\" name=\"mtrl_exposed_dropdown_menu_popup_vertical_offset\" id=\"0x7f070317\" />"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 4009,
+          "pattern": "xposed",
+          "sample": "<public type=\"dimen\" name=\"mtrl_exposed_dropdown_menu_popup_vertical_padding\" id=\"0x7f070318\" />"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 10199,
+          "pattern": "xposed",
+          "sample": "<public type=\"string\" name=\"exposed_dropdown_menu_content_description\" id=\"0x7f1302b9\" />"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 12306,
+          "pattern": "xposed",
+          "sample": "<public type=\"style\" name=\"Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu\" id=\"0x7f140453\" />"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 12309,
+          "pattern": "xposed",
+          "sample": "<public type=\"style\" name=\"Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu\" id=\"0x7f140457\" />"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 12394,
+          "pattern": "xposed",
+          "sample": "<public type=\"style\" name=\"Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu\" id=\"0x7f1404c5\" />"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 12397,
+          "pattern": "xposed",
+          "sample": "<public type=\"style\" name=\"Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu\" id=\"0x7f1404c9\" />"
+        }
+      ],
+      "sha256": "132e8b832a69481109e5e02f82c609c5bebac08467f2394d720d8c7c4cf8f32f"
+    },
+    {
+      "file": "res/values/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 655,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Show dropdown menu</string>"
+        }
+      ],
+      "sha256": "71046b3aa09be9d8e68d9c753a5f50033a2f8b7e5dbb5e134e315f2847815578"
+    },
+    {
+      "file": "res/values/styles.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 632,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 632,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 635,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 635,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 862,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 862,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 865,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 865,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1094,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1094,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1097,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1097,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1324,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1324,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1327,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1327,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1379,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1379,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1382,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1382,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1482,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1482,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1485,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1485,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1591,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1591,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1594,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1594,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1739,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1739,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1742,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1742,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1858,
+          "pattern": "xposed",
+          "sample": "<item name=\"android:dropDownVerticalOffset\">@dimen/mtrl_exposed_dropdown_menu_popup_vertical_offset</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 1861,
+          "pattern": "xposed",
+          "sample": "<item name=\"android:popupElevation\">@dimen/mtrl_exposed_dropdown_menu_popup_elevation</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 5713,
+          "pattern": "xposed",
+          "sample": "<style name=\"Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu\" parent=\"@style/Widget.Material3.TextInputLayout.FilledBox\">"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 5750,
+          "pattern": "xposed",
+          "sample": "<style name=\"Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu\" parent=\"@style/Widget.Material3.TextInputLayout.OutlinedBox\">"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 6296,
+          "pattern": "xposed",
+          "sample": "<style name=\"Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu\" parent=\"@style/Widget.MaterialComponents.TextInputLayout.FilledBox\">"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 6307,
+          "pattern": "xposed",
+          "sample": "<style name=\"Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu\" parent=\"@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox\">"
+        }
+      ],
+      "sha256": "7b2fe75f0e0b52e51b4428cff46c3734e8e16566fd0f5ed583429eb06ebe6370"
+    },
+    {
+      "file": "res/values-af/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Wys aftrekkieslys</string>"
+        }
+      ],
+      "sha256": "4f6c26b92785e42f219ee77540ca87e8ceaede97b7d947c61875e9ffeba01cc3"
+    },
+    {
+      "file": "res/values-am/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">ተቆልቋይ ምናሌን አሳይ</string>"
+        }
+      ],
+      "sha256": "9ec8e92f07b650a66a5c0ef607ff016ad8b2dd31d6b0efaa0c346de398d80c66"
+    },
+    {
+      "file": "res/values-ar/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 576,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">عرض القائمة المنسدلة</string>"
+        }
+      ],
+      "sha256": "c4d8f6bab0f36d7d0ad75ed2c8a9009aa60441b034c3a3352d913518eaee0801"
+    },
+    {
+      "file": "res/values-as/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 75,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Show dropdown menu</string>"
+        }
+      ],
+      "sha256": "d14b18be55fc488c652cea66851fc45d5e62e48ae6fd35bec74848e173f7537b"
+    },
+    {
+      "file": "res/values-az/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Açılan menyunu göstərin</string>"
+        }
+      ],
+      "sha256": "f7618893f257f9d025a9fa626ad4d78e92cd89e07f2b3068421c4c209ea1ac30"
+    },
+    {
+      "file": "res/values-b+es+419/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 13,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Mostrar menú desplegable</string>"
+        }
+      ],
+      "sha256": "3e786ba2ace470fa400a49efa91817d9ce5033f99c2a9da98c6f814ed63c78a5"
+    },
+    {
+      "file": "res/values-b+sr+Latn/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Prikaži padajući meni</string>"
+        }
+      ],
+      "sha256": "bfa30bfdcad3e0ac8a00fcf4791fb7ab64afefdf8761d5588945f5a55edbbb0c"
+    },
+    {
+      "file": "res/values-be/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Паказаць выпадное меню</string>"
+        }
+      ],
+      "sha256": "56d8d40d62fc750ae144dc40c838bf0f5cb0f9bc217e7d7a270633b20e5fa628"
+    },
+    {
+      "file": "res/values-bg/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 557,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Показване на падащото меню</string>"
+        }
+      ],
+      "sha256": "2fff9f6ffbb180de6b1efef02e349a541ad4a3e52cc2a277bd44eab1d28cf83e"
+    },
+    {
+      "file": "res/values-bn/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">ড্রপ-ডাউন মেনু দেখুন</string>"
+        }
+      ],
+      "sha256": "db198135b7eeaa4a6ec0715d735da422ef5966b9bc0a68a107c9b473fb4fe5b3"
+    },
+    {
+      "file": "res/values-bs/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Prikaži padajući meni</string>"
+        }
+      ],
+      "sha256": "56e39e38742c766347fd0b1fa583aa2e5e6435a38684bf7c29f1f28a6e9a5c54"
+    },
+    {
+      "file": "res/values-ca/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Mostra el menú desplegable</string>"
+        }
+      ],
+      "sha256": "d91ee6bd6b75de73d6f8f6f46249e00fcf589a4212a58c8ee77105f4f761a495"
+    },
+    {
+      "file": "res/values-cs/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 580,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Zobrazit rozbalovací nabídku</string>"
+        }
+      ],
+      "sha256": "81dc283c2450e9754cd27646949f04c9249a341d882f1f4d908cdb47bdf4d6d9"
+    },
+    {
+      "file": "res/values-da/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 148,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Vis rullemenuen</string>"
+        }
+      ],
+      "sha256": "5badac9b8031678023f9732a03c05b3446ad4e83303496122269e67e2c2f545d"
+    },
+    {
+      "file": "res/values-de/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 589,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Drop-down-Menü anzeigen</string>"
+        }
+      ],
+      "sha256": "d7b200df64ac52f1b62aadae4abfe0f176bc0a3fae9ef335f8f5549b9d4e8080"
+    },
+    {
+      "file": "res/values-el/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Εμφάνιση αναπτυσσόμενου μενού</string>"
+        }
+      ],
+      "sha256": "a24c0a2e66f093914a4c7b95eb47269b735fc0afdd68371b660f2adb948e1534"
+    },
+    {
+      "file": "res/values-en-rGB/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 130,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Show drop-down menu</string>"
+        }
+      ],
+      "sha256": "e2ff424156910fdb6c2d840b2f2fb3bbcc895e25ea9f38f7e4d531f9a8716819"
+    },
+    {
+      "file": "res/values-es/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 589,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Mostrar menú desplegable</string>"
+        }
+      ],
+      "sha256": "4738c1183573cdecb95917c4c18ca94fdca2c10fe7a5f8df9caa69dfea960cdd"
+    },
+    {
+      "file": "res/values-es-rUS/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Mostrar menú desplegable</string>"
+        }
+      ],
+      "sha256": "3c661b50a3357837ec600769248a1ab4e245f2651923a88c83cbb46cd67d6c08"
+    },
+    {
+      "file": "res/values-et/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Kuva rippmenüü</string>"
+        }
+      ],
+      "sha256": "cb8adbf56f2d213b236a47809253c3e32d90fa2d7866ed98d5ca80392a656427"
+    },
+    {
+      "file": "res/values-eu/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Erakutsi goitibeherako menua</string>"
+        }
+      ],
+      "sha256": "b63b25d9276bd4287181a550569e3d947ebc7f9c3f8061e62cbf36f99218d508"
+    },
+    {
+      "file": "res/values-fa/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">نمایش منوی کرکره‌ای</string>"
+        }
+      ],
+      "sha256": "3a5642cf9dfb895b794b9349acbb9789a10eb03963278426d080dee88bf3eeb8"
+    },
+    {
+      "file": "res/values-fi/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Näytä avattava valikko</string>"
+        }
+      ],
+      "sha256": "469187d57a9d71b10d326847b46e963df05d2dcde013d00e95061c9bf9d99f2e"
+    },
+    {
+      "file": "res/values-fr/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 589,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Afficher le menu déroulant</string>"
+        }
+      ],
+      "sha256": "a6714170fb406f0d23571ece871eaf2e152ac4de0bc09c97aaf1437ecb807af6"
+    },
+    {
+      "file": "res/values-fr-rCA/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Afficher le menu déroulant</string>"
+        }
+      ],
+      "sha256": "5149965b1d2d4f0f0e21e00dec13cdeba9bb05fd01868118074e5596296e2f22"
+    },
+    {
+      "file": "res/values-gl/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Mostra o menú despregable</string>"
+        }
+      ],
+      "sha256": "978e96ecf4ff02999a1c5bc374a2209746aaad1046d9879aefde65badbfb8241"
+    },
+    {
+      "file": "res/values-gu/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">ડ્રૉપડાઉન મેનૂ બતાવો</string>"
+        }
+      ],
+      "sha256": "ddd73d258cc2c9b989e75df3e856b77e9db1ac1ce0e3330dbdbd4e7e5cd5455f"
+    },
+    {
+      "file": "res/values-hi/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 576,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">ड्रॉपडाउन मेन्यू दिखाएं</string>"
+        }
+      ],
+      "sha256": "5231a1a8c278de8442511c2da8e5de5720727c3a63773e80623dd5c8d687c6dd"
+    },
+    {
+      "file": "res/values-hr/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Prikaži padajući izbornik</string>"
+        }
+      ],
+      "sha256": "67c5a3459b48478eb2926add16cf4a2e48baf954273a64aa785f3835dc07fbf9"
+    },
+    {
+      "file": "res/values-hu/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Legördülő menü megjelenítése</string>"
+        }
+      ],
+      "sha256": "3186bcbb4087b0a204a858279bca01f2c79fdb8973ddd68c1e3938ad9e2da9fb"
+    },
+    {
+      "file": "res/values-hy/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Ցույց տալ իջնող ընտրացանկը</string>"
+        }
+      ],
+      "sha256": "88bb01afd9a40ee16ae3eadbd393121d8df36c98fc596e8a2bd199cb8f8a8424"
+    },
+    {
+      "file": "res/values-in/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 581,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Tampilkan menu dropdown</string>"
+        }
+      ],
+      "sha256": "9f430cf78e67db59078ecb838e74fbb8c0dff33cae8b875cbb8a3c30bb2d99fb"
+    },
+    {
+      "file": "res/values-is/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Sýna fellivalmynd</string>"
+        }
+      ],
+      "sha256": "59b749d9e390feaff62cd32ad75d15a5a7bc736d4fa120b4d5d056053eda91a6"
+    },
+    {
+      "file": "res/values-it/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 585,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Mostra il menu a discesa</string>"
+        }
+      ],
+      "sha256": "858bd773e3ac20c2181f1fcc191232fe3e9efcddee9d9de758d5814e934f3f62"
+    },
+    {
+      "file": "res/values-iw/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">הצגת התפריט הנפתח</string>"
+        }
+      ],
+      "sha256": "38e4d5a9758172d3a60013b0da3c3f116e4ed8a1f57106a7d5e7843164def3df"
+    },
+    {
+      "file": "res/values-ja/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 594,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">プルダウン メニューを表示</string>"
+        }
+      ],
+      "sha256": "f062266c489bac923b97cbb7802c114727e3698f1f3b6535fe762f1e15d234cf"
+    },
+    {
+      "file": "res/values-ka/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">ჩამოსაშლელი მენიუს ჩვენება</string>"
+        }
+      ],
+      "sha256": "f815259951467e41ee3a4a7da80d9332814b83b5e51d25ed6f4b5aa056e57992"
+    },
+    {
+      "file": "res/values-kk/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Ашылмалы мәзірді көрсету</string>"
+        }
+      ],
+      "sha256": "f53bc59cf1dcf639426f6c18e58cfdbb390a4b753940aa40b18094a3eda8b0a3"
+    },
+    {
+      "file": "res/values-km/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">បង្ហាញ​ម៉ឺនុយ​ធ្លាក់ចុះ</string>"
+        }
+      ],
+      "sha256": "742c2d3785b95975970b85e45aa6163e2e6476e8bcb644cb157623a6db62817e"
+    },
+    {
+      "file": "res/values-kn/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">ಡ್ರಾಪ್‌ಡೌನ್ ಮೆನು ತೋರಿಸಿ</string>"
+        }
+      ],
+      "sha256": "13719c5402ee12ee8a6b3fab41d9c355ce1b38ac8cae6463c237eb0e23ef41bb"
+    },
+    {
+      "file": "res/values-ko/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 602,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">드롭다운 메뉴 표시</string>"
+        }
+      ],
+      "sha256": "7c9984ea535907c1d4a705aea9e45b884d2e7a123038629d6463da78d33d35f9"
+    },
+    {
+      "file": "res/values-ky/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Түрүлмө менюну көрсөтүү</string>"
+        }
+      ],
+      "sha256": "8ad8c87388128f4daaf6b7887007d7b51460ff571da621800087884decec9e06"
+    },
+    {
+      "file": "res/values-lo/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">ສະແດງເມນູເລື່ອນລົງ</string>"
+        }
+      ],
+      "sha256": "06d3053e25a9e1738c90ba96a929407f7db80b62466c86a420ea5a395cc1c5ff"
+    },
+    {
+      "file": "res/values-lt/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Rodyti išskleidžiamąjį meniu</string>"
+        }
+      ],
+      "sha256": "908294c102f0a512e2ec976d0cbfde8c733420041f67099fc16f00de65af8437"
+    },
+    {
+      "file": "res/values-lv/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Rādīt nolaižamo izvēlni</string>"
+        }
+      ],
+      "sha256": "7be49eaaddb4dbe4a7801fc4aec348e2eb354ccd71ae4cd62d617d4bc3d5032a"
+    },
+    {
+      "file": "res/values-mk/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Прикажи паѓачко мени</string>"
+        }
+      ],
+      "sha256": "8c0471c80f270d782df09af6bc42364b84e19d0dcb45c3bcb0c2f9304a545df4"
+    },
+    {
+      "file": "res/values-ml/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">ഡ്രോപ്പ്‌ ഡൗൺ മെനു കാണിക്കുക</string>"
+        }
+      ],
+      "sha256": "1657df144c788e6ca03e9bccfa707ed215fcd8add8adda232325d862581cf76d"
+    },
+    {
+      "file": "res/values-mn/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Доош унадаг цэсийг харуулах</string>"
+        }
+      ],
+      "sha256": "f597e6eb6f8a66740d8fe2b02c0c7d5f7efcb1abd53dee7da68314b37e2f0c33"
+    },
+    {
+      "file": "res/values-mr/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">ड्रॉपडाउन मेनू दाखवा</string>"
+        }
+      ],
+      "sha256": "c207a18c578f9f518e2a359ea42151597e5547774effa2241a0f95d219547967"
+    },
+    {
+      "file": "res/values-ms/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Tunjukkan menu lungsur</string>"
+        }
+      ],
+      "sha256": "9e438f96eb052ba6ae6e8f5d879663b30e033ef19a0d7e6e13c031c467eb3af0"
+    },
+    {
+      "file": "res/values-my/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">ဆွဲချမီနူးကို ပြရန်</string>"
+        }
+      ],
+      "sha256": "4b1a112f126a76fde13fe3768a743b501444a03812a62dcdffb4bb9d355a98b4"
+    },
+    {
+      "file": "res/values-nb/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 148,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Vis rullegardinmenyen</string>"
+        }
+      ],
+      "sha256": "d5b056c387aaaa0c2474ce97438cc524722f15df26a90f466dfeff4aca35c936"
+    },
+    {
+      "file": "res/values-ne/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">ड्रपडाउन मेनु देखाउनुहोस्</string>"
+        }
+      ],
+      "sha256": "1b53d7385599742c6fde8fc5bf906dd9cb633e8a5ff186ac55238f728edd06f4"
+    },
+    {
+      "file": "res/values-nl/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Dropdownmenu tonen</string>"
+        }
+      ],
+      "sha256": "bd0edfdcc893aed2ec5499a1b8a8448d5801244b7cf35a1a5c9d89f487448e23"
+    },
+    {
+      "file": "res/values-or/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 75,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Show dropdown menu</string>"
+        }
+      ],
+      "sha256": "d1037a71fec1cc2a5b132d48e69f58ee5c1a4a34f3615bc10ab7b9fe4ed99f99"
+    },
+    {
+      "file": "res/values-pa/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">ਡ੍ਰੌਪ-ਡਾਊਨ ਮੀਨੂ ਦਿਖਾਓ</string>"
+        }
+      ],
+      "sha256": "5db0eafa42b0f8e1b5d34639131e8b226c2bd2ece2efa6d6a669f83ca17f7e61"
+    },
+    {
+      "file": "res/values-pl/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 585,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Pokaż menu</string>"
+        }
+      ],
+      "sha256": "45dd2721787f1451b9227d56426b809670ca953f995a77cc5fb7122179573560"
+    },
+    {
+      "file": "res/values-pt-rBR/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 75,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Mostrar menu suspenso</string>"
+        }
+      ],
+      "sha256": "9ff405c335c927e49c6498105345f4b9bc29dc47cd5b14328283a0e9905bf6c3"
+    },
+    {
+      "file": "res/values-pt-rPT/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Mostrar menu pendente</string>"
+        }
+      ],
+      "sha256": "30598a0e27c108f8f1aec959f954d6471d206f3807d94614c61075053f2432f2"
+    },
+    {
+      "file": "res/values-ro/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 580,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Afișați meniul drop-down</string>"
+        }
+      ],
+      "sha256": "c642d65a66c63656047291ce6fdc103143a088d0a25c5ce13294e3f268521037"
+    },
+    {
+      "file": "res/values-ru/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 572,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Показать раскрывающееся меню</string>"
+        }
+      ],
+      "sha256": "c0d368237209986f651953ce5b5c797084eba048142bf8517b7aecaf3bb57645"
+    },
+    {
+      "file": "res/values-si/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">පතන මෙනුව පෙන්වන්න</string>"
+        }
+      ],
+      "sha256": "9061199d2bafb62bd1f7abf13bea31becfc13e3804d741afe5ae48b4ee160900"
+    },
+    {
+      "file": "res/values-sk/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Zobraziť rozbaľovaciu ponuku</string>"
+        }
+      ],
+      "sha256": "fb153a7751f70d3623f081cc85e77f26e4809429e7c838a024252b4c3afcad5b"
+    },
+    {
+      "file": "res/values-sl/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Prikaz spustnega menija</string>"
+        }
+      ],
+      "sha256": "693cef48f214bc3339cb3e9e89f0a620dbefa8d50cc94b77cdfad3150cb755fb"
+    },
+    {
+      "file": "res/values-sq/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Shfaq menynë me lëshim poshtë</string>"
+        }
+      ],
+      "sha256": "b00f4846671699d1652b5ec5a1c9dfab7fa32e695aac706c954035f274c46e9f"
+    },
+    {
+      "file": "res/values-sr/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Прикажи падајући мени</string>"
+        }
+      ],
+      "sha256": "c2f9a443bb3e2054885ff50b7e3b5566d6aaa683614f6c3c26c0c2fd28d534b1"
+    },
+    {
+      "file": "res/values-sv/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Visa rullgardinsmenyn</string>"
+        }
+      ],
+      "sha256": "855eddc4e6ae1a9b800c5ab0f8289ef827d41c7b24eb0ac29c87edb2a4ec134c"
+    },
+    {
+      "file": "res/values-sw/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Onyesha menyu kunjuzi</string>"
+        }
+      ],
+      "sha256": "8e162e2bf79f226f154159939684b705fda6b5a1bff6635d9970eba0024149dd"
+    },
+    {
+      "file": "res/values-ta/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">கீழ் தோன்றல் மெனுவைக் காட்டும் பட்டன்</string>"
+        }
+      ],
+      "sha256": "be0a52d92cc3c6f0022ff95c687810b9fa1b557461f25119d8231a83b546322a"
+    },
+    {
+      "file": "res/values-te/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">డ్రాప్‌డౌన్ మెనూను చూపు</string>"
+        }
+      ],
+      "sha256": "f8001fb43b47cfcf2c048456631ec13582e094f84ffda80782e85484577b502c"
+    },
+    {
+      "file": "res/values-th/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 576,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">แสดงเมนูแบบเลื่อนลง</string>"
+        }
+      ],
+      "sha256": "57a04d4a4bfbfa79d91a9a8b13bd9090f813e4a71c2c22166f88be4427481a97"
+    },
+    {
+      "file": "res/values-tl/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 575,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Ipakita ang dropdown na menu</string>"
+        }
+      ],
+      "sha256": "a17cc1f03b1cdec7b3f310d9a1b1fad6c73c9cbf3d4823e9af5bf7ffd54da3a3"
+    },
+    {
+      "file": "res/values-tr/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 581,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Açılır menüyü göster</string>"
+        }
+      ],
+      "sha256": "dac348770e7520cf71c088a36c4705aaa61e42227eb00abb995dd5eedf28b46c"
+    },
+    {
+      "file": "res/values-uk/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 140,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Показати спадне меню</string>"
+        }
+      ],
+      "sha256": "153abb7bd364260b831e7ef83f0d35f055f699ebb25e539050c3e2b5ab2a86e1"
+    },
+    {
+      "file": "res/values-ur/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">ڈراپ ڈاؤن مینیو دکھائیں</string>"
+        }
+      ],
+      "sha256": "88a5d17203c58717927a9acad837983e1a4dcb1e3be821a9cf494da317e3aaf1"
+    },
+    {
+      "file": "res/values-uz/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Pastga ochiluvchi menyuni ochish</string>"
+        }
+      ],
+      "sha256": "54e4c8c79db764404b55e233765c8b39fa1eb300150229764fd91da6f4b736f1"
+    },
+    {
+      "file": "res/values-v24/styles.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 50,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 50,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 53,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 53,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 93,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 93,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 96,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 96,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 142,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 142,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 145,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 145,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 184,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 184,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputFilledExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 187,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 187,
+          "pattern": "xposed",
+          "sample": "<item name=\"textInputOutlinedExposedDropdownMenuStyle\">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu</item>"
+        }
+      ],
+      "sha256": "2cecb75b373177008133f0310091990b419c6c8eee5f79345d26cf39df677b4e"
+    },
+    {
+      "file": "res/values-vi/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 580,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Hiển thị menu thả xuống</string>"
+        }
+      ],
+      "sha256": "ab8002ab175461a748c1fa6b7a574e6a3d8348848d0dac0ff25f6634ce2acf6a"
+    },
+    {
+      "file": "res/values-zh-rCN/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 149,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">显示下拉菜单</string>"
+        }
+      ],
+      "sha256": "a6c6152928060cbe8a5b4c69dbd800c6fa9c580d441f547dfff3d0c81cbc82e3"
+    },
+    {
+      "file": "res/values-zh-rHK/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 582,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">顯示下拉式選單</string>"
+        }
+      ],
+      "sha256": "cc4ef5d859210115379637751644d1c73c25d0d436e349a064b0c5ba72866027"
+    },
+    {
+      "file": "res/values-zh-rTW/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 585,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">顯示下拉式選單</string>"
+        }
+      ],
+      "sha256": "106959806b5eb71df4e9f7d1a359e69dd13f939362ff190913474c043e65075d"
+    },
+    {
+      "file": "res/values-zu/strings.xml",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 126,
+          "pattern": "xposed",
+          "sample": "<string name=\"exposed_dropdown_menu_content_description\">Bonisa imenyu yokudonsela phansi</string>"
+        }
+      ],
+      "sha256": "bf8b35e8bc7f71b06d3dfcefd190b23e8193d9069fa8f9a8f9cc271a16e136ba"
+    },
+    {
+      "file": "unknown/mozilla/public-suffix-list.txt",
+      "hits": [
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 8090,
+          "noise": true,
+          "noise_reason": "third-party SDK path; indicator context presumed unrelated to app screen protection",
+          "pattern": "xposed",
+          "sample": "// exposed : 2013-12-05 Binky Moon, LLC"
+        },
+        {
+          "category": "TAMPER_RESISTANCE",
+          "family": "xposed",
+          "line": 8091,
+          "noise": true,
+          "noise_reason": "third-party SDK path; indicator context presumed unrelated to app screen protection",
+          "pattern": "xposed",
+          "sample": "exposed"
+        }
+      ],
+      "sha256": "45479362abb0eb02ddfb2e40726d06eaeff59f41154b05815339a1f2b78d5099"
+    }
+  ],
+  "input_mode": "decoded_tree",
+  "interpretation": "STATIC_INDICATORS_ONLY",
+  "manifest": {
+    "appComponentFactory": "com.SecShell.SecShell.AP",
+    "extractNativeLibs": "false",
+    "name": "com.SecShell.SecShell.AW",
+    "present": true
+  },
+  "noise_hits": 2,
+  "packers": [
+    {
+      "evidence": [
+        "manifest:com.secshell.",
+        "native_lib:libsecshell-x86.so"
+      ],
+      "packer": "SecShell"
+    }
+  ],
+  "read_only": true,
+  "root": "/home/user/ReelShort-v4.2.00-analysis/apktool-src",
+  "schema_version": "capture-detection-3",
+  "summary": {
+    "mechanisms": [
+      {
+        "confidence": "MEDIUM",
+        "evidence_count": 5,
+        "layer": "JAVA_CAPTURE_CALLBACKS",
+        "mechanism": "SCREEN_CAPTURE_CALLBACKS"
+      },
+      {
+        "confidence": "MEDIUM",
+        "evidence_count": 62,
+        "layer": "DRM",
+        "mechanism": "DRM_PROTECTION_STRINGS"
+      },
+      {
+        "confidence": "MEDIUM",
+        "evidence_count": 8,
+        "layer": "NATIVE_BUFFERS",
+        "mechanism": "PROTECTED_CONTENT_BUFFERS"
+      },
+      {
+        "confidence": "LOW_INDICATOR",
+        "evidence_count": 21,
+        "layer": "NATIVE_STRINGS",
+        "mechanism": "CAPTURE_RELATED_STRINGS"
+      },
+      {
+        "confidence": "MEDIUM",
+        "evidence_count": 11,
+        "layer": "NATIVE_SYMBOLS",
+        "mechanism": "CAPTURE_RELATED_EXPORTED_SYMBOLS"
+      },
+      {
+        "confidence": "LOW_INDICATOR",
+        "evidence_count": 167,
+        "layer": "TAMPER",
+        "mechanism": "ANTI_INSTRUMENTATION_STRINGS"
+      },
+      {
+        "confidence": "HIGH_STRUCTURAL",
+        "evidence_count": 2,
+        "layer": "PACKER",
+        "mechanism": "APP_HARDENING_SHELL"
+      }
+    ],
+    "note": "An app-hardening shell is present: the real application code is encrypted and only materializes at runtime, so Java-layer protection (e.g. FLAG_SECURE) cannot be fully enumerated from static files alone.",
+    "verdict": "PACKED_STATIC_ANALYSIS_LIMITED"
+  }
+}

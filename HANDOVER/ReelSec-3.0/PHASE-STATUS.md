@@ -272,3 +272,22 @@ The detector now matches the real Smali `invoke-static {registers}, Ljava/lang/S
 
 Implementation: `58653f9c818ad5bc4f6d6bd48f0ab436124804eb`, `9a5f6bbebbe328fdddaa1b066d20d7332c53cb0d`, `584e8f86cc83d5226c4e2cf8a10d9c9cffa535cc`, `6bb958fb406b8b0d952936ca63c8eb17e36ab679`
 Tests: `2434a4ae97da0e903c4757a79c7718162ecdf11d`, `1aca1b7bf6f94fc3dc5c5edb8951d3e4b8e1a439`
+
+## Completed in this stage — 2026-10-07 (evidence platform)
+
+Capture detector upgraded to schema `capture-detection-3`: APK/ZIP container
+input mode (in-memory, read-only), ELF `.dynsym` symbol extraction with
+import/export distinction, third-party noise classification (`UNRELATED`
+downstream), and anti-tamper family tagging.
+
+New `evidence_report.py` (schema `evidence-report-1`) produces strictly
+tiered findings (CONFIRMED / INDICATOR / NOT_PROVEN / UNRELATED), an evidence
+graph linking static, native and runtime findings, and a four-link causal
+chain gate (mechanism identified → provenance → runtime execution →
+capture-block behavior). A causal proof is emitted only when every link is
+CONFIRMED. The campaign emits `EVIDENCE-REPORT.json/.md` after Stage 12.
+
+Suite: 94/94 via `python -m unittest discover -s tools/reelsec`.
+Real-run artifacts: `analysis/evidence-platform-20261007/` — verdict
+`PACKED_STATIC_ANALYSIS_LIMITED`, causal chain `NOT_PROVEN` (L1 CONFIRMED,
+L2–L4 NOT_PROVEN). Handover: `حقيبة التسليم/REELSEC-EVIDENCE-PLATFORM-2026-10-07.md`.

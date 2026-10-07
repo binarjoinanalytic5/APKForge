@@ -26,39 +26,78 @@ The tool never modifies, patches, injects into, signs, or rebuilds the APK.
 ## Capture protection detection
 
 Read-only discovery of screenshot/recording protection indicators
-(schema `capture-detection-2`):
+(schema `capture-detection-3`):
 
+    # decoded apktool tree
     python3 tools/reelsec/capture_detector.py /path/to/decoded-apk \
+        -o CAPTURE-DETECTION.json -m CAPTURE-DETECTION.md
+
+    # APK file directly (in-memory container scan; nothing is extracted)
+    python3 tools/reelsec/capture_detector.py ./original.apk \
         -o CAPTURE-DETECTION.json -m CAPTURE-DETECTION.md
 
 The campaign automatically emits `CAPTURE-DETECTION.json` beside its report.
 
-V2 detection layers:
+V3 detection layers:
 
+- **APK/ZIP container mode** — entry inventory, per-entry native string scan,
+  packed DEX detection inside entries, packer detection from entry names and
+  the binary AndroidManifest string pool (ASCII + UTF-16LE). Read-only: no
+  extraction to disk.
+- **ELF .dynsym extraction** — dynamic symbols of native libraries are
+  classified (`NATIVE_SYMBOLS`), distinguishing imports from defined exports
+  via `symbol_defined` (e.g. imported `AMediaDrm_createByUUID` is a confirmed
+  DRM API usage fact; an exported `nativeOnCaptureScreen` JNI symbol is a
+  confirmed callback surface fact).
+- **Noise classification** — hits inside well-known third-party SDK paths are
+  flagged `noise=true` with a reason and excluded from category counts;
+  downstream they are tiered `UNRELATED`. Evidence is never deleted.
+- **Anti-tamper families** — `family` tag per hit (frida/xposed/magisk/ptrace/root).
 - **Smali FLAG_SECURE heuristic** — obfuscated code that loads `0x2000` into a
   register and applies it via `addFlags`/`setFlags`/`or-int` in a bounded line
-  window. A bare `0x2000` constant alone is never reported (avoids buffer-size
-  false positives).
+  window. A bare `0x2000` constant alone is never reported.
 - **Packer / hardening shell detection** — SecShell, Bangcle/SecNeo, Qihoo
-  Jiagu, Tencent Legu, Ali Mobisec, Ijiami, KiwiSec, identified from the
-  manifest Application class, native library names, and asset names. When a
-  shell is present and no managed-code FLAG_SECURE is found, the verdict is
-  `PACKED_STATIC_ANALYSIS_LIMITED`: the real application code is encrypted and
-  cannot be fully enumerated from static files.
-- **Hidden DEX payload discovery** — DEX magic inside assets/lib/unknown
-  containers (detection only; payloads are never extracted or decrypted).
-- **Native string classification** — DRM (`MediaDrm`, `Widevine`, `edef8ba9`,
-  `OEMCrypto`), DRM security levels (`HW_SECURE`, `securityLevel`),
-  protected-content buffers (`GRALLOC_USAGE_PROTECTED`,
-  `AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT`, `EGL_PROTECTED_CONTENT`), capture
-  callbacks (`nativeOnCaptureScreen`, `registerScreenCaptureCallback`,
-  `onCapturedContentVisibilityChanged`), capture binaries (`screencap`,
-  `screenrecord`), and anti-instrumentation strings.
-- **Structured summary** — per-layer mechanisms with confidence
-  (`HIGH_STRUCTURAL`, `MEDIUM`, `LOW_INDICATOR`) and an overall verdict.
+  Jiagu, Tencent Legu, Ali Mobisec, Ijiami, KiwiSec.
+- **Hidden DEX payload discovery** — detection only; payloads are never
+  extracted or decrypted.
+- **Native string classification** — DRM, DRM security levels,
+  protected-content buffers, capture callbacks, capture binaries,
+  anti-instrumentation strings.
 
-**Important:** indicator presence is not execution or causal proof. The detector
-does not patch, disable, inject, sign, or rebuild the APK.
+## Evidence report (tiered findings + causal chain gate)
+
+    python3 tools/reelsec/evidence_report.py \
+        --detection CAPTURE-DETECTION.json \
+        [--campaign analysis/sec-shell-deep-v1/reelsec-XXXX] \
+        -o EVIDENCE-REPORT.json -m EVIDENCE-REPORT.md
+
+The campaign automatically emits `EVIDENCE-REPORT.json`/`.md` after the
+runtime stage, linking static, native and runtime findings in an evidence
+graph.
+
+Evidence tiers (strict):
+
+- `CONFIRMED` — structural/byte-level facts (hashes, packer signatures, string
+  or symbol presence). Presence only, never behavior.
+- `INDICATOR` — security-relevant by inference; execution not established.
+- `NOT_PROVEN` — causal/behavioral claims without a completed chain.
+- `UNRELATED` — third-party/noise context.
+
+Causal claim "the app blocks screenshots/recording" requires ALL four links
+CONFIRMED:
+
+1. `L1_MECHANISM_IDENTIFIED_STATIC`
+2. `L2_TARGET_PROVENANCE_ESTABLISHED` (hash binding to the exact APK)
+3. `L3_RUNTIME_EXECUTION_OBSERVED` (probe events tied to the artifact)
+4. `L4_CAPTURE_BLOCK_BEHAVIOR_OBSERVED` (bounded behavioral observation via a
+   `BEHAVIOR-CAPTURE.json` record: `screenshot_attempted`,
+   `secure_content_protected`, `session_bound`)
+
+Any incomplete chain yields verdict `NOT_PROVEN` with the missing links
+enumerated.
+
+**Important:** indicator presence is not execution or causal proof. These
+tools do not patch, disable, inject, sign, or rebuild the APK.
 
 
 ## Evidence boundary
