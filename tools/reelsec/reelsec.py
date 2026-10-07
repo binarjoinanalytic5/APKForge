@@ -1923,9 +1923,10 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
                         result["reason"] = "adb monkey launch failed"
                         frida_rc, frida_output = launch_rc, launch_output or ""
                     else:
+                        result["gadget_process_name"] = "Gadget"
                         frida_rc, frida_output = run(
                             [frida, "-H", "127.0.0.1:%d" % gadget_port,
-                             "-n", package, "-l", str(script)],
+                             "-n", "Gadget", "-l", str(script)],
                             timeout=18,
                         )
             else:
