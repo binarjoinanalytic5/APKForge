@@ -371,3 +371,38 @@ written automatically by both campaign rounds into CRASH-COMPARISON.json
 and surfaced as CRASH_COMPARISON in RUNTIME-VERDICT.json. Suite: 213/213.
 No campaign was run; no device-destructive operation was performed.
 Scientific verdict unchanged: SCREENSHOT_BLOCKING = NOT_PROVEN.
+
+## 2026-10-07 — Non-Destructive Original Baseline (no automatic uninstall)
+
+Device fact: the baseline round never executed (CRASH-COMPARISON showed
+Original: null) because the old design unconditionally routed a
+pre-baseline uninstall through safety_gate; without a hash-bound
+authorization document the round returned SAFETY_BLOCKED and the original
+was never assessed.
+
+Redesign: the baseline is NON-DESTRUCTIVE BY DESIGN. The test-signed
+original and the instrumented artifact share the same isolated test
+keystore, so the round now replace-installs the original via
+'adb install -r' — no uninstall, no clear-data, no other package touched —
+observes the startup, writes BASELINE-CRASH-ARTIFACT.json +
+CRASH-COMPARISON.json, and intentionally leaves the original installed
+(post_round NONE_NON_DESTRUCTIVE); the deploy stage then replaces it with
+the instrumented artifact, also via 'adb install -r'.
+
+Uninstall survives ONLY as an explicit fallback when a
+differently-signed build occupies the package slot (replace install fails
+with INSTALL_FAILED_UPDATE_INCOMPATIBLE / signature mismatch / version
+downgrade): with a hash-bound authorization document
+(REELSEC_DESTRUCTIVE_AUTH) the gated uninstall runs through safety_gate
+(audited EXECUTED_VERIFIED); without one the round reports
+BASELINE_BLOCKED_INCOMPATIBLE_INSTALL and touches nothing — never an
+automatic uninstall. REELSEC_ALLOW_TEST_DEVICE_UNINSTALL remains a
+doctor-blocking violation, not a solution.
+
+Regression tests (3): baseline runs and produces the original-side crash
+artifact + comparison with ZERO destructive commands and NO
+authorization; incompatible install without authorization blocks with
+nothing attempted and no app launch; incompatible install WITH
+authorization falls back to the audited gated uninstall. Suite: 215/215.
+No campaign was run. Scientific verdict unchanged:
+SCREENSHOT_BLOCKING = NOT_PROVEN.

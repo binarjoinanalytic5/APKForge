@@ -824,104 +824,108 @@ class _ProbeHarness(unittest.TestCase):
         self.assertEqual(verdict["CRASH_COMPARISON"], "BOTH_CRASH")
 
 
-class BaselineCrashArtifactTests(unittest.TestCase):
-    """BASELINE-CRASH-ARTIFACT.json must be produced by the gated baseline
-    round — every destructive step through safety_gate, and the assessment
-    runner itself never sees a destructive command."""
+class BaselineRoundTests(unittest.TestCase):
+    """The baseline (original) round must run NON-destructively: a replace
+    install without any uninstall; a gated uninstall happens ONLY via an
+    explicit hash-bound authorization document when the installed build has
+    an incompatible signature — never automatically."""
 
-    def test_baseline_round_writes_artifact_through_gate(self):
-        import safety_gate as sg
+    EXIT_INFO = EXIT_INFO_NATIVE.replace(
+        "com.newleaf.app.android.victor", "com.test.pkg")
+    LOG = SIGABRT_BASE_APK_LOG.replace(
+        "com.newleaf.app.android.victor", "com.test.pkg")
+
+    def _run_baseline(self, out, env, install_outputs):
+        """Run the baseline round against a fake device.
+
+        `install_outputs` is the list of (rc, output) returned by successive
+        'adb install' attempts. Returns (doc, gate_cmds, all_cmds)."""
+        state = {"exit_calls": 0, "installs": 0, "present": True}
+        gate_cmds, all_cmds = [], []
+
+        def fake_default_runner(cmd, timeout=120):
+            joined = " ".join(str(c) for c in cmd)
+            gate_cmds.append(joined)
+            if "getprop" in joined:
+                return 0, "samsung/x/y:13"
+            if "pm list users" in joined:
+                return 0, "Users:\n\tUserInfo{0:Owner:13}"
+            if "pm path" in joined:
+                return (0, "package:/data/app/x/base.apk") \
+                    if state["present"] else (0, "")
+            if "ps -A" in joined:
+                return 0, "USER PID PPID VSZ RSS WCHAN ADDR S NAME\n"
+            if "pm uninstall" in joined:
+                state["present"] = False
+                return 0, "Success"
+            return 1, ""
+
+        def fake_run(cmd, timeout=60):
+            joined = " ".join(str(c) for c in cmd)
+            all_cmds.append(joined)
+            if "install" in joined:
+                idx = min(state["installs"], len(install_outputs) - 1)
+                state["installs"] += 1
+                rc, out = install_outputs[idx]
+                if rc == 0:
+                    state["present"] = True
+                return rc, out
+            if "exit-info" in joined:
+                state["exit_calls"] += 1
+                return 0, self.EXIT_INFO if state["exit_calls"] > 1 else ""
+            if "monkey" in joined:
+                return 0, "Events injected: 1"
+            if joined.endswith("ps -A"):
+                return 0, "USER PID PPID VSZ RSS WCHAN ADDR S NAME\n"
+            if "logcat" in joined:
+                return 0, self.LOG
+            if "pm path" in joined:
+                return 0, "package:/data/app/x/base.apk"
+            return 1, ""
+
+        caps = {"tools": {"adb": {"path": "/adb"},
+                          "apksigner": {"path": "/apksigner"}}}
+        with mock.patch.dict(os.environ, {
+                 "REELSEC_TEST_KEYSTORE_PASSWORD": "test-keystore-pw",
+                 "REELSEC_TEST_KEY_PASSWORD": "test-keystore-pw"},
+                 clear=False), \
+             mock.patch.object(MODULE, "resolve_test_device",
+                               lambda adb, serial=None: {"serial": "s1"}), \
+             mock.patch.object(MODULE, "run_checked",
+                               lambda cmd, timeout=120: ""), \
+             mock.patch.object(MODULE, "_default_runner",
+                               fake_default_runner), \
+             mock.patch.object(MODULE, "run", fake_run), \
+             mock.patch.object(rh, "_poll_process",
+                               lambda *a, **k: {
+                                   "pids": [], "observed": False,
+                                   "alive_ms": 0, "alive_at_exit": False,
+                                   "poll_attempts": 1,
+                                   "first_seen_epoch": None,
+                                   "last_seen_epoch": None}):
+            doc = MODULE.run_baseline_runtime(out, __file__, caps, env=env)
+        return doc, gate_cmds, all_cmds
+
+    def test_baseline_runs_non_destructively_without_any_authorization(self):
         with tempfile.TemporaryDirectory() as td:
             out = Path(td)
-            signed = out / "original-testsigned.apk"
-            _craft_apk_with_offset(signed)
-            auth = {
-                "schema_version": sg.SCHEMA_AUTH,
-                "operation": "UNINSTALL",
-                "package": "com.test.pkg",
-                "user": 0,
-                "device_serial": "s1",
-                "issued_at_epoch": time.time() - 10,
-                "expires_at_epoch": time.time() + 600,
-                "authorized_by": "operator",
-                "reason": "baseline round test",
-            }
-            auth_path = out / "auth.json"
-            auth_path.write_text(json.dumps(auth), encoding="utf-8")
-
-            state = {"present": True, "exit_calls": 0}
-            gate_cmds = []
-            assess_cmds = []
-
-            def fake_default_runner(cmd, timeout=120):
-                joined = " ".join(str(c) for c in cmd)
-                gate_cmds.append(joined)
-                if "getprop" in joined:
-                    return 0, "samsung/x/y:13"
-                if "pm list users" in joined:
-                    return 0, "Users:\n\tUserInfo{0:Owner:13}"
-                if "pm path" in joined:
-                    return (0, "package:/data/app/x/base.apk") \
-                        if state["present"] else (0, "")
-                if "ps -A" in joined:
-                    return 0, "USER PID PPID VSZ RSS WCHAN ADDR S NAME\n"
-                if "pm uninstall" in joined:
-                    state["present"] = False
-                    return 0, "Success"
-                return 1, ""
-
-            def fake_run_checked(cmd, timeout=120):
-                if "install" in " ".join(str(c) for c in cmd):
-                    state["present"] = True
-                return ""
-
-            exit_info = EXIT_INFO_NATIVE.replace(
-                "com.newleaf.app.android.victor", "com.test.pkg")
-            log = SIGABRT_BASE_APK_LOG.replace(
-                "com.newleaf.app.android.victor", "com.test.pkg")
-
-            def fake_run(cmd, timeout=60):
-                joined = " ".join(str(c) for c in cmd)
-                assess_cmds.append(joined)
-                if "exit-info" in joined:
-                    state["exit_calls"] += 1
-                    return 0, exit_info if state["exit_calls"] > 1 else ""
-                if "monkey" in joined:
-                    return 0, "Events injected: 1"
-                if joined.endswith("ps -A"):
-                    return 0, "USER PID PPID VSZ RSS WCHAN ADDR S NAME\n"
-                if "logcat" in joined:
-                    return 0, log
-                if "pm path" in joined:
-                    return 0, "package:/data/app/x/base.apk"
-                return 1, ""
-
+            _craft_apk_with_offset(out / "original-testsigned.apk")
+            # NO REELSEC_DESTRUCTIVE_AUTH: the round must still run
             env = {"REELSEC_TEST_PACKAGE": "com.test.pkg",
-                   "REELSEC_TEST_KEYSTORE": str(out / "ks"),
-                   "REELSEC_DESTRUCTIVE_AUTH": str(auth_path)}
-            caps = {"tools": {"adb": {"path": "/adb"},
-                              "apksigner": {"path": "/apksigner"}}}
-            with mock.patch.dict(os.environ, {
-                     "REELSEC_TEST_KEYSTORE_PASSWORD": "test-keystore-pw",
-                     "REELSEC_TEST_KEY_PASSWORD": "test-keystore-pw"},
-                     clear=False), \
-                 mock.patch.object(MODULE, "resolve_test_device",
-                                   lambda adb, serial=None: {"serial": "s1"}), \
-                 mock.patch.object(MODULE, "run_checked", fake_run_checked), \
-                 mock.patch.object(MODULE, "_default_runner",
-                                   fake_default_runner), \
-                 mock.patch.object(MODULE, "run", fake_run), \
-                 mock.patch.object(rh, "_poll_process",
-                                   lambda *a, **k: {
-                                       "pids": [], "observed": False,
-                                       "alive_ms": 0, "alive_at_exit": False,
-                                       "poll_attempts": 1,
-                                       "first_seen_epoch": None,
-                                       "last_seen_epoch": None}):
-                doc = MODULE.run_baseline_runtime(out, __file__, caps,
-                                                  env=env)
+                   "REELSEC_TEST_KEYSTORE": str(out / "ks")}
+            doc, gate_cmds, all_cmds = self._run_baseline(
+                out, env, [(0, "Success")])
             self.assertEqual(doc["status"], "BASELINE_ASSESSED")
+            self.assertEqual(doc["install"]["mode"],
+                             "NON_DESTRUCTIVE_INSTALL_R")
+            self.assertFalse(doc["install"]["uninstall_attempted"])
             self.assertEqual(doc["health"]["startup"], "CRASH")
+            # ZERO destructive commands anywhere: no uninstall, no clear
+            for c in gate_cmds + all_cmds:
+                self.assertNotIn("uninstall", c)
+                self.assertNotIn("pm clear", c)
+            self.assertFalse((out / "SAFETY-AUDIT.jsonl").exists())
+            # original-side evidence + independent comparison still produced
             art = json.loads(
                 (out / "BASELINE-CRASH-ARTIFACT.json").read_text())
             self.assertEqual(art["artifact"]["label"], "original")
@@ -931,22 +935,72 @@ class BaselineCrashArtifactTests(unittest.TestCase):
                              "RESOLVED")
             self.assertEqual(art["apk_offset_resolution"]["entry"],
                              PACKED_ENTRY)
-            # every destructive command went through the gate and was audited
-            audit = (out / "SAFETY-AUDIT.jsonl").read_text()
-            self.assertIn("EXECUTED_VERIFIED", audit)
-            self.assertTrue(any("pm uninstall" in c for c in gate_cmds))
-            # the assessment runner (non-gated path) never saw destruction
-            for c in assess_cmds:
-                self.assertNotIn("uninstall", c)
-                self.assertNotIn("pm clear", c)
-            # baseline round also emits the independent comparison document
-            self.assertEqual(doc["crash_comparison"]["status"],
-                             "ORIGINAL_ONLY_CRASH")
             cmp_doc = json.loads(
                 (out / "CRASH-COMPARISON.json").read_text())
             self.assertEqual(cmp_doc["status"], "ORIGINAL_ONLY_CRASH")
             self.assertIn("not caused by instrumentation",
                           cmp_doc["attribution"]["guard"])
+            # the original is intentionally left installed (non-destructive)
+            self.assertEqual(doc["post_round"]["action"],
+                             "NONE_NON_DESTRUCTIVE")
+
+    def test_incompatible_installed_build_blocks_without_authorization(self):
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td)
+            _craft_apk_with_offset(out / "original-testsigned.apk")
+            env = {"REELSEC_TEST_PACKAGE": "com.test.pkg",
+                   "REELSEC_TEST_KEYSTORE": str(out / "ks")}
+            doc, gate_cmds, all_cmds = self._run_baseline(
+                out, env,
+                [(1, "Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE]")])
+            self.assertEqual(doc["status"],
+                             "BASELINE_BLOCKED_INCOMPATIBLE_INSTALL")
+            self.assertIn("deny-by-default", doc["reason"])
+            # nothing destructive was attempted, nothing was assessed
+            for c in gate_cmds + all_cmds:
+                self.assertNotIn("uninstall", c)
+                self.assertNotIn("pm clear", c)
+            self.assertFalse((out / "BASELINE-CRASH-ARTIFACT.json").exists())
+            self.assertFalse(any("monkey" in c for c in all_cmds))
+
+    def test_incompatible_build_falls_back_to_gated_uninstall_with_auth(self):
+        import safety_gate as sg
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td)
+            _craft_apk_with_offset(out / "original-testsigned.apk")
+            auth = {
+                "schema_version": sg.SCHEMA_AUTH,
+                "operation": "UNINSTALL",
+                "package": "com.test.pkg",
+                "user": 0,
+                "device_serial": "s1",
+                "issued_at_epoch": time.time() - 10,
+                "expires_at_epoch": time.time() + 600,
+                "authorized_by": "operator",
+                "reason": "incompatible-signature baseline fallback test",
+            }
+            auth_path = out / "auth.json"
+            auth_path.write_text(json.dumps(auth), encoding="utf-8")
+            env = {"REELSEC_TEST_PACKAGE": "com.test.pkg",
+                   "REELSEC_TEST_KEYSTORE": str(out / "ks"),
+                   "REELSEC_DESTRUCTIVE_AUTH": str(auth_path)}
+            doc, gate_cmds, all_cmds = self._run_baseline(
+                out, env,
+                [(1, "Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE]"),
+                 (0, "Success")])
+            self.assertEqual(doc["status"], "BASELINE_ASSESSED")
+            self.assertEqual(doc["install"]["mode"],
+                             "GATED_UNINSTALL_THEN_INSTALL")
+            self.assertEqual(doc["gated_uninstall"]["status"],
+                             "EXECUTED_VERIFIED")
+            self.assertIn("EXECUTED_VERIFIED",
+                          (out / "SAFETY-AUDIT.jsonl").read_text())
+            # the ONLY destructive command went through the gate runner,
+            # never through the assessment runner
+            self.assertTrue(any("pm uninstall" in c for c in gate_cmds))
+            for c in all_cmds:
+                self.assertNotIn("uninstall", c)
+                self.assertNotIn("pm clear", c)
 
 
 class EvidenceGateTests(unittest.TestCase):
