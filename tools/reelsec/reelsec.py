@@ -1810,6 +1810,100 @@ def _find_package_from_apk_tools(apk):
                 return m.group(1), kind, checked
     return None, None, checked
 
+def _write_common_cause_comparison(output):
+    """Write COMMON-CAUSE-COMPARISON.json from whichever sides exist.
+
+    Read-only over the campaign outputs: loads WORKING-CONTROL.json (the
+    installed original, observed in place) and CRASH-ARTIFACT.json (the
+    instrumented side). The comparison NEVER upgrades SCREENSHOT_BLOCKING.
+    Returns the comparison dict, or None when no side has evidence.
+    """
+    output = Path(output)
+
+    def _load(name):
+        try:
+            return json.loads((output / name).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+
+    comparison = runtime_health.build_common_cause_comparison(
+        _load("WORKING-CONTROL.json"), _load("CRASH-ARTIFACT.json"))
+    if comparison is None:
+        return None
+    (output / "COMMON-CAUSE-COMPARISON.json").write_text(
+        json.dumps(comparison, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8")
+    return comparison
+
+
+def _baseline_skip_reason(working_control):
+    """Reason to skip the install-based baseline round, or None.
+
+    When the currently installed original was observed IN PLACE as the
+    working control, the comparison already has its original side and
+    re-installing a signed copy over the installed control is neither
+    needed nor performed (no-reinstall mandate).
+    """
+    status = (working_control or {}).get("status")
+    if status in (runtime_health.CONTROL_ASSESSED,
+                  runtime_health.CONTROL_CRASHED):
+        return ("the currently installed original was observed in place as "
+                "the working control (WORKING-CONTROL.json, status=%s); "
+                "re-installing a signed copy over it is neither needed nor "
+                "performed" % status)
+    return None
+
+
+def run_working_control_round(output, capabilities, env=None,
+                              original_apk=None):
+    """Working-control round: observe the CURRENTLY INSTALLED package.
+
+    The installed original is the working control for crash comparison.
+    This round is strictly observational — read-only device queries
+    (pm path / dumpsys package / sha256sum) plus one bounded observed
+    launch. NO uninstall, NO clear-data, NO re-install, NO bypass, and NO
+    destructive authorization is used or required; nothing on the device
+    is modified beyond starting the app once under observation.
+
+    `original_apk` (the untouched local original) is used for offset
+    resolution ONLY when hash-bound to the installed APK.
+    """
+    env = env if env is not None else os.environ
+    doc = {"schema_version": runtime_health.WORKING_CONTROL_SCHEMA,
+           "status": "CONTROL_NOT_RUN"}
+    if env.get("REELSEC_WORKING_CONTROL", "1").strip() == "0":
+        doc["reason"] = "REELSEC_WORKING_CONTROL=0"
+        return doc
+    if safety_gate.inspect_environment(env):
+        doc.update(status="SAFETY_BLOCKED",
+                   reason=("blanket destructive permission is set in the "
+                           "environment; remove it — the working-control "
+                           "round never needs destructive operations"))
+        return doc
+    test_package = env.get("REELSEC_TEST_PACKAGE")
+    if not test_package:
+        doc["reason"] = ("REELSEC_TEST_PACKAGE not configured; refusing to "
+                         "touch any package")
+        return doc
+    adb = (capabilities or {}).get("tools", {}).get("adb", {}).get("path")
+    if not adb:
+        doc["reason"] = "adb unavailable; cannot observe the installed package"
+        return doc
+    try:
+        resolution = resolve_test_device(adb, env.get("REELSEC_TEST_DEVICE"))
+        serial = resolution["serial"]
+        doc = runtime_health.collect_working_control(
+            run, adb, serial, test_package,
+            local_reference_apk=original_apk)
+        doc["serial"] = serial
+    except Exception as exc:
+        doc.update(status="CONTROL_FAILED", error=str(exc)[:1000])
+    (Path(output) / "WORKING-CONTROL.json").write_text(
+        json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    doc["common_cause_comparison"] = _write_common_cause_comparison(output)
+    return doc
+
+
 def _write_crash_comparison(output):
     """Write CRASH-COMPARISON.json from whichever crash artifacts exist.
 
@@ -1838,16 +1932,40 @@ def _write_crash_comparison(output):
     return comparison
 
 
+_INSTALL_INCOMPATIBLE_MARKERS = (
+    "INSTALL_FAILED_UPDATE_INCOMPATIBLE",
+    "signatures do not match",
+    "INSTALL_FAILED_VERSION_DOWNGRADE",
+)
+
+
+def _incompatible_install(output):
+    """True when an install failure is a signature/version conflict.
+
+    Such a conflict means a DIFFERENTLY-signed build occupies the package
+    slot; a replace install cannot proceed and the only way forward is an
+    uninstall, which is deny-by-default (never automatic).
+    """
+    text = output or ""
+    return any(marker in text for marker in _INSTALL_INCOMPATIBLE_MARKERS)
+
+
 def run_baseline_runtime(output, original_apk, capabilities,
                          manifest_decoder=None, instrumented_profile=None,
                          env=None):
     """Baseline (original APK) startup assessment on the explicit test device.
 
-    Fully gated: destructive steps route through safety_gate (authorization
-    document required; blanket env flags are violations), and the round
-    requires REELSEC_TEST_PACKAGE plus a test keystore so a COPY of the
-    original can be signed with the same key as the instrumented artifact.
-    original.apk itself is never modified.
+    NON-DESTRUCTIVE BY DESIGN: the round installs the test-signed original
+    with 'adb install -r' (replace). The instrumented artifact and this
+    baseline copy share the same isolated test keystore, so the replace
+    needs no uninstall and no clear-data. Uninstall happens ONLY in the
+    explicit fallback when a DIFFERENTLY-signed build occupies the package
+    slot (replace install fails with a signature conflict), and only
+    through safety_gate with a hash-bound authorization document
+    (REELSEC_DESTRUCTIVE_AUTH); a blanket env flag is a violation, never
+    authorization (2026-10-07 incident). Without an authorization document
+    the round reports BASELINE_BLOCKED_INCOMPATIBLE_INSTALL and touches
+    nothing. original.apk itself is never modified.
 
     `env` is the configuration input (defaults to os.environ). Reason-code
     precedence when preconditions are missing: disabled flag -> APK path ->
@@ -1898,19 +2016,65 @@ def run_baseline_runtime(output, original_apk, capabilities,
             signed_original, manifest_decoder=manifest_decoder)
         audit_path = Path(output) / "SAFETY-AUDIT.jsonl"
         auth_path = env.get("REELSEC_DESTRUCTIVE_AUTH")
-        try:
-            audit = safety_gate.execute_destructive(
-                _default_runner, adb, serial, safety_gate.UNINSTALL,
-                test_package, authorization_path=auth_path,
-                audit_path=audit_path)
-            doc["pre_uninstall"] = {"status": audit["result"],
-                                    "authorization_sha256":
-                                        audit.get("authorization_sha256")}
-        except safety_gate.SafetyBlock as block:
-            doc.update(status="SAFETY_BLOCKED",
-                       reason="pre-baseline uninstall refused: %s" % block)
+        # NON-DESTRUCTIVE install: replace (or fresh) install without any
+        # uninstall. Both the instrumented artifact and this test-signed
+        # original share the same isolated test keystore, so 'adb install -r'
+        # replaces one with the other without touching app data or any other
+        # package. The previous design unconditionally uninstalled first,
+        # which made the baseline impossible to run without a destructive
+        # authorization document.
+        rc, install_out = run(install_command(adb, serial, signed_original),
+                              timeout=300)
+        installed = rc == 0 and "Success" in (install_out or "")
+        install_mode = "NON_DESTRUCTIVE_INSTALL_R"
+        if not installed and _incompatible_install(install_out):
+            # A differently-signed build (e.g. store certificate) occupies
+            # the slot. Uninstall is deny-by-default: proceed ONLY through
+            # the gated fallback with an explicit hash-bound authorization
+            # document — never automatically.
+            if auth_path:
+                try:
+                    audit = safety_gate.execute_destructive(
+                        _default_runner, adb, serial, safety_gate.UNINSTALL,
+                        test_package, authorization_path=auth_path,
+                        audit_path=audit_path)
+                    doc["gated_uninstall"] = {
+                        "status": audit["result"],
+                        "authorization_sha256":
+                            audit.get("authorization_sha256")}
+                except safety_gate.SafetyBlock as block:
+                    doc.update(status="SAFETY_BLOCKED",
+                               reason=("incompatible installed build; gated "
+                                       "uninstall refused: %s" % block))
+                    return doc
+                rc, install_out = run(
+                    install_command(adb, serial, signed_original),
+                    timeout=300)
+                installed = rc == 0 and "Success" in (install_out or "")
+                install_mode = "GATED_UNINSTALL_THEN_INSTALL"
+            else:
+                doc.update(
+                    status="BASELINE_BLOCKED_INCOMPATIBLE_INSTALL",
+                    reason=("the installed build carries an incompatible "
+                            "signature, so the non-destructive replace "
+                            "install cannot proceed; uninstall is "
+                            "deny-by-default and was NOT attempted. To "
+                            "allow the gated uninstall, provide a "
+                            "hash-bound authorization document via "
+                            "REELSEC_DESTRUCTIVE_AUTH (a blanket env flag "
+                            "is a violation, never authorization)."))
+                return doc
+        if not installed:
+            doc.update(status="BASELINE_FAILED",
+                       error="baseline install failed: %s"
+                             % (install_out or "")[:500],
+                       diagnosis=diagnose_install_failure(str(install_out)))
             return doc
-        run_checked(install_command(adb, serial, signed_original))
+        doc["install"] = {
+            "mode": install_mode,
+            "uninstall_attempted": install_mode != "NON_DESTRUCTIVE_INSTALL_R",
+            "output_tail": (install_out or "")[-200:],
+        }
         health = runtime_health.assess_startup(
             run, adb, serial, test_package, label="original", observe_s=8,
             artifact_apk=str(signed_original),
@@ -1920,15 +2084,18 @@ def run_baseline_runtime(output, original_apk, capabilities,
                 json.dumps(health["crash_artifact"], indent=2,
                            sort_keys=True) + "\n", encoding="utf-8")
         doc["crash_comparison"] = _write_crash_comparison(output)
-        try:
-            audit = safety_gate.execute_destructive(
-                _default_runner, adb, serial, safety_gate.UNINSTALL,
-                test_package, authorization_path=auth_path,
-                audit_path=audit_path)
-            doc["post_uninstall"] = {"status": audit["result"]}
-        except safety_gate.SafetyBlock as block:
-            doc["post_uninstall"] = {"status": "SAFETY_BLOCKED",
-                                     "reason": str(block)}
+        # NO post-round uninstall: the baseline original stays installed and
+        # the deploy stage replaces it non-destructively with the
+        # instrumented artifact via 'adb install -r' (same isolated test
+        # key). Leaving it installed is also the honest end state: nothing
+        # was destroyed to observe the original.
+        doc["post_round"] = {
+            "action": "NONE_NON_DESTRUCTIVE",
+            "note": ("the baseline original is intentionally left installed; "
+                     "the deploy stage replaces it non-destructively via "
+                     "'adb install -r' with the instrumented artifact "
+                     "(same isolated test key)"),
+        }
         doc.update(
             status="BASELINE_ASSESSED", serial=serial, health=health,
             baseline_profile=baseline_profile,
@@ -2181,6 +2348,12 @@ def write_runtime_probe(output, root, target, input_apk=None):
                 # BOTH_CRASH when both sides have crash evidence; the crash
                 # is never attributed to instrumentation by default.
                 result["crash_comparison"] = _write_crash_comparison(output)
+                # Working-control comparison: the installed original was
+                # observed in place earlier in this campaign; refresh the
+                # common-cause document now that the instrumented side
+                # exists. Never upgrades SCREENSHOT_BLOCKING.
+                result["common_cause_comparison"] = \
+                    _write_common_cause_comparison(output)
                 result["health"] = {
                     "startup": health["startup"],
                     "crash_class": health["crash_class"],
@@ -2364,10 +2537,20 @@ def write_runtime_probe(output, root, target, input_apk=None):
             "runtime_probe_allowed")
     comparison = runtime_health.compare_artifacts(baseline_health,
                                                   instrumented_health)
+    working_control_doc = None
+    wc_path = output / "WORKING-CONTROL.json"
+    if wc_path.is_file():
+        try:
+            working_control_doc = json.loads(
+                wc_path.read_text(encoding="utf-8"))
+        except Exception:
+            working_control_doc = None
     verdict = runtime_health.runtime_verdict(
         baseline_health, instrumented_health, comparison=comparison,
         runtime_probe=result, probe_allowed=result.get("runtime_probe_allowed"),
-        crash_comparison=result.get("crash_comparison"))
+        crash_comparison=result.get("crash_comparison"),
+        working_control=working_control_doc,
+        common_cause=result.get("common_cause_comparison"))
     verdict["BASELINE_STATUS"] = baseline_status
     result["verdict"] = verdict
     (output / "RUNTIME-VERDICT.json").write_text(
@@ -3147,19 +3330,39 @@ def main():
     )
 
     # --- Baseline vs instrumented comparison + instrumentation impact ledger.
-    # Runs BEFORE the instrumented artifact is deployed: the baseline round
-    # needs the test package slot free. Fully gated; if any precondition is
-    # missing the document records the specific reason (autonomy rule: the
-    # system states exactly why it could not run, and never guesses).
+    # Runs BEFORE the instrumented artifact is deployed. NON-DESTRUCTIVE:
+    # the baseline round replace-installs the test-signed original via
+    # 'adb install -r' (same isolated test keystore as the instrumented
+    # artifact, so no uninstall is needed), observes the startup, and leaves
+    # it installed; the deploy stage then replaces it with the instrumented
+    # artifact, also via 'adb install -r'. If any precondition is missing
+    # the document records the specific reason (autonomy rule: the system
+    # states exactly why it could not run, and never guesses).
     instrumented_profile = None
     if sign_verify.get("status") == "SIGNED_VERIFIED":
         instrumented_profile = runtime_health.static_artifact_profile(
             sign_verify["signed_path"],
             manifest_decoder=_decode_binary_manifest_package)
-    baseline_runtime = run_baseline_runtime(
-        output, input_apk, capabilities,
-        manifest_decoder=_decode_binary_manifest_package,
-        instrumented_profile=instrumented_profile)
+    # --- Working control round (strictly observational). The CURRENTLY
+    # INSTALLED package is observed in place as the working control:
+    # read-only queries (pm path / dumpsys package / sha256sum) plus one
+    # bounded observed launch. NO uninstall, NO clear-data, NO re-install,
+    # NO bypass. Its fingerprint + startup evidence feed
+    # COMMON-CAUSE-COMPARISON.json against the instrumented side.
+    working_control = run_working_control_round(output, capabilities,
+                                                original_apk=input_apk)
+    baseline_skip = _baseline_skip_reason(working_control)
+    if baseline_skip:
+        baseline_runtime = {
+            "schema_version": runtime_health.SCHEMA,
+            "status": "BASELINE_SKIPPED_WORKING_CONTROL_PRESENT",
+            "reason": baseline_skip,
+        }
+    else:
+        baseline_runtime = run_baseline_runtime(
+            output, input_apk, capabilities,
+            manifest_decoder=_decode_binary_manifest_package,
+            instrumented_profile=instrumented_profile)
     (output / "BASELINE-RUNTIME.json").write_text(
         json.dumps(baseline_runtime, indent=2, sort_keys=True) + "\n",
         encoding="utf-8")

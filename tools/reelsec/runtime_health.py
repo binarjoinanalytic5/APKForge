@@ -72,6 +72,21 @@ INSTRUMENTED_ONLY_CRASH = "INSTRUMENTED_ONLY_CRASH"
 ORIGINAL_ONLY_CRASH = "ORIGINAL_ONLY_CRASH"
 NO_CRASH_EVIDENCE = "NO_CRASH_EVIDENCE"
 
+# Working-control verdicts: the CURRENTLY INSTALLED original is observed
+# in place (read-only + bounded launch) — never uninstalled, cleared, or
+# re-installed — and compared against the instrumented crash evidence.
+WORKING_CONTROL_SCHEMA = "working-control-1"
+COMMON_CAUSE_SCHEMA = "common-cause-comparison-1"
+CONTROL_ASSESSED = "CONTROL_ASSESSED"
+CONTROL_CRASHED = "CONTROL_CRASHED"
+CONTROL_NOT_INSTALLED = "CONTROL_NOT_INSTALLED"
+COMMON_CAUSE_BOTH_CRASH = "COMMON_CAUSE_BOTH_CRASH"
+CONTROL_HEALTHY_INSTRUMENTED_CRASH = "CONTROL_HEALTHY_INSTRUMENTED_CRASH"
+CONTROL_ONLY_CRASH = "CONTROL_ONLY_CRASH"
+CONTROL_HEALTHY_NO_INSTRUMENTED_EVIDENCE = \
+    "CONTROL_HEALTHY_NO_INSTRUMENTED_EVIDENCE"
+COMMON_CAUSE_INCOMPLETE = "COMMON_CAUSE_INCOMPLETE"
+
 CONF_HIGH = "HIGH"
 CONF_MEDIUM = "MEDIUM"
 CONF_LOW = "LOW"
@@ -594,6 +609,274 @@ def build_crash_comparison(instrumented_artifact, original_artifact):
     }
 
 
+def parse_package_identity(dumpsys_text):
+    """Best-effort READ-ONLY identity parse of `dumpsys package` output.
+
+    Extracts version, UID, codePath, ABI, signing certificate and the
+    installed users. Missing fields stay None — nothing is invented.
+    """
+    text = dumpsys_text or ""
+
+    def _one(pattern):
+        m = re.search(pattern, text)
+        return m.group(1) if m else None
+
+    identity = {
+        "version_name": _one(r"versionName=(\S+)"),
+        "version_code": _one(r"versionCode=(\d+)"),
+        "uid": _one(r"userId=(\d+)"),
+        "code_path": _one(r"codePath=(\S+)"),
+        "primary_cpu_abi": _one(r"primaryCpuAbi=([^\s,]+)"),
+    }
+    identity["users_installed"] = sorted(
+        {int(m.group(1))
+         for m in re.finditer(r"User (\d+):[^\n]*installed=true", text)})
+    cert_sha = None
+    cert_raw = None
+    m = re.search(r"signatures=PackageSignatures\{[^}]*\}", text)
+    if m:
+        blob = m.group(0)
+        runs = re.findall(r"[0-9a-fA-F]{64,}", blob)
+        if runs:
+            der = runs[0]
+            der = der[: len(der) // 2 * 2]
+            try:
+                cert_sha = hashlib.sha256(
+                    bytes.fromhex(der)).hexdigest()
+            except ValueError:
+                cert_sha = None
+        cert_raw = blob[:120]
+    identity["signing_certificate_sha256"] = cert_sha
+    identity["signing_certificate_raw_prefix"] = cert_raw
+    return identity
+
+
+def collect_working_control(runner, adb, serial, package, observe_s=8,
+                            local_reference_apk=None):
+    """WORKING-CONTROL-1: observe the CURRENTLY INSTALLED package in place.
+
+    The installed build is the working control: this collector performs
+    READ-ONLY device queries only (pm path, dumpsys package, sha256sum)
+    plus the bounded observational launch already used by the health gate
+    (monkey launch + ps polling + ApplicationExitInfo + crash logcat).
+    NO install, NO uninstall, NO clear-data, NO re-install, NO bypass,
+    NO destructive authorization — the device state is never modified
+    beyond starting the app once under observation.
+
+    `local_reference_apk` (e.g. the untouched original.apk) is used for
+    base.apk+0x… offset resolution ONLY when its SHA-256 equals the
+    on-device APK SHA-256 — hash-bound, never assumed.
+    """
+    doc = {"schema_version": WORKING_CONTROL_SCHEMA,
+           "package": package, "status": CONTROL_NOT_INSTALLED}
+    rc, out = runner([adb, "-s", serial, "shell", "pm", "path", package])
+    installed_path = None
+    for line in (out or "").splitlines():
+        line = line.strip()
+        if line.startswith("package:") and line.endswith(".apk"):
+            installed_path = line[len("package:"):]
+            break
+    if not installed_path:
+        doc["reason"] = ("pm path reports no installed package; nothing was "
+                         "launched and nothing was modified")
+        return doc
+    doc["installed_path"] = installed_path
+    rc, out = runner([adb, "-s", serial, "shell", "dumpsys", "package",
+                      package])
+    doc["identity"] = parse_package_identity(out)
+    rc, out = runner([adb, "-s", serial, "shell", "sha256sum",
+                      installed_path])
+    m = re.match(r"\s*([0-9a-fA-F]{64})\s", out or "")
+    device_sha = m.group(1).lower() if m else None
+    doc["identity"]["apk_sha256"] = device_sha
+    # Hash-bound local reference: offsets are resolved against the local
+    # original ONLY when it is byte-identical to the installed APK.
+    artifact_apk = None
+    if local_reference_apk and Path(local_reference_apk).is_file():
+        local_sha = hashlib.sha256(
+            Path(local_reference_apk).read_bytes()).hexdigest()
+        matches = bool(device_sha) and local_sha == device_sha
+        doc["identity"]["local_reference"] = {
+            "path": str(local_reference_apk), "sha256": local_sha,
+            "matches_installed": matches}
+        if matches:
+            artifact_apk = str(local_reference_apk)
+    health = assess_startup(runner, adb, serial, package,
+                            label="working_control", observe_s=observe_s,
+                            artifact_apk=artifact_apk,
+                            artifact_sha256=device_sha)
+    doc["status"] = (CONTROL_CRASHED if health.get("startup") == "CRASH"
+                     else CONTROL_ASSESSED)
+    doc["health"] = health
+    doc["crash_artifact"] = health.get("crash_artifact")
+    doc["process"] = {"pids": health.get("pids"),
+                      "observed": health.get("process_observed"),
+                      "alive_ms": health.get("process_alive_ms")}
+    return doc
+
+
+def _control_side_summary(control_doc):
+    """Independent working-control summary (never merged with the other
+    side)."""
+    if not control_doc or control_doc.get("status") not in (
+            CONTROL_ASSESSED, CONTROL_CRASHED):
+        return None
+    identity = control_doc.get("identity") or {}
+    process = control_doc.get("process") or {}
+    art = control_doc.get("crash_artifact") or {}
+    fl = art.get("fault_location") or {}
+    return {
+        "status": control_doc.get("status"),
+        "package": control_doc.get("package"),
+        "installed_path": control_doc.get("installed_path"),
+        "apk_sha256": identity.get("apk_sha256"),
+        "signing_certificate_sha256":
+            identity.get("signing_certificate_sha256"),
+        "version_name": identity.get("version_name"),
+        "version_code": identity.get("version_code"),
+        "uid": identity.get("uid"),
+        "users_installed": identity.get("users_installed"),
+        "code_path": identity.get("code_path"),
+        "primary_cpu_abi": identity.get("primary_cpu_abi"),
+        "pids": process.get("pids"),
+        "observed_process_lifetime_ms": process.get("alive_ms"),
+        "fatal_signal": art.get("fatal_signal"),
+        "fault_location": ({"library": fl.get("library"),
+                            "pc": fl.get("pc")} if fl else None),
+        "abort_message_present": bool(art.get("abort_message_present")),
+    }
+
+
+def build_common_cause_comparison(control_doc, instrumented_artifact):
+    """COMMON-CAUSE-COMPARISON-1: installed working control vs instrumented.
+
+    The CURRENTLY INSTALLED original (observed in place, untouched) is
+    compared against the instrumented crash artifact. Sides are never
+    merged; each keeps its own package/user/UID/PID/APK-path/SHA/timing
+    bindings. Verdicts:
+    * COMMON_CAUSE_BOTH_CRASH — both crash: MUST NOT be attributed to
+      instrumentation; common cause (device/OS/ROM or the app itself).
+    * CONTROL_HEALTHY_INSTRUMENTED_CRASH — control starts cleanly while
+      the instrumented artifact crashes: instrumentation is a candidate
+      cause, NOT proven.
+    * CONTROL_ONLY_CRASH / CONTROL_HEALTHY_NO_INSTRUMENTED_EVIDENCE /
+      COMMON_CAUSE_INCOMPLETE — explicit, never guessed.
+    This comparison NEVER upgrades SCREENSHOT_BLOCKING: that verdict
+    stays NOT_PROVEN until the full causal chain is evidenced.
+    Returns None when neither side has usable evidence.
+    """
+    ctrl = _control_side_summary(control_doc)
+    ins = _crash_side_summary(instrumented_artifact)
+    if ctrl is None and ins is None:
+        return None
+
+    if ctrl is not None and ins is not None:
+        if ctrl["status"] == CONTROL_CRASHED:
+            status = COMMON_CAUSE_BOTH_CRASH
+            attribution = {
+                "instrumentation_regression": "NOT_ESTABLISHED",
+                "guard": ("the installed original (working control) AND the "
+                          "instrumented artifact crash on this device: the "
+                          "crash MUST NOT be attributed to instrumentation; "
+                          "a common cause (device/OS/ROM or the app itself) "
+                          "must be investigated and only differential "
+                          "evidence may isolate instrumentation"),
+            }
+        else:
+            status = CONTROL_HEALTHY_INSTRUMENTED_CRASH
+            attribution = {
+                "instrumentation_regression": "SUSPECTED_NOT_PROVEN",
+                "guard": ("the working control starts cleanly while the "
+                          "instrumented artifact crashes: instrumentation "
+                          "is a candidate cause, not a proven one, until "
+                          "the differential is confirmed on the same "
+                          "device/session"),
+            }
+    elif ctrl is not None:
+        if ctrl["status"] == CONTROL_CRASHED:
+            status = CONTROL_ONLY_CRASH
+            attribution = {
+                "instrumentation_regression": "NOT_ESTABLISHED",
+                "guard": ("the working control crashed with no instrumented "
+                          "crash evidence on record: this crash is not "
+                          "caused by instrumentation"),
+            }
+        else:
+            status = CONTROL_HEALTHY_NO_INSTRUMENTED_EVIDENCE
+            attribution = {
+                "instrumentation_regression": "NOT_APPLICABLE",
+                "guard": ("the working control is healthy and no "
+                          "instrumented crash evidence exists to compare"),
+            }
+    else:
+        status = COMMON_CAUSE_INCOMPLETE
+        attribution = {
+            "instrumentation_regression": "NOT_ESTABLISHED",
+            "guard": ("instrumented crash evidence exists but no working "
+                      "control was collected: no common-cause claim may be "
+                      "made until the control round runs"),
+        }
+
+    def _fault_str(side):
+        if not side or not side.get("fault_location"):
+            return None
+        return "%s+%s" % (side["fault_location"].get("library"),
+                          side["fault_location"].get("pc"))
+
+    both = ctrl is not None and ins is not None
+    integrity_notes = [
+        "this comparison MUST NOT upgrade SCREENSHOT_BLOCKING; that verdict "
+        "remains NOT_PROVEN until the full causal chain is evidenced"]
+    if not ((ctrl or {}).get("abort_message_present")
+            or (ins or {}).get("abort_message_present")):
+        integrity_notes.append(
+            "no textual abort() message captured on either side; the cause "
+            "MUST NOT be labeled anti-tamper or screenshot protection on "
+            "this evidence")
+
+    return {
+        "schema_version": COMMON_CAUSE_SCHEMA,
+        "status": status,
+        "source_documents": {
+            "working_control": "WORKING-CONTROL.json" if ctrl else None,
+            "instrumented": "CRASH-ARTIFACT.json" if ins else None,
+        },
+        "working_control": ctrl,
+        "instrumented": ins,
+        "questions": {
+            "both_sigabrt": bool(
+                both and ctrl["fatal_signal"] == "SIGABRT"
+                and ins["fatal_signal"] == "SIGABRT"),
+            "fault_location": {
+                "working_control": _fault_str(ctrl),
+                "instrumented": _fault_str(ins),
+                "match": bool(both and _fault_str(ctrl) is not None
+                              and _fault_str(ctrl) == _fault_str(ins)),
+            },
+            "abort_message": {
+                "working_control_captured":
+                    bool((ctrl or {}).get("abort_message_present")),
+                "instrumented_captured":
+                    bool((ins or {}).get("abort_message_present")),
+                "captured_either": bool(
+                    (ctrl or {}).get("abort_message_present")
+                    or (ins or {}).get("abort_message_present")),
+            },
+            "apk_identity": {
+                "working_control_sha256":
+                    (ctrl or {}).get("apk_sha256"),
+                "instrumented_sha256":
+                    (ins or {}).get("artifact_sha256"),
+                "note": ("different artifacts by construction: the control "
+                         "is the installed original APK, the instrumented "
+                         "side is the re-signed test build"),
+            },
+        },
+        "attribution": attribution,
+        "integrity_notes": integrity_notes,
+    }
+
+
 def classify_crash(package, exit_entries, tombstone, process_observed,
                    pids=None, package_present=True, stage="PROCESS_HEALTH_GATE"):
     """Deterministic crash classification from collected evidence.
@@ -1035,7 +1318,8 @@ def compare_artifacts(baseline_health, instrumented_health,
 
 def runtime_verdict(baseline_health, instrumented_health, comparison=None,
                     runtime_probe=None, probe_allowed=None,
-                    crash_comparison=None):
+                    crash_comparison=None, working_control=None,
+                    common_cause=None):
     """Compact autonomous verdict (requirement 12)."""
     comparison = comparison or compare_artifacts(baseline_health, instrumented_health)
     ih = instrumented_health or {}
@@ -1085,6 +1369,8 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
         "CRASH_CAUSE_CONFIDENCE": ih.get("crash_cause_confidence"),
         "REGRESSION_STATUS": comparison["regression_status"],
         "CRASH_COMPARISON": (crash_comparison or {}).get("status"),
+        "WORKING_CONTROL": (working_control or {}).get("status"),
+        "COMMON_CAUSE_COMPARISON": (common_cause or {}).get("status"),
         "RUNTIME_PROOF_STATUS": proof,
         "runtime_probe_allowed": bool(probe_allowed),
         "NEXT_ACTION": next_action,
