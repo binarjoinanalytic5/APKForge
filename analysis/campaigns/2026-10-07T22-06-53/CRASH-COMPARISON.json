@@ -1,0 +1,74 @@
+{
+  "attribution": {
+    "guard": "only the instrumented artifact has crash evidence; instrumentation is a candidate cause, not a proven one, until a clean original round on the same device/session is recorded",
+    "instrumentation_regression": "SUSPECTED_NOT_PROVEN"
+  },
+  "instrumented": {
+    "abort_message_present": false,
+    "apk_offset_resolution": null,
+    "artifact_sha256": null,
+    "artifact_type": "INSTRUMENTED_TEST_ARTIFACT",
+    "fatal_signal": "SIGABRT",
+    "fault_location": {
+      "library": "libc.so",
+      "pc": "00000000000537d4",
+      "symbol": "abort+168"
+    },
+    "installed_path": "/data/app/~~wqm3Wr5ZFOKRhEM93gkhuw==/com.newleaf.app.android.victor-A4BzlRm-c5ir8ApVsbADZA==/base.apk",
+    "instance_count": 0,
+    "label": "instrumented",
+    "local_artifact": null,
+    "observed_process_lifetime_ms": 7418,
+    "package": "com.newleaf.app.android.victor",
+    "startup_stage": "STILL_ALIVE_AT_WINDOW_EXIT_THEN_CRASH_EXIT_INFO",
+    "uids": [],
+    "users": []
+  },
+  "integrity_notes": [
+    "no textual abort() message captured on either side; the cause MUST NOT be labeled anti-tamper or screenshot protection on this evidence"
+  ],
+  "original": null,
+  "questions": {
+    "abort_message": {
+      "captured_either": false,
+      "instrumented_captured": false,
+      "original_captured": false
+    },
+    "apk_offset_resolution": {
+      "instrumented": {
+        "entry": null,
+        "offset_within_entry": null,
+        "status": null
+      },
+      "note": "offsets are resolved independently against each side's own local artifact (different builds bound by artifact_sha256); identical resolution shows the same relative code location but never by itself proves a shared cause",
+      "original": {
+        "entry": null,
+        "offset_within_entry": null,
+        "status": null
+      },
+      "resolved_identically": false
+    },
+    "both_sigabrt": false,
+    "fatal_signals": {
+      "instrumented": "SIGABRT",
+      "match": false,
+      "original": null
+    },
+    "fault_location": {
+      "instrumented": "libc.so+00000000000537d4",
+      "match": false,
+      "original": null
+    },
+    "startup_stage": {
+      "instrumented": "STILL_ALIVE_AT_WINDOW_EXIT_THEN_CRASH_EXIT_INFO",
+      "match": null,
+      "original": null
+    }
+  },
+  "schema_version": "crash-comparison-1",
+  "source_documents": {
+    "instrumented": "CRASH-ARTIFACT.json",
+    "original": null
+  },
+  "status": "INSTRUMENTED_ONLY_CRASH"
+}

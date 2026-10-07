@@ -1,0 +1,465 @@
+{
+  "tool": "ReelSec",
+  "version": "3.0.0",
+  "probes": [
+    "elf",
+    "symbols",
+    "strings",
+    "vtable",
+    "dispatch",
+    "critical-function",
+    "protection-bridge",
+    "vtable-abi",
+    "critical-function-behavior",
+    "native-security-api",
+    "java-screen-security",
+    "auto-publish",
+    "autonomous-dataflow",
+    "runtime-proof-readiness",
+    "runtime-frida-probe",
+    "target-provenance",
+    "runtime-toolchain-preflight",
+    "environment-capability",
+    "campaign-cli"
+  ],
+  "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so",
+  "created_at": "2026-10-08T01:08:00+0300",
+  "mode": "campaign",
+  "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+  "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+  "capabilities": {
+    "schema_version": "1.0",
+    "resolver": "ReelSec Environment Resolver",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00",
+    "tools": {
+      "java": {
+        "name": "java",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "openjdk 21.0.12 2026-07-21",
+        "returncode": 0
+      },
+      "python": {
+        "name": "python",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/python3.14",
+        "version": "Python 3.14.6",
+        "returncode": 0
+      },
+      "adb": {
+        "name": "adb",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/adb",
+        "version": "Android Debug Bridge version 1.0.41",
+        "returncode": 0,
+        "device_query": "USABLE",
+        "devices": [
+          "192.168.8.8:34661      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+        ]
+      },
+      "apktool": {
+        "name": "apktool-standalone",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "2.7.0-dirty",
+        "backend": "java-classpath",
+        "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+        "attempts": [
+          {
+            "backend": "cli",
+            "path": "/data/data/com.termux/files/usr/bin/apktool",
+            "returncode": 1
+          },
+          {
+            "backend": "java-classpath",
+            "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+            "returncode": 0
+          }
+        ]
+      },
+      "frida": {
+        "name": "frida",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/frida",
+        "version": "17.2.14",
+        "returncode": 0
+      },
+      "signing": {
+        "zipalign": {
+          "name": "zipalign",
+          "status": "BROKEN",
+          "path": "/data/data/com.termux/files/usr/bin/zipalign",
+          "version": null,
+          "returncode": 127
+        },
+        "apksigner": {
+          "name": "apksigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/bin/apksigner",
+          "version": "0.9",
+          "returncode": 0
+        },
+        "jarsigner": {
+          "name": "jarsigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+          "version": "jarsigner 21.0.12",
+          "returncode": 0
+        }
+      },
+      "zipalign": {
+        "name": "zipalign",
+        "status": "BROKEN",
+        "path": "/data/data/com.termux/files/usr/bin/zipalign",
+        "version": null,
+        "returncode": 127
+      },
+      "apksigner": {
+        "name": "apksigner",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/apksigner",
+        "version": "0.9",
+        "returncode": 0
+      },
+      "jarsigner": {
+        "name": "jarsigner",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+        "version": "jarsigner 21.0.12",
+        "returncode": 0
+      }
+    },
+    "device": {
+      "online_count": 1,
+      "state": "USABLE",
+      "records": [
+        "192.168.8.8:34661      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+      ]
+    },
+    "policy": {
+      "available_is_not_usable": true,
+      "resolver_does_not_install": true,
+      "original_apk_is_immutable": true
+    }
+  },
+  "apktool_backend": {
+    "name": "apktool-standalone",
+    "backend": "java-classpath",
+    "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+    "version": "2.7.0-dirty",
+    "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+    "status": "SELECTED"
+  },
+  "apktool_decode": {
+    "status": "DECODED_NO_RES",
+    "returncode": 0,
+    "command": [
+      "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "-cp",
+      "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "brut.apktool.Main",
+      "d",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+      "-o",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res",
+      "-r"
+    ],
+    "output_dir": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res",
+    "log": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res/reelsec-apktool-recovery.log",
+    "mode": "APKTOOL_NO_RES",
+    "resources_decoded": false,
+    "instrumentable_smali": true,
+    "buildable_with_apktool": true,
+    "selection_strategy": "NO_RES_FIRST"
+  },
+  "decoded_input_inventory": {
+    "schema_version": "1.1",
+    "status": "READY",
+    "analysis_mode": "DECODED_SMALI_NATIVE",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res",
+    "manifest": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res/AndroidManifest.xml",
+    "smali_roots": [
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res/smali"
+    ],
+    "smali_file_count": 514,
+    "native_library_count": 50,
+    "native_libraries": [
+      "lib/arm64-v8a/libSecShell-x86.so",
+      "lib/arm64-v8a/libSecShell.so",
+      "lib/arm64-v8a/libalinetworkdiagnosis.so",
+      "lib/arm64-v8a/libalivcffmpeg.so",
+      "lib/arm64-v8a/libapplovin-native-crash-reporter.so",
+      "lib/arm64-v8a/libbuffer_pgl.so",
+      "lib/arm64-v8a/libc++_shared.so",
+      "lib/arm64-v8a/libcrashlytics-common.so",
+      "lib/arm64-v8a/libcrashlytics-handler.so",
+      "lib/arm64-v8a/libcrashlytics-trampoline.so",
+      "lib/arm64-v8a/libcrashlytics.so",
+      "lib/arm64-v8a/libdatastore_shared_counter.so",
+      "lib/arm64-v8a/libfile_lock_pgl.so",
+      "lib/arm64-v8a/libmarsxlog.so",
+      "lib/arm64-v8a/libmku_aaab.so",
+      "lib/arm64-v8a/libmmkv.so",
+      "lib/arm64-v8a/libnms.so",
+      "lib/arm64-v8a/libpglarmor.so",
+      "lib/arm64-v8a/libprotect.so",
+      "lib/arm64-v8a/libsaasCorePlayer.so",
+      "lib/arm64-v8a/libsaasDownloader.so",
+      "lib/arm64-v8a/libsls_producer.so",
+      "lib/arm64-v8a/libstupid.so",
+      "lib/arm64-v8a/libtapjoy.so",
+      "lib/arm64-v8a/libtt_ugen_layout.so",
+      "lib/armeabi-v7a/libSecShell-x86.so",
+      "lib/armeabi-v7a/libSecShell.so",
+      "lib/armeabi-v7a/libalinetworkdiagnosis.so",
+      "lib/armeabi-v7a/libalivcffmpeg.so",
+      "lib/armeabi-v7a/libapplovin-native-crash-reporter.so",
+      "lib/armeabi-v7a/libbuffer_pgl.so",
+      "lib/armeabi-v7a/libc++_shared.so",
+      "lib/armeabi-v7a/libcrashlytics-common.so",
+      "lib/armeabi-v7a/libcrashlytics-handler.so",
+      "lib/armeabi-v7a/libcrashlytics-trampoline.so",
+      "lib/armeabi-v7a/libcrashlytics.so",
+      "lib/armeabi-v7a/libdatastore_shared_counter.so",
+      "lib/armeabi-v7a/libfile_lock_pgl.so",
+      "lib/armeabi-v7a/libmarsxlog.so",
+      "lib/armeabi-v7a/libmku_aaab.so",
+      "lib/armeabi-v7a/libmmkv.so",
+      "lib/armeabi-v7a/libnms.so",
+      "lib/armeabi-v7a/libpglarmor.so",
+      "lib/armeabi-v7a/libprotect.so",
+      "lib/armeabi-v7a/libsaasCorePlayer.so",
+      "lib/armeabi-v7a/libsaasDownloader.so",
+      "lib/armeabi-v7a/libsls_producer.so",
+      "lib/armeabi-v7a/libstupid.so",
+      "lib/armeabi-v7a/libtapjoy.so",
+      "lib/armeabi-v7a/libtt_ugen_layout.so"
+    ],
+    "dex_count": 0,
+    "dex_files": [],
+    "decode_mode": "APKTOOL_NO_RES",
+    "resources_decoded": false
+  },
+  "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res",
+  "target_source": "decoded-apk-no-res",
+  "input_provenance": {
+    "schema_version": "1.1",
+    "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+    "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+    "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res",
+    "analysis_root_kind": "repository_or_external_root",
+    "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_relative_path": "lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+    "target_relation": "WITHIN_ANALYSIS_ROOT",
+    "evidence_scope": "static-analysis-input-provenance",
+    "causality_proven": false
+  },
+  "instrumentation_plan": {
+    "status": "READY",
+    "mode": "NON_MUTATING_PLAN",
+    "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+    "class_name": "com/SecShell/SecShell/AW",
+    "loadlibrary_line": 135,
+    "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+    "anchor": "System.loadLibrary(\"SecShell\")",
+    "placement": "immediately_after_loadLibrary_before_normal_application_init",
+    "runtime_proof": false,
+    "discovery": "STRUCTURAL_CONTENT",
+    "candidate_count": 1,
+    "candidates": [
+      {
+        "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+        "class_name": "com/SecShell/SecShell/AW",
+        "loadlibrary_line": 135,
+        "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "is_application": true,
+        "has_attach_base_context": true
+      }
+    ],
+    "discovered_candidates": [
+      {
+        "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+        "relative_path": "smali/com/SecShell/SecShell/AW.smali",
+        "class_name": "com/SecShell/SecShell/AW",
+        "score": 185,
+        "is_application": true,
+        "has_attach_base_context": true,
+        "manifest_application": null,
+        "manifest_match": false,
+        "loadlibrary_line": 135,
+        "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "secshell_reference_in_class": true
+      }
+    ]
+  },
+  "instrumented_copy": {
+    "mutations": [
+      {
+        "anchor": "Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "file": "smali/com/SecShell/SecShell/AW.smali",
+        "log_message": "SecShell loadLibrary reached",
+        "log_tag": "ReelSec-Instrumentation",
+        "matched_registers": [
+          "v0"
+        ],
+        "purpose": "telemetry_only",
+        "registers_added": 2,
+        "type": "LOG_I_PROBE"
+      },
+      {
+        "type": "FRIDA_GADGET_EMBED",
+        "file": "smali/com/SecShell/SecShell/AW.smali",
+        "library": "lib/arm64-v8a/libfrida-gadget.so",
+        "library_sha256": "9a457f19c7fef6568a86b4d3028e7342b0bbc4cecc6449b47f5802c56f65b135",
+        "config": "lib/arm64-v8a/libfrida-gadget.config.so",
+        "abi": "arm64-v8a",
+        "listen": "127.0.0.1:27042",
+        "purpose": "guarded_runtime_observation",
+        "native_library_packaging": "apktool_doNotCompress_so",
+        "original_apk_untouched": true
+      }
+    ],
+    "schema_version": 1,
+    "source_manifest_sha256": "3fe3d6c8811e4d4ece4108b94d9afca2301eb0cf3118d707648e9484a2c7a1f4",
+    "source_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res",
+    "status": "MUTATED",
+    "work_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-apk",
+    "gadget_enabled": true,
+    "gadget_source": "/data/data/com.termux/files/home/apk-lab/reelsec-gadget/frida-gadget-17.2.14-android-arm64.so",
+    "gadget_abi": "arm64-v8a",
+    "gadget_port": 27042,
+    "instrumentation_target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-apk/smali/com/SecShell/SecShell/AW.smali"
+  },
+  "build_verify": {
+    "status": "BUILT",
+    "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-unsigned-aligned.apk",
+    "size": 75944997,
+    "sha256": "7aa563cc8615a594f14ab1e91d667dec839db3777c3a00a259b55b8efd054bd7",
+    "command": [
+      "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "-cp",
+      "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "brut.apktool.Main",
+      "b",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-apk",
+      "-o",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-unsigned.apk"
+    ],
+    "returncode": 0,
+    "output_tail": "I: Using Apktool 2.7.0-dirty\nI: Checking whether sources has changed...\nI: Smaling smali folder into classes.dex...\nI: Checking whether resources has changed...\nI: Copying raw resources...\nI: Copying libs... (/lib)\nI: Copying libs... (/kotlin)\nI: Copying libs... (/META-INF/services)\nI: Building apk file...\nI: Copying unknown files/dir...\nI: Built apk into: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-unsigned.apk\n",
+    "raw_built_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-unsigned.apk",
+    "alignment_command": [
+      "/data/data/com.termux/files/usr/bin/zipalign",
+      "-P",
+      "16",
+      "-f",
+      "-v",
+      "4",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-unsigned.apk",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-unsigned-aligned.apk"
+    ],
+    "alignment_returncode": 0,
+    "alignment_output_tail": "n_rules_english.txt (OK - compressed)\n75342103 org/apache/commons/codec/language/bm/gen_approx_russian.txt (OK - compressed)\n75342895 org/apache/commons/codec/language/bm/sep_exact_portuguese.txt (OK - compressed)\n75343458 org/apache/commons/codec/language/bm/sep_exact_any.txt (OK - compressed)\n75344027 org/apache/commons/codec/language/bm/ash_approx_spanish.txt (OK - compressed)\n75344609 org/apache/commons/codec/language/bm/gen_approx_cyrillic.txt (OK - compressed)\n75345195 org/apache/commons/codec/language/bm/ash_approx_hungarian.txt (OK - compressed)\n75345776 org/apache/commons/codec/language/bm/sep_approx_italian.txt (OK - compressed)\n75346348 org/apache/commons/codec/language/bm/sep_lang.txt (OK - compressed)\n75347400 org/apache/commons/codec/language/bm/gen_approx_greeklatin.txt (OK - compressed)\n75347988 org/apache/commons/codec/language/bm/gen_rules_polish.txt (OK - compressed)\n75349527 org/apache/commons/codec/language/bm/gen_exact_english.txt (OK - compressed)\n75350109 org/apache/commons/codec/language/bm/ash_rules_polish.txt (OK - compressed)\n75351658 org/apache/commons/codec/language/bm/ash_rules_cyrillic.txt (OK - compressed)\n75352727 org/apache/commons/codec/language/bm/gen_exact_cyrillic.txt (OK - compressed)\n75353313 org/apache/commons/codec/language/bm/sep_rules_portuguese.txt (OK - compressed)\n75354507 org/apache/commons/codec/language/bm/ash_approx_common.txt (OK - compressed)\n75356043 org/apache/commons/codec/language/bm/sep_approx_spanish.txt (OK - compressed)\n75356626 org/apache/commons/codec/language/bm/gen_rules_romanian.txt (OK - compressed)\n75357451 org/apache/commons/codec/language/bm/ash_exact_romanian.txt (OK - compressed)\n75358030 org/apache/commons/codec/language/bm/ash_rules_hebrew.txt (OK - compressed)\n75358814 org/apache/commons/codec/language/bm/sep_hebrew_common.txt (OK - compressed)\n75359825 org/apache/commons/codec/language/bm/gen_rules_hebrew.txt (OK - compressed)\n75360612 org/apache/commons/codec/language/bm/gen_rules_czech.txt (OK - compressed)\n75361452 org/apache/commons/codec/language/bm/ash_lang.txt (OK - compressed)\n75363083 org/apache/http/version.properties (OK - compressed)\n75363687 org/apache/http/client/version.properties (OK - compressed)\n75364376 google/protobuf/timestamp.proto (OK - compressed)\n75367275 google/protobuf/field_mask.proto (OK - compressed)\n75370469 google/protobuf/api.proto (OK - compressed)\n75373459 google/protobuf/duration.proto (OK - compressed)\n75375591 google/protobuf/struct.proto (OK - compressed)\n75377337 google/protobuf/wrappers.proto (OK - compressed)\n75378965 google/protobuf/source_context.proto (OK - compressed)\n75380230 google/protobuf/any.proto (OK - compressed)\n75382923 google/protobuf/type.proto (OK - compressed)\n75385373 google/protobuf/empty.proto (OK - compressed)\n75386672 okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75428132 okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75428396 com/applovin/shadow/okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75469876 com/applovin/shadow/okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75470128 com/google/api/client/http/google-http-client.properties (OK)\n75470236 com/google/api/client/googleapis/google.p12 (OK)\n75546785 com/google/api/client/googleapis/google.jks (OK - compressed)\n75590136 com/google/api/client/googleapis/google-api-client.properties (OK)\n75590234 src/google/protobuf/timestamp.proto (OK - compressed)\n75593137 src/google/protobuf/field_mask.proto (OK - compressed)\n75596335 src/google/protobuf/api.proto (OK - compressed)\n75599329 src/google/protobuf/duration.proto (OK - compressed)\n75601465 src/google/protobuf/struct.proto (OK - compressed)\n75603215 src/google/protobuf/wrappers.proto (OK - compressed)\n75604847 src/google/protobuf/source_context.proto (OK - compressed)\n75606116 src/google/protobuf/any.proto (OK - compressed)\n75608813 src/google/protobuf/type.proto (OK - compressed)\n75611267 src/google/protobuf/empty.proto (OK - compressed)\nVerification successful\n",
+    "alignment_verify_command": [
+      "/data/data/com.termux/files/usr/bin/zipalign",
+      "-c",
+      "-P",
+      "16",
+      "-v",
+      "4",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-unsigned-aligned.apk"
+    ],
+    "alignment_page_size_kb": 16,
+    "native_library_packaging": {
+      "status": "NATIVE_LIBRARIES_UNCOMPRESSED",
+      "native_library_count": 52,
+      "compressed_native_libraries": []
+    }
+  },
+  "sign_verify": {
+    "unsigned_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-unsigned-aligned.apk",
+    "unsigned_sha256": "7aa563cc8615a594f14ab1e91d667dec839db3777c3a00a259b55b8efd054bd7",
+    "signed_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-signed.apk",
+    "signed_sha256": "84cbd862234a3f94d7ad93d483963c344f8a7172283c3aa4db23a60081918a91",
+    "original_mutation": false,
+    "status": "SIGNED_VERIFIED",
+    "sign_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "sign",
+      "--ks",
+      "/data/data/com.termux/files/home/apk-lab/reelsec-test/reelsec-test.jks",
+      "--ks-key-alias",
+      "reelsec-test",
+      "--ks-pass",
+      "env:REELSEC_TEST_KEYSTORE_PASSWORD",
+      "--key-pass",
+      "env:REELSEC_TEST_KEY_PASSWORD",
+      "--out",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-signed.apk",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-unsigned-aligned.apk"
+    ],
+    "verify_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "verify",
+      "--verbose",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-signed.apk"
+    ],
+    "sign_output_tail": "",
+    "verify_output_tail": "Verifies\nVerified using v1 scheme (JAR signing): true\nVerified using v2 scheme (APK Signature Scheme v2): true\nVerified using v3 scheme (APK Signature Scheme v3): true\nVerified using v3.1 scheme (APK Signature Scheme v3.1): false\nVerified using v3.2 scheme (APK Signature Scheme v3.2): false\nVerified using v4 scheme (APK Signature Scheme v4): false\nVerified for SourceStamp: false\nNumber of signers: 1\nWARNING: META-INF/services/io.ktor.client.HttpClientEngineContainer not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.CoroutineExceptionHandler not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.internal.MainDispatcherFactory not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\n"
+  },
+  "adb_deploy": {
+    "status": "BLOCKED_OR_FAILED",
+    "error": "no authorization document supplied (REELSEC_DESTRUCTIVE_AUTH)",
+    "install_failure_diagnosis": {
+      "reason_code": "INSTALL_FAILED_UNCLASSIFIED",
+      "hint": "message did not match a known failure class; see raw output",
+      "matches": []
+    }
+  },
+  "runtime_capture": {
+    "status": "NOT_CAPTURED"
+  },
+  "gadget_observation": {
+    "schema_version": 1,
+    "status": "READY",
+    "mode": "OBSERVATION_ONLY",
+    "artifact": {
+      "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/instrumented-signed.apk",
+      "sha256": "84cbd862234a3f94d7ad93d483963c344f8a7172283c3aa4db23a60081918a91"
+    },
+    "package": "com.newleaf.app.android.victor",
+    "module": "libsaasCorePlayer.so",
+    "target_offset": "0x27a510",
+    "requires_gadget": true,
+    "mutates_original_apk": false,
+    "causal_proof": false,
+    "proof_class": "OBSERVED_ONLY"
+  },
+  "evidence_ledger": {
+    "status": "NOT_READY"
+  },
+  "status": "completed",
+  "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+  "critical_pointer": "0x27a510",
+  "jni_semantic_found": true,
+  "vtable_abi": {
+    "address_point": "0x717e60",
+    "slot": "0x717f68",
+    "rtti": "0x71f4d0",
+    "type_name": "N6Cicada17mediaCodecDecoderE",
+    "container_vtable": null,
+    "pointer": "0x27a510",
+    "function_symbol": null
+  },
+  "critical_function_behavior": "NO_SECURITY_OPERATION_OBSERVED",
+  "autonomous_dataflow": {
+    "status": "completed",
+    "proven": 0,
+    "candidates": 473,
+    "cxx_unresolved": 354,
+    "jni_excluded_count": 6,
+    "constructor_calls": 4
+  },
+  "runtime_probe_status": "RUNTIME_ARTIFACT_CRASH"
+}

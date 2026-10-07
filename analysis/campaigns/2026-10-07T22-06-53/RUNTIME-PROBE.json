@@ -1,0 +1,342 @@
+{
+  "common_cause_comparison": {
+    "attribution": {
+      "guard": "the installed original (working control) AND the instrumented artifact crash on this device: the crash MUST NOT be attributed to instrumentation; a common cause (device/OS/ROM or the app itself) must be investigated and only differential evidence may isolate instrumentation",
+      "instrumentation_regression": "NOT_ESTABLISHED"
+    },
+    "instrumented": {
+      "abort_message_present": false,
+      "apk_offset_resolution": null,
+      "artifact_sha256": null,
+      "artifact_type": "INSTRUMENTED_TEST_ARTIFACT",
+      "fatal_signal": "SIGABRT",
+      "fault_location": {
+        "library": "libc.so",
+        "pc": "00000000000537d4",
+        "symbol": "abort+168"
+      },
+      "installed_path": "/data/app/~~wqm3Wr5ZFOKRhEM93gkhuw==/com.newleaf.app.android.victor-A4BzlRm-c5ir8ApVsbADZA==/base.apk",
+      "instance_count": 0,
+      "label": "instrumented",
+      "local_artifact": null,
+      "observed_process_lifetime_ms": 7418,
+      "package": "com.newleaf.app.android.victor",
+      "startup_stage": "STILL_ALIVE_AT_WINDOW_EXIT_THEN_CRASH_EXIT_INFO",
+      "uids": [],
+      "users": []
+    },
+    "integrity_notes": [
+      "this comparison MUST NOT upgrade SCREENSHOT_BLOCKING; that verdict remains NOT_PROVEN until the full causal chain is evidenced",
+      "no textual abort() message captured on either side; the cause MUST NOT be labeled anti-tamper or screenshot protection on this evidence"
+    ],
+    "questions": {
+      "abort_message": {
+        "captured_either": false,
+        "instrumented_captured": false,
+        "working_control_captured": false
+      },
+      "apk_identity": {
+        "instrumented_sha256": null,
+        "note": "different artifacts by construction: the control is the installed original APK, the instrumented side is the re-signed test build",
+        "working_control_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278"
+      },
+      "both_sigabrt": true,
+      "fault_location": {
+        "instrumented": "libc.so+00000000000537d4",
+        "match": true,
+        "working_control": "libc.so+00000000000537d4"
+      }
+    },
+    "schema_version": "common-cause-comparison-1",
+    "source_documents": {
+      "instrumented": "CRASH-ARTIFACT.json",
+      "working_control": "WORKING-CONTROL.json"
+    },
+    "status": "COMMON_CAUSE_BOTH_CRASH",
+    "working_control": {
+      "abort_message_present": false,
+      "apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+      "code_path": "/data/app/~~wqm3Wr5ZFOKRhEM93gkhuw==/com.newleaf.app.android.victor-A4BzlRm-c5ir8ApVsbADZA==",
+      "fatal_signal": "SIGABRT",
+      "fault_location": {
+        "library": "libc.so",
+        "pc": "00000000000537d4"
+      },
+      "installed_path": "/data/app/~~wqm3Wr5ZFOKRhEM93gkhuw==/com.newleaf.app.android.victor-A4BzlRm-c5ir8ApVsbADZA==/base.apk",
+      "observed_process_lifetime_ms": 7051,
+      "package": "com.newleaf.app.android.victor",
+      "pids": [
+        10332
+      ],
+      "primary_cpu_abi": "arm64-v8a",
+      "signing_certificate_sha256": null,
+      "status": "CONTROL_CRASHED",
+      "uid": "10812",
+      "users_installed": [
+        0
+      ],
+      "version_code": "4200",
+      "version_name": "4.2.00"
+    }
+  },
+  "crash_comparison": {
+    "attribution": {
+      "guard": "only the instrumented artifact has crash evidence; instrumentation is a candidate cause, not a proven one, until a clean original round on the same device/session is recorded",
+      "instrumentation_regression": "SUSPECTED_NOT_PROVEN"
+    },
+    "instrumented": {
+      "abort_message_present": false,
+      "apk_offset_resolution": null,
+      "artifact_sha256": null,
+      "artifact_type": "INSTRUMENTED_TEST_ARTIFACT",
+      "fatal_signal": "SIGABRT",
+      "fault_location": {
+        "library": "libc.so",
+        "pc": "00000000000537d4",
+        "symbol": "abort+168"
+      },
+      "installed_path": "/data/app/~~wqm3Wr5ZFOKRhEM93gkhuw==/com.newleaf.app.android.victor-A4BzlRm-c5ir8ApVsbADZA==/base.apk",
+      "instance_count": 0,
+      "label": "instrumented",
+      "local_artifact": null,
+      "observed_process_lifetime_ms": 7418,
+      "package": "com.newleaf.app.android.victor",
+      "startup_stage": "STILL_ALIVE_AT_WINDOW_EXIT_THEN_CRASH_EXIT_INFO",
+      "uids": [],
+      "users": []
+    },
+    "integrity_notes": [
+      "no textual abort() message captured on either side; the cause MUST NOT be labeled anti-tamper or screenshot protection on this evidence"
+    ],
+    "original": null,
+    "questions": {
+      "abort_message": {
+        "captured_either": false,
+        "instrumented_captured": false,
+        "original_captured": false
+      },
+      "apk_offset_resolution": {
+        "instrumented": {
+          "entry": null,
+          "offset_within_entry": null,
+          "status": null
+        },
+        "note": "offsets are resolved independently against each side's own local artifact (different builds bound by artifact_sha256); identical resolution shows the same relative code location but never by itself proves a shared cause",
+        "original": {
+          "entry": null,
+          "offset_within_entry": null,
+          "status": null
+        },
+        "resolved_identically": false
+      },
+      "both_sigabrt": false,
+      "fatal_signals": {
+        "instrumented": "SIGABRT",
+        "match": false,
+        "original": null
+      },
+      "fault_location": {
+        "instrumented": "libc.so+00000000000537d4",
+        "match": false,
+        "original": null
+      },
+      "startup_stage": {
+        "instrumented": "STILL_ALIVE_AT_WINDOW_EXIT_THEN_CRASH_EXIT_INFO",
+        "match": null,
+        "original": null
+      }
+    },
+    "schema_version": "crash-comparison-1",
+    "source_documents": {
+      "instrumented": "CRASH-ARTIFACT.json",
+      "original": null
+    },
+    "status": "INSTRUMENTED_ONLY_CRASH"
+  },
+  "device_resolution": {
+    "inventory_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "devices",
+      "-l"
+    ],
+    "online_devices": [
+      "192.168.8.8:34661"
+    ],
+    "requested_serial": null,
+    "resolution": "AUTO_SINGLE_ONLINE_DEVICE",
+    "serial": "192.168.8.8:34661"
+  },
+  "events": [],
+  "execution_attempted": true,
+  "frida_exit": null,
+  "frida_output": "",
+  "gadget_mode": true,
+  "gadget_port": 27042,
+  "gadget_source": "/data/data/com.termux/files/home/apk-lab/reelsec-gadget/frida-gadget-17.2.14-android-arm64.so",
+  "health": {
+    "crash_cause": "NATIVE_LIBRARY:libc.so",
+    "crash_cause_confidence": "HIGH",
+    "crash_cause_library": "libc.so",
+    "crash_class": "NATIVE_CRASH",
+    "crash_source": "adb:logcat -b crash (tombstone echo)",
+    "exit_reason": null,
+    "exit_status": null,
+    "process_alive_ms": 7418,
+    "process_observed": true,
+    "startup": "CRASH"
+  },
+  "lifecycle": {
+    "crash_detected": true,
+    "crash_signal": "SIGABRT",
+    "frida_exit": null,
+    "module": null,
+    "module_observed": false,
+    "pid": 10332,
+    "probe_attached": false,
+    "process_observed": true,
+    "reason_code": "RUNTIME_ARTIFACT_CRASH",
+    "runtime_matches": 0,
+    "runtime_probe_allowed": false,
+    "target_observed": false,
+    "target_resolution": false,
+    "window_completed": false
+  },
+  "manifest": null,
+  "missing_requirements": [],
+  "module": "libsaasCorePlayer.so",
+  "package": "com.newleaf.app.android.victor",
+  "package_source": "input_apk_tool:aapt2",
+  "package_tool_checks": [
+    {
+      "output_tail": "ICTED_RESIZABILITY' value='-1' \nuses-library-not-required:'androidx.window.extensions'\nuses-library-not-required:'androidx.window.sidecar'\nuses-permission: name='android.permission.ACCESS_NETWORK_STATE'\nuses-permission: name='android.permission.ACCESS_WIFI_STATE'\nfeature-group: label=''\n  uses-feature: name='android.hardware.bluetooth'\n  uses-implied-feature: name='android.hardware.bluetooth' reason='requested android.permission.BLUETOOTH permission, and targetSdkVersion > 4'\n  uses-feature: name='android.hardware.faketouch'\n  uses-implied-feature: name='android.hardware.faketouch' reason='default feature for all apps'\n  uses-feature: name='android.hardware.location'\n  uses-implied-feature: name='android.hardware.location' reason='requested android.permission.ACCESS_COARSE_LOCATION permission, and requested android.permission.ACCESS_FINE_LOCATION permission'\n  uses-feature: name='android.hardware.screen.portrait'\n  uses-implied-feature: name='android.hardware.screen.portrait' reason='one or more activities have specified a portrait orientation'\n  uses-feature: name='android.hardware.wifi'\n  uses-implied-feature: name='android.hardware.wifi' reason='requested android.permission.ACCESS_WIFI_STATE permission'\nmain\nother-activities\nother-receivers\nother-services\nsupports-screens: 'small' 'normal' 'large' 'xlarge'\nsupports-any-density: 'true'\nlocales: '--_--' 'af' 'am' 'ar' 'as' 'az' 'be' 'bg' 'bn' 'bs' 'ca' 'cs' 'da' 'de' 'de-DE' 'el' 'en' 'en-AU' 'en-CA' 'en-GB' 'en-IN' 'en-XC' 'es' 'es-419' 'es-ES' 'es-US' 'et' 'eu' 'fa' 'fi' 'fr' 'fr-CA' 'gl' 'gu' 'hi' 'hr' 'hu' 'hy' 'id' 'in' 'is' 'it' 'iw' 'ja' 'ja-JP' 'ka' 'kk' 'km' 'kn' 'ko' 'ky' 'lo' 'lt' 'lv' 'mk' 'ml' 'mn' 'mr' 'ms' 'my' 'nb' 'ne' 'nl' 'or' 'pa' 'pl' 'pt' 'pt-BR' 'pt-PT' 'ro' 'ru' 'si' 'sk' 'sl' 'sq' 'sr' 'sr-Latn' 'sv' 'sw' 'ta' 'te' 'th' 'tl' 'tr' 'tw' 'uk' 'ur' 'uz' 'vi' 'zh' 'zh-CN' 'zh-HK' 'zh-MO' 'zh-TW' 'zu'\ndensities: '160' '240' '320' '480' '640' '65534' '65535'\nnative-code: 'arm64-v8a' 'armeabi-v7a'\n",
+      "path": "/data/data/com.termux/files/usr/bin/aapt2",
+      "returncode": 0,
+      "tool": "aapt2"
+    }
+  ],
+  "preflight_status": "CLIENTS_READY",
+  "reason": "instrumented artifact failed the process health gate: crash_class=NATIVE_CRASH cause=NATIVE_LIBRARY:libc.so confidence=HIGH source=adb:logcat -b crash (tombstone echo)",
+  "reason_code": "RUNTIME_ARTIFACT_CRASH",
+  "runtime_matches": 0,
+  "runtime_probe_allowed": false,
+  "stages": [
+    {
+      "elapsed_ms": null,
+      "online_devices": [
+        "192.168.8.8:34661"
+      ],
+      "requested_serial": null,
+      "resolution": "AUTO_SINGLE_ONLINE_DEVICE",
+      "serial": "192.168.8.8:34661",
+      "source": "adb devices -l + resolution policy",
+      "stage": "ADB_CONNECTED",
+      "status": "PASS",
+      "timestamp_epoch": 1791410909.9002137
+    },
+    {
+      "elapsed_ms": null,
+      "package": "com.newleaf.app.android.victor",
+      "source": "package_source:input_apk_tool:aapt2",
+      "stage": "PACKAGE_RESOLVED",
+      "status": "PASS",
+      "timestamp_epoch": 1791410909.9002328
+    },
+    {
+      "elapsed_ms": 204,
+      "installed_path": "/data/app/~~wqm3Wr5ZFOKRhEM93gkhuw==/com.newleaf.app.android.victor-A4BzlRm-c5ir8ApVsbADZA==/base.apk",
+      "package": "com.newleaf.app.android.victor",
+      "pm_returncode": 0,
+      "source": "adb:pm path com.newleaf.app.android.victor",
+      "stage": "PACKAGE_PRESENT",
+      "status": "PASS",
+      "timestamp_epoch": 1791410910.1049094,
+      "version_name": "4.2.00"
+    },
+    {
+      "crash_cause": "NATIVE_LIBRARY:libc.so",
+      "crash_cause_confidence": "HIGH",
+      "crash_class": "NATIVE_CRASH",
+      "elapsed_ms": null,
+      "process_alive_ms": 7418,
+      "reason_code": "RUNTIME_ARTIFACT_CRASH",
+      "source": "runtime_health.assess_startup (launch + ps polling + exit-info + crash logcat)",
+      "stage": "PROCESS_HEALTH_GATE",
+      "startup": "CRASH",
+      "status": "FAIL",
+      "timestamp_epoch": 1791410919.9584007
+    },
+    {
+      "elapsed_ms": null,
+      "returncode": 0,
+      "source": "adb:monkey launcher (health gate)",
+      "stage": "APP_LAUNCH_ATTEMPTED",
+      "status": "PASS",
+      "timestamp_epoch": 1791410919.9584107
+    },
+    {
+      "elapsed_ms": null,
+      "package": "com.newleaf.app.android.victor",
+      "pids": [
+        10332
+      ],
+      "source": "derived:PROCESS_HEALTH_GATE",
+      "stage": "PROCESS_OBSERVED",
+      "status": "PASS",
+      "timestamp_epoch": 1791410919.9584155
+    },
+    {
+      "elapsed_ms": null,
+      "source": "skipped: PROCESS_HEALTH_GATE failed",
+      "stage": "PROBE_ATTACHED",
+      "status": "SKIP",
+      "timestamp_epoch": 1791410919.9584248
+    },
+    {
+      "elapsed_ms": null,
+      "source": "skipped: PROCESS_HEALTH_GATE failed",
+      "stage": "MODULE_OBSERVED",
+      "status": "SKIP",
+      "timestamp_epoch": 1791410919.958429
+    },
+    {
+      "elapsed_ms": null,
+      "source": "skipped: PROCESS_HEALTH_GATE failed",
+      "stage": "TARGET_RESOLUTION",
+      "status": "SKIP",
+      "timestamp_epoch": 1791410919.958431
+    },
+    {
+      "elapsed_ms": null,
+      "source": "skipped: PROCESS_HEALTH_GATE failed",
+      "stage": "TARGET_OBSERVED",
+      "status": "SKIP",
+      "timestamp_epoch": 1791410919.9584327
+    }
+  ],
+  "status": "RUNTIME_ARTIFACT_CRASH",
+  "tooling": {
+    "adb": "/data/data/com.termux/files/usr/bin/adb",
+    "adb_source": "preflight.adb",
+    "frida": "/data/data/com.termux/files/usr/bin/frida",
+    "frida_source": "preflight.frida",
+    "pkg": "/data/data/com.termux/files/usr/bin/pkg",
+    "proot_distro": "/data/data/com.termux/files/usr/bin/proot-distro",
+    "python": "/data/data/com.termux/files/usr/bin/python"
+  },
+  "verdict": {
+    "BASELINE_STATUS": "BASELINE_SKIPPED_WORKING_CONTROL_PRESENT",
+    "COMMON_CAUSE_COMPARISON": "COMMON_CAUSE_BOTH_CRASH",
+    "CRASH_CAUSE": "NATIVE_LIBRARY:libc.so",
+    "CRASH_CAUSE_CONFIDENCE": "HIGH",
+    "CRASH_CLASS": "NATIVE_CRASH",
+    "CRASH_COMPARISON": "INSTRUMENTED_ONLY_CRASH",
+    "INSTRUMENTED_RUNTIME": "CRASH",
+    "NEXT_ACTION": "Artifact crash without baseline comparison: run the gated baseline round (REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1) to attribute the failure.",
+    "ORIGINAL_RUNTIME": "NOT_RUN",
+    "REGRESSION_STATUS": "NOT_COMPARABLE",
+    "RUNTIME_PROOF_STATUS": "BLOCKED_BY_ARTIFACT_CRASH",
+    "WORKING_CONTROL": "CONTROL_CRASHED",
+    "runtime_probe_allowed": false,
+    "schema_version": "runtime-health-1"
+  }
+}

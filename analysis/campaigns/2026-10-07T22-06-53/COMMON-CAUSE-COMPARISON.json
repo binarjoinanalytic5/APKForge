@@ -1,0 +1,80 @@
+{
+  "attribution": {
+    "guard": "the installed original (working control) AND the instrumented artifact crash on this device: the crash MUST NOT be attributed to instrumentation; a common cause (device/OS/ROM or the app itself) must be investigated and only differential evidence may isolate instrumentation",
+    "instrumentation_regression": "NOT_ESTABLISHED"
+  },
+  "instrumented": {
+    "abort_message_present": false,
+    "apk_offset_resolution": null,
+    "artifact_sha256": null,
+    "artifact_type": "INSTRUMENTED_TEST_ARTIFACT",
+    "fatal_signal": "SIGABRT",
+    "fault_location": {
+      "library": "libc.so",
+      "pc": "00000000000537d4",
+      "symbol": "abort+168"
+    },
+    "installed_path": "/data/app/~~wqm3Wr5ZFOKRhEM93gkhuw==/com.newleaf.app.android.victor-A4BzlRm-c5ir8ApVsbADZA==/base.apk",
+    "instance_count": 0,
+    "label": "instrumented",
+    "local_artifact": null,
+    "observed_process_lifetime_ms": 7418,
+    "package": "com.newleaf.app.android.victor",
+    "startup_stage": "STILL_ALIVE_AT_WINDOW_EXIT_THEN_CRASH_EXIT_INFO",
+    "uids": [],
+    "users": []
+  },
+  "integrity_notes": [
+    "this comparison MUST NOT upgrade SCREENSHOT_BLOCKING; that verdict remains NOT_PROVEN until the full causal chain is evidenced",
+    "no textual abort() message captured on either side; the cause MUST NOT be labeled anti-tamper or screenshot protection on this evidence"
+  ],
+  "questions": {
+    "abort_message": {
+      "captured_either": false,
+      "instrumented_captured": false,
+      "working_control_captured": false
+    },
+    "apk_identity": {
+      "instrumented_sha256": null,
+      "note": "different artifacts by construction: the control is the installed original APK, the instrumented side is the re-signed test build",
+      "working_control_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278"
+    },
+    "both_sigabrt": true,
+    "fault_location": {
+      "instrumented": "libc.so+00000000000537d4",
+      "match": true,
+      "working_control": "libc.so+00000000000537d4"
+    }
+  },
+  "schema_version": "common-cause-comparison-1",
+  "source_documents": {
+    "instrumented": "CRASH-ARTIFACT.json",
+    "working_control": "WORKING-CONTROL.json"
+  },
+  "status": "COMMON_CAUSE_BOTH_CRASH",
+  "working_control": {
+    "abort_message_present": false,
+    "apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+    "code_path": "/data/app/~~wqm3Wr5ZFOKRhEM93gkhuw==/com.newleaf.app.android.victor-A4BzlRm-c5ir8ApVsbADZA==",
+    "fatal_signal": "SIGABRT",
+    "fault_location": {
+      "library": "libc.so",
+      "pc": "00000000000537d4"
+    },
+    "installed_path": "/data/app/~~wqm3Wr5ZFOKRhEM93gkhuw==/com.newleaf.app.android.victor-A4BzlRm-c5ir8ApVsbADZA==/base.apk",
+    "observed_process_lifetime_ms": 7051,
+    "package": "com.newleaf.app.android.victor",
+    "pids": [
+      10332
+    ],
+    "primary_cpu_abi": "arm64-v8a",
+    "signing_certificate_sha256": null,
+    "status": "CONTROL_CRASHED",
+    "uid": "10812",
+    "users_installed": [
+      0
+    ],
+    "version_code": "4200",
+    "version_name": "4.2.00"
+  }
+}

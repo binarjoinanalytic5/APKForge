@@ -1,0 +1,38 @@
+{
+  "anchor": "System.loadLibrary(\"SecShell\")",
+  "candidate_count": 1,
+  "candidates": [
+    {
+      "class_name": "com/SecShell/SecShell/AW",
+      "has_attach_base_context": true,
+      "is_application": true,
+      "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+      "loadlibrary_line": 135,
+      "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali"
+    }
+  ],
+  "class_name": "com/SecShell/SecShell/AW",
+  "discovered_candidates": [
+    {
+      "class_name": "com/SecShell/SecShell/AW",
+      "has_attach_base_context": true,
+      "is_application": true,
+      "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+      "loadlibrary_line": 135,
+      "manifest_application": null,
+      "manifest_match": false,
+      "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+      "relative_path": "smali/com/SecShell/SecShell/AW.smali",
+      "score": 185,
+      "secshell_reference_in_class": true
+    }
+  ],
+  "discovery": "STRUCTURAL_CONTENT",
+  "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+  "loadlibrary_line": 135,
+  "mode": "NON_MUTATING_PLAN",
+  "placement": "immediately_after_loadLibrary_before_normal_application_init",
+  "runtime_proof": false,
+  "status": "READY",
+  "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T22-06-53/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali"
+}
