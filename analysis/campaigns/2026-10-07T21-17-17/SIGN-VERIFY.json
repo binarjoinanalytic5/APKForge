@@ -1,0 +1,31 @@
+{
+  "original_mutation": false,
+  "sign_command": [
+    "/data/data/com.termux/files/usr/bin/apksigner",
+    "sign",
+    "--ks",
+    "/data/data/com.termux/files/home/apk-lab/reelsec-test/reelsec-test.jks",
+    "--ks-key-alias",
+    "reelsec-test",
+    "--ks-pass",
+    "env:REELSEC_TEST_KEYSTORE_PASSWORD",
+    "--key-pass",
+    "env:REELSEC_TEST_KEY_PASSWORD",
+    "--out",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-unsigned-aligned.apk"
+  ],
+  "sign_output_tail": "",
+  "signed_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk",
+  "signed_sha256": "9ee4dc7a96db102de4fb2ff0b304f9fdf489958ebcc26ba4dfdc181a81f58a02",
+  "status": "SIGNED_VERIFIED",
+  "unsigned_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-unsigned-aligned.apk",
+  "unsigned_sha256": "5fb1625043958539f515af53c9a35a3b3220da9f5f02036fdf15ee1a58f01403",
+  "verify_command": [
+    "/data/data/com.termux/files/usr/bin/apksigner",
+    "verify",
+    "--verbose",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk"
+  ],
+  "verify_output_tail": "Verifies\nVerified using v1 scheme (JAR signing): true\nVerified using v2 scheme (APK Signature Scheme v2): true\nVerified using v3 scheme (APK Signature Scheme v3): true\nVerified using v3.1 scheme (APK Signature Scheme v3.1): false\nVerified using v3.2 scheme (APK Signature Scheme v3.2): false\nVerified using v4 scheme (APK Signature Scheme v4): false\nVerified for SourceStamp: false\nNumber of signers: 1\nWARNING: META-INF/services/io.ktor.client.HttpClientEngineContainer not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.CoroutineExceptionHandler not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.internal.MainDispatcherFactory not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\n"
+}

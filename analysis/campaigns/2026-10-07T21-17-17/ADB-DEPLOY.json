@@ -1,0 +1,83 @@
+{
+  "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk",
+  "artifact_kind": "INSTRUMENTED_TEST_ARTIFACT",
+  "artifact_preflight": {
+    "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk",
+    "checks": {
+      "abi_compatibility": {
+        "apk_abis": [
+          "arm64-v8a",
+          "armeabi-v7a"
+        ],
+        "compatible": true,
+        "device_abilist": "arm64-v8a,armeabi-v7a,armeabi",
+        "status": "PASS"
+      },
+      "abi_directories": {
+        "abis": [
+          "arm64-v8a",
+          "armeabi-v7a"
+        ],
+        "status": "PASS"
+      },
+      "native_libs_uncompressed": {
+        "compressed_entries": [],
+        "so_count": 52,
+        "status": "PASS"
+      },
+      "zipalign_page_alignment": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/zipalign",
+          "-c",
+          "-P",
+          "16",
+          "-v",
+          "4",
+          "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk"
+        ],
+        "output_tail": "google/protobuf/any.proto (OK - compressed)\n75383119 google/protobuf/type.proto (OK - compressed)\n75385569 google/protobuf/empty.proto (OK - compressed)\n75386876 okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75428336 okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75428604 com/applovin/shadow/okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75470084 com/applovin/shadow/okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75470344 com/google/api/client/http/google-http-client.properties (OK)\n75470456 com/google/api/client/googleapis/google.p12 (OK)\n75547005 com/google/api/client/googleapis/google.jks (OK - compressed)\n75590364 com/google/api/client/googleapis/google-api-client.properties (OK)\n75590462 src/google/protobuf/timestamp.proto (OK - compressed)\n75593365 src/google/protobuf/field_mask.proto (OK - compressed)\n75596563 src/google/protobuf/api.proto (OK - compressed)\n75599557 src/google/protobuf/duration.proto (OK - compressed)\n75601693 src/google/protobuf/struct.proto (OK - compressed)\n75603443 src/google/protobuf/wrappers.proto (OK - compressed)\n75605075 src/google/protobuf/source_context.proto (OK - compressed)\n75606344 src/google/protobuf/any.proto (OK - compressed)\n75609041 src/google/protobuf/type.proto (OK - compressed)\n75611495 src/google/protobuf/empty.proto (OK - compressed)\n75612767 META-INF/REELSEC-.SF (OK - compressed)\n75771977 META-INF/REELSEC-.RSA (OK - compressed)\n75773117 META-INF/MANIFEST.MF (OK - compressed)\nVerification successful\n",
+        "returncode": 0,
+        "status": "PASS"
+      }
+    },
+    "status": "PASS"
+  },
+  "artifact_sha256": "9ee4dc7a96db102de4fb2ff0b304f9fdf489958ebcc26ba4dfdc181a81f58a02",
+  "device_check_command": [
+    "/data/data/com.termux/files/usr/bin/adb",
+    "-s",
+    "192.168.8.8:34661",
+    "get-state"
+  ],
+  "device_inventory_command": [
+    "/data/data/com.termux/files/usr/bin/adb",
+    "devices",
+    "-l"
+  ],
+  "device_resolution": "AUTO_SINGLE_ONLINE_DEVICE",
+  "install_command": [
+    "/data/data/com.termux/files/usr/bin/adb",
+    "-s",
+    "192.168.8.8:34661",
+    "install",
+    "-r",
+    "--no-incremental",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk"
+  ],
+  "install_mode": "UPDATE",
+  "install_output_tail": "Performing Streamed Install\nSuccess\n",
+  "installed_verification": {
+    "installed_path": "/data/app/~~lePFL99rqCTQrEAYOuc0IQ==/com.newleaf.app.android.victor-x675TNl43GYVOupcr_0NTA==/base.apk",
+    "present": true,
+    "status": "VERIFIED_INSTALLED",
+    "version_code": "4200"
+  },
+  "online_devices": [
+    "192.168.8.8:34661"
+  ],
+  "requested_serial": null,
+  "serial": "192.168.8.8:34661",
+  "status": "INSTALLED",
+  "uninstall_command": null,
+  "uninstall_output_tail": ""
+}

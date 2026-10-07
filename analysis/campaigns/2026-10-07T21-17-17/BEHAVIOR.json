@@ -1,0 +1,10 @@
+{
+  "collected_at_epoch": 1791407956.05562,
+  "collector": "BEHAVIOR",
+  "data": {},
+  "errors": [
+    "BEHAVIOR-CAPTURE.json absent (L4 capture not attempted)"
+  ],
+  "schema_version": "collector-1",
+  "status": "SKIPPED"
+}

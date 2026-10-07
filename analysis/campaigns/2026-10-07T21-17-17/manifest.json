@@ -1,0 +1,602 @@
+{
+  "tool": "ReelSec",
+  "version": "3.0.0",
+  "probes": [
+    "elf",
+    "symbols",
+    "strings",
+    "vtable",
+    "dispatch",
+    "critical-function",
+    "protection-bridge",
+    "vtable-abi",
+    "critical-function-behavior",
+    "native-security-api",
+    "java-screen-security",
+    "auto-publish",
+    "autonomous-dataflow",
+    "runtime-proof-readiness",
+    "runtime-frida-probe",
+    "target-provenance",
+    "runtime-toolchain-preflight",
+    "environment-capability",
+    "campaign-cli"
+  ],
+  "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so",
+  "created_at": "2026-10-08T00:18:34+0300",
+  "mode": "campaign",
+  "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+  "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+  "capabilities": {
+    "schema_version": "1.0",
+    "resolver": "ReelSec Environment Resolver",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00",
+    "tools": {
+      "java": {
+        "name": "java",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "openjdk 21.0.12 2026-07-21",
+        "returncode": 0
+      },
+      "python": {
+        "name": "python",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/python3.14",
+        "version": "Python 3.14.6",
+        "returncode": 0
+      },
+      "adb": {
+        "name": "adb",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/adb",
+        "version": "Android Debug Bridge version 1.0.41",
+        "returncode": 0,
+        "device_query": "USABLE",
+        "devices": [
+          "192.168.8.8:34661      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+        ]
+      },
+      "apktool": {
+        "name": "apktool-standalone",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "2.7.0-dirty",
+        "backend": "java-classpath",
+        "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+        "attempts": [
+          {
+            "backend": "cli",
+            "path": "/data/data/com.termux/files/usr/bin/apktool",
+            "returncode": 1
+          },
+          {
+            "backend": "java-classpath",
+            "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+            "returncode": 0
+          }
+        ]
+      },
+      "frida": {
+        "name": "frida",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/frida",
+        "version": "17.2.14",
+        "returncode": 0
+      },
+      "signing": {
+        "zipalign": {
+          "name": "zipalign",
+          "status": "BROKEN",
+          "path": "/data/data/com.termux/files/usr/bin/zipalign",
+          "version": null,
+          "returncode": 127
+        },
+        "apksigner": {
+          "name": "apksigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/bin/apksigner",
+          "version": "0.9",
+          "returncode": 0
+        },
+        "jarsigner": {
+          "name": "jarsigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+          "version": "jarsigner 21.0.12",
+          "returncode": 0
+        }
+      },
+      "zipalign": {
+        "name": "zipalign",
+        "status": "BROKEN",
+        "path": "/data/data/com.termux/files/usr/bin/zipalign",
+        "version": null,
+        "returncode": 127
+      },
+      "apksigner": {
+        "name": "apksigner",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/apksigner",
+        "version": "0.9",
+        "returncode": 0
+      },
+      "jarsigner": {
+        "name": "jarsigner",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+        "version": "jarsigner 21.0.12",
+        "returncode": 0
+      }
+    },
+    "device": {
+      "online_count": 1,
+      "state": "USABLE",
+      "records": [
+        "192.168.8.8:34661      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+      ]
+    },
+    "policy": {
+      "available_is_not_usable": true,
+      "resolver_does_not_install": true,
+      "original_apk_is_immutable": true
+    }
+  },
+  "apktool_backend": {
+    "name": "apktool-standalone",
+    "backend": "java-classpath",
+    "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+    "version": "2.7.0-dirty",
+    "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+    "status": "SELECTED"
+  },
+  "apktool_decode": {
+    "status": "DECODED_NO_RES",
+    "returncode": 0,
+    "command": [
+      "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "-cp",
+      "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "brut.apktool.Main",
+      "d",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+      "-o",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/decoded-apk-no-res",
+      "-r"
+    ],
+    "output_dir": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/decoded-apk-no-res",
+    "log": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/decoded-apk-no-res/reelsec-apktool-recovery.log",
+    "mode": "APKTOOL_NO_RES",
+    "resources_decoded": false,
+    "instrumentable_smali": true,
+    "buildable_with_apktool": true,
+    "selection_strategy": "NO_RES_FIRST"
+  },
+  "decoded_input_inventory": {
+    "schema_version": "1.1",
+    "status": "READY",
+    "analysis_mode": "DECODED_SMALI_NATIVE",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/decoded-apk-no-res",
+    "manifest": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/decoded-apk-no-res/AndroidManifest.xml",
+    "smali_roots": [
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/decoded-apk-no-res/smali"
+    ],
+    "smali_file_count": 514,
+    "native_library_count": 50,
+    "native_libraries": [
+      "lib/arm64-v8a/libSecShell-x86.so",
+      "lib/arm64-v8a/libSecShell.so",
+      "lib/arm64-v8a/libalinetworkdiagnosis.so",
+      "lib/arm64-v8a/libalivcffmpeg.so",
+      "lib/arm64-v8a/libapplovin-native-crash-reporter.so",
+      "lib/arm64-v8a/libbuffer_pgl.so",
+      "lib/arm64-v8a/libc++_shared.so",
+      "lib/arm64-v8a/libcrashlytics-common.so",
+      "lib/arm64-v8a/libcrashlytics-handler.so",
+      "lib/arm64-v8a/libcrashlytics-trampoline.so",
+      "lib/arm64-v8a/libcrashlytics.so",
+      "lib/arm64-v8a/libdatastore_shared_counter.so",
+      "lib/arm64-v8a/libfile_lock_pgl.so",
+      "lib/arm64-v8a/libmarsxlog.so",
+      "lib/arm64-v8a/libmku_aaab.so",
+      "lib/arm64-v8a/libmmkv.so",
+      "lib/arm64-v8a/libnms.so",
+      "lib/arm64-v8a/libpglarmor.so",
+      "lib/arm64-v8a/libprotect.so",
+      "lib/arm64-v8a/libsaasCorePlayer.so",
+      "lib/arm64-v8a/libsaasDownloader.so",
+      "lib/arm64-v8a/libsls_producer.so",
+      "lib/arm64-v8a/libstupid.so",
+      "lib/arm64-v8a/libtapjoy.so",
+      "lib/arm64-v8a/libtt_ugen_layout.so",
+      "lib/armeabi-v7a/libSecShell-x86.so",
+      "lib/armeabi-v7a/libSecShell.so",
+      "lib/armeabi-v7a/libalinetworkdiagnosis.so",
+      "lib/armeabi-v7a/libalivcffmpeg.so",
+      "lib/armeabi-v7a/libapplovin-native-crash-reporter.so",
+      "lib/armeabi-v7a/libbuffer_pgl.so",
+      "lib/armeabi-v7a/libc++_shared.so",
+      "lib/armeabi-v7a/libcrashlytics-common.so",
+      "lib/armeabi-v7a/libcrashlytics-handler.so",
+      "lib/armeabi-v7a/libcrashlytics-trampoline.so",
+      "lib/armeabi-v7a/libcrashlytics.so",
+      "lib/armeabi-v7a/libdatastore_shared_counter.so",
+      "lib/armeabi-v7a/libfile_lock_pgl.so",
+      "lib/armeabi-v7a/libmarsxlog.so",
+      "lib/armeabi-v7a/libmku_aaab.so",
+      "lib/armeabi-v7a/libmmkv.so",
+      "lib/armeabi-v7a/libnms.so",
+      "lib/armeabi-v7a/libpglarmor.so",
+      "lib/armeabi-v7a/libprotect.so",
+      "lib/armeabi-v7a/libsaasCorePlayer.so",
+      "lib/armeabi-v7a/libsaasDownloader.so",
+      "lib/armeabi-v7a/libsls_producer.so",
+      "lib/armeabi-v7a/libstupid.so",
+      "lib/armeabi-v7a/libtapjoy.so",
+      "lib/armeabi-v7a/libtt_ugen_layout.so"
+    ],
+    "dex_count": 0,
+    "dex_files": [],
+    "decode_mode": "APKTOOL_NO_RES",
+    "resources_decoded": false
+  },
+  "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/decoded-apk-no-res",
+  "target_source": "decoded-apk-no-res",
+  "input_provenance": {
+    "schema_version": "1.1",
+    "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+    "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+    "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/decoded-apk-no-res",
+    "analysis_root_kind": "repository_or_external_root",
+    "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_relative_path": "lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+    "target_relation": "WITHIN_ANALYSIS_ROOT",
+    "evidence_scope": "static-analysis-input-provenance",
+    "causality_proven": false
+  },
+  "instrumentation_plan": {
+    "status": "READY",
+    "mode": "NON_MUTATING_PLAN",
+    "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+    "class_name": "com/SecShell/SecShell/AW",
+    "loadlibrary_line": 135,
+    "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+    "anchor": "System.loadLibrary(\"SecShell\")",
+    "placement": "immediately_after_loadLibrary_before_normal_application_init",
+    "runtime_proof": false,
+    "discovery": "STRUCTURAL_CONTENT",
+    "candidate_count": 1,
+    "candidates": [
+      {
+        "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+        "class_name": "com/SecShell/SecShell/AW",
+        "loadlibrary_line": 135,
+        "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "is_application": true,
+        "has_attach_base_context": true
+      }
+    ],
+    "discovered_candidates": [
+      {
+        "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+        "relative_path": "smali/com/SecShell/SecShell/AW.smali",
+        "class_name": "com/SecShell/SecShell/AW",
+        "score": 185,
+        "is_application": true,
+        "has_attach_base_context": true,
+        "manifest_application": null,
+        "manifest_match": false,
+        "loadlibrary_line": 135,
+        "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "secshell_reference_in_class": true
+      }
+    ]
+  },
+  "instrumented_copy": {
+    "mutations": [
+      {
+        "anchor": "Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "file": "smali/com/SecShell/SecShell/AW.smali",
+        "log_message": "SecShell loadLibrary reached",
+        "log_tag": "ReelSec-Instrumentation",
+        "matched_registers": [
+          "v0"
+        ],
+        "purpose": "telemetry_only",
+        "registers_added": 2,
+        "type": "LOG_I_PROBE"
+      },
+      {
+        "type": "FRIDA_GADGET_EMBED",
+        "file": "smali/com/SecShell/SecShell/AW.smali",
+        "library": "lib/arm64-v8a/libfrida-gadget.so",
+        "library_sha256": "9a457f19c7fef6568a86b4d3028e7342b0bbc4cecc6449b47f5802c56f65b135",
+        "config": "lib/arm64-v8a/libfrida-gadget.config.so",
+        "abi": "arm64-v8a",
+        "listen": "127.0.0.1:27042",
+        "purpose": "guarded_runtime_observation",
+        "native_library_packaging": "apktool_doNotCompress_so",
+        "original_apk_untouched": true
+      }
+    ],
+    "schema_version": 1,
+    "source_manifest_sha256": "3fe3d6c8811e4d4ece4108b94d9afca2301eb0cf3118d707648e9484a2c7a1f4",
+    "source_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/decoded-apk-no-res",
+    "status": "MUTATED",
+    "work_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-apk",
+    "gadget_enabled": true,
+    "gadget_source": "/data/data/com.termux/files/home/apk-lab/reelsec-gadget/frida-gadget-17.2.14-android-arm64.so",
+    "gadget_abi": "arm64-v8a",
+    "gadget_port": 27042,
+    "instrumentation_target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-apk/smali/com/SecShell/SecShell/AW.smali"
+  },
+  "build_verify": {
+    "status": "BUILT",
+    "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-unsigned-aligned.apk",
+    "size": 75944997,
+    "sha256": "5fb1625043958539f515af53c9a35a3b3220da9f5f02036fdf15ee1a58f01403",
+    "command": [
+      "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "-cp",
+      "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "brut.apktool.Main",
+      "b",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-apk",
+      "-o",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-unsigned.apk"
+    ],
+    "returncode": 0,
+    "output_tail": "I: Using Apktool 2.7.0-dirty\nI: Checking whether sources has changed...\nI: Smaling smali folder into classes.dex...\nI: Checking whether resources has changed...\nI: Copying raw resources...\nI: Copying libs... (/lib)\nI: Copying libs... (/kotlin)\nI: Copying libs... (/META-INF/services)\nI: Building apk file...\nI: Copying unknown files/dir...\nI: Built apk into: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-unsigned.apk\n",
+    "raw_built_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-unsigned.apk",
+    "alignment_command": [
+      "/data/data/com.termux/files/usr/bin/zipalign",
+      "-P",
+      "16",
+      "-f",
+      "-v",
+      "4",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-unsigned.apk",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-unsigned-aligned.apk"
+    ],
+    "alignment_returncode": 0,
+    "alignment_output_tail": "n_rules_english.txt (OK - compressed)\n75342103 org/apache/commons/codec/language/bm/gen_approx_russian.txt (OK - compressed)\n75342895 org/apache/commons/codec/language/bm/sep_exact_portuguese.txt (OK - compressed)\n75343458 org/apache/commons/codec/language/bm/sep_exact_any.txt (OK - compressed)\n75344027 org/apache/commons/codec/language/bm/ash_approx_spanish.txt (OK - compressed)\n75344609 org/apache/commons/codec/language/bm/gen_approx_cyrillic.txt (OK - compressed)\n75345195 org/apache/commons/codec/language/bm/ash_approx_hungarian.txt (OK - compressed)\n75345776 org/apache/commons/codec/language/bm/sep_approx_italian.txt (OK - compressed)\n75346348 org/apache/commons/codec/language/bm/sep_lang.txt (OK - compressed)\n75347400 org/apache/commons/codec/language/bm/gen_approx_greeklatin.txt (OK - compressed)\n75347988 org/apache/commons/codec/language/bm/gen_rules_polish.txt (OK - compressed)\n75349527 org/apache/commons/codec/language/bm/gen_exact_english.txt (OK - compressed)\n75350109 org/apache/commons/codec/language/bm/ash_rules_polish.txt (OK - compressed)\n75351658 org/apache/commons/codec/language/bm/ash_rules_cyrillic.txt (OK - compressed)\n75352727 org/apache/commons/codec/language/bm/gen_exact_cyrillic.txt (OK - compressed)\n75353313 org/apache/commons/codec/language/bm/sep_rules_portuguese.txt (OK - compressed)\n75354507 org/apache/commons/codec/language/bm/ash_approx_common.txt (OK - compressed)\n75356043 org/apache/commons/codec/language/bm/sep_approx_spanish.txt (OK - compressed)\n75356626 org/apache/commons/codec/language/bm/gen_rules_romanian.txt (OK - compressed)\n75357451 org/apache/commons/codec/language/bm/ash_exact_romanian.txt (OK - compressed)\n75358030 org/apache/commons/codec/language/bm/ash_rules_hebrew.txt (OK - compressed)\n75358814 org/apache/commons/codec/language/bm/sep_hebrew_common.txt (OK - compressed)\n75359825 org/apache/commons/codec/language/bm/gen_rules_hebrew.txt (OK - compressed)\n75360612 org/apache/commons/codec/language/bm/gen_rules_czech.txt (OK - compressed)\n75361452 org/apache/commons/codec/language/bm/ash_lang.txt (OK - compressed)\n75363083 org/apache/http/version.properties (OK - compressed)\n75363687 org/apache/http/client/version.properties (OK - compressed)\n75364376 google/protobuf/timestamp.proto (OK - compressed)\n75367275 google/protobuf/field_mask.proto (OK - compressed)\n75370469 google/protobuf/api.proto (OK - compressed)\n75373459 google/protobuf/duration.proto (OK - compressed)\n75375591 google/protobuf/struct.proto (OK - compressed)\n75377337 google/protobuf/wrappers.proto (OK - compressed)\n75378965 google/protobuf/source_context.proto (OK - compressed)\n75380230 google/protobuf/any.proto (OK - compressed)\n75382923 google/protobuf/type.proto (OK - compressed)\n75385373 google/protobuf/empty.proto (OK - compressed)\n75386672 okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75428132 okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75428396 com/applovin/shadow/okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75469876 com/applovin/shadow/okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75470128 com/google/api/client/http/google-http-client.properties (OK)\n75470236 com/google/api/client/googleapis/google.p12 (OK)\n75546785 com/google/api/client/googleapis/google.jks (OK - compressed)\n75590136 com/google/api/client/googleapis/google-api-client.properties (OK)\n75590234 src/google/protobuf/timestamp.proto (OK - compressed)\n75593137 src/google/protobuf/field_mask.proto (OK - compressed)\n75596335 src/google/protobuf/api.proto (OK - compressed)\n75599329 src/google/protobuf/duration.proto (OK - compressed)\n75601465 src/google/protobuf/struct.proto (OK - compressed)\n75603215 src/google/protobuf/wrappers.proto (OK - compressed)\n75604847 src/google/protobuf/source_context.proto (OK - compressed)\n75606116 src/google/protobuf/any.proto (OK - compressed)\n75608813 src/google/protobuf/type.proto (OK - compressed)\n75611267 src/google/protobuf/empty.proto (OK - compressed)\nVerification successful\n",
+    "alignment_verify_command": [
+      "/data/data/com.termux/files/usr/bin/zipalign",
+      "-c",
+      "-P",
+      "16",
+      "-v",
+      "4",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-unsigned-aligned.apk"
+    ],
+    "alignment_page_size_kb": 16,
+    "native_library_packaging": {
+      "status": "NATIVE_LIBRARIES_UNCOMPRESSED",
+      "native_library_count": 52,
+      "compressed_native_libraries": []
+    }
+  },
+  "sign_verify": {
+    "unsigned_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-unsigned-aligned.apk",
+    "unsigned_sha256": "5fb1625043958539f515af53c9a35a3b3220da9f5f02036fdf15ee1a58f01403",
+    "signed_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk",
+    "signed_sha256": "9ee4dc7a96db102de4fb2ff0b304f9fdf489958ebcc26ba4dfdc181a81f58a02",
+    "original_mutation": false,
+    "status": "SIGNED_VERIFIED",
+    "sign_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "sign",
+      "--ks",
+      "/data/data/com.termux/files/home/apk-lab/reelsec-test/reelsec-test.jks",
+      "--ks-key-alias",
+      "reelsec-test",
+      "--ks-pass",
+      "env:REELSEC_TEST_KEYSTORE_PASSWORD",
+      "--key-pass",
+      "env:REELSEC_TEST_KEY_PASSWORD",
+      "--out",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-unsigned-aligned.apk"
+    ],
+    "verify_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "verify",
+      "--verbose",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk"
+    ],
+    "sign_output_tail": "",
+    "verify_output_tail": "Verifies\nVerified using v1 scheme (JAR signing): true\nVerified using v2 scheme (APK Signature Scheme v2): true\nVerified using v3 scheme (APK Signature Scheme v3): true\nVerified using v3.1 scheme (APK Signature Scheme v3.1): false\nVerified using v3.2 scheme (APK Signature Scheme v3.2): false\nVerified using v4 scheme (APK Signature Scheme v4): false\nVerified for SourceStamp: false\nNumber of signers: 1\nWARNING: META-INF/services/io.ktor.client.HttpClientEngineContainer not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.CoroutineExceptionHandler not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.internal.MainDispatcherFactory not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\n"
+  },
+  "adb_deploy": {
+    "status": "INSTALLED",
+    "serial": "192.168.8.8:34661",
+    "requested_serial": null,
+    "device_resolution": "AUTO_SINGLE_ONLINE_DEVICE",
+    "online_devices": [
+      "192.168.8.8:34661"
+    ],
+    "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk",
+    "artifact_sha256": "9ee4dc7a96db102de4fb2ff0b304f9fdf489958ebcc26ba4dfdc181a81f58a02",
+    "artifact_kind": "INSTRUMENTED_TEST_ARTIFACT",
+    "device_inventory_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "devices",
+      "-l"
+    ],
+    "device_check_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "-s",
+      "192.168.8.8:34661",
+      "get-state"
+    ],
+    "artifact_preflight": {
+      "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk",
+      "checks": {
+        "native_libs_uncompressed": {
+          "status": "PASS",
+          "so_count": 52,
+          "compressed_entries": []
+        },
+        "abi_directories": {
+          "status": "PASS",
+          "abis": [
+            "arm64-v8a",
+            "armeabi-v7a"
+          ]
+        },
+        "zipalign_page_alignment": {
+          "status": "PASS",
+          "command": [
+            "/data/data/com.termux/files/usr/bin/zipalign",
+            "-c",
+            "-P",
+            "16",
+            "-v",
+            "4",
+            "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk"
+          ],
+          "returncode": 0,
+          "output_tail": "google/protobuf/any.proto (OK - compressed)\n75383119 google/protobuf/type.proto (OK - compressed)\n75385569 google/protobuf/empty.proto (OK - compressed)\n75386876 okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75428336 okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75428604 com/applovin/shadow/okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75470084 com/applovin/shadow/okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75470344 com/google/api/client/http/google-http-client.properties (OK)\n75470456 com/google/api/client/googleapis/google.p12 (OK)\n75547005 com/google/api/client/googleapis/google.jks (OK - compressed)\n75590364 com/google/api/client/googleapis/google-api-client.properties (OK)\n75590462 src/google/protobuf/timestamp.proto (OK - compressed)\n75593365 src/google/protobuf/field_mask.proto (OK - compressed)\n75596563 src/google/protobuf/api.proto (OK - compressed)\n75599557 src/google/protobuf/duration.proto (OK - compressed)\n75601693 src/google/protobuf/struct.proto (OK - compressed)\n75603443 src/google/protobuf/wrappers.proto (OK - compressed)\n75605075 src/google/protobuf/source_context.proto (OK - compressed)\n75606344 src/google/protobuf/any.proto (OK - compressed)\n75609041 src/google/protobuf/type.proto (OK - compressed)\n75611495 src/google/protobuf/empty.proto (OK - compressed)\n75612767 META-INF/REELSEC-.SF (OK - compressed)\n75771977 META-INF/REELSEC-.RSA (OK - compressed)\n75773117 META-INF/MANIFEST.MF (OK - compressed)\nVerification successful\n"
+        },
+        "abi_compatibility": {
+          "status": "PASS",
+          "device_abilist": "arm64-v8a,armeabi-v7a,armeabi",
+          "apk_abis": [
+            "arm64-v8a",
+            "armeabi-v7a"
+          ],
+          "compatible": true
+        }
+      },
+      "status": "PASS"
+    },
+    "install_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "-s",
+      "192.168.8.8:34661",
+      "install",
+      "-r",
+      "--no-incremental",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk"
+    ],
+    "install_mode": "UPDATE",
+    "uninstall_command": null,
+    "uninstall_output_tail": "",
+    "install_output_tail": "Performing Streamed Install\nSuccess\n",
+    "installed_verification": {
+      "present": true,
+      "installed_path": "/data/app/~~lePFL99rqCTQrEAYOuc0IQ==/com.newleaf.app.android.victor-x675TNl43GYVOupcr_0NTA==/base.apk",
+      "version_code": "4200",
+      "status": "VERIFIED_INSTALLED"
+    }
+  },
+  "runtime_capture": {
+    "schema_version": 1,
+    "captured_at_epoch": 1791407907.7362926,
+    "device_serial": "192.168.8.8:34661",
+    "package": "com.newleaf.app.android.victor",
+    "observations": {
+      "state": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:34661",
+          "get-state"
+        ],
+        "returncode": 0,
+        "output": "device\n"
+      },
+      "package_path": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:34661",
+          "shell",
+          "pm",
+          "path",
+          "com.newleaf.app.android.victor"
+        ],
+        "returncode": 0,
+        "output": "package:/data/app/~~lePFL99rqCTQrEAYOuc0IQ==/com.newleaf.app.android.victor-x675TNl43GYVOupcr_0NTA==/base.apk\n"
+      },
+      "process": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:34661",
+          "shell",
+          "sh",
+          "-c",
+          "ps -A | grep -F com.newleaf.app.android.victor || true"
+        ],
+        "returncode": 0,
+        "output": ""
+      },
+      "logcat_tail": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:34661",
+          "logcat",
+          "-d",
+          "-t",
+          "250",
+          "-v",
+          "threadtime"
+        ],
+        "returncode": 0,
+        "output": "--------- beginning of main\n10-08 00:18:29.393  1269  2404 D SemNscXgbL2Nrt: L2 NRT 1 sample inference time: 0.32276 msecs\n10-08 00:18:29.393  1269  2404 I SemWifiServiceDetector: NSD results: [0, 1, 2, 0, 0, 1, 2, 1, 0] Traff. type 1 Thr 0\n10-08 00:18:29.393  1269  2407 D SemWifiOptimizer: enable=0 state=0x10 prev=0x10 new=0x00 force=0 mode=0\n10-08 00:18:29.399 21713 21751 D OpenGLRenderer: setSurface called with nullptr\n10-08 00:18:29.404 21713 21751 D OpenGLRenderer: trimMemory(TRIM_MEMORY_COMPLETE)::destroyRenderingContext\n10-08 00:18:29.404 21713 21751 D OpenGLRenderer: RenderThread::destroyRenderingContext()\n10-08 00:18:29.404 21713 21751 D OpenGLRenderer: RenderThread::setGrContext()\n10-08 00:18:29.407   921   921 D Zygote  : Forked child process 23507\n--------- beginning of system\n10-08 00:18:29.407  1269  1639 I ActivityManager: Start proc 23507:com.samsung.android.da.daagent/1000 for content provider {com.samsung.android.da.daagent/com.samsung.android.da.daagent.provider.DualAppProvider}\n10-08 00:18:29.417 12692 12782 I Icing   : Using regular flags by method 2\n10-08 00:18:29.419 12692 12782 I Icing   : Usage reports ok 0, Failed Usage reports 0, indexed 0, rejected 0\n10-08 00:18:29.423  1269  1614 W Looper  : Slow dispatch took 274ms android.fg h=android.os.Handler c=<recycled PooledLambda@7d0b007> m=0\n10-08 00:18:29.426   705   705 D io_stats: !@   8,0 r 15931340 236847488 w 4445449 58073432 d 2099259 171161768 f 0 0 iot 3007780 0 th 0 0 0 pt 0 inp 0 0 39458.948\n10-08 00:18:29.439  1269  2450 D NetdEventListenerService: DNS Requested by : 104, 10436\n10-08 00:18:29.439 23507 23507 I roid.da.daagent: Using generational CollectorTypeCC GC.\n10-08 00:18:29.448 23507 23507 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok\n10-08 00:18:29.450 23507 23507 D ActivityThread: setConscryptValidator\n10-08 00:18:29.451 23507 23507 D ActivityThread: setConscryptValidator - put\n10-08 00:18:29.456  1269  4958 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 1000; state: DISABLED\n10-08 00:18:29.457  1269  4958 I ActivityManager: DSS OFF for com.samsung.android.da.daagent\n10-08 00:18:29.467 12692 12782 I Icing   : Usage reports ok 0, Failed Usage reports 0, indexed 0, rejected 0\n10-08 00:18:29.475 23507 23507 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 1000; state: ENABLED\n10-08 00:18:29.478 12692 12782 W Bundle  : Key identifier expected Parcelable[] but value was a [Ljava.lang.String;.  The default value <null> was returned.\n10-08 00:18:29.478 12692 12782 W Bundle  : Attempt to cast generated internal exception:\n10-08 00:18:29.478 12692 12782 W Bundle  : java.lang.ClassCastException: java.lang.String[] cannot be cast to android.os.Parcelable[]\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat android.os.Bundle.getParcelableArray(Bundle.java:974)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat mdg.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):14)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635029@26.36.35 (190400-991383798):5)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat cqjb.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):582)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat cqjb.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):63)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat cqiu.i(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat cqhl.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):19)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat cqiw.f(:com.google.android.gms@263635029@26.36.35 (190400-991383798):26)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat cqhl.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):3)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat cqhs.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):10)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat cqpp.k(:com.google.android.gms@263635029@26.36.35 (190400-991383798):103)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat cqpm.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):71)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:520)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat java.util.concurrent.FutureTask.run(FutureTask.java:328)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat boph.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):50)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat boph.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):28)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat boph.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):33)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat bovg.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.478 12692 12782 W Bundle  : \tat java.lang.Thread.run(Thread.java:1571)\n10-08 00:18:29.479 12692 12782 W Bundle  : Key name expected Parcelable[] but value was a [Ljava.lang.String;.  The default value <null> was returned.\n10-08 00:18:29.479 12692 12782 W Bundle  : Attempt to cast generated internal exception:\n10-08 00:18:29.479 12692 12782 W Bundle  : java.lang.ClassCastException: java.lang.String[] cannot be cast to android.os.Parcelable[]\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat android.os.Bundle.getParcelableArray(Bundle.java:974)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat mdg.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):14)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635029@26.36.35 (190400-991383798):5)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqjb.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):582)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqjb.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):63)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqiu.i(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqhl.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):19)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqiw.f(:com.google.android.gms@263635029@26.36.35 (190400-991383798):26)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqhl.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):3)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqhs.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):10)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqpp.k(:com.google.android.gms@263635029@26.36.35 (190400-991383798):103)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqpm.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):71)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:520)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat java.util.concurrent.FutureTask.run(FutureTask.java:328)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat boph.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):50)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat boph.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):28)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat boph.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):33)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat bovg.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat java.lang.Thread.run(Thread.java:1571)\n10-08 00:18:29.479 12692 12782 W Bundle  : Key image expected Parcelable[] but value was a [Ljava.lang.String;.  The default value <null> was returned.\n10-08 00:18:29.479 12692 12782 W Bundle  : Attempt to cast generated internal exception:\n10-08 00:18:29.479 12692 12782 W Bundle  : java.lang.ClassCastException: java.lang.String[] cannot be cast to android.os.Parcelable[]\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat android.os.Bundle.getParcelableArray(Bundle.java:974)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat mdg.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):14)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635029@26.36.35 (190400-991383798):5)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqjb.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):582)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqjb.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):63)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqiu.i(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqhl.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):19)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqiw.f(:com.google.android.gms@263635029@26.36.35 (190400-991383798):26)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqhl.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):3)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqhs.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):10)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqpp.k(:com.google.android.gms@263635029@26.36.35 (190400-991383798):103)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqpm.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):71)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:520)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat java.util.concurrent.FutureTask.run(FutureTask.java:328)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat boph.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):50)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat boph.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):28)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat boph.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):33)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat bovg.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat java.lang.Thread.run(Thread.java:1571)\n10-08 00:18:29.479 12692 12782 W Bundle  : Key dateModified expected Parcelable[] but value was a [J.  The default value <null> was returned.\n10-08 00:18:29.479 12692 12782 W Bundle  : Attempt to cast generated internal exception:\n10-08 00:18:29.479 12692 12782 W Bundle  : java.lang.ClassCastException: long[] cannot be cast to android.os.Parcelable[]\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat android.os.Bundle.getParcelableArray(Bundle.java:974)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat mdg.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):14)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635029@26.36.35 (190400-991383798):5)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqjb.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):582)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqjb.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):63)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqiu.i(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqhl.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):19)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqiw.f(:com.google.android.gms@263635029@26.36.35 (190400-991383798):26)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqhl.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):3)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqhs.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):10)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqpp.k(:com.google.android.gms@263635029@26.36.35 (190400-991383798):103)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat cqpm.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):71)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:520)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat java.util.concurrent.FutureTask.run(FutureTask.java:328)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat boph.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):50)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat boph.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):28)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat boph.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):33)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat bovg.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.479 12692 12782 W Bundle  : \tat java.lang.Thread.run(Thread.java:1571)\n10-08 00:18:29.477  1269  1323 I system_server: Background young concurrent copying GC freed 32MB AllocSpace bytes, 68(3340KB) LOS objects, 12% free, 171MB/195MB, paused 314us,345us total 322.414ms\n10-08 00:18:29.522  1269  5140 D CompatibilityChangeReporter: Compat change id reported: 161145287; UID 10040; state: DISABLED\n10-08 00:18:29.532 22977 23085 I Finsky  : [2997] Already at the latest configurations for experiment package com.google.android.finsky.regular.\n10-08 00:18:29.532 22977 23085 I Finsky  : [2997] Triggered update for experiment package com.google.android.finsky.regular.\n10-08 00:18:29.544 23441 23501 D nativeloader: Load /data/app/~~ZQGZFhkBQGt6pItzD8P0RA==/com.android.vending-2x6lPlQ5EWpijeCaZ9aRYg==/split_config.arm64_v8a.apk!/lib/arm64-v8a/libmappedcountercacheversionjni.so using class loader ns clns-5 (caller=/data/app/~~ZQGZFhkBQGt6pItzD8P0RA==/com.android.vending-2x6lPlQ5EWpijeCaZ9aRYg==/base.apk): ok\n10-08 00:18:29.583 23441 23441 I Finsky:background: [2] ApplicationRestrictions: {}\n10-08 00:18:29.601 23403 23513 D nativeloader: Load /data/app/~~ZQGZFhkBQGt6pItzD8P0RA==/com.android.vending-2x6lPlQ5EWpijeCaZ9aRYg==/split_config.arm64_v8a.apk!/lib/arm64-v8a/libmappedcountercacheversionjni.so using class loader ns clns-5 (caller=/data/app/~~ZQGZFhkBQGt6pItzD8P0RA==/com.android.vending-2x6lPlQ5EWpijeCaZ9aRYg==/base.apk): ok\n10-08 00:18:29.601   735   735 W keymaster_tee: [WRN]begin req PARAMS: A32 B32 P1 \n10-08 00:18:29.604   735   735 D keymaster_swd: keymaster_swd [WRN] (km_usage_expire_datetime_valid:223) for purpose 0 we shuldn't check KM_TAG_USAGE_EXPIRE_DATETIME\n10-08 00:18:29.604   735   735 D keymaster_swd: keymaster_swd [WRN] (swd_run_cb:260) swd_begin() returns 0\n10-08 00:18:29.608   732 10755 I keystore2: keystore2::security_level: In create_operation. Success to create IKeystoreOperation. 15010240, None\n10-08 00:18:29.609 22977 23085 I Finsky  : [2997] Already at the latest configurations for experiment package com.google.android.finsky.regular.\n10-08 00:18:29.609 22977 23085 I Finsky  : [2997] Triggered update for experiment package com.google.android.finsky.regular.\n10-08 00:18:29.611   735   735 D keymaster_swd: keymaster_swd [WRN] (swd_run_cb:260) swd_update() returns 0\n10-08 00:18:29.611 23441 23441 I Finsky:background: [2] Finished reading experiment flags from file [mIuo5cIhww34J0EVd6mTnkEChqGCBbQ49e2PvMZSOrY] numFlags=2106.\n10-08 00:18:29.618  1269  2982 I GenerationRegistry: mBackingStore.isClosed() : false\n10-08 00:18:29.621   735   735 D keymaster_swd: keymaster_swd [WRN] (swd_run_cb:260) swd_finish() returns 0\n10-08 00:18:29.645 12692 12782 I Icing   : Usage reports ok 0, Failed Usage reports 0, indexed 0, rejected 0\n10-08 00:18:29.646  1269  5106 I GenerationRegistry: mBackingStore.isClosed() : false\n10-08 00:18:29.648   735   735 W keymaster_tee: [WRN]begin req PARAMS: A32 B32 P1 \n10-08 00:18:29.651   735   735 D keymaster_swd: keymaster_swd [WRN] (swd_run_cb:260) swd_begin() returns 0\n10-08 00:18:29.651   732 10755 I keystore2: keystore2::security_level: In create_operation. Success to create IKeystoreOperation. 15010240, None\n10-08 00:18:29.654  1269  5167 I GenerationRegistry: mBackingStore.isClosed() : false\n10-08 00:18:29.654 23441 23441 I Finsky:background: [2] Finished reading experiment flags from file [gxgBYeBPAzXFaTP13L9kL5CBePQj7cYu41haFDTPPQI] numFlags=2089.\n10-08 00:18:29.654   735   735 D keymaster_swd: keymaster_swd [WRN] (swd_run_cb:260) swd_update() returns 0\n10-08 00:18:29.655 12692 12782 W Bundle  : Key identifier expected Parcelable[] but value was a [Ljava.lang.String;.  The default value <null> was returned.\n10-08 00:18:29.655 12692 12782 W Bundle  : Attempt to cast generated internal exception:\n10-08 00:18:29.655 12692 12782 W Bundle  : java.lang.ClassCastException: java.lang.String[] cannot be cast to android.os.Parcelable[]\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat android.os.Bundle.getParcelableArray(Bundle.java:974)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat mdg.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):14)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635029@26.36.35 (190400-991383798):5)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqjb.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):582)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqjb.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):63)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqiu.i(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqhl.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):19)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqiw.f(:com.google.android.gms@263635029@26.36.35 (190400-991383798):26)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqhl.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):3)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqhs.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):10)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqpp.k(:com.google.android.gms@263635029@26.36.35 (190400-991383798):103)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqpm.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):71)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:520)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat java.util.concurrent.FutureTask.run(FutureTask.java:328)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat boph.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):50)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat boph.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):28)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat boph.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):33)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat bovg.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat java.lang.Thread.run(Thread.java:1571)\n10-08 00:18:29.655 12692 12782 W Bundle  : Key name expected Parcelable[] but value was a [Ljava.lang.String;.  The default value <null> was returned.\n10-08 00:18:29.655 12692 12782 W Bundle  : Attempt to cast generated internal exception:\n10-08 00:18:29.655 12692 12782 W Bundle  : java.lang.ClassCastException: java.lang.String[] cannot be cast to android.os.Parcelable[]\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat android.os.Bundle.getParcelableArray(Bundle.java:974)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat mdg.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):14)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635029@26.36.35 (190400-991383798):5)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqjb.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):582)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqjb.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):63)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqiu.i(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqhl.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):19)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqiw.f(:com.google.android.gms@263635029@26.36.35 (190400-991383798):26)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqhl.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):3)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqhs.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):10)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqpp.k(:com.google.android.gms@263635029@26.36.35 (190400-991383798):103)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqpm.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):71)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:520)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat java.util.concurrent.FutureTask.run(FutureTask.java:328)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat boph.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):50)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat boph.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):28)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat boph.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):33)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat bovg.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat java.lang.Thread.run(Thread.java:1571)\n10-08 00:18:29.655 12692 12782 W Bundle  : Key image expected Parcelable[] but value was a [Ljava.lang.String;.  The default value <null> was returned.\n10-08 00:18:29.655 12692 12782 W Bundle  : Attempt to cast generated internal exception:\n10-08 00:18:29.655 12692 12782 W Bundle  : java.lang.ClassCastException: java.lang.String[] cannot be cast to android.os.Parcelable[]\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat android.os.Bundle.getParcelableArray(Bundle.java:974)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat mdg.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):14)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635029@26.36.35 (190400-991383798):5)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqjb.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):582)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqjb.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):63)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqiu.i(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqhl.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):19)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqiw.f(:com.google.android.gms@263635029@26.36.35 (190400-991383798):26)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqhl.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):3)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqhs.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):10)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqpp.k(:com.google.android.gms@263635029@26.36.35 (190400-991383798):103)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat cqpm.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):71)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:520)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat java.util.concurrent.FutureTask.run(FutureTask.java:328)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat boph.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):50)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat boph.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):28)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat boph.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):33)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat bovg.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.655 12692 12782 W Bundle  : \tat java.lang.Thread.run(Thread.java:1571)\n10-08 00:18:29.655 12692 12782 W Bundle  : Key dateModified expected Parcelable[] but value was a [J.  The default value <null> was returned.\n10-08 00:18:29.656 12692 12782 W Bundle  : Attempt to cast generated internal exception:\n10-08 00:18:29.656 12692 12782 W Bundle  : java.lang.ClassCastException: long[] cannot be cast to android.os.Parcelable[]\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat android.os.Bundle.getParcelableArray(Bundle.java:974)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat mdg.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):14)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635029@26.36.35 (190400-991383798):5)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat cqjb.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):582)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat cqjb.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):63)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat cqiu.i(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat cqhl.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):19)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat cqiw.f(:com.google.android.gms@263635029@26.36.35 (190400-991383798):26)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat cqhl.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):3)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat cqhs.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):10)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat cqpp.k(:com.google.android.gms@263635029@26.36.35 (190400-991383798):103)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat cqpm.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):71)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:520)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat java.util.concurrent.FutureTask.run(FutureTask.java:328)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat boph.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):50)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat boph.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):28)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat boph.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):33)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat bovg.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 00:18:29.656 12692 12782 W Bundle  : \tat java.lang.Thread.run(Thread.java:1571)\n10-08 00:18:29.658   735   735 D keymaster_swd: keymaster_swd [WRN] (swd_run_cb:260) swd_finish() returns 0\n10-08 00:18:29.658  1269  1614 W Looper  : Slow dispatch took 223ms android.fg h=android.os.Handler c=<recycled PooledLambda@c7c37c6> m=0\n10-08 00:18:29.664   735   735 W keymaster_tee: [WRN]begin req PARAMS: A32 B32 P1 \n10-08 00:18:29.668   735   735 D keymaster_swd: keymaster_swd [WRN] (swd_run_cb:260) swd_begin() returns 0\n10-08 00:18:29.668   732 10755 I keystore2: keystore2::security_level: In create_operation. Success to create IKeystoreOperation. 15010240, None\n10-08 00:18:29.670 22977 22981 W android.vending: Suspending all threads took: 20.603ms\n10-08 00:18:29.671   735   735 D keymaster_swd: keymaster_swd [WRN] (swd_run_cb:260) swd_update() returns 0\n10-08 00:18:29.672  1269  2982 I GenerationRegistry: mBackingStore.isClosed() : false\n10-08 00:18:29.672 23441 23441 I Finsky:background: [2] Finished reading experiment flags from file [qrPVWnB4mHjiJfbUxO_8bFqCHDgWG9yCBtVjDgDLa8k] numFlags=2088.\n10-08 00:18:29.679   735   735 D keymaster_swd: keymaster_swd [WRN] (swd_run_cb:260) swd_finish() returns 0\n10-08 00:18:29.688 23403 23403 I Finsky:background: [2] Finished reading experiment flags from file [fGo7jWYFoW_-hOrXhetHcqWMMUx7JdjACO1HgFpSbzo] numFlags=2106.\n10-08 00:18:29.694 23441 23441 I Finsky:background: [2] Finished reading experiment flags from file [ynqyiJmUkrv0PNkNyf4nontFIFc_2wt_VdPghR72qyo] numFlags=2088.\n10-08 00:18:29.699 23441 23441 I Finsky:background: [2] Finished reading experiment flags from file [6xyXqtJOOpH5rxZZrBKMBVvlczSHVxMFAwzeuHQlU7w] numFlags=2088.\n10-08 00:18:29.700  3551  3551 I ContactsProvider: onTrimMemory-success\n10-08 00:18:29.701  1269  5106 I ActivityManager: Changes in 10048 19 to 5, 0 to 8\n10-08 00:18:29.702  1269  1690 D PowerManagerService: UserActivityStateListenerState: 0\n10-08 00:18:29.707 14206 23499 I GOS:GameIntentService: onPackageChanged(). extras: Bundle[{changeType=0, userId=0, pkgName=com.newleaf.app.android.victor, type=15, packageName=com.newleaf.app.android.victor}]\n10-08 00:18:29.707 14206 23499 I GOS:GameIntentService: onPackageChanged(). changeType(INSTALLED), pkgName(com.newleaf.app.android.victor), UserHandle(0), userId(0), Installed(true)\n10-08 00:18:29.708 14206 23499 I GOS:GameIntentService: onPkgInstalled(), appInfoCategory: null, packageName: com.newleaf.app.android.victor\n10-08 00:18:29.713 22977 23085 I Finsky  : [2997] Already at the latest configurations for experiment package com.google.android.finsky.regular.\n10-08 00:18:29.713 22977 23085 I Finsky  : [2997] Triggered update for experiment package com.google.android.finsky.regular.\n10-08 00:18:29.731 23441 23441 I Finsky:background: [2] Finished reading experiment flags from file [fGo7jWYFoW_-hOrXhetHcqWMMUx7JdjACO1HgFpSbzo] numFlags=2088.\n10-08 00:18:29.735 14206 23499 I GOS:SystemEventReactor: checkReservedCategory() - reservedList is null or empty!\n10-08 00:18:29.736 12887 12887 W get.kidscontrol: Long monitor contention with owner DefaultDispatcher-worker-7 (13036) at void android.view.accessibility.AccessibilityCache.add(android.view.accessibility.AccessibilityNodeInfo)(AccessibilityCache.java:545) waiters=0 in void android.view.accessibility.AccessibilityCache.onAccessibilityEvent(android.view.accessibility.AccessibilityEvent) for 202ms\n10-08 00:18:29.771 23403 23403 I Finsky:background: [2] Finished reading experiment flags from file [AmUC0k6VLtCYULa4oqcbsD90PmrxID675hnIE4b45HA] numFlags=2088.\n10-08 00:18:29.772 23441 23441 I Finsky:background: [2] [BGP] Initializing crash detector...\n10-08 00:18:29.796 23441 23441 I Finsky:background: [2] anip - Registering in memory receiver for android.intent.action.PACKAGE_ADDED and android.intent.action.PACKAGE_REMOVED\n10-08 00:18:29.820 23475 23475 I DWBy    : all 16 persistence tables built.\n10-08 00:18:29.821 23475 23475 I DWBContentProvider: onCreate\n10-08 00:18:29.837  1269  2359 W DevicePolicyManager: Unknown user type: UserInfo{95:DUAL_APP:20001010}\n10-08 00:18:29.837  1269  2359 W DevicePolicyManager: Unknown user type: UserInfo{95:DUAL_APP:20001010}\n10-08 00:18:29.838  1269  2359 W DevicePolicyManager: Unknown user type: UserInfo{95:DUAL_APP:20001010}\n10-08 00:18:29.838  1269  2359 W DevicePolicyManager: Unknown user type: UserInfo{95:DUAL_APP:20001010}\n10-08 00:18:29.839  1269  2359 W DevicePolicyManager: Unknown user type: UserInfo{95:DUAL_APP:20001010}\n10-08 00:18:29.839  1269  2359 W DevicePolicyManager: Unknown user type: UserInfo{95:DUAL_APP:20001010}\n10-08 00:18:29.839  1269  2359 W DevicePolicyManager: Unknown user type: UserInfo{95:DUAL_APP:20001010}\n10-08 00:18:29.839  1269  2359 W DevicePolicyManager: Unknown user type: UserInfo{95:DUAL_APP:20001010}\n10-08 00:18:29.848 23441 23441 I Finsky:background: [2] This process start was not selected for Play memory metrics collection.\n10-08 00:18:29.850  1269  2588 I GenerationRegistry: mBackingStore.isClosed() : false\n10-08 00:18:29.853 23403 23403 I Finsky:background: [2] Finished reading experiment flags from file [GVLz8-kTQQjIgagf0S8-DSQRNRoHJ2XUN3BXxOQy3Tc] numFlags=2088.\n10-08 00:18:29.859 23441 23441 I Finsky:background: [2] Memory trim requested to level 15\n10-08 00:18:29.867 23403 23403 I Finsky:background: [2] Finished reading experiment flags from file [_1SDwYZ5e7lQgi3fCN2HAxcs63FWdj-jooZ3n621Ydc] numFlags=2088.\n10-08 00:18:29.873 22977 23085 I Finsky  : [2997] Already at the latest configurations for experiment package com.google.android.finsky.regular.\n10-08 00:18:29.874 22977 23462 W android.vending: Long monitor contention with owner BlockingExecutor #2 (v85343430) (23085) at java.lang.Object anxr.doInBackground(java.lang.Object[])(PG:198) waiters=0 in java.lang.Object anxr.doInBackground(java.lang.Object[]) for 840ms\n10-08 00:18:29.875 22977 23462 I Finsky  : [3010] Triggered update for experiment package com.google.android.finsky.stable_new.\n10-08 00:18:29.895 23403 23403 I Finsky:background: [2] Finished reading experiment flags from file [us38Mg5eH-_g6pDbXtHyjzXYIQRT37WJq1o7kRfWbAI] numFlags=2088.\n10-08 00:18:29.896  1269  2404 D SemNscXgbMsL1: Probability - Cloud gaming: [0.0058947504]\n10-08 00:18:29.896  1269  2404 D SemNscXgbMsL1: Probability - Real time: [0.382086]\n10-08 00:18:29.896  1269  2404 D SemNscXgbMsL1: Probability - Non real time: [0.9802131]\n10-08 00:18:29.896  1269  2404 D SemNscXgbMsL1: 1 sample inference time: 0.271875 msecs\n10-08 00:18:29.896  1269  2404 D SemNscXgbL2Rt: L2 RT 1 sample inference time: 0.446041 msecs\n10-08 00:18:29.897  1269  2404 D SemNscXgbL2Nrt: L2 NRT 1 sample inference time: 0.329167 msecs\n10-08 00:18:29.918  1008  1008 I sensors-hal: flush:383, com.samsung.sensor.light_cct/1511\n10-08 00:18:29.918  1008  1008 I sensors-hal: flush:389, com.samsung.sensor.light_cct/1511 completed\n10-08 00:18:29.919  1269  2814 D SensorManager: registerListener :: 1511, TMD4907 Light CCT  Non-wakeup, 200000, 0, com.samsung.android.displaysolution.EyeComfortSolutionService$2@a54baea\n10-08 00:18:29.925 23403 23403 I Finsky:background: [2] Finished reading experiment flags from file [A5H-EaVAsvq8YMAXMdyMbgrDF9FJoVo4__YkHqzxlFQ] numFlags=2088.\n10-08 00:18:29.928  1269  1614 W Looper  : Slow dispatch took 205ms android.fg h=android.os.Handler c=<recycled PooledLambda@f986334> m=0\n10-08 00:18:29.933 23441 23558 W Settings: Setting download_manager_max_bytes_over_mobile has moved from android.provider.Settings.Secure to android.provider.Settings.Global.\n10-08 00:18:29.938  1269  2588 I GenerationRegistry: mBackingStore.isClosed() : false\n10-08 00:18:29.940 23441 23558 I Finsky:background: [2991] SettingNotFoundException for download_manager_max_bytes_over_mobile\n10-08 00:18:29.940 23441 23558 W Settings: Setting download_manager_recommended_max_bytes_over_mobile has moved from android.provider.Settings.Secure to android.provider.Settings.Global.\n10-08 00:18:29.941 23441 23558 I Finsky:background: [2991] SettingNotFoundException for download_manager_recommended_max_bytes_over_mobile\n10-08 00:18:29.951 23403 23403 I Finsky:background: [2] Finished reading experiment flags from file [-iEAyMB6r1r1VLGX6fzay3CU_Azk_S-b38gO518ERJA] numFlags=2088.\n10-08 00:18:29.967 23403 23403 I Finsky:background: [2] Finished reading experiment flags from file [-qQGL9_l2RY3mp6OO8ikHzbkyoRX13d0e9r9umbRmYg] numFlags=2088.\n10-08 00:18:29.975 23403 23403 I Finsky:background: [2] Finished reading experiment flags from file [UMPce67y40vX4mG7pmgX-CjJS6YQBhEPQDqeObHX6FA] numFlags=2088.\n10-08 00:18:29.976 23441 23570 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4698)] [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4867)] [android.net.ConnectivityManager.registerDefaultNetworkCallbackForUid(ConnectivityManager.java:5427)] [android.net.ConnectivityManager.registerDefaultNetworkCallback(ConnectivityManager.java:5395)] [android.net.ConnectivityManager.registerDefaultNetworkCallback(ConnectivityManager.java:5369)] [afuc.call(PG:27)] [btgl.a(PG:3)] [btfr.run(PG:19)] [btgm.run(PG:5)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [xyi.run(PG:371)] [java.lang.Thread.run(Thread.java:1571)]\n10-08 00:18:29.979  1269  2982 D ConnectivityService: requestNetwork for uid/pid:15010241/23441 activeRequest: null callbackRequest: 7668 [NetworkRequest [ REQUEST id=7669, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 15010241 RequestorUid: 15010241 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: AVAIL|LOST\n10-08 00:18:29.980  1269  2350 D ConnectivityService:    accepting network in place of null for NetworkRequest [ REQUEST id=7669, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 15010241 RequestorUid: 15010241 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]\n10-08 00:18:29.982 23403 23403 I Finsky:background: [2] [BGP] Initializing crash detector...\n10-08 00:18:29.982  1269  2339 D WifiNetworkFactory: got request NetworkRequest [ REQUEST id=7669, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 15010241 RequestorUid: 15010241 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]\n10-08 00:18:29.982  1269  2339 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=7669, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 15010241 RequestorUid: 15010241 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]\n10-08 00:18:29.982  1269  2339 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=7669, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 15010241 RequestorUid: 15010241 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]\n10-08 00:18:29.982  1269  2339 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=7669, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 15010241 RequestorUid: 15010241 RequestorPkg: com.android.vending UnderlyingNetworks: Null] ]\n10-08 00:18:29.982  1269  2350 D ConnectivityService: Rematched networks [computed 0ms] [applied 2ms] [issued 1]\n10-08 00:18:29.982  1269  2350 D ConnectivityService: NetworkReassignment :\n10-08 00:18:29.982  1269  2350 D ConnectivityService:   7669 : null \u2192 104\n10-08 00:18:29.983 23475 23475 I DWBq    : when(FIRST_DAY_OF_WEEK=7, day=2026-10-11)\n10-08 00:18:29.985 23403 23403 I Finsky:background: [2] anip - Registering in memory receiver for android.intent.action.PACKAGE_ADDED and android.intent.action.PACKAGE_REMOVED\n10-08 00:18:29.986 23475 23475 I DWBq    : com.samsung.android.forest.promovence.NOTIFY_WEEKLY_REPORT: shouldWeNotify=true\n10-08 00:18:29.988 23441 23549 I Finsky:background: [2986] IQ: start evaluating install requests.\n10-08 00:18:29.988 23441 23549 I Finsky:background: [2986] IQ: no jobs active. Skipping\n10-08 00:18:29.990  1269  2814 D SensorService: Calling activate off 1511\n10-08 00:18:29.990  1008  1008 I sensors-hal: set_config:67, sample_period_ns is adjusted to 200000000 based on min/max delay_ns\n10-08 00:18:29.990  1008  1008 I sensors-hal: batch:363, com.samsung.sensor.light_cct/1511, period=200000000, max_latency=0 request completed\n10-08 00:18:29.990  1269  2814 D SensorManager: unregisterListener :: com.samsung.android.displaysolution.EyeComfortSolutionService$2@a54baea\n10-08 00:18:29.996 23475 23475 I DWBb    : when(FIRST_DAY_OF_WEEK=7, day=2026-10-11T09:00+03:00[Asia/Aden])\n10-08 00:18:29.999 23403 23403 I Finsky:background: [2] Memory trim requested to level 15\n10-08 00:18:30.002 23475 23475 I DWBg    : changeLocale to YE\n10-08 00:18:30.002 23475 23475 I DWBm    : ComponentInfo{com.samsung.android.forest/com.samsung.android.forest.launcher.LauncherActivity} is 0\n10-08 00:18:30.003 23403 23403 I Finsky:background: [2] This process start was not selected for Play memory metrics collection.\n10-08 00:18:30.004 23475 23475 E DWBr    : App icon disabled, so return addDynamicShortcuts\n10-08 00:18:30.006 23403 23403 I Finsky:background: [2] anip - Received: android.intent.action.PACKAGE_ADDED, [Ra9tlJijjc97T3myZt4ttZkemTKXavpwSBUrvn4zB5w]\n10-08 00:18:30.019 23475 23475 I DWBSettingsSearchProvider: secQueryGetFingerprint :ar_YE\n10-08 00:18:30.023 23475 23475 I DWBDigitalWellbeingApplication: onCreate called\n10-08 00:18:30.031  9893  9893 I Routine@Core[4.2.01.2]: SleepScheduleMigrator: migrateDWBData: do not have Migration data about DWB\n10-08 00:18:30.033 23475 23475 I DIAGMON_SDK[605066]: DiagMonAgent type: 2\n10-08 00:18:30.033 23475 23475 I DIAGMON_SDK[605066][g5xty0ulcd] : generated SR object\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.pocketpalai' not found Error while validating document (android$apps-db/apps, com.pocketpalai)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.pocketpalai' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.reader' not found Error while validating document (android$apps-db/apps, com.adobe.reader)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.reader' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-apk.signer' not found Error while validating document (android$apps-db/apps, apk.signer)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-apk.signer' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-dev.tokforge' not found Error while validating document (android$apps-db/apps, dev.tokforge)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-dev.tokforge' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.lemon.lvoverseas' not found Error while validating document (android$apps-db/apps, com.lemon.lvoverseas)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.lemon.lvoverseas' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.meitu.roboneo' not found Error while validating document (android$apps-db/apps, com.meitu.roboneo)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.meitu.roboneo' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.alrajhiretailapp' not found Error while validating document (android$apps-db/apps, com.alrajhiretailapp)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.alrajhiretailapp' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.adenBank.adenCash' not found Error while validating document (android$apps-db/apps, com.adenBank.adenCash)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.adenBank.adenCash' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.stripe.link.android' not found Error while validating document (android$apps-db/apps, com.stripe.link.android)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.stripe.link.android' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.freereels.app' not found Error while validating document (android$apps-db/apps, com.freereels.app)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.freereels.app' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.pixelfed.loops' not found Error while validating document (android$apps-db/apps, com.pixelfed.loops)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.pixelfed.loops' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.qtbbank.alqutaibi' not found Error while validating document (android$apps-db/apps, com.qtbbank.alqutaibi)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.qtbbank.alqutaibi' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.x.ai.grok' not found Error while validating document (android$apps-db/apps, com.x.ai.grok)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.x.ai.grok' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.newleaf.app.android.victor' not found Error while validating document (android$apps-db/apps, com.newleaf.app.android.victor)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.newleaf.app.android.victor' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.zhiliaoapp.musically' not found Error while validating document (android$apps-db/apps, com.zhiliaoapp.musically)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.zhiliaoapp.musically' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.echosign' not found Error while validating document (android$apps-db/apps, com.adobe.echosign)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.echosign' not found\n10-08 00:18:30.034  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.AamalTech.Aden_Bank' not found Error while validating document (android$apps-db/apps, com.AamalTech.Aden_Bank)\n10-08 00:18:30.034  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.AamalTech.Aden_Bank' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.lemon.lvoverseas' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-dev.tokforge' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.x.ai.grok' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.alrajhiretailapp' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.qtbbank.alqutaibi' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.AamalTech.Aden_Bank' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.stripe.link.android' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.meitu.roboneo' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.freereels.app' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.newleaf.app.android.victor' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.pocketpalai' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.zhiliaoapp.musically' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-apk.signer' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.adenBank.adenCash' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.reader' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.pixelfed.loops' not found\n10-08 00:18:30.035  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.echosign' not found\n10-08 00:18:30.036  9893  9893 I Routine@Core[4.2.01.2]: SmartThingsMetadataUpdater: calculate: isEnabled=false\n10-08 00:18:30.037 22977 23462 I Finsky  : [3010] Already at the latest configurations for experiment package com.google.android.finsky.stable_new.\n10-08 00:18:30.037 23441 23561 I Finsky:background: [2993] registerListener\n10-08 00:18:30.040 23475 23475 I DWBb    : onTrimMemory(15)\n10-08 00:18:30.041 23441 23561 I Finsky:background: [2993] DFS: Listener added for uqp@eeaac55\n10-08 00:18:30.041 23441 23561 I Finsky:background: [2993] registerListener\n10-08 00:18:30.042 23441 23561 I Finsky:background: [2993] registerListener\n10-08 00:18:30.042 23441 23561 I Finsky:background: [2993] DFS: Listener added for arzy@3bb4fa4\n10-08 00:18:30.055  9893  9893 I Routine@Core[4.2.01.2]: LifestyleModeMigrator: migrate\n10-08 00:18:30.066  3922  3922 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color:export ANDROID_LOG_TAGS=''; exec logcat '-d' '-t' '250' '-v' 'threadtime''\n10-08 00:18:30.069  9893  9893 I Routine@Core[4.2.01.2]: RoutineHistoryDumpImpl: [RoutineService] [ACTION_METADATA_LOADING_FINISHED]\n10-08 00:18:30.087 23441 23441 I Finsky:background: [2] Memory trim requested to level 80\n10-08 00:18:30.113  9893  9893 I AbstractProxyReflection: Create proxy instance for class : com.samsung.android.app.usage.IUsageStatsWatcher$Stub\n10-08 00:18:30.115  9893  9893 I AbstractProxyReflection: Create proxy instance for class : com.samsung.android.app.usage.IUsageStatsWatcher$Stub\n10-08 00:18:30.115  9893  9893 I Routine@Core[4.2.01.2]: RoutineHistoryDumpImpl: [PRELOAD_CONDITION_SERVICE] onCreate\n10-08 00:18:30.118  9893  9893 I Routine@Core[4.2.01.2]: WatchingConditions: clear\n10-08 00:18:30.118  9893  9893 I Routine@Core[4.2.01.2]: Pref: removeSharedPrefsData() key=condition_launch_app_data_resume_pkg\n10-08 00:18:30.118  9893  9893 I Routine@Core[4.2.01.2]: AppLifecycleWatcher: updateUsageStateWatcher: 0\n10-08 00:18:30.120  9893  9893 I Routine@Core[4.2.01.2]: ActivityWatcherForSolo: unregister\n10-08 00:18:30.124  9893  9893 I Routine@Core[4.2.01.2]: WatchingConditions: clear\n10-08 00:18:30.124  9893  9893 I Routine@Core[4.2.01.2]: Pref: removeSharedPrefsData() key=condition_launch_app_data_resume_pkg\n10-08 00:18:30.126  9893  9893 I Routine@Core[4.2.01.2]: PreloadConditionService: onEnd: tag=launch_app, stop service.\n10-08 00:18:30.141  1269  5106 I GenerationRegistry: mBackingStore.isClosed() : false\n10-08 00:18:30.145  9893  9893 I Routine@Core[4.2.01.2]: WatchingConditions: clear\n10-08 00:18:30.145  9893  9893 I Routine@Core[4.2.01.2]: Pref: removeSharedPrefsData() key=condition_launch_game_data_resume_pkg\n10-08 00:18:30.148  9893  9893 I Routine@Core[4.2.01.2]: AppLifecycleWatcher: updateUsageStateWatcher: 0\n10-08 00:18:30.148  9893  9893 I Routine@Core[4.2.01.2]: ActivityWatcherForSolo: unregister\n10-08 00:18:30.154  9893  9893 I Routine@Core[4.2.01.2]: WatchingConditions: clear\n10-08 00:18:30.154  9893  9893 I Routine@Core[4.2.01.2]: Pref: removeSharedPrefsData() key=condition_launch_game_data_resume_pkg\n10-08 00:18:30.155 23403 23597 W Settings: Setting download_manager_max_bytes_over_mobile has moved from android.provider.Settings.Secure to android.provider.Settings.Global.\n10-08 00:18:30.155  9893  9893 I Routine@Core[4.2.01.2]: PreloadConditionService: onEnd: tag=launch_game, stop service.\n10-08 00:18:30.159 23403 23597 I Finsky:background: [2987] SettingNotFoundException for download_manager_max_bytes_over_mobile\n10-08 00:18:30.159 23403 23597 W Settings: Setting download_manager_recommended_max_bytes_over_mobile has moved from android.provider.Settings.Secure to android.provider.Settings.Global.\n10-08 00:18:30.160 23403 23597 I Finsky:background: [2987] SettingNotFoundException for download_manager_recommended_max_bytes_over_mobile\n10-08 00:18:30.160 23403 23597 I Finsky:background: [2987] registerListener\n10-08 00:18:30.165 23403 23597 I Finsky:background: [2987] DFS: Listener added for uqp@d8d2f63\n10-08 00:18:30.165 23403 23597 I Finsky:background: [2987] registerListener\n10-08 00:18:30.166 23403 23597 I Finsky:background: [2987] registerListener\n10-08 00:18:30.166 23403 23597 I Finsky:background: [2987] DFS: Listener added for arzy@94b68ea\n10-08 00:18:30.173  1269  1614 W Looper  : Slow dispatch took 141ms android.fg h=android.os.Handler c=<recycled PooledLambda@58ed085> m=0\n"
+      }
+    },
+    "artifact": {
+      "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk",
+      "sha256": "9ee4dc7a96db102de4fb2ff0b304f9fdf489958ebcc26ba4dfdc181a81f58a02"
+    },
+    "evidence_class": "OBSERVED",
+    "causal_proof": false,
+    "status": "CAPTURED"
+  },
+  "gadget_observation": {
+    "schema_version": 1,
+    "status": "READY",
+    "mode": "OBSERVATION_ONLY",
+    "artifact": {
+      "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-17-17/instrumented-signed.apk",
+      "sha256": "9ee4dc7a96db102de4fb2ff0b304f9fdf489958ebcc26ba4dfdc181a81f58a02"
+    },
+    "package": "com.newleaf.app.android.victor",
+    "module": "libsaasCorePlayer.so",
+    "target_offset": "0x27a510",
+    "requires_gadget": true,
+    "mutates_original_apk": false,
+    "causal_proof": false,
+    "proof_class": "OBSERVED_ONLY"
+  },
+  "evidence_ledger": {
+    "status": "NOT_READY"
+  },
+  "status": "completed",
+  "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+  "critical_pointer": "0x27a510",
+  "jni_semantic_found": true,
+  "vtable_abi": {
+    "address_point": "0x717e60",
+    "slot": "0x717f68",
+    "rtti": "0x71f4d0",
+    "type_name": "N6Cicada17mediaCodecDecoderE",
+    "container_vtable": null,
+    "pointer": "0x27a510",
+    "function_symbol": null
+  },
+  "critical_function_behavior": "NO_SECURITY_OPERATION_OBSERVED",
+  "autonomous_dataflow": {
+    "status": "completed",
+    "proven": 0,
+    "candidates": 473,
+    "cxx_unresolved": 354,
+    "jni_excluded_count": 6,
+    "constructor_calls": 4
+  },
+  "runtime_probe_status": "RUNTIME_ARTIFACT_CRASH"
+}
