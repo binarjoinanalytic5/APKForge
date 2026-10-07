@@ -30,7 +30,12 @@ from adb_deploy import (
     device_check_command,
     resolve_test_device,
     is_signature_mismatch_error,
+    diagnose_install_failure,
+    artifact_preflight_checks,
+    verify_installed_package,
 )
+import runtime_probe
+import behavior_capture
 from runtime_capture import capture_snapshot, bind_artifact
 from gadget_observer import plan_gadget_observation
 from proof_gate import build_evidence_ledger
@@ -1811,43 +1816,11 @@ def write_runtime_probe(output, root, target, input_apk=None):
             package_source = "input_apk_tool:%s" % package_tool
     module = target.name if target else "libsaasCorePlayer.so"
     script = output / "reelsec-runtime-probe.js"
-    js = r'''const TARGET_OFFSET = ptr("0x27a510");
-const TARGET_VTABLE = ptr("0x717e60");
-const TARGET_SLOT = 0x108;
-const MODULE_NAME = "MODULE_PLACEHOLDER";
-function hookModule(m) {
-  try {
-    const target = m.base.add(TARGET_OFFSET);
-    Interceptor.attach(target, {
-      onEnter(args) {
-        let vptr = ptr("0x0");
-        let slot = ptr("0x0");
-        try { vptr = args[0].readPointer(); } catch (_) {}
-        try { slot = vptr.add(TARGET_SLOT).readPointer(); } catch (_) {}
-        send({event:"TARGET_FUNCTION_ENTER",module:m.name,base:m.base.toString(),
-          pc:this.context.pc.toString(),object:args[0].toString(),vptr:vptr.toString(),
-          slot:slot.toString(),expected_vptr:TARGET_VTABLE.toString(),
-          expected_slot:ptr("0x27a510").toString(),return_address:this.returnAddress.toString(),
-          target_vptr_match:vptr.equals(TARGET_VTABLE),
-          target_slot_match:slot.equals(ptr("0x27a510"))});
-      }
-    });
-    send({event:"HOOK_INSTALLED",module:m.name,base:m.base.toString(),target:target.toString()});
-    return true;
-  } catch(e) { send({event:"HOOK_ERROR",module:m.name,error:String(e)}); return false; }
-}
-let installed=false;
-const existing=Process.findModuleByName(MODULE_NAME);
-if(existing) installed=hookModule(existing);
-if(!installed) Process.attachModuleObserver({onAdded(module){
-  if(!installed && module.name===MODULE_NAME) installed=hookModule(module);
-}});
-send({event:"READY",package:"PACKAGE_PLACEHOLDER",module:MODULE_NAME,target_offset:TARGET_OFFSET.toString()});
-setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();},12000);
-'''
-    js = js.replace("MODULE_PLACEHOLDER", module.replace("\\", "\\\\").replace('"', '\\"'))
-    js = js.replace("PACKAGE_PLACEHOLDER", (package or "UNKNOWN").replace("\\", "\\\\").replace('"', '\\"'))
-    script.write_text(js, encoding="utf-8")
+    probe_window_ms = _positive_int_env("REELSEC_PROBE_WINDOW_MS", 12000)
+    script.write_text(
+        runtime_probe.build_probe_js(module, package, window_ms=probe_window_ms),
+        encoding="utf-8",
+    )
 
     preflight=write_runtime_toolchain_preflight(output)
     gadget_mode = os.environ.get("REELSEC_USE_GADGET", "").strip().lower() in ("1", "true", "yes")
@@ -1885,114 +1858,164 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
         missing.append("frida_cli")
 
     result["missing_requirements"]=missing
+    result["stages"] = []
+    result["lifecycle"] = {}
+    result["reason_code"] = None
+    result["execution_attempted"] = False
 
     if missing:
         result["status"]="RUNTIME_ENVIRONMENT_UNAVAILABLE"
         result["reason"]="missing: " + ",".join(missing)
+        result["stages"].append(runtime_probe.make_stage(
+            "ADB_CONNECTED", runtime_probe.FAIL,
+            reason_code=runtime_probe.ADB_UNAVAILABLE,
+            source="preflight tooling resolution"))
+        result["reason_code"] = runtime_probe.ADB_UNAVAILABLE
     else:
-        adb_rc, adb_output = run([adb, "devices", "-l"])
-        adb_records = parse_adb_devices(adb_output)
+        # --- Stage: ADB_CONNECTED (safe endpoint resolution, never stale) ---
+        serial = None
+        resolution = None
+        try:
+            resolution = resolve_test_device(adb, os.environ.get("REELSEC_TEST_DEVICE"))
+            serial = resolution["serial"]
+            adb_stage = runtime_probe.make_stage(
+                "ADB_CONNECTED", runtime_probe.PASS,
+                source="adb devices -l + resolution policy",
+                serial=serial,
+                requested_serial=resolution.get("requested_serial"),
+                resolution=resolution.get("resolution"),
+                online_devices=resolution.get("online_devices"),
+            )
+        except Exception as exc:
+            adb_stage = runtime_probe.make_stage(
+                "ADB_CONNECTED", runtime_probe.FAIL,
+                reason_code=runtime_probe.ADB_NO_ONLINE_DEVICE,
+                source="adb devices -l + resolution policy",
+                error=str(exc)[:500])
+        result["device_resolution"] = resolution
+        result["stages"].append(adb_stage)
 
-        result["tooling"].update(
-            adb_returncode=adb_rc,
-            adb_devices=[record["raw"] for record in adb_records],
-            adb_device_records=adb_records,
-            adb_output_tail=adb_output[-4000:],
-        )
+        # --- Stage: PACKAGE_RESOLVED ---
+        pkg_stage = runtime_probe.make_stage(
+            "PACKAGE_RESOLVED", runtime_probe.PASS if package else runtime_probe.FAIL,
+            reason_code=None if package else runtime_probe.PACKAGE_NAME_UNRESOLVED,
+            source="package_source:%s" % package_source, package=package)
+        result["stages"].append(pkg_stage)
 
-        if adb_rc != 0:
-            result["status"]="ADB_QUERY_FAILED"
-            result["reason"]="adb devices -l returned non-zero exit status"
-        elif not adb_records:
-            result["status"]="NO_ONLINE_ANDROID_DEVICE"
-            result["reason"]="adb is installed and queried successfully, but no device is in state=device"
-        else:
-            result["execution_attempted"] = True
+        frida_rc, frida_output = None, ""
+        events = []
+        process_stage = None
+        package_present_stage = None
+        launch_stage = None
+
+        if serial and package:
+            # --- Stage: PACKAGE_PRESENT (read-only pm query) ---
+            present, package_present_stage = runtime_probe.check_package_present(
+                run, adb, serial, package)
+            result["stages"].append(package_present_stage)
 
             gadget_mode = os.environ.get("REELSEC_USE_GADGET", "").strip().lower() in ("1", "true", "yes")
             gadget_port = _positive_int_env("REELSEC_FRIDA_GADGET_PORT", 27042)
             result["gadget_mode"] = gadget_mode
             result["gadget_port"] = gadget_port
             forward_established = False
-            if gadget_mode:
-                forward_rc, forward_output = run(
-                    [adb, "forward", "tcp:%d" % gadget_port, "tcp:%d" % gadget_port]
-                )
-                result["gadget_forward_returncode"] = forward_rc
-                result["gadget_forward_output"] = (forward_output or "")[-4000:]
-                if forward_rc != 0:
-                    result["status"] = "GADGET_PORT_FORWARD_FAILED"
-                    result["reason"] = "adb forward failed"
-                    result["execution_attempted"] = False
-                    frida_rc, frida_output = 1, forward_output or ""
-                else:
-                    forward_established = True
-                    launch_rc, launch_output = run(
-                        [adb, "shell", "monkey", "-p", package, "1"],
-                        timeout=15,
-                    )
-                    result["gadget_launch_returncode"] = launch_rc
-                    result["gadget_launch_output"] = (launch_output or "")[-4000:]
-                    if launch_rc != 0:
-                        result["status"] = "GADGET_APP_LAUNCH_FAILED"
-                        result["reason"] = "adb monkey launch failed"
-                        frida_rc, frida_output = launch_rc, launch_output or ""
+
+            if present:
+                if gadget_mode:
+                    forward_rc, forward_output = run(
+                        [adb, "-s", serial, "forward",
+                         "tcp:%d" % gadget_port, "tcp:%d" % gadget_port], timeout=20)
+                    result["gadget_forward_returncode"] = forward_rc
+                    result["gadget_forward_output"] = (forward_output or "")[-4000:]
+                    if forward_rc != 0:
+                        result["status"] = "GADGET_PORT_FORWARD_FAILED"
+                        result["reason"] = "adb forward failed"
+                        result["reason_code"] = runtime_probe.PROBE_ATTACH_FAILED
+                        frida_rc, frida_output = 1, forward_output or ""
                     else:
-                        result["gadget_process_name"] = "Gadget"
-                        frida_rc, frida_output = run(
-                            [frida, "-H", "127.0.0.1:%d" % gadget_port,
-                             "-n", "Gadget", "-l", str(script)],
-                            timeout=18,
-                        )
-            else:
-                frida_rc, frida_output = run(
-                    [frida, "-U", "-f", package, "-l", str(script)],
-                    timeout=18,
-                )
+                        forward_established = True
+                        # --- Stage: APP_LAUNCH_ATTEMPTED ---
+                        launch_started = time.time()
+                        launch_rc, launch_output = run(
+                            [adb, "-s", serial, "shell", "monkey", "-p", package, "1"],
+                            timeout=15)
+                        launch_stage = runtime_probe.make_stage(
+                            "APP_LAUNCH_ATTEMPTED",
+                            runtime_probe.PASS if launch_rc == 0 else runtime_probe.FAIL,
+                            reason_code=None if launch_rc == 0 else runtime_probe.APP_NOT_STARTED,
+                            source="adb:monkey -p %s 1" % package, started=launch_started,
+                            returncode=launch_rc)
+                        result["stages"].append(launch_stage)
+                        result["execution_attempted"] = True
+                        result["gadget_launch_returncode"] = launch_rc
+                        result["gadget_launch_output"] = (launch_output or "")[-4000:]
+                        if launch_rc == 0:
+                            # --- Stage: PROCESS_OBSERVED (bounded ps polling) ---
+                            _obs, _pids, process_stage = runtime_probe.observe_process(
+                                run, adb, serial, package)
+                            result["stages"].append(process_stage)
+                            result["gadget_process_name"] = "Gadget"
+                            frida_rc, frida_output = run(
+                                [frida, "-H", "127.0.0.1:%d" % gadget_port,
+                                 "-n", "Gadget", "-l", str(script)],
+                                timeout=(probe_window_ms // 1000) + 8)
+                        else:
+                            frida_rc, frida_output = launch_rc, launch_output or ""
+                else:
+                    # spawn mode: frida launches the package itself
+                    result["execution_attempted"] = True
+                    launch_stage = runtime_probe.make_stage(
+                        "APP_LAUNCH_ATTEMPTED", runtime_probe.PASS,
+                        source="frida:-U -f spawn", package=package)
+                    result["stages"].append(launch_stage)
+                    frida_rc, frida_output = run(
+                        [frida, "-U", "-f", package, "-l", str(script)],
+                        timeout=(probe_window_ms // 1000) + 8)
 
             if forward_established:
-                run([adb, "forward", "--remove", "tcp:%d" % gadget_port], timeout=10)
+                run([adb, "-s", serial, "forward", "--remove", "tcp:%d" % gadget_port],
+                    timeout=10)
 
             result["frida_exit"]=frida_rc
-            result["frida_output"]=frida_output[-12000:]
-
-            events=[]
-            for line in frida_output.splitlines():
-                try:
-                    item=json.loads(line)
-                except Exception:
-                    continue
-
-                payload=item.get("payload") if isinstance(item, dict) else None
-
-                if isinstance(payload, dict):
-                    events.append(payload)
-                elif isinstance(item, dict) and item.get("event"):
-                    events.append(item)
-
+            result["frida_output"]=(frida_output or "")[-12000:]
+            events = runtime_probe.parse_probe_events(frida_output)
             result["events"]=events
 
-            matches=[
-                e for e in events
-                if e.get("event")=="TARGET_FUNCTION_ENTER"
-                and e.get("target_vptr_match") is True
-                and e.get("target_slot_match") is True
-            ]
-
+            derived = runtime_probe.derive_lifecycle(
+                events, frida_rc=frida_rc, process_stage=process_stage,
+                package_stage=package_present_stage, launch=launch_stage)
+            result["stages"].extend(derived["stages"])
+            result["lifecycle"] = derived["lifecycle"]
+            result["reason_code"] = derived["reason_code"]
+            matches = [e for e in events
+                       if e.get("event") == "TARGET_FUNCTION_ENTER"
+                       and e.get("target_vptr_match") is True
+                       and e.get("target_slot_match") is True]
             result["runtime_matches"]=len(matches)
 
             if matches:
                 result["status"]="PROVEN_RUNTIME_TARGET_DISPATCH"
+                result["reason"]="target entry observed with full vptr+slot predicate"
             elif frida_rc == 124:
                 result["status"]="RUNTIME_PROBE_TIMEOUT_NO_TARGET_OBSERVED"
-                result["reason"]="Frida probe exceeded the bounded 18s execution window"
+                result["reason"]=(
+                    "Frida probe exceeded the bounded execution window; "
+                    "lifecycle reason_code=%s" % derived["reason_code"])
             elif frida_rc != 0:
                 status, reason = classify_frida_failure(frida_output)
                 result["status"] = status
                 result["reason"] = reason
             else:
                 result["status"]="RUNTIME_TARGET_NOT_OBSERVED"
-                result["reason"]="Frida probe ran, but no target entry satisfied the full vptr+slot proof predicate"
+                result["reason"]=(
+                    "Frida probe ran, but no target entry satisfied the full "
+                    "vptr+slot proof predicate; lifecycle reason_code=%s"
+                    % derived["reason_code"])
+        else:
+            result["status"]="NO_ONLINE_ANDROID_DEVICE" if not serial else "PACKAGE_NAME_UNRESOLVED"
+            result["reason"]="runtime preconditions not satisfied (see stages)"
+            result["reason_code"] = (runtime_probe.ADB_NO_ONLINE_DEVICE if not serial
+                                     else runtime_probe.PACKAGE_NAME_UNRESOLVED)
 
     (output / "RUNTIME-PROBE.json").write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -2751,6 +2774,18 @@ def main():
             state_output = run_checked(state_cmd)
             if state_output.strip() != "device":
                 raise RuntimeError("resolved test device is not in adb device state")
+            # Read-only artifact preflight: alignment, uncompressed native
+            # libs, ABI compatibility. Never modifies the APK.
+            zipalign_path = os.environ.get("REELSEC_ZIPALIGN") or shutil.which("zipalign")
+            artifact_preflight = artifact_preflight_checks(
+                sign_verify["signed_path"], zipalign=zipalign_path,
+                adb=adb, serial=serial)
+            if artifact_preflight.get("status") == "PREFLIGHT_FAILED":
+                failed = [name for name, c in artifact_preflight.get("checks", {}).items()
+                          if c.get("status") == "FAIL"]
+                raise RuntimeError(
+                    "artifact preflight failed (%s); install rejected before attempt"
+                    % ",".join(failed))
             install_cmd = install_command(adb, serial, sign_verify["signed_path"])
             try:
                 install_output = run_checked(install_cmd)
@@ -2773,24 +2808,37 @@ def main():
                 uninstall_output = run_checked(uninstall_cmd)
                 install_output = run_checked(install_cmd)
                 reinstall_mode = "UNINSTALL_THEN_INSTALL"
+            test_package = os.environ.get("REELSEC_TEST_PACKAGE")
+            installed_check = (
+                verify_installed_package(adb, serial, test_package)
+                if test_package else
+                {"status": "SKIPPED", "reason": "REELSEC_TEST_PACKAGE not configured"})
             adb_deploy = {
-                "status": "INSTALLED",
+                "status": "INSTALLED" if installed_check.get("present", True)
+                          else "INSTALLED_NOT_VERIFIED",
                 "serial": serial,
                 "requested_serial": resolution.get("requested_serial"),
                 "device_resolution": resolution.get("resolution"),
                 "online_devices": resolution.get("online_devices", []),
                 "artifact": sign_verify["signed_path"],
                 "artifact_sha256": sign_verify["signed_sha256"],
+                "artifact_kind": "INSTRUMENTED_TEST_ARTIFACT",
                 "device_inventory_command": resolution.get("inventory_command"),
                 "device_check_command": state_cmd,
+                "artifact_preflight": artifact_preflight,
                 "install_command": install_cmd,
                 "install_mode": reinstall_mode,
                 "uninstall_command": uninstall_cmd,
                 "uninstall_output_tail": uninstall_output[-2000:],
                 "install_output_tail": install_output[-2000:],
+                "installed_verification": installed_check,
             }
         except Exception as exc:
-            adb_deploy = {"status": "BLOCKED_OR_FAILED", "error": str(exc)}
+            adb_deploy = {
+                "status": "BLOCKED_OR_FAILED",
+                "error": str(exc),
+                "install_failure_diagnosis": diagnose_install_failure(str(exc)),
+            }
         (output / "ADB-DEPLOY.json").write_text(
             json.dumps(adb_deploy, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
@@ -2855,6 +2903,28 @@ def main():
         else "SKIP",
         runtime_capture.get("error", runtime_capture.get("status", "")),
     )
+
+    # Optional guarded L4 behavioral capture (explicit opt-in). Observes
+    # capture-protection behavior via one user-level screencap; never
+    # modifies protections, never attempts circumvention.
+    if (os.environ.get("REELSEC_BEHAVIOR_CAPTURE", "").strip().lower() in ("1", "true", "yes")
+            and adb_deploy.get("status") == "INSTALLED"):
+        try:
+            behavior = behavior_capture.capture_behavior(
+                capabilities.get("tools", {}).get("adb", {}).get("path"),
+                adb_deploy["serial"],
+                os.environ.get("REELSEC_TEST_PACKAGE"),
+                artifact_sha256=sign_verify.get("signed_sha256"),
+                playback_confirmed=os.environ.get(
+                    "REELSEC_BEHAVIOR_PLAYBACK_CONFIRMED", "").strip() == "1",
+            )
+            (output / "BEHAVIOR-CAPTURE.json").write_text(
+                json.dumps(behavior, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        except Exception as exc:
+            (output / "BEHAVIOR-CAPTURE.json").write_text(
+                json.dumps({"schema_version": "behavior-capture-1", "status": "FAILED",
+                            "error": str(exc), "read_only": True}, indent=2) + "\n",
+                encoding="utf-8")
 
     # Tiered evidence report + evidence graph linking static, native and
     # runtime findings. Read-only classification; the causal chain gate

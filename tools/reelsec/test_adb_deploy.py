@@ -13,6 +13,7 @@ from adb_deploy import (
     install_command,
     resolve_test_device,
     is_signature_mismatch_error,
+    diagnose_install_failure,
 )
 
 
@@ -112,6 +113,92 @@ class AdbDeployTests(unittest.TestCase):
         with mock.patch("adb_deploy.subprocess.run", return_value=self._completed(output)):
             with self.assertRaises(AdbDeployError):
                 resolve_test_device("/usr/bin/adb", "auto")
+
+
+class InstallDiagnosticsTests(unittest.TestCase):
+    def test_native_lib_extraction_failure_is_classified(self):
+        diag = diagnose_install_failure(
+            "adb: failed to install x.apk: Failure [INSTALL_FAILED_INVALID_APK: "
+            "INSTALL_FAILED_INVALID_APK: Failed to extract native libraries, res=-2]")
+        self.assertEqual(diag["reason_code"], "NATIVE_LIB_EXTRACTION_FAILED")
+        self.assertIn("alignment", diag["hint"])
+
+    def test_signature_mismatch_is_classified(self):
+        diag = diagnose_install_failure(
+            "Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE: signatures do not match]")
+        self.assertEqual(diag["reason_code"], "SIGNATURE_MISMATCH")
+
+    def test_unknown_failure_is_unclassified_not_guessed(self):
+        diag = diagnose_install_failure("something entirely unknown happened")
+        self.assertEqual(diag["reason_code"], "INSTALL_FAILED_UNCLASSIFIED")
+        self.assertEqual(diag["matches"], [])
+
+    def test_preflight_detects_compressed_native_libs(self):
+        import io
+        import zipfile
+        from adb_deploy import artifact_preflight_checks
+        with tempfile.TemporaryDirectory() as td:
+            apk = Path(td) / "instrumented.apk"
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w") as zf:
+                zf.writestr("classes.dex", b"dex\n035\x00fake")
+                zf.writestr("lib/arm64-v8a/libgood.so", b"\x7fELFstored",
+                            compress_type=zipfile.ZIP_STORED)
+                zf.writestr("lib/arm64-v8a/libbad.so", b"\x7fELFcompressed" * 40,
+                            compress_type=zipfile.ZIP_DEFLATED)
+            apk.write_bytes(buf.getvalue())
+            report = artifact_preflight_checks(apk)
+            self.assertEqual(report["status"], "PREFLIGHT_FAILED")
+            check = report["checks"]["native_libs_uncompressed"]
+            self.assertEqual(check["status"], "FAIL")
+            self.assertIn("lib/arm64-v8a/libbad.so", check["compressed_entries"])
+            self.assertEqual(report["checks"]["abi_directories"]["abis"], ["arm64-v8a"])
+
+    def test_preflight_passes_with_stored_libs_and_abi_match(self):
+        import io
+        import zipfile
+        from adb_deploy import artifact_preflight_checks
+        with tempfile.TemporaryDirectory() as td:
+            apk = Path(td) / "instrumented.apk"
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w") as zf:
+                zf.writestr("classes.dex", b"dex\n035\x00fake")
+                zf.writestr("lib/arm64-v8a/libgood.so", b"\x7fELFstored",
+                            compress_type=zipfile.ZIP_STORED)
+            apk.write_bytes(buf.getvalue())
+
+            def fake_runner(cmd, timeout=120):
+                if "getprop" in cmd:
+                    return 0, "arm64-v8a,armeabi-v7a\n"
+                return 1, ""
+            report = artifact_preflight_checks(
+                apk, runner=fake_runner, adb="/usr/bin/adb", serial="192.168.8.8:1")
+            self.assertEqual(report["status"], "PASS")
+            self.assertTrue(report["checks"]["abi_compatibility"]["compatible"])
+
+    def test_verify_installed_package_success(self):
+        from adb_deploy import verify_installed_package
+
+        def fake_runner(cmd, timeout=120):
+            if "pm" in cmd:
+                return 0, "package:/data/app/~~x/com.newleaf.app.android.victor-y/base.apk\n"
+            return 0, "    versionCode=4200 minSdk=24 targetSdk=34\n"
+        result = verify_installed_package(
+            "/usr/bin/adb", "192.168.8.8:1", "com.newleaf.app.android.victor",
+            runner=fake_runner)
+        self.assertEqual(result["status"], "VERIFIED_INSTALLED")
+        self.assertTrue(result["present"])
+        self.assertEqual(result["version_code"], "4200")
+
+    def test_verify_installed_package_absent(self):
+        from adb_deploy import verify_installed_package
+
+        def fake_runner(cmd, timeout=120):
+            return 0, ""
+        result = verify_installed_package(
+            "/usr/bin/adb", "192.168.8.8:1", "com.x", runner=fake_runner)
+        self.assertEqual(result["status"], "NOT_PRESENT_AFTER_INSTALL")
+        self.assertFalse(result["present"])
 
 
 if __name__ == "__main__":

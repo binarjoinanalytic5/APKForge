@@ -236,11 +236,13 @@ def build_causal_chain(detection, facts, findings):
     probe = facts.get("runtime_probe") or {}
     events = probe.get("events") or []
     runtime_matches = probe.get("runtime_matches", 0)
+    probe_reason = probe.get("reason_code") or (probe.get("lifecycle") or {}).get("reason_code")
     if events and runtime_matches > 0:
         l3 = (TIER_CONFIRMED, "runtime probe observed %d matching event(s)" % runtime_matches)
     elif probe:
-        l3 = (TIER_NOT_PROVEN, "runtime probe ran but observed no matching target events (%s)" %
-              probe.get("status", "unknown"))
+        l3 = (TIER_NOT_PROVEN,
+              "runtime probe observed no matching target events (status=%s reason_code=%s)" %
+              (probe.get("status", "unknown"), probe_reason or "UNKNOWN"))
     else:
         l3 = (TIER_NOT_PROVEN, "no runtime probe evidence supplied")
     links.append({"id": "L3_RUNTIME_EXECUTION_OBSERVED", "status": l3[0], "detail": l3[1]})

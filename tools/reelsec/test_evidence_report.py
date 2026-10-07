@@ -174,6 +174,74 @@ class EvidenceReportTests(unittest.TestCase):
         self.assertEqual(report["schema_version"], "evidence-report-1")
         self.assertIn("never patches", report["safety_boundary"])
 
+    def test_lifecycle_probe_without_target_keeps_L3_not_proven(self):
+        """Scenario 13: staged diagnostics never manufacture L3."""
+        d = tempfile.TemporaryDirectory()
+        self.addCleanup(d.cleanup)
+        cd = Path(d.name)
+        (cd / "target-sha256.txt").write_text(SHA + "\n")
+        (cd / "RUNTIME-PROBE.json").write_text(json.dumps({
+            "status": "RUNTIME_PROBE_TIMEOUT_NO_TARGET_OBSERVED",
+            "reason_code": "TARGET_MODULE_NOT_OBSERVED",
+            "lifecycle": {"probe_attached": True, "module_observed": False,
+                          "target_observed": False,
+                          "reason_code": "TARGET_MODULE_NOT_OBSERVED"},
+            "events": [{"event": "PROBE_ATTACHED"}],
+            "runtime_matches": 0,
+        }))
+        det = detection_stub()
+        det["input_sha256"] = SHA
+        report = build_report(det, campaign_dir=cd)
+        status = {l["id"]: l["status"] for l in report["causal_chain"]["links"]}
+        self.assertEqual(status["L3_RUNTIME_EXECUTION_OBSERVED"], TIER_NOT_PROVEN)
+        self.assertIn("TARGET_MODULE_NOT_OBSERVED",
+                      next(l["detail"] for l in report["causal_chain"]["links"]
+                           if l["id"] == "L3_RUNTIME_EXECUTION_OBSERVED"))
+        self.assertEqual(report["causal_chain"]["verdict"], TIER_NOT_PROVEN)
+
+    def test_missing_behavior_capture_keeps_L4_not_proven(self):
+        """Scenario 14: no BEHAVIOR-CAPTURE.json means L4 stays NOT_PROVEN."""
+        d = tempfile.TemporaryDirectory()
+        self.addCleanup(d.cleanup)
+        cd = Path(d.name)
+        (cd / "target-sha256.txt").write_text(SHA + "\n")
+        (cd / "RUNTIME-PROBE.json").write_text(json.dumps({
+            "status": "PROVEN_RUNTIME_TARGET_DISPATCH",
+            "events": [{"event": "TARGET_FUNCTION_ENTER"}],
+            "runtime_matches": 1,
+        }))
+        det = detection_stub()
+        det["input_sha256"] = SHA
+        report = build_report(det, campaign_dir=cd)
+        status = {l["id"]: l["status"] for l in report["causal_chain"]["links"]}
+        self.assertEqual(status["L3_RUNTIME_EXECUTION_OBSERVED"], TIER_CONFIRMED)
+        self.assertEqual(status["L4_CAPTURE_BLOCK_BEHAVIOR_OBSERVED"], TIER_NOT_PROVEN)
+        self.assertEqual(report["causal_chain"]["verdict"], TIER_NOT_PROVEN)
+        self.assertFalse(report["causal_proof"])
+
+    def test_gate_rejects_partial_evidence_without_provenance(self):
+        """Scenario 15: runtime+behavior without hash binding is rejected."""
+        d = tempfile.TemporaryDirectory()
+        self.addCleanup(d.cleanup)
+        cd = Path(d.name)  # no target-sha256.txt -> L2 cannot confirm
+        (cd / "RUNTIME-PROBE.json").write_text(json.dumps({
+            "status": "PROVEN_RUNTIME_TARGET_DISPATCH",
+            "events": [{"event": "TARGET_FUNCTION_ENTER"}],
+            "runtime_matches": 1,
+        }))
+        (cd / "BEHAVIOR-CAPTURE.json").write_text(json.dumps({
+            "screenshot_attempted": True,
+            "secure_content_protected": True,
+            "session_bound": True,
+        }))
+        report = build_report(detection_stub(), campaign_dir=cd)
+        status = {l["id"]: l["status"] for l in report["causal_chain"]["links"]}
+        self.assertEqual(status["L2_TARGET_PROVENANCE_ESTABLISHED"], TIER_NOT_PROVEN)
+        self.assertEqual(status["L3_RUNTIME_EXECUTION_OBSERVED"], TIER_CONFIRMED)
+        self.assertEqual(status["L4_CAPTURE_BLOCK_BEHAVIOR_OBSERVED"], TIER_CONFIRMED)
+        self.assertEqual(report["causal_chain"]["verdict"], TIER_NOT_PROVEN)
+        self.assertFalse(report["causal_proof"])
+
 
 def main():
     unittest.main(module=__name__, argv=[__name__, "-v"], exit=False)
