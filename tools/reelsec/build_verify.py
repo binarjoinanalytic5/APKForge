@@ -47,6 +47,43 @@ def apktool_build_command(selection, decoded_root, output_apk):
     raise BuildVerifyError("unsupported Apktool backend: %r" % backend)
 
 
+def zipalign_command(zipalign, input_apk, output_apk, page_size_kb=16):
+    """Build a modern zipalign command for APKs containing shared libraries.
+
+    -P 16 aligns uncompressed .so files to a 16 KiB page boundary, which is
+    suitable for both 16 KiB and 4 KiB Android devices.
+    """
+    if not zipalign:
+        raise BuildVerifyError("zipalign path is required")
+    source = Path(input_apk).resolve()
+    target = Path(output_apk).resolve()
+    if not source.is_file():
+        raise BuildVerifyError("input APK for zipalign is missing")
+    if source == target:
+        raise BuildVerifyError("zipalign output must be separate from input APK")
+    if int(page_size_kb) not in (4, 16, 64):
+        raise BuildVerifyError("unsupported zipalign page size: %s" % page_size_kb)
+    return [
+        str(zipalign), "-P", str(int(page_size_kb)), "-f", "-v", "4",
+        str(source), str(target),
+    ]
+
+
+def zipalign_verify_command(zipalign, apk, page_size_kb=16):
+    """Build a read-only zipalign verification command."""
+    if not zipalign:
+        raise BuildVerifyError("zipalign path is required")
+    target = Path(apk).resolve()
+    if not target.is_file():
+        raise BuildVerifyError("APK for zipalign verification is missing")
+    if int(page_size_kb) not in (4, 16, 64):
+        raise BuildVerifyError("unsupported zipalign page size: %s" % page_size_kb)
+    return [
+        str(zipalign), "-c", "-P", str(int(page_size_kb)), "-v", "4",
+        str(target),
+    ]
+
+
 def verify_artifact(path):
     apk = Path(path).resolve()
     if not apk.is_file():
