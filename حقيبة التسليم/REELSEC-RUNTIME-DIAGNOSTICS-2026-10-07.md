@@ -260,3 +260,51 @@ L1 CONFIRMED / L2 INDICATOR / L3 NOT_PROVEN / L4 NOT_PROVEN /
 `git fetch origin main && git merge --ff-only origin/main` ثم bootstrap كالمعتاد.
 النظام سيجيب تلقائيًا: هل original يعمل؟ هل instrumented يعمل؟ نوع الانهيار؟
 سببه؟ regression أم baseline؟ هل probe مسموح؟ ولماذا؟ — بدون تحقيق يدوي.
+
+---
+
+## ملحق 2026-10-07 (ج): Autonomous Evidence Platform + Safety-by-Design
+
+### الحادث المؤسِّس لهذا الملحق
+جولة الـbaseline نفّذت **uninstall هدمي** لحزمة الاختبار على الجهاز استنادًا إلى
+متغير بيئة واحد (`REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1`). سُجِّلت الجولة كـ
+**`SAFETY/DESIGN FAILURE — DESTRUCTIVE BASELINE UNINSTALL`** في
+`analysis/campaigns/2026-10-07T20-06-46-incident/` — فشل في تصميم منصة ReelSec،
+**وليس فشلًا في تطبيق ReelShort**. الحالة العلمية بلا تغيير:
+L1 CONFIRMED / L2 INDICATOR / L3 NOT_PROVEN / L4 NOT_PROVEN /
+`SCREENSHOT_BLOCKING = NOT_PROVEN`.
+
+### المعمارية الجديدة (داخل الكود، لا في الإعدادات)
+1. **`safety_gate.py`**: الهدم مرفوض افتراضيًا **داخل الكود**:
+   `UNINSTALL = DENY · CLEAR_DATA = DENY · REMOVE_PACKAGE = DENY ·
+   FACTORY_RESET = DENY` (الأخير غير قابل للتنفيذ مطلقًا حتى مع تفويض).
+2. **التفويض وثيقة لا متغير بيئة**: `destructive-auth-1` — مطابقة تامة
+   (operation/package/user/device) + نافذة زمنية ≤ 15 دقيقة + authorized_by +
+   reason + بصمة SHA-256. أعلام البيئة القديمة **مخالفات** تُوقف المنصة.
+3. **السلسلة التسعية إلزامية**: بوابة → مطابقة الحزمة → مطابقة المستخدم →
+   تحقق هوية الجهاز → Snapshot مسبق → تفويض صريح → العملية → تحقق لاحق →
+   سجل تدقيق (`SAFETY-AUDIT.jsonl` — يُسجَّل التنفيذ **والمنع** معًا).
+4. **`reelsec doctor`**: يفحص البيئة؛ عند وجود أي علم هدمي شامل:
+   `SAFETY: BLOCKED / REASON: destructive uninstall permission enabled /
+   No package was modified. / No runtime campaign executed.` — ولا تُنفَّذ
+   أي حملة. **الأداة تعرف متى تتوقف.**
+5. **`reelsec platform <apk>`**: المنسق المستقل —
+   doctor → بوابة السلامة → حملة → Collectors → Evidence Aggregator →
+   Git Publisher → تقرير نهائي. المخرجات في
+   `analysis/campaigns/<timestamp>/`: ‏`MANIFEST.json` (SHA-256 لكل ملف)،
+   `FINAL-VERDICT.json`، ‏`FINAL-REPORT.md`، ‏`SAFETY-GATE.json`، وملفات
+   الـCollectors العشرة الموحدة (`collector-1`): DEVICE-SNAPSHOT, PACKAGE,
+   PROCESS, CRASH, LOGCAT, ARTIFACT-INTEGRITY, RUNTIME-HEALTH, BASELINE,
+   BEHAVIOR, EVIDENCE. الرفع تلقائي بعد كل حملة (ناجحة أو فاشلة) مع
+   `PUBLISH_COMMIT` — لا أوامر Termux يدوية ولا grep/sed بين الوكيل والأداة.
+6. **كل مسارات الـuninstall القديمة** (baseline + تعارض التوقيع في مرحلة 10)
+   تمر الآن عبر `safety_gate.execute_destructive` حصريًا.
+7. **الاختبارات**: ‏20 اختبار سلامة تجعل سيناريو الحادث مستحيلًا بنيويًا
+   (منصة ترفض، ولا أمر uninstall واحد يصدر) — المجموعة الكاملة 187/187.
+
+### ما تغيّر للمشغّل على Termux
+- `reelsec doctor` قبل أي شيء؛ إن ظهر `SAFETY: BLOCKED` فأزل العلم ولا تتجاوزه.
+- الحملة المستقلة: `python3 tools/reelsec/reelsec.py platform ./original.apk`
+  — تجمع وتحلل وتنشر وتعطي verdict واحدًا ومرجع commit.
+- إن تطلبت جولة uninstall فعلًا: وثيقة تفويض `destructive-auth-1` محددة
+  بالحزمة والمستخدم والجهاز و15 دقيقة، عبر `REELSEC_DESTRUCTIVE_AUTH`.

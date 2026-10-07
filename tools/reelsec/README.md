@@ -195,3 +195,25 @@ hooks, no protection modification, no circumvention.
 
 **Important:** `TARGET_OBSERVED` proves a runtime layer only (L3). It is
 never behavioral proof; L4 requires the independent behavioral record.
+
+## Autonomous Evidence Platform + Safety-by-Design (2026-10-07)
+
+`reelsec doctor` inspects the environment and **blocks the platform** while
+any blanket destructive flag is set (`SAFETY: BLOCKED — destructive
+uninstall permission enabled; no package was modified; no runtime campaign
+executed`). `reelsec platform <apk>` runs the full autonomous pipeline:
+safety gate → campaign orchestrator → 10 uniform collectors
+(schema `collector-1`) → evidence aggregator (SHA-256 manifest, final
+verdict, report) → git publisher (`PUBLISH_COMMIT`). Campaign evidence
+lands in `analysis/campaigns/<timestamp>/`.
+
+Destructive operations (UNINSTALL / CLEAR_DATA / REMOVE_PACKAGE /
+FACTORY_RESET) are **DENY by default in code**. The only authorization is a
+hash-bound, exact-match (operation/package/user/device), time-bounded
+`destructive-auth-1` document via `REELSEC_DESTRUCTIVE_AUTH`, processed by
+`safety_gate.execute_destructive` with the full nine-step chain
+(gate → package → user → device → pre-snapshot → authorization → operation
+→ post-verification → audit). Blocks are audited too. This is the
+architectural remediation of the 2026-10-07 DESTRUCTIVE BASELINE UNINSTALL
+incident, recorded in
+`analysis/campaigns/2026-10-07T20-06-46-incident/`.

@@ -34,9 +34,11 @@ from adb_deploy import (
     artifact_preflight_checks,
     artifact_integrity_gate,
     verify_installed_package,
+    _default_runner,
 )
 import runtime_probe
 import runtime_health
+import safety_gate
 import behavior_capture
 from runtime_capture import capture_snapshot, bind_artifact
 from gadget_observer import plan_gadget_observation
@@ -1825,10 +1827,15 @@ def run_baseline_runtime(output, original_apk, capabilities,
     if not original_apk or not Path(original_apk).is_file():
         doc["reason"] = "original APK path unavailable in this environment"
         return doc
-    if os.environ.get("REELSEC_ALLOW_TEST_DEVICE_UNINSTALL", "").strip() != "1":
-        doc["reason"] = ("baseline round installs/uninstalls the test package; "
-                         "REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1 is required on "
-                         "the explicit test device")
+    # Safety-by-design: the baseline round needs destructive uninstalls, which
+    # are DENY by default. A legacy blanket env flag is NOT authorization
+    # (2026-10-07 incident); a hash-bound authorization document processed by
+    # safety_gate is the only accepted path.
+    if safety_gate.inspect_environment(os.environ):
+        doc.update(status="SAFETY_BLOCKED",
+                   reason=("blanket destructive permission is set in the "
+                           "environment; remove it and use a hash-bound "
+                           "authorization document (REELSEC_DESTRUCTIVE_AUTH)"))
         return doc
     test_package = os.environ.get("REELSEC_TEST_PACKAGE")
     if not test_package:
@@ -1851,19 +1858,32 @@ def run_baseline_runtime(output, original_apk, capabilities,
                                  keystore, alias))
         baseline_profile = runtime_health.static_artifact_profile(
             signed_original, manifest_decoder=manifest_decoder)
+        audit_path = Path(output) / "SAFETY-AUDIT.jsonl"
+        auth_path = os.environ.get("REELSEC_DESTRUCTIVE_AUTH")
         try:
-            run_checked(uninstall_command(adb, serial, test_package))
-            doc["pre_uninstall"] = "existing test package removed for the baseline round"
-        except Exception as exc:
-            doc["pre_uninstall"] = "no package removed (%s)" % str(exc)[:200]
+            audit = safety_gate.execute_destructive(
+                _default_runner, adb, serial, safety_gate.UNINSTALL,
+                test_package, authorization_path=auth_path,
+                audit_path=audit_path)
+            doc["pre_uninstall"] = {"status": audit["result"],
+                                    "authorization_sha256":
+                                        audit.get("authorization_sha256")}
+        except safety_gate.SafetyBlock as block:
+            doc.update(status="SAFETY_BLOCKED",
+                       reason="pre-baseline uninstall refused: %s" % block)
+            return doc
         run_checked(install_command(adb, serial, signed_original))
         health = runtime_health.assess_startup(
             run, adb, serial, test_package, label="original", observe_s=8)
         try:
-            run_checked(uninstall_command(adb, serial, test_package))
-            doc["post_uninstall"] = "baseline copy removed after assessment"
-        except Exception as exc:
-            doc["post_uninstall"] = "cleanup uninstall failed: %s" % str(exc)[:300]
+            audit = safety_gate.execute_destructive(
+                _default_runner, adb, serial, safety_gate.UNINSTALL,
+                test_package, authorization_path=auth_path,
+                audit_path=audit_path)
+            doc["post_uninstall"] = {"status": audit["result"]}
+        except safety_gate.SafetyBlock as block:
+            doc["post_uninstall"] = {"status": "SAFETY_BLOCKED",
+                                     "reason": str(block)}
         doc.update(
             status="BASELINE_ASSESSED", serial=serial, health=health,
             baseline_profile=baseline_profile,
@@ -2664,7 +2684,8 @@ def _progress_run(state, output, index, name, fn):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", nargs="?", choices=("campaign",))
+    parser.add_argument("command", nargs="?", choices=("campaign", "doctor",
+                                                       "platform"))
     parser.add_argument("apk", nargs="?")
     parser.add_argument("--elf")
     parser.add_argument("--output")
@@ -2676,6 +2697,36 @@ def main():
 
     input_apk = None
     input_apk_sha256 = None
+    if args.command == "doctor":
+        import orchestrator
+        doc = orchestrator.doctor()
+        print(json.dumps(doc, indent=2, sort_keys=True))
+        if doc["safety"] != "OK":
+            print("SAFETY: BLOCKED")
+            print("REASON: %s" % doc["reason"])
+            print("No package was modified.")
+            print("No runtime campaign executed.")
+            return 2
+        print("SAFETY: OK")
+        return 0
+    if args.command == "platform":
+        import orchestrator
+        if not args.apk:
+            parser.error("platform mode requires an APK path")
+        apk = Path(args.apk).expanduser().resolve()
+        if not apk.is_file():
+            parser.error("APK not found: %s" % apk)
+        result = orchestrator.run_platform(apk, ROOT)
+        print(json.dumps({
+            "status": result["status"],
+            "campaign_status": result.get("campaign_status"),
+            "campaign_dir": result["campaign_dir"],
+            "final_verdict": result["verdict"]["final_verdict"],
+            "reason": result["verdict"].get("reason"),
+            "PUBLISH_STATUS": (result.get("publish") or {}).get("status"),
+            "PUBLISH_COMMIT": (result.get("publish") or {}).get("commit"),
+        }, indent=2, sort_keys=True))
+        return 0 if result["status"] != "SAFETY_BLOCKED" else 2
     if args.command == "campaign":
         if not args.apk:
             parser.error("campaign mode requires an APK path")
@@ -3110,17 +3161,20 @@ def main():
             except Exception as install_exc:
                 if not is_signature_mismatch_error(str(install_exc)):
                     raise
-                if os.environ.get("REELSEC_ALLOW_TEST_DEVICE_UNINSTALL", "").strip() != "1":
-                    raise RuntimeError(
-                        "existing package is signed with a different certificate; "
-                        "set REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1 only on the explicit "
-                        "test device to remove the existing package and reinstall the isolated artifact"
-                    )
                 package_name = os.environ.get("REELSEC_TEST_PACKAGE")
                 if not package_name:
                     raise RuntimeError("REELSEC_TEST_PACKAGE unavailable; refusing package uninstall")
-                uninstall_cmd = uninstall_command(adb, serial, package_name)
-                uninstall_output = run_checked(uninstall_cmd)
+                # Safety-by-design: replacing a differently-signed package is a
+                # destructive UNINSTALL. The legacy blanket env flag is not an
+                # authorization (2026-10-07 incident); only a hash-bound
+                # authorization document processed by the safety gate is.
+                uninstall_audit = safety_gate.execute_destructive(
+                    _default_runner, adb, serial, safety_gate.UNINSTALL,
+                    package_name,
+                    authorization_path=os.environ.get("REELSEC_DESTRUCTIVE_AUTH"),
+                    audit_path=output / "SAFETY-AUDIT.jsonl")
+                uninstall_cmd = uninstall_audit["command"]
+                uninstall_output = (uninstall_audit.get("output_tail") or "")
                 install_output = run_checked(install_cmd)
                 reinstall_mode = "UNINSTALL_THEN_INSTALL"
             test_package = os.environ.get("REELSEC_TEST_PACKAGE")

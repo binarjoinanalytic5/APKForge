@@ -1,0 +1,39 @@
+{
+  "schema_version": "final-verdict-1",
+  "record_type": "INCIDENT_RECORD",
+  "campaign_dir": "analysis/campaigns/2026-10-07T20-06-46-incident",
+  "final_verdict": "SAFETY_DESIGN_FAILURE",
+  "classification": "SAFETY/DESIGN FAILURE — DESTRUCTIVE BASELINE UNINSTALL",
+  "attributed_to": "ReelSec platform design (baseline round gated by a bare environment variable), NOT a ReelShort application failure",
+  "reason": "The baseline round executed destructive uninstalls of the test package on the device under the sole authority of REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1. A blanket env flag is not an authorization. The application package was removed as a side effect of a diagnostic round.",
+  "campaign_status": "NOT_REPEATED_BY_DESIGN",
+  "safety": "DESIGN_FAILURE_RECORDED",
+  "runtime": {
+    "ORIGINAL_RUNTIME": "NOT_ASSESSED",
+    "INSTRUMENTED_RUNTIME": "NOT_ASSESSED",
+    "CRASH_CLASS": null,
+    "CRASH_CAUSE": null,
+    "REGRESSION_STATUS": "NOT_COMPARABLE",
+    "RUNTIME_PROOF_STATUS": "NOT_RUN",
+    "NEXT_ACTION": "None. The round is recorded as a safety/design failure; no campaign is re-run until the Autonomous Evidence Platform safety gate is in force."
+  },
+  "scientific_status": {
+    "L1": "CONFIRMED",
+    "L2": "INDICATOR",
+    "L3": "NOT_PROVEN",
+    "L4": "NOT_PROVEN",
+    "SCREENSHOT_BLOCKING": "NOT_PROVEN"
+  },
+  "remediation": {
+    "status": "IMPLEMENTED",
+    "measures": [
+      "safety_gate.py: destructive operations DENY by default in code (UNINSTALL/CLEAR_DATA/REMOVE_PACKAGE/FACTORY_RESET); FACTORY_RESET never executable even authorized",
+      "authorization = hash-bound, exact-match (operation/package/user/device), time-bounded document; environment variables are violations, never authorizations",
+      "nine-step chain enforced: gate -> package match -> user match -> device identity -> pre-snapshot -> authorization -> operation -> post-verification -> audit record (executed AND blocked attempts)",
+      "orchestrator.doctor blocks the entire platform while any blanket destructive flag is set: SAFETY: BLOCKED / No package was modified / No runtime campaign executed",
+      "run_baseline_runtime and the stage-10 signature-mismatch path now route every uninstall through safety_gate.execute_destructive",
+      "test_safety_gate.py: 20 regression tests make the incident scenario structurally impossible"
+    ]
+  },
+  "note": "This record replaces what would otherwise have been filed as a ReelShort runtime failure. The scientific verdict is unchanged."
+}

@@ -323,3 +323,19 @@ RUNTIME-VERDICT artifacts, and evidence-gate enforcement
 artifact crash). 10-scenario regression matrix covered; no scenario may
 degenerate into a misleading RUNTIME_PROBE_TIMEOUT. Suite: 166/166.
 Scientific verdict unchanged: SCREENSHOT_BLOCKING = NOT_PROVEN.
+
+## 2026-10-07 — Autonomous Evidence Platform + Safety-by-Design
+
+Incident recorded: 2026-10-07 baseline round executed a destructive
+uninstall under a bare env flag — filed as SAFETY/DESIGN FAILURE —
+DESTRUCTIVE BASELINE UNINSTALL (analysis/campaigns/2026-10-07T20-06-46-
+incident/), NOT a ReelShort failure; scientific verdict unchanged
+(SCREENSHOT_BLOCKING = NOT_PROVEN). Architectural remediation implemented:
+safety_gate.py (deny-by-default in code; hash-bound exact-match
+time-bounded authorization documents; nine-step chain; audited blocks),
+orchestrator.py (doctor blocks the platform on blanket destructive flags;
+autonomous pipeline: campaign -> collectors -> aggregator -> git
+publisher -> FINAL-VERDICT/FINAL-REPORT with PUBLISH_COMMIT),
+collectors.py (10 uniform collector-1 envelopes), and all legacy uninstall
+paths rerouted through the gate. Suite: 187/187, including 20 safety
+regression tests that make the incident scenario structurally impossible.
