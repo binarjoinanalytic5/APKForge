@@ -2500,6 +2500,47 @@ def main():
             "causal_proof": False,
             "interpretation": "STATIC_INDICATORS_ONLY",
         }
+    # Optional open-source analyzers: read-only evidence only.
+    try:
+        adapter_root = (decoded_inventory or {}).get("root") if decoded_inventory else None
+        if adapter_root:
+            previous_input_apk = os.environ.get("REELSEC_INPUT_APK")
+            if input_apk:
+                os.environ["REELSEC_INPUT_APK"] = str(input_apk)
+            try:
+                optional_adapters = run_optional_adapters(
+                    adapter_root,
+                    elf=args.elf,
+                    requested=args.adapters,
+                )
+            finally:
+                if previous_input_apk is None:
+                    os.environ.pop("REELSEC_INPUT_APK", None)
+                else:
+                    os.environ["REELSEC_INPUT_APK"] = previous_input_apk
+        else:
+            optional_adapters = {
+                "schema_version": "reelsec-optional-adapters-1",
+                "read_only": True,
+                "status": "BLOCKED",
+                "reason": "no usable analysis root",
+                "causal_proof": False,
+                "interpretation": "OPTIONAL_TOOL_EVIDENCE_ONLY",
+            }
+    except Exception as exc:
+        optional_adapters = {
+            "schema_version": "reelsec-optional-adapters-1",
+            "read_only": True,
+            "status": "FAILED",
+            "error": str(exc),
+            "causal_proof": False,
+            "interpretation": "OPTIONAL_TOOL_EVIDENCE_ONLY",
+        }
+    (output / "OPTIONAL-ADAPTERS.json").write_text(
+        json.dumps(optional_adapters, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
     (output / "CAPTURE-DETECTION.json").write_text(
         json.dumps(capture_detection, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
         encoding="utf-8",
