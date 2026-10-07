@@ -1,4 +1,5 @@
 import json
+import struct
 import tempfile
 import unittest
 from pathlib import Path
@@ -30,7 +31,12 @@ class GadgetEmbedTests(unittest.TestCase):
                 json.dumps({"status":"MUTATED","mutations":[]}) + "\n", encoding="utf-8"
             )
             gadget = Path(tmp) / "libfrida-gadget.so"
-            gadget.write_bytes(b"fake-gadget")
+            header = bytearray(64)
+            header[:4] = b"\x7fELF"
+            header[4] = 2
+            header[5] = 1
+            struct.pack_into("<H", header, 18, 183)
+            gadget.write_bytes(header + b"test-gadget")
             manifest = embed_frida_gadget(root, target, gadget)
             self.assertTrue((root / "lib" / "arm64-v8a" / "libfrida-gadget.so").is_file())
             config_path = root / "lib" / "arm64-v8a" / "libfrida-gadget.config.so"
