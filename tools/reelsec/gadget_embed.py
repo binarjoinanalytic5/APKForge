@@ -19,7 +19,7 @@ def sha256_file(path):
     return h.hexdigest()
 
 
-def _reserve_register(text, anchor):
+def _reserve_registers(text, anchor, count=2):
     starts = list(re.finditer(r"(?m)^[ \t]*\.method\b", text[:anchor.start()]))
     if not starts:
         raise GadgetEmbedError("containing method not found")
@@ -82,7 +82,7 @@ def embed_frida_gadget(work_dir, target_smali, gadget_path, abi="arm64-v8a", por
     if not match:
         raise GadgetEmbedError("loadLibrary anchor not found")
 
-    updated, reg = _reserve_register(text, match)
+    updated, reg = _reserve_registers(text, match, count=2)
     match = pattern.search(updated)
     indent = match.group("i")
     replacement = (
@@ -90,8 +90,8 @@ def embed_frida_gadget(work_dir, target_smali, gadget_path, abi="arm64-v8a", por
         + indent + 'const-string v%d, "frida-gadget"\n' % reg
         + indent + 'invoke-static {v%d}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n' % reg
         + indent + 'const-string v%d, "ReelSec-Gadget-Load"\n' % reg
-        + indent + 'const-string v%d, "loaded"\n' % reg
-        + indent + 'invoke-static {v%d, v%d}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I' % (reg, reg)
+        + indent + 'const-string v%d, "loaded"\n' % (reg + 1)
+        + indent + 'invoke-static {v%d, v%d}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I' % (reg, reg + 1)
     )
     target.write_text(updated[:match.start()] + replacement + updated[match.end():], encoding="utf-8")
 
