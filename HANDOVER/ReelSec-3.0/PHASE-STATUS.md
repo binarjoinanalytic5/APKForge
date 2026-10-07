@@ -339,3 +339,35 @@ publisher -> FINAL-VERDICT/FINAL-REPORT with PUBLISH_COMMIT),
 collectors.py (10 uniform collector-1 envelopes), and all legacy uninstall
 paths rerouted through the gate. Suite: 187/187, including 20 safety
 regression tests that make the incident scenario structurally impossible.
+
+## 2026-10-07 — Crash Collector Verification + Original-vs-Instrumented
+## Crash Comparison (crash-comparison-1)
+
+Verification round (commit bf5a80b, code-only, no campaign, no destructive
+op): CRASH-ARTIFACT.json is written by write_runtime_probe (reelsec.py) and
+BASELINE-CRASH-ARTIFACT.json by the gated run_baseline_runtime; every
+collector-chain device command is read-only (dumpsys exit-info, monkey
+launch, ps, logcat -b crash, /proc maps, pm path) — the only uninstall in
+the flow goes through safety_gate with a hash-bound authorization
+document. Two regression tests simulate the observed device crash
+(SIGABRT, uid 10285/9510285, pid 14210, users 0/95, base.apk + 0x31e10)
+against a crafted STORED-entry artifact and assert RESOLVED offset math,
+PID/UID/APK-path/SHA bindings, and the no-cause-labeling guard.
+
+New operational fact: BOTH the original and the instrumented artifact
+crash on the device. Attribution rule hardened: a crash present in both
+builds must NOT be attributed to instrumentation. Implemented
+build_crash_comparison (crash-comparison-1): the two sides are compared
+but never merged — each keeps its own package/user/UID/PID/APK-path/
+artifact-SHA/timing bindings and its own independent base.apk+0x… offset
+resolution (different builds; identity never assumed). Explicit statuses:
+BOTH_CRASH / INSTRUMENTED_ONLY_CRASH / ORIGINAL_ONLY_CRASH; explicit
+question answers (both SIGABRT? same fault location? same startup stage?
+abort message captured on either side? does each artifact's own file
+contain the offset?); attribution guards (BOTH_CRASH =>
+instrumentation_regression NOT_ESTABLISHED, common cause device/OS/ROM or
+app itself; INSTRUMENTED_ONLY => SUSPECTED_NOT_PROVEN). The comparison is
+written automatically by both campaign rounds into CRASH-COMPARISON.json
+and surfaced as CRASH_COMPARISON in RUNTIME-VERDICT.json. Suite: 213/213.
+No campaign was run; no device-destructive operation was performed.
+Scientific verdict unchanged: SCREENSHOT_BLOCKING = NOT_PROVEN.

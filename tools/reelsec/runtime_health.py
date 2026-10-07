@@ -63,6 +63,15 @@ BOTH_START_OK = "BOTH_START_OK"
 BASELINE_CRASH_INSTRUMENTED_OK = "BASELINE_CRASH_INSTRUMENTED_OK"
 NOT_COMPARABLE = "NOT_COMPARABLE"
 
+# Crash-level comparison verdicts: original vs instrumented are treated as
+# two INDEPENDENT evidence sides; when both crash the status is explicit
+# and the crash must not be attributed to instrumentation.
+CRASH_COMPARISON_SCHEMA = "crash-comparison-1"
+BOTH_CRASH = "BOTH_CRASH"
+INSTRUMENTED_ONLY_CRASH = "INSTRUMENTED_ONLY_CRASH"
+ORIGINAL_ONLY_CRASH = "ORIGINAL_ONLY_CRASH"
+NO_CRASH_EVIDENCE = "NO_CRASH_EVIDENCE"
+
 CONF_HIGH = "HIGH"
 CONF_MEDIUM = "MEDIUM"
 CONF_LOW = "LOW"
@@ -309,6 +318,7 @@ def build_crash_artifact(package, label, exit_entries, tombstone,
     crashes = []
     for e in exit_entries or []:
         crashes.append({
+            "package": e.get("package"),
             "uid": e.get("uid"),
             "user": (e.get("uid") // 100000) if e.get("uid") is not None
                     else e.get("user"),
@@ -392,6 +402,195 @@ def build_crash_artifact(package, label, exit_entries, tombstone,
             "fatal_lines": tombstone.get("fatal_lines") or [],
             "package_matched_lines": tombstone.get("package_matched_lines") or [],
         },
+    }
+
+
+def _crash_side_summary(art):
+    """Independent per-artifact crash summary (never merged across sides).
+
+    Keeps each side's own package/user/UID/PID/APK-path/artifact-SHA and
+    timing bindings exactly as collected for THAT artifact.
+    """
+    if not art:
+        return None
+    artifact = art.get("artifact") or {}
+    session = art.get("session") or {}
+    grouping = art.get("grouping") or {}
+    fl = art.get("fault_location") or {}
+    res = art.get("apk_offset_resolution") or {}
+    seen = session.get("first_process_seen_epoch")
+    if seen is None:
+        stage = "CRASHED_BEFORE_PROCESS_OBSERVED"
+    elif session.get("process_alive_at_exit"):
+        stage = "STILL_ALIVE_AT_WINDOW_EXIT_THEN_CRASH_EXIT_INFO"
+    else:
+        stage = "CRASHED_AFTER_PROCESS_OBSERVED"
+    return {
+        "label": artifact.get("label"),
+        "artifact_type": artifact.get("artifact_type"),
+        "artifact_sha256": artifact.get("artifact_sha256"),
+        "installed_path": artifact.get("installed_path"),
+        "local_artifact": artifact.get("local_artifact"),
+        "package": art.get("package"),
+        "fatal_signal": art.get("fatal_signal"),
+        "fault_location": ({"library": fl.get("library"),
+                            "pc": fl.get("pc"),
+                            "symbol": fl.get("symbol")} if fl else None),
+        "apk_offset_resolution": (
+            {"status": res.get("status"), "entry": res.get("entry"),
+             "offset_within_entry": res.get("offset_within_entry"),
+             "reason": res.get("reason")} if res else None),
+        "abort_message_present": bool(art.get("abort_message_present")),
+        "startup_stage": stage,
+        "observed_process_lifetime_ms":
+            session.get("observed_process_lifetime_ms"),
+        "instance_count": grouping.get("instance_count"),
+        "uids": grouping.get("uids"),
+        "users": grouping.get("users"),
+    }
+
+
+def build_crash_comparison(instrumented_artifact, original_artifact):
+    """CRASH-COMPARISON-1: original-vs-instrumented crash comparison.
+
+    The two sides are compared but never merged: each keeps its own
+    package/user/UID/PID/APK-path/artifact-SHA/timing bindings and its own
+    `base.apk + 0x…` offset resolution (the original and the instrumented
+    build are DIFFERENT files, so offsets are resolved independently
+    against each side's own local artifact and identical values are never
+    assumed). When BOTH sides crashed the status is explicitly BOTH_CRASH
+    and the crash MUST NOT be attributed to instrumentation on this
+    evidence; a common cause (device/OS/ROM or the app itself) must be
+    investigated and only differential evidence may isolate
+    instrumentation. Returns None when neither side has crash evidence.
+    """
+    ins = _crash_side_summary(instrumented_artifact)
+    orig = _crash_side_summary(original_artifact)
+    if ins is None and orig is None:
+        return None
+
+    if ins is not None and orig is not None:
+        status = BOTH_CRASH
+        attribution = {
+            "instrumentation_regression": "NOT_ESTABLISHED",
+            "guard": ("both the ORIGINAL and the INSTRUMENTED artifact "
+                      "crashed on this device: the crash MUST NOT be "
+                      "attributed to instrumentation; a common cause "
+                      "(device/OS/ROM or the app itself) must be "
+                      "investigated and only differential evidence may "
+                      "isolate instrumentation"),
+        }
+    elif ins is not None:
+        status = INSTRUMENTED_ONLY_CRASH
+        attribution = {
+            "instrumentation_regression": "SUSPECTED_NOT_PROVEN",
+            "guard": ("only the instrumented artifact has crash evidence; "
+                      "instrumentation is a candidate cause, not a proven "
+                      "one, until a clean original round on the same "
+                      "device/session is recorded"),
+        }
+    else:
+        status = ORIGINAL_ONLY_CRASH
+        attribution = {
+            "instrumentation_regression": "NOT_ESTABLISHED",
+            "guard": ("the ORIGINAL artifact crashed without any "
+                      "instrumentation present: this crash is not caused "
+                      "by instrumentation"),
+        }
+
+    def _fault_str(side):
+        if not side or not side.get("fault_location"):
+            return None
+        return "%s+%s" % (side["fault_location"].get("library"),
+                          side["fault_location"].get("pc"))
+
+    def _res(side):
+        return (side or {}).get("apk_offset_resolution") or {}
+
+    both = ins is not None and orig is not None
+    ins_res, orig_res = _res(ins), _res(orig)
+    resolved_identically = bool(
+        both
+        and ins_res.get("status") == "RESOLVED"
+        and orig_res.get("status") == "RESOLVED"
+        and ins_res.get("entry") == orig_res.get("entry")
+        and ins_res.get("offset_within_entry")
+        == orig_res.get("offset_within_entry")
+        and _fault_str(ins) is not None
+        and _fault_str(ins) == _fault_str(orig))
+
+    integrity_notes = []
+    if status == BOTH_CRASH:
+        integrity_notes.append(attribution["guard"])
+    if not ((ins or {}).get("abort_message_present")
+            or (orig or {}).get("abort_message_present")):
+        integrity_notes.append(
+            "no textual abort() message captured on either side; the cause "
+            "MUST NOT be labeled anti-tamper or screenshot protection on "
+            "this evidence")
+
+    return {
+        "schema_version": CRASH_COMPARISON_SCHEMA,
+        "status": status,
+        "source_documents": {
+            "instrumented": "CRASH-ARTIFACT.json" if ins else None,
+            "original": "BASELINE-CRASH-ARTIFACT.json" if orig else None,
+        },
+        "instrumented": ins,
+        "original": orig,
+        "questions": {
+            "both_sigabrt": bool(
+                both and ins["fatal_signal"] == "SIGABRT"
+                and orig["fatal_signal"] == "SIGABRT"),
+            "fatal_signals": {
+                "instrumented": (ins or {}).get("fatal_signal"),
+                "original": (orig or {}).get("fatal_signal"),
+                "match": bool(both and ins["fatal_signal"] is not None
+                              and ins["fatal_signal"]
+                              == orig["fatal_signal"]),
+            },
+            "fault_location": {
+                "instrumented": _fault_str(ins),
+                "original": _fault_str(orig),
+                "match": bool(both and _fault_str(ins) is not None
+                              and _fault_str(ins) == _fault_str(orig)),
+            },
+            "startup_stage": {
+                "instrumented": (ins or {}).get("startup_stage"),
+                "original": (orig or {}).get("startup_stage"),
+                "match": (bool(ins["startup_stage"] == orig["startup_stage"])
+                          if both else None),
+            },
+            "abort_message": {
+                "instrumented_captured":
+                    bool((ins or {}).get("abort_message_present")),
+                "original_captured":
+                    bool((orig or {}).get("abort_message_present")),
+                "captured_either": bool(
+                    (ins or {}).get("abort_message_present")
+                    or (orig or {}).get("abort_message_present")),
+            },
+            "apk_offset_resolution": {
+                "instrumented": {
+                    "status": ins_res.get("status"),
+                    "entry": ins_res.get("entry"),
+                    "offset_within_entry": ins_res.get("offset_within_entry"),
+                },
+                "original": {
+                    "status": orig_res.get("status"),
+                    "entry": orig_res.get("entry"),
+                    "offset_within_entry": orig_res.get("offset_within_entry"),
+                },
+                "resolved_identically": resolved_identically,
+                "note": ("offsets are resolved independently against each "
+                         "side's own local artifact (different builds bound "
+                         "by artifact_sha256); identical resolution shows "
+                         "the same relative code location but never by "
+                         "itself proves a shared cause"),
+            },
+        },
+        "attribution": attribution,
+        "integrity_notes": integrity_notes,
     }
 
 
@@ -835,7 +1034,8 @@ def compare_artifacts(baseline_health, instrumented_health,
 
 
 def runtime_verdict(baseline_health, instrumented_health, comparison=None,
-                    runtime_probe=None, probe_allowed=None):
+                    runtime_probe=None, probe_allowed=None,
+                    crash_comparison=None):
     """Compact autonomous verdict (requirement 12)."""
     comparison = comparison or compare_artifacts(baseline_health, instrumented_health)
     ih = instrumented_health or {}
@@ -884,6 +1084,7 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
         "CRASH_CAUSE": ih.get("crash_cause"),
         "CRASH_CAUSE_CONFIDENCE": ih.get("crash_cause_confidence"),
         "REGRESSION_STATUS": comparison["regression_status"],
+        "CRASH_COMPARISON": (crash_comparison or {}).get("status"),
         "RUNTIME_PROOF_STATUS": proof,
         "runtime_probe_allowed": bool(probe_allowed),
         "NEXT_ACTION": next_action,
