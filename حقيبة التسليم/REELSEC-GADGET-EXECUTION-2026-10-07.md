@@ -53,3 +53,42 @@ git show origin/main:tools/reelsec/bootstrap-run.sh | bash -s -- campaign ./orig
 ```
 
 If the Gadget binary is absent, the campaign must not pretend the runtime proof succeeded; it should remain on the existing `FRIDA_GADGET_REQUIRED` boundary.
+
+
+## Latest execution result — 2026-10-07 02:59
+
+The Gadget path was requested, but the operator value was still the documentation placeholder:
+
+`$HOME/path/to/frida-gadget-android-arm64.so`
+
+Campaign `20261007_025929-30334` therefore stopped the isolated instrumentation stage with:
+
+`REELSEC_FRIDA_GADGET not found: /data/data/com.termux/files/home/path/to/frida-gadget-android-arm64.so`
+
+This is an operator-input failure, not runtime evidence. The campaign correctly did **not** claim target execution.
+
+## Hardening applied after that run
+
+- `REELSEC_USE_GADGET=1` now explicitly requires `REELSEC_FRIDA_GADGET` to point to an existing file; the runtime probe returns `GADGET_BINARY_REQUIRED` instead of silently degrading to a timeout.
+- Gadget embedding is now truly opt-in through `REELSEC_USE_GADGET`; merely setting a path does not enable embedding.
+- Smali injection now reserves two registers and uses separate tag/message registers for the `Log.i` telemetry marker.
+- `test_gadget_embed.py` now checks register allocation, Gadget config, and isolated mutation behavior.
+
+Latest implementation commits:
+- `3f525c772d72d511392ab63fb7fe23319f8f10e5`
+- `2ae795bcd81a6b4399c5720c3df2a4e2b7c9ac4d`
+- `89b1e4737b6508c815964fca3c866067482678e9`
+- `a6977b034c540c4df808325db3455c645e8a2433`
+- `b63cfe3344435dce62cef6a73b9571e4e6b4bb77`
+
+## Next operator gate
+
+Do not run another campaign with the placeholder path. First place a real Android arm64 Gadget ELF on Termux, then verify:
+
+`test -f "$REELSEC_FRIDA_GADGET"`
+
+and:
+
+`file "$REELSEC_FRIDA_GADGET"`
+
+The binary must be the arm64 Android Gadget matching the Frida client/toolchain used by the campaign. Keep `original.apk` unchanged.
