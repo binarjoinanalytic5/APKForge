@@ -406,3 +406,45 @@ nothing attempted and no app launch; incompatible install WITH
 authorization falls back to the audited gated uninstall. Suite: 215/215.
 No campaign was run. Scientific verdict unchanged:
 SCREENSHOT_BLOCKING = NOT_PROVEN.
+
+## 2026-10-07 — Working Control Round (installed original observed in place)
+
+Operational fact: a clean ORIGINAL now runs on the device (installed from
+Downloads) and NO destructive authorization will be granted. The
+comparison stage was redesigned around a WORKING CONTROL: the currently
+installed package is observed exactly where it is — no uninstall, no
+clear-data, no re-install, no bypass, no destructive authorization.
+
+New round `run_working_control_round` (working-control-1) collects
+automatically, read-only: APK SHA-256 (on-device sha256sum), signing
+certificate SHA-256 (dumpsys package), versionName/versionCode,
+package/user/UID + installed users, codePath, primaryCpuAbi, then one
+bounded observed launch (monkey + ps + ApplicationExitInfo + crash
+logcat) yielding process/PID, startup lifetime, SIGABRT fault PC/library
+and abort message when captured. `base.apk+0x…` offsets resolve against
+the local original ONLY when hash-bound to the installed APK
+(local_reference.matches_installed) — never assumed.
+
+Platform order: the control round runs BEFORE any install stage; when
+the control was observed (CONTROL_ASSESSED / CONTROL_CRASHED) the
+install-based baseline round is SKIPPED
+(BASELINE_SKIPPED_WORKING_CONTROL_PRESENT) so nothing is re-installed
+over the control. When no package is installed the round launches
+nothing and touches nothing (CONTROL_NOT_INSTALLED).
+
+New document COMMON-CAUSE-COMPARISON.json (common-cause-comparison-1),
+refreshed by both the control round and the probe round, with explicit
+statuses: COMMON_CAUSE_BOTH_CRASH (MUST NOT be attributed to
+instrumentation; common cause device/OS/ROM or app itself),
+CONTROL_HEALTHY_INSTRUMENTED_CRASH (SUSPECTED_NOT_PROVEN),
+CONTROL_ONLY_CRASH, CONTROL_HEALTHY_NO_INSTRUMENTED_EVIDENCE,
+COMMON_CAUSE_INCOMPLETE (no claim without a control). RUNTIME-VERDICT.json
+gains WORKING_CONTROL + COMMON_CAUSE_COMPARISON fields. Fixed integrity
+note: the comparison MUST NOT upgrade SCREENSHOT_BLOCKING — it stays
+NOT_PROVEN until the full causal chain is evidenced.
+
+Suite: 230/230 (15 new regression tests: fingerprint completeness, zero
+state-changing commands in every control path, hash-bound-only offset
+resolution, all five comparison statuses, blanket-flag refusal, skip
+logic). No campaign was run; no destructive operation performed.
+Scientific verdict unchanged: SCREENSHOT_BLOCKING = NOT_PROVEN.

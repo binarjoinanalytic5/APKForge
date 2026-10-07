@@ -15,6 +15,7 @@ Regression matrix (mandate 2026-10-07, requirement 11):
  10. target executes successfully             -> TARGET_OBSERVED
 None may degenerate into a misleading RUNTIME_PROBE_TIMEOUT.
 """
+import hashlib
 import importlib.util
 import json
 import os
@@ -1001,6 +1002,296 @@ class BaselineRoundTests(unittest.TestCase):
             for c in all_cmds:
                 self.assertNotIn("uninstall", c)
                 self.assertNotIn("pm clear", c)
+
+
+DUMPSYS_PACKAGE_FIXTURE = """Packages:
+  Package [com.test.pkg] (a1b2c3d):
+    userId=10285
+    codePath=/data/app/~~abc==/com.test.pkg-xyz==
+    versionName=4.2.00
+    versionCode=4200 minSdk=24 targetSdk=34
+    primaryCpuAbi=arm64-v8a
+    signatures=PackageSignatures{f1e2d3c4 version:3, signatures:%s, past signatures:42424242}
+    User 0: ceDataInode=0 installed=true hidden=false stopped=false
+    User 95: ceDataInode=0 installed=true hidden=false stopped=false
+""" % ("ab" * 64)
+
+EXPECTED_CERT_SHA = __import__("hashlib").sha256(
+    bytes.fromhex("ab" * 64)).hexdigest()
+
+
+def _control_runner(state, exit_info="", crash_log="", present=True,
+                    apk_sha=None):
+    def fake(cmd, timeout=60):
+        joined = " ".join(str(c) for c in cmd)
+        state["cmds"].append(joined)
+        if "pm path" in joined:
+            if not present:
+                return 1, ""
+            return 0, "package:/data/app/~~abc==/com.test.pkg-xyz==/base.apk"
+        if "dumpsys package" in joined:
+            return 0, DUMPSYS_PACKAGE_FIXTURE
+        if "sha256sum" in joined:
+            return 0, "%s  /data/app/~~abc==/com.test.pkg-xyz==/base.apk" % (
+                apk_sha or "c" * 64)
+        if "exit-info" in joined:
+            state["exit_calls"] += 1
+            return 0, exit_info if state["exit_calls"] > 1 else ""
+        if "monkey" in joined:
+            return 0, "Events injected: 1"
+        if joined.endswith("ps -A"):
+            return 0, "USER PID PPID VSZ RSS WCHAN ADDR S NAME\n"
+        if "logcat" in joined:
+            return 0, crash_log
+        return 1, ""
+    return fake
+
+
+class WorkingControlTests(unittest.TestCase):
+    """Working control = the CURRENTLY INSTALLED package observed in place.
+    Read-only fingerprint + bounded observed launch; NEVER install,
+    uninstall, clear-data, re-install, or bypass."""
+
+    EXIT_INFO = EXIT_INFO_NATIVE.replace(
+        "com.newleaf.app.android.victor", "com.test.pkg")
+    LOG = SIGABRT_BASE_APK_LOG.replace(
+        "com.newleaf.app.android.victor", "com.test.pkg")
+
+    def _collect(self, present=True, crash=False, apk_sha=None,
+                 local_ref=None):
+        state = {"cmds": [], "exit_calls": 0}
+        runner = _control_runner(
+            state,
+            exit_info=self.EXIT_INFO if crash else "",
+            crash_log=self.LOG if crash else "",
+            present=present, apk_sha=apk_sha)
+        with mock.patch("time.sleep"):
+            doc = rh.collect_working_control(
+                runner, "/adb", "s1", "com.test.pkg", observe_s=0.05,
+                local_reference_apk=local_ref)
+        return doc, state["cmds"]
+
+    def test_healthy_control_full_fingerprint_zero_destructive_commands(self):
+        doc, cmds = self._collect(present=True, crash=False)
+        self.assertEqual(doc["status"], "CONTROL_ASSESSED")
+        ident = doc["identity"]
+        self.assertEqual(ident["version_name"], "4.2.00")
+        self.assertEqual(ident["version_code"], "4200")
+        self.assertEqual(ident["uid"], "10285")
+        self.assertEqual(ident["code_path"],
+                         "/data/app/~~abc==/com.test.pkg-xyz==")
+        self.assertEqual(ident["primary_cpu_abi"], "arm64-v8a")
+        self.assertEqual(ident["users_installed"], [0, 95])
+        self.assertEqual(ident["apk_sha256"], "c" * 64)
+        self.assertEqual(ident["signing_certificate_sha256"],
+                         EXPECTED_CERT_SHA)
+        # exactly one observational launch and ZERO state-changing commands
+        self.assertEqual(sum(1 for c in cmds if "monkey" in c), 1)
+        for c in cmds:
+            self.assertNotIn("install", c)
+            self.assertNotIn("uninstall", c)
+            self.assertNotIn("pm clear", c)
+
+    def test_not_installed_control_launches_and_touches_nothing(self):
+        doc, cmds = self._collect(present=False)
+        self.assertEqual(doc["status"], "CONTROL_NOT_INSTALLED")
+        self.assertIn("nothing was modified", doc["reason"])
+        for c in cmds:
+            self.assertNotIn("monkey", c)
+            self.assertNotIn("install", c)
+            self.assertNotIn("uninstall", c)
+            self.assertNotIn("pm clear", c)
+
+    def test_crashed_control_collects_fault_and_abort_absence(self):
+        doc, _ = self._collect(present=True, crash=True)
+        self.assertEqual(doc["status"], "CONTROL_CRASHED")
+        art = doc["crash_artifact"]
+        self.assertEqual(art["fatal_signal"], "SIGABRT")
+        self.assertEqual(art["fault_location"]["library"], "base.apk")
+        self.assertEqual(art["fault_location"]["pc"], "00031e10")
+        self.assertIsNone(art["abort_message"])
+        # no local reference provided => offset honestly UNRESOLVED
+        self.assertEqual(art["apk_offset_resolution"]["status"], "UNRESOLVED")
+
+    def test_offset_resolved_only_when_local_reference_is_hash_bound(self):
+        with tempfile.TemporaryDirectory() as td:
+            apk = _craft_apk_with_offset(Path(td) / "original.apk")
+            import hashlib
+            real_sha = hashlib.sha256(apk.read_bytes()).hexdigest()
+            doc, _ = self._collect(present=True, crash=True,
+                                   apk_sha=real_sha, local_ref=str(apk))
+            self.assertTrue(
+                doc["identity"]["local_reference"]["matches_installed"])
+            res = doc["crash_artifact"]["apk_offset_resolution"]
+            self.assertEqual(res["status"], "RESOLVED")
+            self.assertEqual(res["entry"], PACKED_ENTRY)
+            # a NON-matching hash must never resolve offsets
+            doc2, _ = self._collect(present=True, crash=True,
+                                    apk_sha="c" * 64, local_ref=str(apk))
+            self.assertFalse(
+                doc2["identity"]["local_reference"]["matches_installed"])
+            self.assertEqual(
+                doc2["crash_artifact"]["apk_offset_resolution"]["status"],
+                "UNRESOLVED")
+
+
+class WorkingControlRoundTests(unittest.TestCase):
+    """run_working_control_round wiring: refusal reasons, document writes,
+    and the common-cause comparison refresh."""
+
+    EXIT_INFO = EXIT_INFO_NATIVE.replace(
+        "com.newleaf.app.android.victor", "com.test.pkg")
+    LOG = SIGABRT_BASE_APK_LOG.replace(
+        "com.newleaf.app.android.victor", "com.test.pkg")
+
+    def test_requires_test_package_identity(self):
+        with tempfile.TemporaryDirectory() as td:
+            doc = MODULE.run_working_control_round(td, {"tools": {}}, env={})
+        self.assertEqual(doc["status"], "CONTROL_NOT_RUN")
+        self.assertIn("REELSEC_TEST_PACKAGE", doc["reason"])
+
+    def test_blanket_destructive_flag_blocks_the_round(self):
+        with tempfile.TemporaryDirectory() as td:
+            doc = MODULE.run_working_control_round(
+                td, {"tools": {}},
+                env={"REELSEC_ALLOW_TEST_DEVICE_UNINSTALL": "1",
+                     "REELSEC_TEST_PACKAGE": "com.test.pkg"})
+        self.assertEqual(doc["status"], "SAFETY_BLOCKED")
+
+    def test_round_writes_control_and_common_cause_documents(self):
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td)
+            # instrumented side already on disk from the probe round
+            (out / "CRASH-ARTIFACT.json").write_text(json.dumps(
+                _simulated_crash_artifact("instrumented", "f" * 64)),
+                encoding="utf-8")
+            state = {"cmds": [], "exit_calls": 0}
+            runner = _control_runner(state, exit_info=self.EXIT_INFO,
+                                     crash_log=self.LOG, present=True)
+            env = {"REELSEC_TEST_PACKAGE": "com.test.pkg"}
+            caps = {"tools": {"adb": {"path": "/adb"}}}
+            with mock.patch.object(MODULE, "resolve_test_device",
+                                   lambda adb, serial=None: {"serial": "s1"}), \
+                 mock.patch.object(MODULE, "run", runner), \
+                 mock.patch.object(rh, "_poll_process",
+                                   lambda *a, **k: {
+                                       "pids": [], "observed": False,
+                                       "alive_ms": 0, "alive_at_exit": False,
+                                       "poll_attempts": 1,
+                                       "first_seen_epoch": None,
+                                       "last_seen_epoch": None}):
+                doc = MODULE.run_working_control_round(out, caps, env=env)
+            self.assertEqual(doc["status"], "CONTROL_CRASHED")
+            wc = json.loads((out / "WORKING-CONTROL.json").read_text())
+            self.assertEqual(wc["identity"]["version_name"], "4.2.00")
+            cmp_doc = json.loads(
+                (out / "COMMON-CAUSE-COMPARISON.json").read_text())
+            self.assertEqual(cmp_doc["status"], "COMMON_CAUSE_BOTH_CRASH")
+            self.assertIn("MUST NOT be attributed to instrumentation",
+                          cmp_doc["attribution"]["guard"])
+            # the whole round issued zero state-changing commands
+            for c in state["cmds"]:
+                self.assertNotIn("install", c)
+                self.assertNotIn("uninstall", c)
+                self.assertNotIn("pm clear", c)
+
+
+class CommonCauseComparisonTests(unittest.TestCase):
+    """common-cause-comparison-1: installed control vs instrumented, sides
+    never merged, verdict never upgraded."""
+
+    def _control(self, status, apk_sha="e" * 64):
+        return {
+            "schema_version": "working-control-1",
+            "status": status,
+            "package": "com.x",
+            "installed_path": "/data/app/~~x/com.x/base.apk",
+            "identity": {"apk_sha256": apk_sha,
+                         "signing_certificate_sha256": "d" * 64,
+                         "version_name": "4.2.00", "version_code": "4200",
+                         "uid": "10285", "users_installed": [0, 95],
+                         "code_path": "/data/app/~~x/com.x",
+                         "primary_cpu_abi": "arm64-v8a"},
+            "process": {"pids": [14210], "observed": True, "alive_ms": 900},
+            "crash_artifact": (
+                _simulated_crash_artifact("working_control", apk_sha)
+                if status == "CONTROL_CRASHED" else None),
+        }
+
+    def test_both_crash_common_cause_not_instrumentation(self):
+        ins = _simulated_crash_artifact("instrumented", "f" * 64)
+        cmp = rh.build_common_cause_comparison(
+            self._control("CONTROL_CRASHED"), ins)
+        self.assertEqual(cmp["status"], "COMMON_CAUSE_BOTH_CRASH")
+        self.assertEqual(cmp["attribution"]["instrumentation_regression"],
+                         "NOT_ESTABLISHED")
+        self.assertIn("MUST NOT be attributed to instrumentation",
+                      cmp["attribution"]["guard"])
+        q = cmp["questions"]
+        self.assertTrue(q["both_sigabrt"])
+        self.assertTrue(q["fault_location"]["match"])
+        self.assertEqual(q["fault_location"]["working_control"],
+                         "base.apk+00031e10")
+        self.assertFalse(q["abort_message"]["captured_either"])
+        # per-side bindings stay independent
+        self.assertEqual(cmp["working_control"]["apk_sha256"], "e" * 64)
+        self.assertEqual(cmp["instrumented"]["artifact_sha256"], "f" * 64)
+
+    def test_control_healthy_instrumented_crash_is_candidate_not_proven(self):
+        ins = _simulated_crash_artifact("instrumented", "f" * 64)
+        cmp = rh.build_common_cause_comparison(
+            self._control("CONTROL_ASSESSED"), ins)
+        self.assertEqual(cmp["status"],
+                         "CONTROL_HEALTHY_INSTRUMENTED_CRASH")
+        self.assertEqual(cmp["attribution"]["instrumentation_regression"],
+                         "SUSPECTED_NOT_PROVEN")
+
+    def test_control_only_crash_not_caused_by_instrumentation(self):
+        cmp = rh.build_common_cause_comparison(
+            self._control("CONTROL_CRASHED"), None)
+        self.assertEqual(cmp["status"], "CONTROL_ONLY_CRASH")
+        self.assertIn("not caused by instrumentation",
+                      cmp["attribution"]["guard"])
+
+    def test_control_healthy_without_instrumented_evidence(self):
+        cmp = rh.build_common_cause_comparison(
+            self._control("CONTROL_ASSESSED"), None)
+        self.assertEqual(cmp["status"],
+                         "CONTROL_HEALTHY_NO_INSTRUMENTED_EVIDENCE")
+
+    def test_instrumented_only_is_incomplete_not_a_claim(self):
+        ins = _simulated_crash_artifact("instrumented", "f" * 64)
+        cmp = rh.build_common_cause_comparison(None, ins)
+        self.assertEqual(cmp["status"], "COMMON_CAUSE_INCOMPLETE")
+        self.assertIn("no common-cause claim may be made",
+                      cmp["attribution"]["guard"])
+
+    def test_no_evidence_returns_none(self):
+        self.assertIsNone(rh.build_common_cause_comparison(None, None))
+
+    def test_comparison_never_upgrades_screenshot_blocking(self):
+        ins = _simulated_crash_artifact("instrumented", "f" * 64)
+        cmp = rh.build_common_cause_comparison(
+            self._control("CONTROL_CRASHED"), ins)
+        self.assertTrue(
+            any("MUST NOT upgrade SCREENSHOT_BLOCKING" in n
+                for n in cmp["integrity_notes"]))
+        self.assertTrue(
+            any("MUST NOT be labeled anti-tamper" in n
+                for n in cmp["integrity_notes"]))
+
+
+class WorkingControlVerdictTests(unittest.TestCase):
+    """Platform wiring: skip logic + verdict surfaces the new documents."""
+
+    def test_baseline_skipped_only_when_control_observed(self):
+        self.assertIsNotNone(MODULE._baseline_skip_reason(
+            {"status": "CONTROL_ASSESSED"}))
+        self.assertIsNotNone(MODULE._baseline_skip_reason(
+            {"status": "CONTROL_CRASHED"}))
+        self.assertIsNone(MODULE._baseline_skip_reason(
+            {"status": "CONTROL_NOT_INSTALLED"}))
+        self.assertIsNone(MODULE._baseline_skip_reason(None))
 
 
 class EvidenceGateTests(unittest.TestCase):

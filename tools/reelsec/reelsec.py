@@ -1810,6 +1810,100 @@ def _find_package_from_apk_tools(apk):
                 return m.group(1), kind, checked
     return None, None, checked
 
+def _write_common_cause_comparison(output):
+    """Write COMMON-CAUSE-COMPARISON.json from whichever sides exist.
+
+    Read-only over the campaign outputs: loads WORKING-CONTROL.json (the
+    installed original, observed in place) and CRASH-ARTIFACT.json (the
+    instrumented side). The comparison NEVER upgrades SCREENSHOT_BLOCKING.
+    Returns the comparison dict, or None when no side has evidence.
+    """
+    output = Path(output)
+
+    def _load(name):
+        try:
+            return json.loads((output / name).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+
+    comparison = runtime_health.build_common_cause_comparison(
+        _load("WORKING-CONTROL.json"), _load("CRASH-ARTIFACT.json"))
+    if comparison is None:
+        return None
+    (output / "COMMON-CAUSE-COMPARISON.json").write_text(
+        json.dumps(comparison, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8")
+    return comparison
+
+
+def _baseline_skip_reason(working_control):
+    """Reason to skip the install-based baseline round, or None.
+
+    When the currently installed original was observed IN PLACE as the
+    working control, the comparison already has its original side and
+    re-installing a signed copy over the installed control is neither
+    needed nor performed (no-reinstall mandate).
+    """
+    status = (working_control or {}).get("status")
+    if status in (runtime_health.CONTROL_ASSESSED,
+                  runtime_health.CONTROL_CRASHED):
+        return ("the currently installed original was observed in place as "
+                "the working control (WORKING-CONTROL.json, status=%s); "
+                "re-installing a signed copy over it is neither needed nor "
+                "performed" % status)
+    return None
+
+
+def run_working_control_round(output, capabilities, env=None,
+                              original_apk=None):
+    """Working-control round: observe the CURRENTLY INSTALLED package.
+
+    The installed original is the working control for crash comparison.
+    This round is strictly observational — read-only device queries
+    (pm path / dumpsys package / sha256sum) plus one bounded observed
+    launch. NO uninstall, NO clear-data, NO re-install, NO bypass, and NO
+    destructive authorization is used or required; nothing on the device
+    is modified beyond starting the app once under observation.
+
+    `original_apk` (the untouched local original) is used for offset
+    resolution ONLY when hash-bound to the installed APK.
+    """
+    env = env if env is not None else os.environ
+    doc = {"schema_version": runtime_health.WORKING_CONTROL_SCHEMA,
+           "status": "CONTROL_NOT_RUN"}
+    if env.get("REELSEC_WORKING_CONTROL", "1").strip() == "0":
+        doc["reason"] = "REELSEC_WORKING_CONTROL=0"
+        return doc
+    if safety_gate.inspect_environment(env):
+        doc.update(status="SAFETY_BLOCKED",
+                   reason=("blanket destructive permission is set in the "
+                           "environment; remove it — the working-control "
+                           "round never needs destructive operations"))
+        return doc
+    test_package = env.get("REELSEC_TEST_PACKAGE")
+    if not test_package:
+        doc["reason"] = ("REELSEC_TEST_PACKAGE not configured; refusing to "
+                         "touch any package")
+        return doc
+    adb = (capabilities or {}).get("tools", {}).get("adb", {}).get("path")
+    if not adb:
+        doc["reason"] = "adb unavailable; cannot observe the installed package"
+        return doc
+    try:
+        resolution = resolve_test_device(adb, env.get("REELSEC_TEST_DEVICE"))
+        serial = resolution["serial"]
+        doc = runtime_health.collect_working_control(
+            run, adb, serial, test_package,
+            local_reference_apk=original_apk)
+        doc["serial"] = serial
+    except Exception as exc:
+        doc.update(status="CONTROL_FAILED", error=str(exc)[:1000])
+    (Path(output) / "WORKING-CONTROL.json").write_text(
+        json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    doc["common_cause_comparison"] = _write_common_cause_comparison(output)
+    return doc
+
+
 def _write_crash_comparison(output):
     """Write CRASH-COMPARISON.json from whichever crash artifacts exist.
 
@@ -2254,6 +2348,12 @@ def write_runtime_probe(output, root, target, input_apk=None):
                 # BOTH_CRASH when both sides have crash evidence; the crash
                 # is never attributed to instrumentation by default.
                 result["crash_comparison"] = _write_crash_comparison(output)
+                # Working-control comparison: the installed original was
+                # observed in place earlier in this campaign; refresh the
+                # common-cause document now that the instrumented side
+                # exists. Never upgrades SCREENSHOT_BLOCKING.
+                result["common_cause_comparison"] = \
+                    _write_common_cause_comparison(output)
                 result["health"] = {
                     "startup": health["startup"],
                     "crash_class": health["crash_class"],
@@ -2437,10 +2537,20 @@ def write_runtime_probe(output, root, target, input_apk=None):
             "runtime_probe_allowed")
     comparison = runtime_health.compare_artifacts(baseline_health,
                                                   instrumented_health)
+    working_control_doc = None
+    wc_path = output / "WORKING-CONTROL.json"
+    if wc_path.is_file():
+        try:
+            working_control_doc = json.loads(
+                wc_path.read_text(encoding="utf-8"))
+        except Exception:
+            working_control_doc = None
     verdict = runtime_health.runtime_verdict(
         baseline_health, instrumented_health, comparison=comparison,
         runtime_probe=result, probe_allowed=result.get("runtime_probe_allowed"),
-        crash_comparison=result.get("crash_comparison"))
+        crash_comparison=result.get("crash_comparison"),
+        working_control=working_control_doc,
+        common_cause=result.get("common_cause_comparison"))
     verdict["BASELINE_STATUS"] = baseline_status
     result["verdict"] = verdict
     (output / "RUNTIME-VERDICT.json").write_text(
@@ -3233,10 +3343,26 @@ def main():
         instrumented_profile = runtime_health.static_artifact_profile(
             sign_verify["signed_path"],
             manifest_decoder=_decode_binary_manifest_package)
-    baseline_runtime = run_baseline_runtime(
-        output, input_apk, capabilities,
-        manifest_decoder=_decode_binary_manifest_package,
-        instrumented_profile=instrumented_profile)
+    # --- Working control round (strictly observational). The CURRENTLY
+    # INSTALLED package is observed in place as the working control:
+    # read-only queries (pm path / dumpsys package / sha256sum) plus one
+    # bounded observed launch. NO uninstall, NO clear-data, NO re-install,
+    # NO bypass. Its fingerprint + startup evidence feed
+    # COMMON-CAUSE-COMPARISON.json against the instrumented side.
+    working_control = run_working_control_round(output, capabilities,
+                                                original_apk=input_apk)
+    baseline_skip = _baseline_skip_reason(working_control)
+    if baseline_skip:
+        baseline_runtime = {
+            "schema_version": runtime_health.SCHEMA,
+            "status": "BASELINE_SKIPPED_WORKING_CONTROL_PRESENT",
+            "reason": baseline_skip,
+        }
+    else:
+        baseline_runtime = run_baseline_runtime(
+            output, input_apk, capabilities,
+            manifest_decoder=_decode_binary_manifest_package,
+            instrumented_profile=instrumented_profile)
     (output / "BASELINE-RUNTIME.json").write_text(
         json.dumps(baseline_runtime, indent=2, sort_keys=True) + "\n",
         encoding="utf-8")
