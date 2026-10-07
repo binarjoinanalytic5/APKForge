@@ -323,5 +323,141 @@ class GitPublishTests(unittest.TestCase):
         self.assertFalse(res["pushed"])
 
 
+class FinalVerdictAggregationTests(unittest.TestCase):
+    """End-to-end requirements 3+12+17: the aggregation reads the new
+    comparison documents first; a completed COMMON_CAUSE_BOTH_CRASH
+    investigation is a VALID campaign, never a destructive-baseline
+    recommendation, and FINAL == RUNTIME == COMMON-CAUSE."""
+
+    def _both_crash_campaign(self, td):
+        cd = Path(td)
+        (cd / "SAFETY-GATE.json").write_text(json.dumps({"safety": "OK"}))
+        (cd / "RUNTIME-HEALTH.json").write_text(json.dumps(
+            {"startup": "CRASH", "crash_class": "NATIVE_CRASH"}))
+        (cd / "WORKING-CONTROL.json").write_text(json.dumps(
+            {"status": "CONTROL_CRASHED", "package": "com.x"}))
+        (cd / "COMMON-CAUSE-COMPARISON.json").write_text(json.dumps(
+            {"status": "COMMON_CAUSE_BOTH_CRASH",
+             "attribution": {"instrumentation_regression":
+                             "NOT_ESTABLISHED"}}))
+        (cd / "RUNTIME-VERDICT.json").write_text(json.dumps(
+            {"ORIGINAL_RUNTIME": "CRASH", "INSTRUMENTED_RUNTIME": "CRASH",
+             "REGRESSION_STATUS": "NOT_ESTABLISHED",
+             "RUNTIME_STATUS": "COMMON_CAUSE_BOTH_CRASH",
+             "NEXT_ACTION": "Investigate the common cause; no destructive "
+                            "operation is required or permitted."}))
+        return cd
+
+    def test_both_crash_is_valid_not_proven_campaign(self):
+        with tempfile.TemporaryDirectory() as td:
+            cd = self._both_crash_campaign(td)
+            manifest, verdict = orch.aggregate(str(cd),
+                                               campaign_status="COMPLETED")
+        self.assertEqual(verdict["final_verdict"], "NOT_PROVEN")
+        self.assertEqual(verdict["campaign_status"], "COMPLETED")
+        rt = verdict["runtime"]
+        self.assertEqual(rt["RUNTIME_STATUS"], "COMMON_CAUSE_BOTH_CRASH")
+        self.assertEqual(rt["REGRESSION_STATUS"], "NOT_ESTABLISHED")
+        self.assertEqual(rt["ORIGINAL_RUNTIME"], "CRASH")
+        self.assertEqual(rt["WORKING_CONTROL"], "CONTROL_CRASHED")
+        self.assertEqual(
+            verdict["scientific_status"]["SCREENSHOT_BLOCKING"], "NOT_PROVEN")
+        self.assertNotIn("REELSEC_ALLOW_TEST_DEVICE_UNINSTALL",
+                         rt["NEXT_ACTION"])
+        self.assertNotIn("gated baseline", rt["NEXT_ACTION"])
+        states = [t["to"] for t in verdict["campaign_state_transitions"]]
+        self.assertIn("COMMON_CAUSE_BOTH_CRASH", states)
+        self.assertEqual(verdict["campaign_state"], "CAUSAL_CHAIN_INCOMPLETE")
+
+    def test_legacy_destructive_next_action_is_never_surfaced(self):
+        # A stale RUNTIME-VERDICT produced by the legacy logic must be
+        # sanitized by the aggregator (defense in depth).
+        with tempfile.TemporaryDirectory() as td:
+            cd = Path(td)
+            (cd / "SAFETY-GATE.json").write_text(json.dumps({"safety": "OK"}))
+            (cd / "RUNTIME-HEALTH.json").write_text(json.dumps(
+                {"startup": "CRASH", "crash_class": "NATIVE_CRASH"}))
+            (cd / "RUNTIME-VERDICT.json").write_text(json.dumps(
+                {"ORIGINAL_RUNTIME": "NOT_RUN",
+                 "REGRESSION_STATUS": "NOT_COMPARABLE",
+                 "NEXT_ACTION": "Artifact crash without baseline comparison: "
+                                "run the gated baseline round "
+                                "(REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1) to "
+                                "attribute the failure."}))
+            manifest, verdict = orch.aggregate(str(cd))
+        na = verdict["runtime"]["NEXT_ACTION"]
+        self.assertNotIn("REELSEC_ALLOW_TEST_DEVICE_UNINSTALL", na)
+        self.assertNotIn("gated baseline", na)
+        self.assertIn("working-control", na)
+
+    def test_original_runtime_recovered_from_working_control(self):
+        with tempfile.TemporaryDirectory() as td:
+            cd = self._both_crash_campaign(td)
+            # stale RUNTIME-VERDICT claims NOT_RUN — aggregation must fix it
+            (cd / "RUNTIME-VERDICT.json").write_text(json.dumps(
+                {"ORIGINAL_RUNTIME": "NOT_RUN",
+                 "REGRESSION_STATUS": "NOT_COMPARABLE"}))
+            manifest, verdict = orch.aggregate(str(cd))
+        self.assertEqual(verdict["runtime"]["ORIGINAL_RUNTIME"], "CRASH")
+        self.assertEqual(verdict["runtime"]["REGRESSION_STATUS"],
+                         "NOT_ESTABLISHED")
+
+
+class CampaignExitMappingTests(unittest.TestCase):
+    """End-to-end requirement 13 at the platform layer."""
+
+    def _platform(self, td, rc):
+        def runner(cmd, timeout=5400):
+            if "campaign" in " ".join(str(c) for c in cmd):
+                return rc, "simulated campaign output"
+            return 0, ""
+        return orch.run_platform(__file__, td, runner=runner, env={},
+                                 publish=False)
+
+    def test_valid_investigation_maps_to_completed(self):
+        with tempfile.TemporaryDirectory() as td:
+            result = self._platform(td, 0)
+        self.assertEqual(result["campaign_status"], "COMPLETED")
+
+    def test_scientific_incomplete_maps_explicitly(self):
+        with tempfile.TemporaryDirectory() as td:
+            result = self._platform(td, 3)
+        self.assertEqual(result["campaign_status"], "SCIENTIFIC_INCOMPLETE")
+
+    def test_infrastructure_failure_maps_explicitly(self):
+        with tempfile.TemporaryDirectory() as td:
+            result = self._platform(td, 2)
+        self.assertEqual(result["campaign_status"], "INFRASTRUCTURE_FAILURE")
+
+
+class PublisherClassificationTests(unittest.TestCase):
+    """End-to-end requirement 14: PUSH_FAILED is a PUBLISH_FAILURE
+    (infrastructure only) and never alters scientific/runtime verdicts."""
+
+    def test_push_failed_is_classified_and_verdict_untouched(self):
+        def runner(cmd, timeout=5400):
+            return 0, ""
+
+        def git_runner(cmd, timeout=300):
+            if "push" in cmd:
+                return 1, "remote: 403 Forbidden"
+            if "rev-parse" in cmd:
+                return 0, "abc123\n"
+            return 0, "ok"
+        with tempfile.TemporaryDirectory() as td:
+            result = orch.run_platform(__file__, td, runner=runner,
+                                       git_runner=git_runner, env={},
+                                       publish=True)
+        pub = result["publish"]
+        self.assertEqual(pub["status"], "PUSH_FAILED")
+        self.assertIn("PUBLISH_FAILURE", pub["classification"])
+        self.assertIn("unaffected", pub["classification"])
+        # scientific verdicts are computed before publishing and unchanged
+        self.assertEqual(result["verdict"]["final_verdict"], "NOT_PROVEN")
+        self.assertEqual(
+            result["verdict"]["scientific_status"]["SCREENSHOT_BLOCKING"],
+            "NOT_PROVEN")
+
+
 if __name__ == "__main__":
     unittest.main()

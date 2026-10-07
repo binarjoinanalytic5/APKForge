@@ -163,8 +163,10 @@ INSTALL_REASON_CODES = (
      "(zipalign -P 16), uncompressed .so entries (extractNativeLibs=false "
      "requires STORED), and ABI match"),
     ("install_failed_update_incompatible", "SIGNATURE_MISMATCH",
-     "existing package is signed with a different certificate; guarded "
-     "uninstall requires REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1"),
+     "existing package is signed with a different certificate; the "
+     "non-destructive install path stops here — replacing the installed "
+     "package requires an explicit hash-bound destructive authorization "
+     "document (REELSEC_DESTRUCTIVE_AUTH), never a blanket env flag"),
     ("install_failed_insufficient_storage", "INSUFFICIENT_STORAGE",
      "device storage is insufficient for the instrumented artifact"),
     ("install_failed_version_downgrade", "VERSION_DOWNGRADE",

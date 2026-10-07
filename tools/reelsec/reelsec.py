@@ -1836,6 +1836,61 @@ def _write_common_cause_comparison(output):
     return comparison
 
 
+def classify_campaign_exit(output, final_status):
+    """Exit-code classification (end-to-end requirement 13).
+
+    Returns (exit_code, classification). The decision is made from the
+    campaign's own produced documents — never from the mere presence of
+    FAIL/BLOCKED stages, because an app crash with successful evidence
+    collection and comparison is a VALID completed investigation, not an
+    infrastructure failure.
+    """
+    output = Path(output)
+
+    def _load(name):
+        try:
+            return json.loads((output / name).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+
+    if final_status == "COMPLETED":
+        return 0, "COMPLETED"
+
+    probe = _load("RUNTIME-PROBE.json") or {}
+    health = _load("RUNTIME-HEALTH.json") or {}
+    common_cause = _load("COMMON-CAUSE-COMPARISON.json") or {}
+    crash_comparison = _load("CRASH-COMPARISON.json") or {}
+    evidence_exists = (output / "EVIDENCE-REPORT.json").is_file()
+
+    # Infrastructure failures: the environment, not the science, failed.
+    if probe.get("status") == "NO_ONLINE_ANDROID_DEVICE":
+        return 2, "INFRASTRUCTURE_NO_ONLINE_ANDROID_DEVICE"
+    if probe.get("status") == "PACKAGE_NAME_UNRESOLVED":
+        return 2, "INFRASTRUCTURE_PACKAGE_UNRESOLVED"
+
+    complete_comparisons = ("COMMON_CAUSE_BOTH_CRASH",
+                            "CONTROL_HEALTHY_INSTRUMENTED_CRASH",
+                            "CONTROL_ONLY_CRASH",
+                            "CONTROL_HEALTHY_NO_INSTRUMENTED_EVIDENCE",
+                            "BOTH_CRASH", "INSTRUMENTED_ONLY_CRASH",
+                            "ORIGINAL_ONLY_CRASH")
+    comparison_done = (common_cause.get("status") in complete_comparisons
+                       or crash_comparison.get("status")
+                       in complete_comparisons)
+
+    if health.get("startup") == "CRASH":
+        if comparison_done and evidence_exists:
+            # App crash alone must NOT mean exit 2: evidence collection and
+            # comparison succeeded, so this is a valid investigation whose
+            # scientific verdict lives in the documents.
+            return 0, "VALID_INVESTIGATION_APP_CRASH_COMPARED"
+        return 3, "SCIENTIFIC_INCOMPLETE_CRASH_WITHOUT_COMPARISON"
+
+    if evidence_exists:
+        return 0, "VALID_INVESTIGATION"
+    return 3, "SCIENTIFIC_INCOMPLETE_NO_EVIDENCE_REPORT"
+
+
 def _baseline_skip_reason(working_control):
     """Reason to skip the install-based baseline round, or None.
 
@@ -3967,11 +4022,18 @@ def main():
     print("FINAL_STATUS=" + progress["final_status"], flush=True)
     print("RUNTIME_PROOF_STATUS=" + str(runtime_result.get("status") if runtime_result else "NOT_RUN"), flush=True)
 
-    # Exit non-zero when the campaign completed with failed/blocked stages.
-    # This makes the CLI truthful for automation while preserving the report.
-    if progress["final_status"] == "COMPLETED_WITH_ISSUES":
-        return 2
-    return 0
+    # Exit-code split (end-to-end requirement 13): the CLI distinguishes
+    #   rc 0 = VALID COMPLETED INVESTIGATION — evidence collection and
+    #          comparison succeeded; an app crash (e.g.
+    #          COMMON_CAUSE_BOTH_CRASH) is a scientific FINDING, never an
+    #          infrastructure failure;
+    #   rc 2 = INFRASTRUCTURE FAILURE (no online device, invalid artifact);
+    #   rc 3 = SCIENTIFIC INCOMPLETE (e.g. crash without any original-side
+    #          comparison — the causal question could not be adjudicated).
+    exit_code, exit_class = classify_campaign_exit(
+        output, progress["final_status"])
+    print("EXIT_CLASSIFICATION=" + exit_class, flush=True)
+    return exit_code
 
 if __name__ == "__main__":
     raise SystemExit(main())
