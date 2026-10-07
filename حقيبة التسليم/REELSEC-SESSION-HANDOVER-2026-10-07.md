@@ -268,3 +268,16 @@ Implementation commits:
 
 Next gate: rerun the Gadget campaign and require Stage 10 `INSTALLED` before
 treating any runtime timeout/result as meaningful evidence.
+
+
+## 21. Capture-protection detector — current state
+
+Commit: `986ba63df033f8eb484bd92f40be1545051fa3de`.
+
+The repository now has a read-only capture detector integrated into campaigns. It scans decoded Smali/text and native-library printable strings for FLAG_SECURE, MediaProjection, capture callbacks, Surface security, DRM and native capture indicators. The report explicitly records that these are static indicators only and that causal proof is false until exact-artifact runtime evidence, matching provenance, and observable security behavior are established.
+
+The detector does not patch, inject, disable, sign, or rebuild an APK. No screenshot/recording protection has been declared proven from the detector alone.
+
+### 22. Current execution boundary
+
+The project authorization documents permit repository analysis/tooling, controlled builds/tests, evidence collection and documentation within the authorized project scope. They do not override platform/model safety boundaries and do not authorize bypassing third-party security controls. If the application source becomes available, source-level development configuration can be addressed as a separate owner-controlled build task.
