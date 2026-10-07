@@ -21,7 +21,7 @@ class CampaignOrchestrationTests(unittest.TestCase):
             "args=sys.argv\n"
             "out=pathlib.Path(args[args.index('-o')+1])\n"
             "out.mkdir(parents=True, exist_ok=False)\n"
-            "(out/'AndroidManifest.xml').write_text('<manifest package="example.test"/>')\n"
+            "(out/'AndroidManifest.xml').write_text('<manifest package=\"example.test\"/>')\n"
             "(out/'smali').mkdir()\n",
             encoding="utf-8",
         )
@@ -63,7 +63,7 @@ class CampaignOrchestrationTests(unittest.TestCase):
                 "    raise SystemExit(9)\n"
                 "out=pathlib.Path(args[args.index('-o')+1])\n"
                 "out.mkdir(parents=True, exist_ok=False)\n"
-                "(out/'AndroidManifest.xml').write_text('<manifest package=\\"example.test\\"/>')\n"
+                "(out/'AndroidManifest.xml').write_text('<manifest package=\"example.test\"/>')\n"
                 "(out/'smali').mkdir()\n"
                 "(out/'smali'/'Example.smali').write_text('.class public LExample;')\n",
                 encoding="utf-8",

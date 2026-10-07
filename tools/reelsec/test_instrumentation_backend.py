@@ -22,6 +22,7 @@ class InstrumentationBackendTests(unittest.TestCase):
             target.parent.mkdir(parents=True)
             target.write_text(
                 ".class public Lcom/SecShell/SecShell/AW;\n"
+                ".super Landroid/app/Application;\n"
                 ".method protected attachBaseContext(Landroid/content/Context;)V\n"
                 "    .locals 6\n"
                 "    const-string v0, \"SecShell\"\n"

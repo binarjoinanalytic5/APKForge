@@ -25,10 +25,12 @@ class CriticalBoundaryTests(unittest.TestCase):
                 encoding="utf-8",
             )
             reelsec.write_critical_behavior(out, 0x27A510)
-            report = (out / "CRITICAL-FUNCTION-BEHAVIOR.md").read_text(encoding="utf-8")
-            self.assertIn("27a540: d65f03c0     ret", report)
-            self.assertNotIn("27a544", report)
-            self.assertNotIn("__stack_chk_fail", report)
+            # The extracted body (bounded at the first RET) is published in
+            # CRITICAL-FUNCTION-BODY.txt; the behavior report summarizes it.
+            body = (out / "CRITICAL-FUNCTION-BODY.txt").read_text(encoding="utf-8")
+            self.assertIn("27a540: d65f03c0     ret", body)
+            self.assertNotIn("27a544", body)
+            self.assertNotIn("__stack_chk_fail", body)
 
     def test_vtable_object_proof_accepts_objdump_tabs(self):
         with tempfile.TemporaryDirectory() as td:

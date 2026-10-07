@@ -25,14 +25,37 @@ The tool never modifies, patches, injects into, signs, or rebuilds the APK.
 
 ## Capture protection detection
 
-Read-only discovery of screenshot/recording protection indicators:
+Read-only discovery of screenshot/recording protection indicators
+(schema `capture-detection-2`):
 
-    python3 tools/reelsec/capture_detector.py /path/to/decoded-apk -o CAPTURE-DETECTION.json
+    python3 tools/reelsec/capture_detector.py /path/to/decoded-apk \
+        -o CAPTURE-DETECTION.json -m CAPTURE-DETECTION.md
 
 The campaign automatically emits `CAPTURE-DETECTION.json` beside its report.
-The detector classifies only static indicators such as `FLAG_SECURE`,
-MediaProjection, capture callbacks, Surface security, DRM/native capture
-strings, and native-library printable strings.
+
+V2 detection layers:
+
+- **Smali FLAG_SECURE heuristic** — obfuscated code that loads `0x2000` into a
+  register and applies it via `addFlags`/`setFlags`/`or-int` in a bounded line
+  window. A bare `0x2000` constant alone is never reported (avoids buffer-size
+  false positives).
+- **Packer / hardening shell detection** — SecShell, Bangcle/SecNeo, Qihoo
+  Jiagu, Tencent Legu, Ali Mobisec, Ijiami, KiwiSec, identified from the
+  manifest Application class, native library names, and asset names. When a
+  shell is present and no managed-code FLAG_SECURE is found, the verdict is
+  `PACKED_STATIC_ANALYSIS_LIMITED`: the real application code is encrypted and
+  cannot be fully enumerated from static files.
+- **Hidden DEX payload discovery** — DEX magic inside assets/lib/unknown
+  containers (detection only; payloads are never extracted or decrypted).
+- **Native string classification** — DRM (`MediaDrm`, `Widevine`, `edef8ba9`,
+  `OEMCrypto`), DRM security levels (`HW_SECURE`, `securityLevel`),
+  protected-content buffers (`GRALLOC_USAGE_PROTECTED`,
+  `AHARDWAREBUFFER_USAGE_PROTECTED_CONTENT`, `EGL_PROTECTED_CONTENT`), capture
+  callbacks (`nativeOnCaptureScreen`, `registerScreenCaptureCallback`,
+  `onCapturedContentVisibilityChanged`), capture binaries (`screencap`,
+  `screenrecord`), and anti-instrumentation strings.
+- **Structured summary** — per-layer mechanisms with confidence
+  (`HIGH_STRUCTURAL`, `MEDIUM`, `LOW_INDICATOR`) and an overall verdict.
 
 **Important:** indicator presence is not execution or causal proof. The detector
 does not patch, disable, inject, sign, or rebuild the APK.

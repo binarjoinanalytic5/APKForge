@@ -1427,6 +1427,13 @@ def write_autonomous_dataflow(output, target, objdump):
                 page=int(m1.group(1),16)
                 for k in range(j+1,min(rel_i,j+4)):
                     m2=re.search(r"\badd\s+x8,\s+x8,\s+#(0x[0-9a-fA-F]+|\d+)",block[k])
+                    if m2 and page+int(m2.group(1),0)==0x717e60:
+                        # x8 was advanced directly to the exact target vtable
+                        # constant before the +0x108 slot load. The constant
+                        # must match exactly; this does not widen the gate.
+                        direct_vtable=True
+                        direct_basis="0x717e60 vtable constant resolved directly into x8 before +0x108 load"
+                        break
                     if m2 and page+int(m2.group(1),0)==0x717e50:
                         # The ABI address-point is x8 + 0x10, so either x9 or
                         # x8 must be explicitly advanced to 0x717e60 before use.
