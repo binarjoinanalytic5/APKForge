@@ -41,3 +41,31 @@ does not patch, disable, inject, sign, or rebuild the APK.
 ## Evidence boundary
 
 The capture detector is deliberately evidence-gated. Strong static indicators are discovery signals only; DRM/native capture strings are contextual signals. No static hit is treated as proof of execution or causality. Causal status requires runtime observation tied to the exact artifact, matching code-path provenance, and an observable security decision or capture behavior.
+
+
+## Optional open-source analysis adapters
+
+ReelSec can optionally use installed open-source analyzers without making them
+hard dependencies:
+
+    python3 tools/reelsec/optional_adapters.py /path/to/decoded-apk \
+      --elf /path/to/libsaasCorePlayer.so \
+      --adapters auto -o OPTIONAL-ADAPTERS.json
+
+The campaign also runs the adapters automatically in read-only mode and writes
+`OPTIONAL-ADAPTERS.json`. Select a subset with:
+
+    python3 tools/reelsec/reelsec.py campaign ./original.apk \
+      --adapters mobsfscan,radare2
+
+Supported adapters:
+
+- **mobsfscan** — static source-pattern analysis when installed.
+- **radare2** — native ELF header/symbol inventory when an ELF is available.
+- **MobSF** — availability/version discovery; server upload/orchestration remains external.
+- **objection** — availability/version discovery; runtime observation stays in ReelSec's guarded path.
+
+Adapters are optional and missing tools are reported as `UNAVAILABLE`, not as
+campaign failures. Adapter output is evidence only and never causal proof.
+No adapter patches, disables protections, injects hooks, signs, or rebuilds the
+input APK.
