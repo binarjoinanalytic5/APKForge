@@ -1,0 +1,57 @@
+{
+  "apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+  "causal_proof": false,
+  "elf": null,
+  "interpretation": "OPTIONAL_TOOL_EVIDENCE_ONLY",
+  "read_only": true,
+  "requested": [
+    "mobsfscan",
+    "radare2",
+    "jadx",
+    "mobsf",
+    "objection"
+  ],
+  "results": {
+    "jadx": {
+      "command": [
+        "/data/data/com.termux/files/usr/bin/jadx",
+        "--version"
+      ],
+      "decompile": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/jadx",
+          "-d",
+          "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/.reelsec-jadx",
+          "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk"
+        ],
+        "output": "proot error: '/usr/bin/env' not found (root = /data/data/com.termux/files/usr/share/apkmod, cwd = /data/data/com.termux/files/home, $PATH=(null))\nfatal error: see `proot --help`.\n",
+        "returncode": 1,
+        "status": "FAILED"
+      },
+      "output": "proot error: '/usr/bin/env' not found (root = /data/data/com.termux/files/usr/share/apkmod, cwd = /data/data/com.termux/files/home, $PATH=(null))\nfatal error: see `proot --help`.\n",
+      "output_dir": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/.reelsec-jadx",
+      "returncode": 1,
+      "status": "FAILED",
+      "tool": "jadx"
+    },
+    "mobsf": {
+      "status": "UNAVAILABLE",
+      "tool": "mobsf"
+    },
+    "mobsfscan": {
+      "status": "UNAVAILABLE",
+      "tool": "mobsfscan"
+    },
+    "objection": {
+      "status": "UNAVAILABLE",
+      "tool": "objection"
+    },
+    "radare2": {
+      "status": "UNAVAILABLE",
+      "tool": "radare2"
+    }
+  },
+  "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/decoded-apk-no-res",
+  "safety_boundary": "Adapters do not patch, disable protections, inject hooks, sign, rebuild, or modify the input APK.",
+  "schema_version": "reelsec-optional-adapters-1"
+}

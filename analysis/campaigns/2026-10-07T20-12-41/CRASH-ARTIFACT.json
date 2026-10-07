@@ -1,0 +1,62 @@
+{
+  "abort_message": null,
+  "abort_message_present": false,
+  "apk_offset_resolution": null,
+  "artifact": {
+    "artifact_sha256": "f560856d21838ab5c3c5d502986bc9fea965d5c852da98a6ff7924d5a666e97a",
+    "artifact_type": "INSTRUMENTED_TEST_ARTIFACT",
+    "installed_path": "/data/app/~~nrjmFUVKZFwMhK4zbryVeg==/com.newleaf.app.android.victor-5PuRjguwRH6hKBLK2tkiRA==/base.apk",
+    "label": "instrumented",
+    "local_artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-signed.apk"
+  },
+  "crash_instances": [],
+  "evidence_lines": {
+    "fatal_lines": [
+      "10-07 19:20:51.592 22429 22429 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 22429 (.android.victor), pid 22429 (.android.victor)",
+      "10-07 19:22:27.850 23267 23267 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 23267 (.android.victor), pid 23267 (.android.victor)",
+      "10-07 22:38:01.381 27483 27483 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 27483 (.android.victor), pid 27483 (.android.victor)",
+      "10-07 22:43:22.838   443   443 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 443 (.android.victor), pid 443 (.android.victor)",
+      "10-07 22:43:57.292  2607  2607 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 2607 (.android.victor), pid 2607 (.android.victor)"
+    ],
+    "package_matched_lines": [
+      "10-07 19:20:51.592 22429 22429 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 22429 (.android.victor), pid 22429 (.android.victor)",
+      "10-07 19:20:51.742 22451 22451 F DEBUG   : Cmdline: com.newleaf.app.android.victor",
+      "10-07 19:20:51.742 22451 22451 F DEBUG   : pid: 22429, tid: 22429, name: .android.victor  >>> com.newleaf.app.android.victor <<<",
+      "10-07 19:20:51.742 22451 22451 F DEBUG   :       #01 pc 0000000000031e10  /data/app/~~nI_eqrIl5VwXHgiiiwaDEw==/com.newleaf.app.android.victor-fjpp5arRcaT3OH5BqHNlqA==/base.apk",
+      "10-07 19:22:27.850 23267 23267 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 23267 (.android.victor), pid 23267 (.android.victor)",
+      "10-07 19:22:28.024 23290 23290 F DEBUG   : Cmdline: com.newleaf.app.android.victor",
+      "10-07 19:22:28.024 23290 23290 F DEBUG   : pid: 23267, tid: 23267, name: .android.victor  >>> com.newleaf.app.android.victor <<<",
+      "10-07 19:22:28.024 23290 23290 F DEBUG   :       #01 pc 0000000000031e10  /data/app/~~nI_eqrIl5VwXHgiiiwaDEw==/com.newleaf.app.android.victor-fjpp5arRcaT3OH5BqHNlqA==/base.apk",
+      "10-07 22:38:01.381 27483 27483 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 27483 (.android.victor), pid 27483 (.android.victor)",
+      "10-07 22:38:01.724 27515 27515 F DEBUG   : Cmdline: com.newleaf.app.android.victor"
+    ]
+  },
+  "fatal_signal": "SIGABRT",
+  "fault_addr": null,
+  "fault_location": {
+    "library": "libc.so",
+    "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+    "pc": "00000000000537d4",
+    "symbol": "abort+168"
+  },
+  "grouping": {
+    "instance_count": 0,
+    "sessions_detected": 0,
+    "uids": [],
+    "users": []
+  },
+  "integrity_notes": [
+    "no textual abort() message captured in this record; the cause MUST NOT be labeled anti-tamper or screenshot protection on this evidence alone"
+  ],
+  "package": "com.newleaf.app.android.victor",
+  "schema_version": "crash-artifact-1",
+  "session": {
+    "first_process_seen_epoch": 1791404048.5851066,
+    "last_process_seen_epoch": 1791404048.5851066,
+    "launch_returncode": 0,
+    "observe_s": 8,
+    "observed_process_lifetime_ms": 0,
+    "process_alive_at_exit": false,
+    "started_at_epoch": 1791404047.3370626
+  }
+}

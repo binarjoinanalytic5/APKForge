@@ -1,0 +1,23 @@
+{
+  "attribution_rule": "a crash is attributed to instrumentation only when the identified fault library matches a ReelSec-introduced change; CRASH_CAUSE_UNKNOWN is never attributed",
+  "changes": [
+    {
+      "applied_by": "sign_verify.sign_command",
+      "artifact_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-signed.apk",
+      "change_id": "SIGN-1",
+      "description": "artifact re-signed with the isolated test keystore (test key, not the store certificate)",
+      "type": "RE_SIGNING"
+    },
+    {
+      "applied_by": "apktool build / zipalign",
+      "artifact_path": "instrumented-unsigned.apk",
+      "change_id": "BUILD-1",
+      "description": "apktool rebuild + zipalign of the isolated instrumented tree",
+      "type": "REPACKAGING"
+    }
+  ],
+  "crash_cause": "NATIVE_LIBRARY:libc.so",
+  "crash_linkage": "FAULT_LIBRARY_NOT_INJECTED_BY_REELSEC:libc.so",
+  "fault_library": "libc.so",
+  "schema_version": "instrumentation-impact-1"
+}

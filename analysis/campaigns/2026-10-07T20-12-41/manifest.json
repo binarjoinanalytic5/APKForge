@@ -1,0 +1,602 @@
+{
+  "tool": "ReelSec",
+  "version": "3.0.0",
+  "probes": [
+    "elf",
+    "symbols",
+    "strings",
+    "vtable",
+    "dispatch",
+    "critical-function",
+    "protection-bridge",
+    "vtable-abi",
+    "critical-function-behavior",
+    "native-security-api",
+    "java-screen-security",
+    "auto-publish",
+    "autonomous-dataflow",
+    "runtime-proof-readiness",
+    "runtime-frida-probe",
+    "target-provenance",
+    "runtime-toolchain-preflight",
+    "environment-capability",
+    "campaign-cli"
+  ],
+  "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so",
+  "created_at": "2026-10-07T23:13:44+0300",
+  "mode": "campaign",
+  "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+  "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+  "capabilities": {
+    "schema_version": "1.0",
+    "resolver": "ReelSec Environment Resolver",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00",
+    "tools": {
+      "java": {
+        "name": "java",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "openjdk 21.0.12 2026-07-21",
+        "returncode": 0
+      },
+      "python": {
+        "name": "python",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/python3.14",
+        "version": "Python 3.14.6",
+        "returncode": 0
+      },
+      "adb": {
+        "name": "adb",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/adb",
+        "version": "Android Debug Bridge version 1.0.41",
+        "returncode": 0,
+        "device_query": "USABLE",
+        "devices": [
+          "192.168.8.8:45441      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+        ]
+      },
+      "apktool": {
+        "name": "apktool-standalone",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "2.7.0-dirty",
+        "backend": "java-classpath",
+        "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+        "attempts": [
+          {
+            "backend": "cli",
+            "path": "/data/data/com.termux/files/usr/bin/apktool",
+            "returncode": 1
+          },
+          {
+            "backend": "java-classpath",
+            "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+            "returncode": 0
+          }
+        ]
+      },
+      "frida": {
+        "name": "frida",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/frida",
+        "version": "17.2.14",
+        "returncode": 0
+      },
+      "signing": {
+        "zipalign": {
+          "name": "zipalign",
+          "status": "BROKEN",
+          "path": "/data/data/com.termux/files/usr/bin/zipalign",
+          "version": null,
+          "returncode": 127
+        },
+        "apksigner": {
+          "name": "apksigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/bin/apksigner",
+          "version": "0.9",
+          "returncode": 0
+        },
+        "jarsigner": {
+          "name": "jarsigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+          "version": "jarsigner 21.0.12",
+          "returncode": 0
+        }
+      },
+      "zipalign": {
+        "name": "zipalign",
+        "status": "BROKEN",
+        "path": "/data/data/com.termux/files/usr/bin/zipalign",
+        "version": null,
+        "returncode": 127
+      },
+      "apksigner": {
+        "name": "apksigner",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/apksigner",
+        "version": "0.9",
+        "returncode": 0
+      },
+      "jarsigner": {
+        "name": "jarsigner",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+        "version": "jarsigner 21.0.12",
+        "returncode": 0
+      }
+    },
+    "device": {
+      "online_count": 1,
+      "state": "USABLE",
+      "records": [
+        "192.168.8.8:45441      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+      ]
+    },
+    "policy": {
+      "available_is_not_usable": true,
+      "resolver_does_not_install": true,
+      "original_apk_is_immutable": true
+    }
+  },
+  "apktool_backend": {
+    "name": "apktool-standalone",
+    "backend": "java-classpath",
+    "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+    "version": "2.7.0-dirty",
+    "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+    "status": "SELECTED"
+  },
+  "apktool_decode": {
+    "status": "DECODED_NO_RES",
+    "returncode": 0,
+    "command": [
+      "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "-cp",
+      "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "brut.apktool.Main",
+      "d",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+      "-o",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/decoded-apk-no-res",
+      "-r"
+    ],
+    "output_dir": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/decoded-apk-no-res",
+    "log": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/decoded-apk-no-res/reelsec-apktool-recovery.log",
+    "mode": "APKTOOL_NO_RES",
+    "resources_decoded": false,
+    "instrumentable_smali": true,
+    "buildable_with_apktool": true,
+    "selection_strategy": "NO_RES_FIRST"
+  },
+  "decoded_input_inventory": {
+    "schema_version": "1.1",
+    "status": "READY",
+    "analysis_mode": "DECODED_SMALI_NATIVE",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/decoded-apk-no-res",
+    "manifest": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/decoded-apk-no-res/AndroidManifest.xml",
+    "smali_roots": [
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/decoded-apk-no-res/smali"
+    ],
+    "smali_file_count": 514,
+    "native_library_count": 50,
+    "native_libraries": [
+      "lib/arm64-v8a/libSecShell-x86.so",
+      "lib/arm64-v8a/libSecShell.so",
+      "lib/arm64-v8a/libalinetworkdiagnosis.so",
+      "lib/arm64-v8a/libalivcffmpeg.so",
+      "lib/arm64-v8a/libapplovin-native-crash-reporter.so",
+      "lib/arm64-v8a/libbuffer_pgl.so",
+      "lib/arm64-v8a/libc++_shared.so",
+      "lib/arm64-v8a/libcrashlytics-common.so",
+      "lib/arm64-v8a/libcrashlytics-handler.so",
+      "lib/arm64-v8a/libcrashlytics-trampoline.so",
+      "lib/arm64-v8a/libcrashlytics.so",
+      "lib/arm64-v8a/libdatastore_shared_counter.so",
+      "lib/arm64-v8a/libfile_lock_pgl.so",
+      "lib/arm64-v8a/libmarsxlog.so",
+      "lib/arm64-v8a/libmku_aaab.so",
+      "lib/arm64-v8a/libmmkv.so",
+      "lib/arm64-v8a/libnms.so",
+      "lib/arm64-v8a/libpglarmor.so",
+      "lib/arm64-v8a/libprotect.so",
+      "lib/arm64-v8a/libsaasCorePlayer.so",
+      "lib/arm64-v8a/libsaasDownloader.so",
+      "lib/arm64-v8a/libsls_producer.so",
+      "lib/arm64-v8a/libstupid.so",
+      "lib/arm64-v8a/libtapjoy.so",
+      "lib/arm64-v8a/libtt_ugen_layout.so",
+      "lib/armeabi-v7a/libSecShell-x86.so",
+      "lib/armeabi-v7a/libSecShell.so",
+      "lib/armeabi-v7a/libalinetworkdiagnosis.so",
+      "lib/armeabi-v7a/libalivcffmpeg.so",
+      "lib/armeabi-v7a/libapplovin-native-crash-reporter.so",
+      "lib/armeabi-v7a/libbuffer_pgl.so",
+      "lib/armeabi-v7a/libc++_shared.so",
+      "lib/armeabi-v7a/libcrashlytics-common.so",
+      "lib/armeabi-v7a/libcrashlytics-handler.so",
+      "lib/armeabi-v7a/libcrashlytics-trampoline.so",
+      "lib/armeabi-v7a/libcrashlytics.so",
+      "lib/armeabi-v7a/libdatastore_shared_counter.so",
+      "lib/armeabi-v7a/libfile_lock_pgl.so",
+      "lib/armeabi-v7a/libmarsxlog.so",
+      "lib/armeabi-v7a/libmku_aaab.so",
+      "lib/armeabi-v7a/libmmkv.so",
+      "lib/armeabi-v7a/libnms.so",
+      "lib/armeabi-v7a/libpglarmor.so",
+      "lib/armeabi-v7a/libprotect.so",
+      "lib/armeabi-v7a/libsaasCorePlayer.so",
+      "lib/armeabi-v7a/libsaasDownloader.so",
+      "lib/armeabi-v7a/libsls_producer.so",
+      "lib/armeabi-v7a/libstupid.so",
+      "lib/armeabi-v7a/libtapjoy.so",
+      "lib/armeabi-v7a/libtt_ugen_layout.so"
+    ],
+    "dex_count": 0,
+    "dex_files": [],
+    "decode_mode": "APKTOOL_NO_RES",
+    "resources_decoded": false
+  },
+  "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/decoded-apk-no-res",
+  "target_source": "decoded-apk-no-res",
+  "input_provenance": {
+    "schema_version": "1.1",
+    "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+    "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+    "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/decoded-apk-no-res",
+    "analysis_root_kind": "repository_or_external_root",
+    "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_relative_path": "lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+    "target_relation": "WITHIN_ANALYSIS_ROOT",
+    "evidence_scope": "static-analysis-input-provenance",
+    "causality_proven": false
+  },
+  "instrumentation_plan": {
+    "status": "READY",
+    "mode": "NON_MUTATING_PLAN",
+    "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+    "class_name": "com/SecShell/SecShell/AW",
+    "loadlibrary_line": 135,
+    "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+    "anchor": "System.loadLibrary(\"SecShell\")",
+    "placement": "immediately_after_loadLibrary_before_normal_application_init",
+    "runtime_proof": false,
+    "discovery": "STRUCTURAL_CONTENT",
+    "candidate_count": 1,
+    "candidates": [
+      {
+        "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+        "class_name": "com/SecShell/SecShell/AW",
+        "loadlibrary_line": 135,
+        "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "is_application": true,
+        "has_attach_base_context": true
+      }
+    ],
+    "discovered_candidates": [
+      {
+        "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+        "relative_path": "smali/com/SecShell/SecShell/AW.smali",
+        "class_name": "com/SecShell/SecShell/AW",
+        "score": 185,
+        "is_application": true,
+        "has_attach_base_context": true,
+        "manifest_application": null,
+        "manifest_match": false,
+        "loadlibrary_line": 135,
+        "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "secshell_reference_in_class": true
+      }
+    ]
+  },
+  "instrumented_copy": {
+    "mutations": [
+      {
+        "anchor": "Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "file": "smali/com/SecShell/SecShell/AW.smali",
+        "log_message": "SecShell loadLibrary reached",
+        "log_tag": "ReelSec-Instrumentation",
+        "matched_registers": [
+          "v0"
+        ],
+        "purpose": "telemetry_only",
+        "registers_added": 2,
+        "type": "LOG_I_PROBE"
+      },
+      {
+        "type": "FRIDA_GADGET_EMBED",
+        "file": "smali/com/SecShell/SecShell/AW.smali",
+        "library": "lib/arm64-v8a/libfrida-gadget.so",
+        "library_sha256": "9a457f19c7fef6568a86b4d3028e7342b0bbc4cecc6449b47f5802c56f65b135",
+        "config": "lib/arm64-v8a/libfrida-gadget.config.so",
+        "abi": "arm64-v8a",
+        "listen": "127.0.0.1:27042",
+        "purpose": "guarded_runtime_observation",
+        "native_library_packaging": "apktool_doNotCompress_so",
+        "original_apk_untouched": true
+      }
+    ],
+    "schema_version": 1,
+    "source_manifest_sha256": "3fe3d6c8811e4d4ece4108b94d9afca2301eb0cf3118d707648e9484a2c7a1f4",
+    "source_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/decoded-apk-no-res",
+    "status": "MUTATED",
+    "work_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-apk",
+    "gadget_enabled": true,
+    "gadget_source": "/data/data/com.termux/files/home/apk-lab/reelsec-gadget/frida-gadget-17.2.14-android-arm64.so",
+    "gadget_abi": "arm64-v8a",
+    "gadget_port": 27042,
+    "instrumentation_target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-apk/smali/com/SecShell/SecShell/AW.smali"
+  },
+  "build_verify": {
+    "status": "BUILT",
+    "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-unsigned-aligned.apk",
+    "size": 75944997,
+    "sha256": "8418e3ed80f5339564b94211928975bbcb5919441f83c569ff45a03e0bbf5d56",
+    "command": [
+      "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "-cp",
+      "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "brut.apktool.Main",
+      "b",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-apk",
+      "-o",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-unsigned.apk"
+    ],
+    "returncode": 0,
+    "output_tail": "I: Using Apktool 2.7.0-dirty\nI: Checking whether sources has changed...\nI: Smaling smali folder into classes.dex...\nI: Checking whether resources has changed...\nI: Copying raw resources...\nI: Copying libs... (/lib)\nI: Copying libs... (/kotlin)\nI: Copying libs... (/META-INF/services)\nI: Building apk file...\nI: Copying unknown files/dir...\nI: Built apk into: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-unsigned.apk\n",
+    "raw_built_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-unsigned.apk",
+    "alignment_command": [
+      "/data/data/com.termux/files/usr/bin/zipalign",
+      "-P",
+      "16",
+      "-f",
+      "-v",
+      "4",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-unsigned.apk",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-unsigned-aligned.apk"
+    ],
+    "alignment_returncode": 0,
+    "alignment_output_tail": "n_rules_english.txt (OK - compressed)\n75342103 org/apache/commons/codec/language/bm/gen_approx_russian.txt (OK - compressed)\n75342895 org/apache/commons/codec/language/bm/sep_exact_portuguese.txt (OK - compressed)\n75343458 org/apache/commons/codec/language/bm/sep_exact_any.txt (OK - compressed)\n75344027 org/apache/commons/codec/language/bm/ash_approx_spanish.txt (OK - compressed)\n75344609 org/apache/commons/codec/language/bm/gen_approx_cyrillic.txt (OK - compressed)\n75345195 org/apache/commons/codec/language/bm/ash_approx_hungarian.txt (OK - compressed)\n75345776 org/apache/commons/codec/language/bm/sep_approx_italian.txt (OK - compressed)\n75346348 org/apache/commons/codec/language/bm/sep_lang.txt (OK - compressed)\n75347400 org/apache/commons/codec/language/bm/gen_approx_greeklatin.txt (OK - compressed)\n75347988 org/apache/commons/codec/language/bm/gen_rules_polish.txt (OK - compressed)\n75349527 org/apache/commons/codec/language/bm/gen_exact_english.txt (OK - compressed)\n75350109 org/apache/commons/codec/language/bm/ash_rules_polish.txt (OK - compressed)\n75351658 org/apache/commons/codec/language/bm/ash_rules_cyrillic.txt (OK - compressed)\n75352727 org/apache/commons/codec/language/bm/gen_exact_cyrillic.txt (OK - compressed)\n75353313 org/apache/commons/codec/language/bm/sep_rules_portuguese.txt (OK - compressed)\n75354507 org/apache/commons/codec/language/bm/ash_approx_common.txt (OK - compressed)\n75356043 org/apache/commons/codec/language/bm/sep_approx_spanish.txt (OK - compressed)\n75356626 org/apache/commons/codec/language/bm/gen_rules_romanian.txt (OK - compressed)\n75357451 org/apache/commons/codec/language/bm/ash_exact_romanian.txt (OK - compressed)\n75358030 org/apache/commons/codec/language/bm/ash_rules_hebrew.txt (OK - compressed)\n75358814 org/apache/commons/codec/language/bm/sep_hebrew_common.txt (OK - compressed)\n75359825 org/apache/commons/codec/language/bm/gen_rules_hebrew.txt (OK - compressed)\n75360612 org/apache/commons/codec/language/bm/gen_rules_czech.txt (OK - compressed)\n75361452 org/apache/commons/codec/language/bm/ash_lang.txt (OK - compressed)\n75363083 org/apache/http/version.properties (OK - compressed)\n75363687 org/apache/http/client/version.properties (OK - compressed)\n75364376 google/protobuf/timestamp.proto (OK - compressed)\n75367275 google/protobuf/field_mask.proto (OK - compressed)\n75370469 google/protobuf/api.proto (OK - compressed)\n75373459 google/protobuf/duration.proto (OK - compressed)\n75375591 google/protobuf/struct.proto (OK - compressed)\n75377337 google/protobuf/wrappers.proto (OK - compressed)\n75378965 google/protobuf/source_context.proto (OK - compressed)\n75380230 google/protobuf/any.proto (OK - compressed)\n75382923 google/protobuf/type.proto (OK - compressed)\n75385373 google/protobuf/empty.proto (OK - compressed)\n75386672 okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75428132 okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75428396 com/applovin/shadow/okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75469876 com/applovin/shadow/okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75470128 com/google/api/client/http/google-http-client.properties (OK)\n75470236 com/google/api/client/googleapis/google.p12 (OK)\n75546785 com/google/api/client/googleapis/google.jks (OK - compressed)\n75590136 com/google/api/client/googleapis/google-api-client.properties (OK)\n75590234 src/google/protobuf/timestamp.proto (OK - compressed)\n75593137 src/google/protobuf/field_mask.proto (OK - compressed)\n75596335 src/google/protobuf/api.proto (OK - compressed)\n75599329 src/google/protobuf/duration.proto (OK - compressed)\n75601465 src/google/protobuf/struct.proto (OK - compressed)\n75603215 src/google/protobuf/wrappers.proto (OK - compressed)\n75604847 src/google/protobuf/source_context.proto (OK - compressed)\n75606116 src/google/protobuf/any.proto (OK - compressed)\n75608813 src/google/protobuf/type.proto (OK - compressed)\n75611267 src/google/protobuf/empty.proto (OK - compressed)\nVerification successful\n",
+    "alignment_verify_command": [
+      "/data/data/com.termux/files/usr/bin/zipalign",
+      "-c",
+      "-P",
+      "16",
+      "-v",
+      "4",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-unsigned-aligned.apk"
+    ],
+    "alignment_page_size_kb": 16,
+    "native_library_packaging": {
+      "status": "NATIVE_LIBRARIES_UNCOMPRESSED",
+      "native_library_count": 52,
+      "compressed_native_libraries": []
+    }
+  },
+  "sign_verify": {
+    "unsigned_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-unsigned-aligned.apk",
+    "unsigned_sha256": "8418e3ed80f5339564b94211928975bbcb5919441f83c569ff45a03e0bbf5d56",
+    "signed_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-signed.apk",
+    "signed_sha256": "f560856d21838ab5c3c5d502986bc9fea965d5c852da98a6ff7924d5a666e97a",
+    "original_mutation": false,
+    "status": "SIGNED_VERIFIED",
+    "sign_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "sign",
+      "--ks",
+      "/data/data/com.termux/files/home/apk-lab/reelsec-test/reelsec-test.jks",
+      "--ks-key-alias",
+      "reelsec-test",
+      "--ks-pass",
+      "env:REELSEC_TEST_KEYSTORE_PASSWORD",
+      "--key-pass",
+      "env:REELSEC_TEST_KEY_PASSWORD",
+      "--out",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-signed.apk",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-unsigned-aligned.apk"
+    ],
+    "verify_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "verify",
+      "--verbose",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-signed.apk"
+    ],
+    "sign_output_tail": "",
+    "verify_output_tail": "Verifies\nVerified using v1 scheme (JAR signing): true\nVerified using v2 scheme (APK Signature Scheme v2): true\nVerified using v3 scheme (APK Signature Scheme v3): true\nVerified using v3.1 scheme (APK Signature Scheme v3.1): false\nVerified using v3.2 scheme (APK Signature Scheme v3.2): false\nVerified using v4 scheme (APK Signature Scheme v4): false\nVerified for SourceStamp: false\nNumber of signers: 1\nWARNING: META-INF/services/io.ktor.client.HttpClientEngineContainer not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.CoroutineExceptionHandler not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.internal.MainDispatcherFactory not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\n"
+  },
+  "adb_deploy": {
+    "status": "INSTALLED",
+    "serial": "192.168.8.8:45441",
+    "requested_serial": null,
+    "device_resolution": "AUTO_SINGLE_ONLINE_DEVICE",
+    "online_devices": [
+      "192.168.8.8:45441"
+    ],
+    "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-signed.apk",
+    "artifact_sha256": "f560856d21838ab5c3c5d502986bc9fea965d5c852da98a6ff7924d5a666e97a",
+    "artifact_kind": "INSTRUMENTED_TEST_ARTIFACT",
+    "device_inventory_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "devices",
+      "-l"
+    ],
+    "device_check_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "-s",
+      "192.168.8.8:45441",
+      "get-state"
+    ],
+    "artifact_preflight": {
+      "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-signed.apk",
+      "checks": {
+        "native_libs_uncompressed": {
+          "status": "PASS",
+          "so_count": 52,
+          "compressed_entries": []
+        },
+        "abi_directories": {
+          "status": "PASS",
+          "abis": [
+            "arm64-v8a",
+            "armeabi-v7a"
+          ]
+        },
+        "zipalign_page_alignment": {
+          "status": "PASS",
+          "command": [
+            "/data/data/com.termux/files/usr/bin/zipalign",
+            "-c",
+            "-P",
+            "16",
+            "-v",
+            "4",
+            "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-signed.apk"
+          ],
+          "returncode": 0,
+          "output_tail": "google/protobuf/any.proto (OK - compressed)\n75383119 google/protobuf/type.proto (OK - compressed)\n75385569 google/protobuf/empty.proto (OK - compressed)\n75386876 okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75428336 okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75428604 com/applovin/shadow/okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75470084 com/applovin/shadow/okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75470344 com/google/api/client/http/google-http-client.properties (OK)\n75470456 com/google/api/client/googleapis/google.p12 (OK)\n75547005 com/google/api/client/googleapis/google.jks (OK - compressed)\n75590364 com/google/api/client/googleapis/google-api-client.properties (OK)\n75590462 src/google/protobuf/timestamp.proto (OK - compressed)\n75593365 src/google/protobuf/field_mask.proto (OK - compressed)\n75596563 src/google/protobuf/api.proto (OK - compressed)\n75599557 src/google/protobuf/duration.proto (OK - compressed)\n75601693 src/google/protobuf/struct.proto (OK - compressed)\n75603443 src/google/protobuf/wrappers.proto (OK - compressed)\n75605075 src/google/protobuf/source_context.proto (OK - compressed)\n75606344 src/google/protobuf/any.proto (OK - compressed)\n75609041 src/google/protobuf/type.proto (OK - compressed)\n75611495 src/google/protobuf/empty.proto (OK - compressed)\n75612767 META-INF/REELSEC-.SF (OK - compressed)\n75771976 META-INF/REELSEC-.RSA (OK - compressed)\n75773115 META-INF/MANIFEST.MF (OK - compressed)\nVerification successful\n"
+        },
+        "abi_compatibility": {
+          "status": "PASS",
+          "device_abilist": "arm64-v8a,armeabi-v7a,armeabi",
+          "apk_abis": [
+            "arm64-v8a",
+            "armeabi-v7a"
+          ],
+          "compatible": true
+        }
+      },
+      "status": "PASS"
+    },
+    "install_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "-s",
+      "192.168.8.8:45441",
+      "install",
+      "-r",
+      "--no-incremental",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-signed.apk"
+    ],
+    "install_mode": "UPDATE",
+    "uninstall_command": null,
+    "uninstall_output_tail": "",
+    "install_output_tail": "Performing Streamed Install\nSuccess\n",
+    "installed_verification": {
+      "present": true,
+      "installed_path": "/data/app/~~nrjmFUVKZFwMhK4zbryVeg==/com.newleaf.app.android.victor-5PuRjguwRH6hKBLK2tkiRA==/base.apk",
+      "version_code": "4200",
+      "status": "VERIFIED_INSTALLED"
+    }
+  },
+  "runtime_capture": {
+    "schema_version": 1,
+    "captured_at_epoch": 1791404018.3316953,
+    "device_serial": "192.168.8.8:45441",
+    "package": "com.newleaf.app.android.victor",
+    "observations": {
+      "state": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:45441",
+          "get-state"
+        ],
+        "returncode": 0,
+        "output": "device\n"
+      },
+      "package_path": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:45441",
+          "shell",
+          "pm",
+          "path",
+          "com.newleaf.app.android.victor"
+        ],
+        "returncode": 0,
+        "output": "package:/data/app/~~nrjmFUVKZFwMhK4zbryVeg==/com.newleaf.app.android.victor-5PuRjguwRH6hKBLK2tkiRA==/base.apk\n"
+      },
+      "process": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:45441",
+          "shell",
+          "sh",
+          "-c",
+          "ps -A | grep -F com.newleaf.app.android.victor || true"
+        ],
+        "returncode": 0,
+        "output": ""
+      },
+      "logcat_tail": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:45441",
+          "logcat",
+          "-d",
+          "-t",
+          "250",
+          "-v",
+          "threadtime"
+        ],
+        "returncode": 0,
+        "output": "--------- beginning of main\n10-07 23:13:39.595  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.newleaf.app.android.victor' not found\n10-07 23:13:39.595  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.qtbbank.alqutaibi' not found Error while validating document (android$apps-db/apps, com.qtbbank.alqutaibi)\n10-07 23:13:39.595  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.qtbbank.alqutaibi' not found\n10-07 23:13:39.595  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.alrajhiretailapp' not found Error while validating document (android$apps-db/apps, com.alrajhiretailapp)\n10-07 23:13:39.595  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.alrajhiretailapp' not found\n10-07 23:13:39.596  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.stripe.link.android' not found Error while validating document (android$apps-db/apps, com.stripe.link.android)\n10-07 23:13:39.596  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.stripe.link.android' not found\n10-07 23:13:39.596  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-dev.tokforge' not found Error while validating document (android$apps-db/apps, dev.tokforge)\n10-07 23:13:39.596  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-dev.tokforge' not found\n10-07 23:13:39.596  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.AamalTech.Aden_Bank' not found Error while validating document (android$apps-db/apps, com.AamalTech.Aden_Bank)\n10-07 23:13:39.596  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.AamalTech.Aden_Bank' not found\n10-07 23:13:39.596  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.pocketpalai' not found Error while validating document (android$apps-db/apps, com.pocketpalai)\n10-07 23:13:39.596  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.pocketpalai' not found\n10-07 23:13:39.596  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.zhiliaoapp.musically' not found Error while validating document (android$apps-db/apps, com.zhiliaoapp.musically)\n10-07 23:13:39.596  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.zhiliaoapp.musically' not found\n10-07 23:13:39.596  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.adenBank.adenCash' not found Error while validating document (android$apps-db/apps, com.adenBank.adenCash)\n10-07 23:13:39.596  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.adenBank.adenCash' not found\n10-07 23:13:39.596  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.reader' not found Error while validating document (android$apps-db/apps, com.adobe.reader)\n10-07 23:13:39.596  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.reader' not found\n10-07 23:13:39.596  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.pixelfed.loops' not found Error while validating document (android$apps-db/apps, com.pixelfed.loops)\n10-07 23:13:39.596  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.pixelfed.loops' not found\n10-07 23:13:39.596  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.x.ai.grok' not found Error while validating document (android$apps-db/apps, com.x.ai.grok)\n10-07 23:13:39.596  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.x.ai.grok' not found\n10-07 23:13:39.596  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-apk.signer' not found Error while validating document (android$apps-db/apps, apk.signer)\n10-07 23:13:39.596  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-apk.signer' not found\n10-07 23:13:39.596  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.meitu.roboneo' not found Error while validating document (android$apps-db/apps, com.meitu.roboneo)\n10-07 23:13:39.596  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.meitu.roboneo' not found\n10-07 23:13:39.596  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.echosign' not found Error while validating document (android$apps-db/apps, com.adobe.echosign)\n10-07 23:13:39.596  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.echosign' not found\n10-07 23:13:39.596  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.freereels.app' not found Error while validating document (android$apps-db/apps, com.freereels.app)\n10-07 23:13:39.596  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.freereels.app' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.lemon.lvoverseas' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-dev.tokforge' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.x.ai.grok' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.alrajhiretailapp' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.qtbbank.alqutaibi' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.AamalTech.Aden_Bank' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.stripe.link.android' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.meitu.roboneo' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.freereels.app' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.newleaf.app.android.victor' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.pocketpalai' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.zhiliaoapp.musically' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-apk.signer' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.adenBank.adenCash' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.reader' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.pixelfed.loops' not found\n10-07 23:13:39.597  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.echosign' not found\n--------- beginning of system\n10-07 23:13:39.606  1269  1614 W Looper  : Slow dispatch took 119ms android.fg h=android.os.Handler c=<recycled PooledLambda@967deb6> m=0\n10-07 23:13:39.610  1269  5167 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package: flg=0x4000010 (has extras) } to com.google.android.gms/.gass.chimera.PackageChangeBroadcastReceiver\n10-07 23:13:39.611  1269  1638 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package: flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver\n10-07 23:13:39.611  1269  1638 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package: flg=0x4000010 (has extras) } to com.samsung.android.calendar/com.samsung.android.app.calendar.model.settings.receiver.UpdateReceiver\n10-07 23:13:39.611 27785 27854 I FILP/FilterProvider: query: E\n10-07 23:13:39.611  1269  1638 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package: flg=0x4000010 (has extras) } to com.sec.android.app.samsungapps/.receiver.PackageAddedReceiver\n10-07 23:13:39.611  1269  1638 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package: flg=0x4000010 (has extras) } to com.sec.android.app.samsungapps/com.samsung.android.iap.receiver.IapReceiver\n10-07 23:13:39.611  1269  1638 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package: flg=0x4000010 (has extras) } to com.verizon.mips.services/com.verizon.vzwavs.receiver.AVSBaseReceiver\n10-07 23:13:39.611  1269  1638 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package: flg=0x4000010 (has extras) } to com.verizon.mips.services/com.verizon.vzwavs.receiver.AVSImplicitBroadcastReceiver\n10-07 23:13:39.612  3922  3922 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color:export ANDROID_LOG_TAGS=''; exec logcat '-d' '-t' '250' '-v' 'threadtime''\n10-07 23:13:39.612  1269  2301 D IntervalStats: Unable to parse usage stats packages: [1424, 2059, 2155, 2156]\n10-07 23:13:39.615  1269  2301 D IntervalStats: Unable to parse event packages: [2059, 2156]\n10-07 23:13:39.619 27765 27864 I Routine@Ui[4.2.01.2]: Pref: putSharedPrefsData() key=debug_mode_features\n10-07 23:13:39.626 27785 27854 I FILP/b  : removeFromFS : com.newleaf.app.android.victor, cursor size : 0\n10-07 23:13:39.626 27765 27864 I Routine@Ui[4.2.01.2]: DebugModeRepository: initialized.\n10-07 23:13:39.628 23347 27662 I Finsky:background: [2611] Wrote row to frosting DB: 1929\n10-07 23:13:39.629  1269  2912 D SemContextService: lock : requestToUpdate\n10-07 23:13:39.629  1269  2912 W CAE     : setCAProperty(ContextAwareService.java:513) - [setProperty 01] Mutex is locked for CH_LOC_TRIGGER\n10-07 23:13:39.629  1269  2287 D SensorService: setSContextDataLocked ints length 2 , byte length 4\n10-07 23:13:39.629  1269  2287 D SensorService: setSContextDataLocked 3db8\n10-07 23:13:39.630  1008  1008 I sensors-hal: inject_sensor_data:407, handle 1501 send inject\n10-07 23:13:39.630  1008  1008 I sensors-hal: sendContextData:286, sensor hal 4, (0xb8, 0x3d, 0x0, 0x0)\n10-07 23:13:39.630  1008  1008 I sensors-hal: sendContextData:123, change_location_trigger 4,184\n10-07 23:13:39.630  1008  1008 I sensors-hal: sendUserData:110, change_location_trigger h 184 m 61 s 0\n10-07 23:13:39.630  1008  1008 I sensors-hal: create_send_context_data:65, change_location_trigger create_send_context_data\n10-07 23:13:39.630  1008  1008 I sensors-hal: send_context_data:632, change_location_trigger, -244018566922240, 1320970896291267344, msgid:700\n10-07 23:13:39.635  1269  2912 W CAE     : setCAProperty(ContextAwareService.java:519) - [setProperty 02] Mutex is unlocked for CH_LOC_TRIGGER\n10-07 23:13:39.635  1269  2912 D SemContextService:     .requestToUpdate() : service = Location Change Trigger\n10-07 23:13:39.635  1269  2912 D SemContextService: unlock : requestToUpdate\n10-07 23:13:39.635  1269  2912 D SemContextManager:   .requestToUpdate : listener = com.android.server.location.nsflp.NSLocationMonitor$5@ff342fe, service=Location Change Trigger\n10-07 23:13:39.635  3935  5885 I OldStopController_FLP: StateChecker, check stationary message\n10-07 23:13:39.636 31551 27874 V MVS_VZWAVSService: com.verizon.provider.PACKAGE_REPLACED\n10-07 23:13:39.639  1008 23763 I sensors-hal: handle_sns_client_event:80, change_location_trigger_event: msgid:1025\n10-07 23:13:39.639  1008 23763 I sensors-hal: handle_sns_client_event:100, change_location_trigger_event: 2, 2\n10-07 23:13:39.640  1269  2279 D CAE     : onGetSensorHubData(SensorHubParserProvider.java:89) - onGetSensorHubData Event [event buffer len :5], AP_WAKEUP\n10-07 23:13:39.640  1269  2279 I CAE     : parse(SensorHubParserProvider.java:190) - buffer size = 5\n10-07 23:13:39.640  1269  2279 I CAE     : parse(SensorHubParserProvider.java:201) - 1, 1, 61, 2, 1,\n10-07 23:13:39.640  1269  2279 D CAE     : display(ContextProvider.java:375) - ================= CH_LOC_TRIGGER =================\n10-07 23:13:39.640  1269  2279 I CAE     : display(ContextProvider.java:391) - property=[1], result=[2]\n10-07 23:13:39.641  1269  2276 D SemContextService: Service.updateContext() : service = Location Change Trigger\n10-07 23:13:39.641  1269  1269 D SemContextManager: onSemContextChanged() : event = Location Change Trigger\n10-07 23:13:39.641  1269  1269 D NSLocationMonitor: onSemContextChanged, activity : 1 result : 2 movement : -1\n10-07 23:13:39.644  3935  4061 I GnssEngineManager_FLP: updateSatelliteStatus, top4=25, top6=25, visibleSv=4, usedSv=4, usedL5Sv=0 (usedGps=2, usedGlo=1, usedBds=0, usedGal=1)\n10-07 23:13:39.645  1269  2362 D GnssLocationProvider_ex: SV Count : 4 / 4      (PRN, Constellation, SNR, Used)\n10-07 23:13:39.645  1269  2362 D GnssLocationProvider_ex: (18, GPS, 24.1, 1) (25, GPS, 32.2, 1) (12, GLONASS, 23.2, 1) (26, GALILEO, 22.4, 1) \n10-07 23:13:39.646 27825 27825 I StateUtils: isDirectBootMode On : true\n10-07 23:13:39.650 27765 27765 I Routine@Ui[4.2.01.2]: MetadataSyncHistory: latest : 4.2.01.2, currentVersion : 4.2.01.2\n10-07 23:13:39.651  1269  2362 D GnssLocationProvider: reportLocation\n10-07 23:13:39.651  3935  4061 I GnssEngineManager_FLP: onGpsLocationChanged, provider=gps / isMock=false / speed=0.0 / time=1791404020000 / elapsed=36262149334361\n10-07 23:13:39.651  3935  4061 I OldStopController_FLP: onChangedGlpLocation, isGpsStopped= false, isReportingLL= false\n10-07 23:13:39.652  1269  2362 V LocationManagerService: passive provider registration 5010/com.samsung.android.rubin.app/4406BC59 dropped delivery - too fast\n10-07 23:13:39.652  1269  2362 V LocationManagerService: passive provider registration 5010/com.samsung.android.rubin.app/77E6E961 dropped delivery - too close\n10-07 23:13:39.652  1269  2362 V LocationManagerService: passive provider registration 10113/com.samsung.android.messaging/A05025ED dropped delivery - too fast\n10-07 23:13:39.653  1269  2362 D CompatibilityChangeReporter: Compat change id reported: 151105954; UID 1000; state: ENABLED\n10-07 23:13:39.657 27785 27854 I FILP/b  : Delete DB result : com.newleaf.app.android.victor, 0\n10-07 23:13:39.658 12704 12843 I FusedLocation: (REDACTED) location delivery to %s blocked - too close\n10-07 23:13:39.659 12704 12843 I FusedLocation: (REDACTED) location delivery to %s blocked - too close\n10-07 23:13:39.659 12704 12843 I FusedLocation: (REDACTED) location delivery to %s blocked - too close\n10-07 23:13:39.659 12704 12843 I FusedLocation: (REDACTED) location delivery to %s blocked - too fast\n10-07 23:13:39.659 12704 12843 I FusedLocation: (REDACTED) location delivery to %s blocked - too fast\n10-07 23:13:39.660  1269  4958 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package: flg=0x4000010 (has extras) } to com.google.android.gms/.gass.chimera.PackageChangeBroadcastReceiver\n10-07 23:13:39.660 12704 12843 I FusedLocation: (REDACTED) location delivery to %s blocked - too close\n10-07 23:13:39.663 27403 27529 W Settings: Setting download_manager_max_bytes_over_mobile has moved from android.provider.Settings.Secure to android.provider.Settings.Global.\n10-07 23:13:39.664  3935  4061 I GmsPassiveListener_FLP: onGmsLocationChanged, provider=fused / speed=5.0637197 / time=1791404019650 / elapsed=36262149334361\n10-07 23:13:39.664 27403 27529 I Finsky  : [2610] SettingNotFoundException for download_manager_max_bytes_over_mobile\n10-07 23:13:39.664 27403 27529 W Settings: Setting download_manager_recommended_max_bytes_over_mobile has moved from android.provider.Settings.Secure to android.provider.Settings.Global.\n10-07 23:13:39.666 27403 27529 I Finsky  : [2610] SettingNotFoundException for download_manager_recommended_max_bytes_over_mobile\n10-07 23:13:39.666  1269  2301 D IntervalStats: Unable to parse usage stats packages: [2059, 2156, 2167, 2168]\n10-07 23:13:39.669  1269  1638 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_REPLACED dat=package: flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver\n10-07 23:13:39.672  1269  2301 D IntervalStats: Unable to parse event packages: [2168]\n10-07 23:13:39.680  1269  2362 E AppOps  : attributionTag SLocationService not declared in manifest of android\n10-07 23:13:39.680  1269  2362 V LocationManagerService: passive provider registration 1000/android[SensorNotificationService]/DB828A02 dropped delivery - too close\n10-07 23:13:39.681  1269  2800 D SLocation: PositionManager - PassiveonLocationChanged gps 1791404020000\n10-07 23:13:39.681  1269  2800 D SLocation: ARDistanceBigData - BIGDATA ARD - receive location\n10-07 23:13:39.681  1269  2800 D SLocation: GeofenceLocationFilter - location sent before 4014, need to filter / provider : gps, accuracy : 123.251366\n10-07 23:13:39.681  1269  2800 D SLocation: CellManagerFmm - refreshCellInfo\n10-07 23:13:39.681  1269  2800 W Settings: Setting airplane_mode_on has moved from android.provider.Settings.System to android.provider.Settings.Global, returning read-only value.\n10-07 23:13:39.681  1269  2800 D SLocation: CellManagerFmm - registered cell is not lte & nr\n10-07 23:13:39.681  1269  2800 W Settings: Setting airplane_mode_on has moved from android.provider.Settings.System to android.provider.Settings.Global, returning read-only value.\n10-07 23:13:39.681  1269  2800 D SLocation: CellManagerFmm - registered cell is not lte & nr\n10-07 23:13:39.681  1269  2800 D SLocation: CellManagerFmm - isChangedCellInfo - true\n10-07 23:13:39.681  1269  2800 D SLocation: SLocationCoreSem - send to coreSem, packet length : 23 / [2, 9, 39, 26, 42, 26, 83, 83, 24, 0, 0, 0, 123, 1, 0, 0, 1, 161, 24, 0, 17, 32, 0]\n10-07 23:13:39.681  1269  2800 D SemContextLocationCoreAttribute: setAttribute() mode : 0 action : 23\n10-07 23:13:39.681  1269  5167 V LocationManagerService: passive provider registration 5010/com.samsung.android.rubin.app/4406BC59 dropped delivery - too fast\n10-07 23:13:39.681  1269  2800 D SemContextService: lock : changeParameters\n10-07 23:13:39.681  1269  2800 D SemContext.CaeProvider.LocationCoreImpl: setAttribute() mode : 0 action : 23\n10-07 23:13:39.681  1269  2800 W CAE     : setCAProperty(ContextAwareService.java:513) - [setProperty 01] Mutex is locked for SLOCATION_RUNNER\n10-07 23:13:39.682  1269  2800 I CAE     : setPropertyValue(SLocationRunner.java:116) - SLocationRunner setProperty header : 2, len : 23\n10-07 23:13:39.682  1269  2287 D SensorService: setSContextDataLocked ints length 8 , byte length 26\n10-07 23:13:39.682  1269  5167 V LocationManagerService: passive provider registration 5010/com.samsung.android.rubin.app/77E6E961 dropped delivery - too close\n10-07 23:13:39.682  1269  2287 D SensorService: setSContextDataLocked 23717c1\n10-07 23:13:39.682  1269  5167 V LocationManagerService: passive provider registration 10113/com.samsung.android.messaging/A05025ED dropped delivery - too fast\n10-07 23:13:39.682  1008  1008 I sensors-hal: inject_sensor_data:407, handle 1501 send inject\n10-07 23:13:39.682  1008  1008 I sensors-hal: sendContextData:286, sensor hal 26, (0xc1, 0x17, 0x37, 0x2)\n10-07 23:13:39.682  1008  1008 E sensors-hal: sendContextData:132, slocationcore h 193 m 23 s 55\n10-07 23:13:39.682  1008  1008 I sensors-hal: sendUserData:118, slocationcore sendUserData\n10-07 23:13:39.682  1008  1008 E sensors-hal: create_send_context_data:63, slocationcore create_send_context_data\n10-07 23:13:39.683  1008  1008 I sensors-hal: send_context_data:632, slocationcore, 4986366670857974562, 1320970896291267344, msgid:700\n10-07 23:13:39.684  1008 14352 E sensors-hal: handle_sns_client_event:77, slocationcore_event: msgid:1025\n10-07 23:13:39.684  1008 14352 E sensors-hal: handle_sns_client_event:77, slocationcore_event: msgid:1025\n10-07 23:13:39.685  1269  2800 W CAE     : setCAProperty(ContextAwareService.java:519) - [setProperty 02] Mutex is unlocked for SLOCATION_RUNNER\n10-07 23:13:39.685  1269  2800 D SemContextService: unlock : changeParameters\n10-07 23:13:39.685  1269  2800 D SemContextManager:   .changeParameters : listener = com.samsung.android.location.semcontext.a@c1ac170, service=SLocation Core\n10-07 23:13:39.685  1269  2800 D SLocation: ARDistanceLibManager - request distance diff to AR Distance Library\n10-07 23:13:39.685  1269  2800 D SLocation: SLocationCoreSem - send to coreSem, packet length : 1 / [34]\n10-07 23:13:39.685  1269  2800 D SemContextLocationCoreAttribute: setAttribute() mode : 0 action : 23\n10-07 23:13:39.685  1269  2800 D SemContextService: lock : changeParameters\n10-07 23:13:39.685  1269  2800 D SemContext.CaeProvider.LocationCoreImpl: setAttribute() mode : 0 action : 23\n10-07 23:13:39.685  1269  2800 W CAE     : setCAProperty(ContextAwareService.java:513) - [setProperty 01] Mutex is locked for SLOCATION_RUNNER\n10-07 23:13:39.686  1269  2800 I CAE     : setPropertyValue(SLocationRunner.java:116) - SLocationRunner setProperty header : 34, len : 1\n10-07 23:13:39.686  1269  2287 D SensorService: setSContextDataLocked ints length 2 , byte length 4\n10-07 23:13:39.686  1269  2287 D SensorService: setSContextDataLocked 223717c1\n10-07 23:13:39.686  1008  1008 I sensors-hal: inject_sensor_data:407, handle 1501 send inject\n10-07 23:13:39.686  1008  1008 I sensors-hal: sendContextData:286, sensor hal 4, (0xc1, 0x17, 0x37, 0x22)\n10-07 23:13:39.686  1008  1008 E sensors-hal: sendContextData:132, slocationcore h 193 m 23 s 55\n10-07 23:13:39.686  1008  1008 I sensors-hal: sendUserData:118, slocationcore sendUserData\n10-07 23:13:39.686  1008  1008 E sensors-hal: create_send_context_data:63, slocationcore create_send_context_data\n10-07 23:13:39.687  1269  5167 E AppOps  : attributionTag SLocationService not declared in manifest of android\n10-07 23:13:39.687  1008  1008 I sensors-hal: send_context_data:632, slocationcore, 4986366670857974562, 1320970896291267344, msgid:700\n10-07 23:13:39.687  1269  5167 V LocationManagerService: passive provider registration 1000/android[SensorNotificationService]/DB828A02 dropped delivery - too close\n10-07 23:13:39.687  1269  2279 D CAE     : onGetSensorHubData(SensorHubParserProvider.java:89) - onGetSensorHubData Event [event buffer len :46], AP_WAKEUP\n10-07 23:13:39.688  1269  2279 I CAE     : parse(SensorHubParserProvider.java:190) - buffer size = 46\n10-07 23:13:39.688  1269  2279 I CAE     : parse(SensorHubParserProvider.java:201) - 1, 1, 55, 0, 41, 5, 7, 2, 0, 0, 0, 0, 4, 87, 25, 104, 5, 1, 0, 0, 0, -41, 4, 87, 25, 104, 7, 1, 0, 0, 0, 0, 4, 87, 25, 104, 5, 1, 0, 0, 0, -41, 4, 87, 25, 104,\n10-07 23:13:39.688  1269  2279 I CAE     : parse(SLocationRunner.java:88) - SLocationRunner parse start : 3\n10-07 23:13:39.688  1269  2279 D CAE     : display(ContextProvider.java:375) - ================= SLOCATION_RUNNER =================\n10-07 23:13:39.688  1269  2279 I CAE     : display(ContextProvider.java:391) - ExtraDataArray=[1, 1, 55, 0, 41, 5, 7, 2, 0, 0, 0, 0, 4, 87, 25, 104, 5, 1, 0, 0, 0, -41, 4, 87, 25, 104, 7, 1, 0, 0, 0, 0, 4, 87, 25, 104, 5, 1, 0, 0, 0, -41, 4, 87, 25, 104]\n10-07 23:13:39.688  1269  2279 I CAE     : parse(SLocationRunner.java:96) - SLocationRunner parse end:46\n10-07 23:13:39.688  1269  2279 D CAE     : onGetSensorHubData(SensorHubParserProvider.java:89) - onGetSensorHubData Event [event buffer len :10], AP_WAKEUP\n10-07 23:13:39.688  1269  2279 I CAE     : parse(SensorHubParserProvider.java:190) - buffer size = 10\n10-07 23:13:39.688  1269  2279 I CAE     : parse(SensorHubParserProvider.java:201) - 1, 1, 55, 0, 5, 2, 2, 0, 0, 0,\n10-07 23:13:39.688  1269  2279 I CAE     : parse(SLocationRunner.java:88) - SLocationRunner parse start : 3\n10-07 23:13:39.688  1269  2279 D CAE     : display(ContextProvider.java:375) - ================= SLOCATION_RUNNER =================\n10-07 23:13:39.688  1269  2279 I CAE     : display(ContextProvider.java:391) - ExtraDataArray=[1, 1, 55, 0, 5, 2, 2, 0, 0, 0]\n10-07 23:13:39.688  1269  2279 I CAE     : parse(SLocationRunner.java:96) - SLocationRunner parse end:10\n10-07 23:13:39.689  1008 14352 E sensors-hal: handle_sns_client_event:77, slocationcore_event: msgid:1025\n10-07 23:13:39.690  1008 14352 E sensors-hal: handle_sns_client_event:77, slocationcore_event: msgid:1025\n10-07 23:13:39.690  1269  2276 D SemContextService: Service.updateContext() : service = SLocation Core\n10-07 23:13:39.690  1269  2276 D SemContextService: Service.updateContext() : service = SLocation Core\n10-07 23:13:39.690  1269  2800 W CAE     : setCAProperty(ContextAwareService.java:519) - [setProperty 02] Mutex is unlocked for SLOCATION_RUNNER\n10-07 23:13:39.690  1269  2800 D SemContextService: unlock : changeParameters\n10-07 23:13:39.690  1269  2800 D SemContextManager:   .changeParameters : listener = com.samsung.android.location.semcontext.a@c1ac170, service=SLocation Core\n10-07 23:13:39.691  1269  2800 D SLocation: PositionManager - PassiveonLocationChanged fused 1791404019650\n10-07 23:13:39.691  1269  2800 W SLocation: PositionManager - do not refresh last location about fused location\n10-07 23:13:39.691  1269  2800 D SLocation: ARDistanceBigData - BIGDATA ARD - receive location\n10-07 23:13:39.691  1269  2800 D SLocation: ARDistanceLibManager - request distance diff to AR Distance Library\n10-07 23:13:39.691  1269  2800 D SLocation: ARDistanceGetARDistance - ignore request, waiting for packet\n10-07 23:13:39.691  1269  2800 D SLocation: PositionManager - receive fused location\n10-07 23:13:39.692  1269  2279 D CAE     : onGetSensorHubData(SensorHubParserProvider.java:89) - onGetSensorHubData Event [event buffer len :38], AP_WAKEUP\n10-07 23:13:39.692  1269  2279 I CAE     : parse(SensorHubParserProvider.java:190) - buffer size = 38\n10-07 23:13:39.692  1269  2279 I CAE     : parse(SensorHubParserProvider.java:201) - 1, 1, 55, 0, 33, 33, 0, 0, 0, 0, 0, 0, 1, -95, 24, 0, 13, 56, 9, 39, 26, 48, 26, 83, 83, 32, 0, 0, 0, 110, 4, 87, 25, 104, 0, 0, 0, 0,\n10-07 23:13:39.692  1269  2279 I CAE     : parse(SLocationRunner.java:88) - SLocationRunner parse start : 3\n10-07 23:13:39.692  1269  1269 D SemContextManager: onSemContextChanged() : event = SLocation Core\n10-07 23:13:39.692  1269  1269 D SLocation: SLocationCoreSem - SemContextChanged type = 47, packet received\n10-07 23:13:39.692  1269  2279 D CAE     : display(ContextProvider.java:375) - ================= SLOCATION_RUNNER =================\n10-07 23:13:39.692  1269  1269 D SemContextManager: onSemContextChanged() : event = SLocation Core\n10-07 23:13:39.692  1269  1269 D SLocation: SLocationCoreSem - SemContextChanged type = 47, packet received\n10-07 23:13:39.692  1269  2279 I CAE     : display(ContextProvider.java:391) - ExtraDataArray=[1, 1, 55, 0, 33, 33, 0, 0, 0, 0, 0, 0, 1, -95, 24, 0, 13, 56, 9, 39, 26, 48, 26, 83, 83, 32, 0, 0, 0, 110, 4, 87, 25, 104, 0, 0, 0, 0]\n10-07 23:13:39.692  1269  2279 I CAE     : parse(SLocationRunner.java:96) - SLocationRunner parse end:38\n10-07 23:13:39.692  1269  2279 D CAE     : onGetSensorHubData(SensorHubParserProvider.java:89) - onGetSensorHubData Event [event buffer len :10], AP_WAKEUP\n10-07 23:13:39.692  1269  2279 I CAE     : parse(SensorHubParserProvider.java:190) - buffer size = 10\n10-07 23:13:39.692  1269  2276 D SemContextService: Service.updateContext() : service = SLocation Core\n10-07 23:13:39.692  1269  2279 I CAE     : parse(SensorHubParserProvider.java:201) - 1, 1, 55, 0, 5, 2, 34, 0, 0, 0,\n10-07 23:13:39.692  1269  2279 I CAE     : parse(SLocationRunner.java:88) - SLocationRunner parse start : 3\n10-07 23:13:39.692  1269  2279 D CAE     : display(ContextProvider.java:375) - ================= SLOCATION_RUNNER =================\n10-07 23:13:39.692  1269  2279 I CAE     : display(ContextProvider.java:391) - ExtraDataArray=[1, 1, 55, 0, 5, 2, 34, 0, 0, 0]\n10-07 23:13:39.693  1269  2279 I CAE     : parse(SLocationRunner.java:96) - SLocationRunner parse end:10\n10-07 23:13:39.694  1269  1269 D SemContextManager: onSemContextChanged() : event = SLocation Core\n10-07 23:13:39.694  1269  1269 D SLocation: SLocationCoreSem - SemContextChanged type = 47, packet received\n10-07 23:13:39.694  1269  2276 D SemContextService: Service.updateContext() : service = SLocation Core\n10-07 23:13:39.694  1269  1269 D SemContextManager: onSemContextChanged() : event = SLocation Core\n10-07 23:13:39.694  1269  1269 D SLocation: SLocationCoreSem - SemContextChanged type = 47, packet received\n10-07 23:13:39.694  1269  2800 I SLocation: SemContextParser -  parse start : 3\n10-07 23:13:39.694  1269  2800 I SLocation: SemContextParser -  packet Length : 41packet total size : 46\n10-07 23:13:39.694  1269  2800 I SLocation: SemContextParser - packet : [5, 7, 2, 0, 0, 0, 0, 4, 87, 25, 104, 5, 1, 0, 0, 0, -41, 4, 87, 25, 104, 7, 1, 0, 0, 0, 0, 4, 87, 25, 104, 5, 1, 0, 0, 0, -41, 4, 87, 25, 104]\n10-07 23:13:39.694  1269  2800 I SLocation: SemContextParser -  parse start : 3\n10-07 23:13:39.694  1269  2800 I SLocation: SemContextParser -  packet Length : 5packet total size : 10\n10-07 23:13:39.694  1269  2800 I SLocation: SemContextParser - packet : [2, 2, 0, 0, 0]\n10-07 23:13:39.694  1269  2800 I SLocation: SemContextParser -  parse start : 3\n10-07 23:13:39.694  1269  2800 I SLocation: SemContextParser -  packet Length : 33packet total size : 38\n10-07 23:13:39.695  1269  2800 I SLocation: SemContextParser - packet : [33, 0, 0, 0, 0, 0, 0, 1, -95, 24, 0, 13, 56, 9, 39, 26, 48, 26, 83, 83, 32, 0, 0, 0, 110, 4, 87, 25, 104, 0, 0, 0, 0]\n10-07 23:13:39.695  1269  2800 I SLocation: SemContextParser -  parse start : 3\n10-07 23:13:39.695  1269  2800 I SLocation: SemContextParser -  packet Length : 5packet total size : 10\n10-07 23:13:39.695  1269  2800 I SLocation: SemContextParser - packet : [2, 34, 0, 0, 0]\n10-07 23:13:39.695  1269  2800 D SLocation: GeofenceCoreManager - received Extra Data from core, len : 41\n10-07 23:13:39.695  1269  2800 D SLocation: CommonCoreManager - received Extra Data from core, len : 41\n10-07 23:13:39.695  1269  2800 D SLocation: GeofenceCoreManager - received Extra Data from core, len : 5\n10-07 23:13:39.695  1269  2800 D SLocation: GeofenceCoreManager - handleCommandCallback - UNKNOWN_CALLBACK 2 SUCCESS\n10-07 23:13:39.695  1269  2800 D SLocation: CommonCoreManager - received Extra Data from core, len : 5\n10-07 23:13:39.695  1269  2800 D SLocation: CommonCoreManager - handleCommandCallback - FUNC_TYPE : SET_LOCATION ERROR_CODE : ERROR_NONE\n10-07 23:13:39.695  1269  2800 D SLocation: GeofenceCoreManager - received Extra Data from core, len : 33\n10-07 23:13:39.695  1269  2800 D SLocation: ARDistanceGetARDistance - convertSensorHubTimeToElapsedTime 36261499\n10-07 23:13:39.695  1269  2800 D SLocation: CommonCoreManager - received Extra Data from core, len : 33\n10-07 23:13:39.695  1269  2800 D SLocation: GeofenceCoreManager - received Extra Data from core, len : 5\n10-07 23:13:39.695  1269  2800 D SLocation: GeofenceCoreManager - handleCommandCallback - UNKNOWN_CALLBACK 34 SUCCESS\n10-07 23:13:39.695  1269  2800 D SLocation: ARDistanceLibManager - command callback received - CURRENT_LOCATION_REQUEST_DISTANCE ERROR CODE : ERROR_NONE\n10-07 23:13:39.695  1269  2800 D SLocation: CommonCoreManager - received Extra Data from core, len : 5\n10-07 23:13:39.695  1269  2800 D SLocation: SCurrentLocationManager - handleCurrentLocationCoreDistance 0.0\n10-07 23:13:39.695  1269  2800 D SLocation: TrackingReceiverFilterFmm - sum of ar distance : 0.0, update time : 36262194, gps loc time : 36262149\n10-07 23:13:39.695  1269  2800 D SLocation: SingleLastLocation - last locations is gps/110.0/110.0, network/16.451/16.451, fused/31.398/31.398\n10-07 23:13:39.696  1269  2800 D SLocation: TrackingReceiverFilter - sum of ar distance : 0.0, update time : 36262194, gps loc time : 36262149\n10-07 23:13:39.696  1269  2800 D SLocation: TrackingReceiverFilter - update last gps location from core, dist : 0.0\n10-07 23:13:39.696  1269  2800 D SLocation: SingleLastLocation - handleOnUpdateLastLocation 3\n"
+      }
+    },
+    "artifact": {
+      "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-signed.apk",
+      "sha256": "f560856d21838ab5c3c5d502986bc9fea965d5c852da98a6ff7924d5a666e97a"
+    },
+    "evidence_class": "OBSERVED",
+    "causal_proof": false,
+    "status": "CAPTURED"
+  },
+  "gadget_observation": {
+    "schema_version": 1,
+    "status": "READY",
+    "mode": "OBSERVATION_ONLY",
+    "artifact": {
+      "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-signed.apk",
+      "sha256": "f560856d21838ab5c3c5d502986bc9fea965d5c852da98a6ff7924d5a666e97a"
+    },
+    "package": "com.newleaf.app.android.victor",
+    "module": "libsaasCorePlayer.so",
+    "target_offset": "0x27a510",
+    "requires_gadget": true,
+    "mutates_original_apk": false,
+    "causal_proof": false,
+    "proof_class": "OBSERVED_ONLY"
+  },
+  "evidence_ledger": {
+    "status": "NOT_READY"
+  },
+  "status": "completed",
+  "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+  "critical_pointer": "0x27a510",
+  "jni_semantic_found": true,
+  "vtable_abi": {
+    "address_point": "0x717e60",
+    "slot": "0x717f68",
+    "rtti": "0x71f4d0",
+    "type_name": "N6Cicada17mediaCodecDecoderE",
+    "container_vtable": null,
+    "pointer": "0x27a510",
+    "function_symbol": null
+  },
+  "critical_function_behavior": "NO_SECURITY_OPERATION_OBSERVED",
+  "autonomous_dataflow": {
+    "status": "completed",
+    "proven": 0,
+    "candidates": 473,
+    "cxx_unresolved": 354,
+    "jni_excluded_count": 6,
+    "constructor_calls": 4
+  },
+  "runtime_probe_status": "RUNTIME_ARTIFACT_CRASH"
+}

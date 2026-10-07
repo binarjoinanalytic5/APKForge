@@ -1,0 +1,16 @@
+{
+  "artifact": {
+    "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T20-12-41/instrumented-signed.apk",
+    "sha256": "f560856d21838ab5c3c5d502986bc9fea965d5c852da98a6ff7924d5a666e97a"
+  },
+  "causal_proof": false,
+  "mode": "OBSERVATION_ONLY",
+  "module": "libsaasCorePlayer.so",
+  "mutates_original_apk": false,
+  "package": "com.newleaf.app.android.victor",
+  "proof_class": "OBSERVED_ONLY",
+  "requires_gadget": true,
+  "schema_version": 1,
+  "status": "READY",
+  "target_offset": "0x27a510"
+}

@@ -1,0 +1,13 @@
+{
+  "collected_at_epoch": 1791404057.0615404,
+  "collector": "BASELINE",
+  "data": {
+    "original_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+    "reason": "pre-baseline uninstall refused: no authorization document supplied (REELSEC_DESTRUCTIVE_AUTH)",
+    "schema_version": "runtime-health-1",
+    "status": "SAFETY_BLOCKED"
+  },
+  "errors": [],
+  "schema_version": "collector-1",
+  "status": "FAILED"
+}
