@@ -1884,7 +1884,13 @@ def run_baseline_runtime(output, original_apk, capabilities,
             return doc
         run_checked(install_command(adb, serial, signed_original))
         health = runtime_health.assess_startup(
-            run, adb, serial, test_package, label="original", observe_s=8)
+            run, adb, serial, test_package, label="original", observe_s=8,
+            artifact_apk=str(signed_original),
+            artifact_sha256=baseline_profile.get("sha256"))
+        if health.get("crash_artifact"):
+            (Path(output) / "BASELINE-CRASH-ARTIFACT.json").write_text(
+                json.dumps(health["crash_artifact"], indent=2,
+                           sort_keys=True) + "\n", encoding="utf-8")
         try:
             audit = safety_gate.execute_destructive(
                 _default_runner, adb, serial, safety_gate.UNINSTALL,
@@ -2119,12 +2125,29 @@ def write_runtime_probe(output, root, target, input_apk=None):
                 # never surface an artifact crash as a probe timeout.
                 health_window_s = max(2, _positive_int_env(
                     "REELSEC_HEALTH_WINDOW_MS", 8000) // 1000)
+                # Bind crash evidence to the deployed artifact identity when
+                # this campaign deployed one (read-only).
+                deploy_artifact = deploy_artifact_sha = None
+                deploy_doc = None
+                try:
+                    deploy_doc = json.loads(
+                        (output / "ADB-DEPLOY.json").read_text(encoding="utf-8"))
+                    deploy_artifact = deploy_doc.get("artifact")
+                    deploy_artifact_sha = deploy_doc.get("artifact_sha256")
+                except (OSError, ValueError):
+                    deploy_doc = None
                 health = runtime_health.assess_startup(
                     run, adb, serial, package, label="instrumented",
-                    observe_s=health_window_s)
+                    observe_s=health_window_s,
+                    artifact_apk=deploy_artifact,
+                    artifact_sha256=deploy_artifact_sha)
                 (output / "RUNTIME-HEALTH.json").write_text(
                     json.dumps(health, indent=2, sort_keys=True) + "\n",
                     encoding="utf-8")
+                if health.get("crash_artifact"):
+                    (output / "CRASH-ARTIFACT.json").write_text(
+                        json.dumps(health["crash_artifact"], indent=2,
+                                   sort_keys=True) + "\n", encoding="utf-8")
                 result["health"] = {
                     "startup": health["startup"],
                     "crash_class": health["crash_class"],

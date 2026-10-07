@@ -72,8 +72,11 @@ REASON_CODE_ARTIFACT_CRASH = "RUNTIME_ARTIFACT_CRASH"
 REASON_CODE_INTEGRITY = "ARTIFACT_INTEGRITY_FAILURE"
 
 _FATAL_RE = re.compile(r"Fatal signal\s+(\d+)\s+\((SIG[A-Z0-9]+)\)", re.I)
+_FAULT_ADDR_RE = re.compile(r"fault addr\s+(0x[0-9a-fA-F]+)", re.I)
+# Frame paths end in .so OR .apk (Android maps uncompressed APK entries
+# directly, so fault PCs like `base.apk + 0x31e10` are real and must parse).
 _FRAME_RE = re.compile(
-    r"#\d{2}\s+pc\s+([0-9a-fA-F]+)\s+(\S+?\.so)(?:!\S+)?(?:\s+\(([^)]*)\))?")
+    r"#\d{2}\s+pc\s+([0-9a-fA-F]+)\s+(\S+)(?:\s+\(([^)]*)\))?")
 _ABORT_RE = re.compile(r"Abort message:\s*'?(.*?)'?\s*$")
 _EXIT_PKG_RE = re.compile(r"Package\s+\[([^\]]+)\]")
 _EXIT_FIELD_RE = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*[:=]\s*(.*)$")
@@ -170,6 +173,7 @@ def parse_tombstone_logcat(text, package=None):
     """
     fatal_signal = None
     fatal_status = None
+    fault_addr = None
     frames = []
     abort_message = None
     pid = tid = None
@@ -187,16 +191,19 @@ def parse_tombstone_logcat(text, package=None):
                 fatal_status = fm.group(1)
             if package and (package in stripped or (truncated and truncated in stripped)):
                 package_lines.append(stripped[:240])
+            fam = _FAULT_ADDR_RE.search(stripped)
+            if fam and fault_addr is None:
+                fault_addr = fam.group(1)
         frm = _FRAME_RE.search(stripped)
         if frm:
-            lib = frm.group(2)
-            if "!" in lib:
-                lib = lib.split("!")[-1]
+            path = frm.group(2)
+            sym = frm.group(3)
+            lib = path.split("!")[-1] if "!" in path else path
             frames.append({
                 "pc": frm.group(1),
                 "library": lib.rsplit("/", 1)[-1],
-                "library_path": frm.group(2),
-                "symbol": (frm.group(3) or "").strip() or None,
+                "library_path": path,
+                "symbol": (sym or "").strip() or None,
             })
         am = _ABORT_RE.search(stripped)
         if am and abort_message is None:
@@ -214,14 +221,177 @@ def parse_tombstone_logcat(text, package=None):
     return {
         "fatal_signal": fatal_signal,
         "fatal_status": fatal_status,
+        "fault_addr": fault_addr,
         "fatal_lines": fatal_lines[:5],
         "backtrace_frames": frames[:40],
         "abort_message": abort_message,
+        "abort_message_present": abort_message is not None,
         "pid": pid,
         "tid": tid,
         "thread_name": thread_name,
         "package_associated": associated,
         "package_matched_lines": package_lines[:10],
+    }
+
+
+def resolve_apk_offset(apk_path, offset):
+    """Map a file offset inside an APK to the STORED zip entry containing it.
+
+    Android maps uncompressed (STORED) APK entries directly into the process
+    address space, so a fault PC reported as `base.apk + 0x31e10` points into
+    one specific stored entry — typically a packed .so. This resolves that
+    offset to the entry name + offset within the entry, read-only, from the
+    LOCAL artifact file (byte-identical to the installed base.apk; identity
+    is bound by the campaign's artifact_sha256). Never invents a mapping:
+    anything not provably inside a STORED entry stays UNRESOLVED.
+    """
+    if apk_path is None:
+        return {"status": "UNRESOLVED",
+                "reason": "local artifact not provided"}
+    p = Path(apk_path)
+    if not p.is_file():
+        return {"status": "UNRESOLVED",
+                "reason": "local artifact file unavailable: %s" % p}
+    try:
+        offset = int(offset)
+    except (TypeError, ValueError):
+        return {"status": "UNRESOLVED", "reason": "offset not an integer"}
+    try:
+        with zipfile.ZipFile(p) as zf, p.open("rb") as fh:
+            for info in zf.infolist():
+                if info.compress_type != zipfile.ZIP_STORED:
+                    continue
+                fh.seek(info.header_offset)
+                hdr = fh.read(30)
+                if len(hdr) < 30 or hdr[:4] != b"PK\x03\x04":
+                    continue
+                name_len = int.from_bytes(hdr[26:28], "little")
+                extra_len = int.from_bytes(hdr[28:30], "little")
+                data_start = info.header_offset + 30 + name_len + extra_len
+                data_end = data_start + info.file_size
+                if data_start <= offset < data_end:
+                    return {
+                        "status": "RESOLVED",
+                        "entry": info.filename,
+                        "offset_within_entry": hex(offset - data_start),
+                        "entry_data_start": hex(data_start),
+                        "entry_size": info.file_size,
+                        "compress_type": "STORED",
+                        "note": ("resolved against the local artifact bytes; "
+                                 "installed identity is bound by the campaign "
+                                 "artifact_sha256"),
+                    }
+        return {"status": "UNRESOLVED",
+                "reason": "offset not inside any STORED entry of the artifact"}
+    except (OSError, zipfile.BadZipFile) as exc:
+        return {"status": "UNRESOLVED",
+                "reason": "artifact unreadable: %s" % str(exc)[:200]}
+
+
+def build_crash_artifact(package, label, exit_entries, tombstone,
+                         installed_path=None, artifact_apk=None,
+                         artifact_sha256=None, session=None):
+    """CRASH-ARTIFACT-1: per package/UID/session crash evidence record.
+
+    Collected automatically when a fatal signal or fresh crash exit-info is
+    observed. Integrity rules enforced here:
+    * entries are GROUPED by (uid/user, pid, timestamp) — a mixed buffer
+      (multiple users/runs, e.g. uid 10805/10810/9510810) is never merged
+      into one story;
+    * the abort message is recorded only if actually captured; when absent,
+      an explicit guard forbids labeling the crash anti-tamper or
+      screenshot protection on this evidence;
+    * `base.apk + 0x…` fault locations are resolved to the artifact's
+      STORED zip entry when the local artifact is available.
+    """
+    tombstone = tombstone or {}
+    session = session or {}
+    crashes = []
+    for e in exit_entries or []:
+        crashes.append({
+            "uid": e.get("uid"),
+            "user": (e.get("uid") // 100000) if e.get("uid") is not None
+                    else e.get("user"),
+            "pid": e.get("pid"),
+            "timestamp_device": e.get("timestamp"),
+            "reason_code": e.get("reason_code"),
+            "reason_name": e.get("reason_name")
+                           or EXIT_INFO_REASONS.get(e.get("reason_code")),
+            "status": e.get("status"),
+            "description": e.get("description"),
+            "tombstone_path": e.get("trace"),
+        })
+    uids = sorted({c["uid"] for c in crashes if c.get("uid") is not None})
+    users = sorted({c["user"] for c in crashes if c.get("user") is not None})
+
+    fault_location = None
+    offset_resolution = None
+    frames = tombstone.get("backtrace_frames") or []
+    if frames:
+        f0 = frames[0]
+        fault_location = {
+            "library": f0.get("library"),
+            "library_path": f0.get("library_path"),
+            "pc": f0.get("pc"),
+            "symbol": f0.get("symbol"),
+        }
+        if (f0.get("library_path") or "").endswith(".apk"):
+            try:
+                off = int(f0.get("pc"), 16)
+            except (TypeError, ValueError):
+                off = None
+            if off is not None:
+                offset_resolution = resolve_apk_offset(artifact_apk, off)
+            else:
+                offset_resolution = {"status": "UNRESOLVED",
+                                     "reason": "frame pc not parseable"}
+
+    abort_present = bool(tombstone.get("abort_message"))
+    integrity_notes = []
+    if not abort_present:
+        integrity_notes.append(
+            "no textual abort() message captured in this record; the cause "
+            "MUST NOT be labeled anti-tamper or screenshot protection on "
+            "this evidence alone")
+    if len(uids) > 1 or len(users) > 1:
+        integrity_notes.append(
+            "crash buffer mixes multiple users/runs (uids=%s users=%s); "
+            "entries are grouped per UID/session and must not be merged "
+            "into a single narrative" % (uids, users))
+
+    return {
+        "schema_version": "crash-artifact-1",
+        "package": package,
+        "artifact": {
+            "label": label,
+            "artifact_type": ("INSTRUMENTED_TEST_ARTIFACT"
+                              if label == "instrumented"
+                              else "ORIGINAL_APK" if label == "original"
+                              else label),
+            "installed_path": installed_path,
+            "local_artifact": str(artifact_apk) if artifact_apk else None,
+            "artifact_sha256": artifact_sha256,
+        },
+        "session": session,
+        "fatal_signal": tombstone.get("fatal_signal"),
+        "fault_addr": tombstone.get("fault_addr"),
+        "abort_message": tombstone.get("abort_message"),
+        "abort_message_present": abort_present,
+        "fault_location": fault_location,
+        "apk_offset_resolution": offset_resolution,
+        "crash_instances": crashes,
+        "grouping": {
+            "uids": uids,
+            "users": users,
+            "instance_count": len(crashes),
+            "sessions_detected": len({(c.get("uid"), c.get("pid"))
+                                      for c in crashes}),
+        },
+        "integrity_notes": integrity_notes,
+        "evidence_lines": {
+            "fatal_lines": tombstone.get("fatal_lines") or [],
+            "package_matched_lines": tombstone.get("package_matched_lines") or [],
+        },
     }
 
 
@@ -423,16 +593,21 @@ def _poll_process(runner, adb, serial, package, observe_s, interval=1.0):
     alive_ms = int((last_seen - first_seen) * 1000) if first_seen else 0
     return {"pids": pids, "observed": first_seen is not None,
             "alive_ms": alive_ms, "alive_at_exit": alive_at_exit,
-            "poll_attempts": attempts}
+            "poll_attempts": attempts,
+            "first_seen_epoch": first_seen, "last_seen_epoch": last_seen}
 
 
 def assess_startup(runner, adb, serial, package, label="instrumented",
-                   launch=True, observe_s=8, interval=1.0, pre_entries=None):
+                   launch=True, observe_s=8, interval=1.0, pre_entries=None,
+                   artifact_apk=None, artifact_sha256=None):
     """Process Health Gate: launch, observe bounded, classify death.
 
     Returns the RUNTIME-HEALTH record (requirement 9). Read-only against the
     device except the launch itself. Never retries unboundedly, never
-    suppresses crashes, never waits for a probe timeout.
+    suppresses crashes, never waits for a probe timeout. When a fatal signal
+    or fresh crash exit-info is observed, a CRASH-ARTIFACT-1 record is
+    attached automatically (per package/UID/session, abort message extracted
+    only if captured, base.apk offsets resolved against the local artifact).
     """
     started = time.time()
     if pre_entries is None:
@@ -469,9 +644,38 @@ def assess_startup(runner, adb, serial, package, label="instrumented",
     cause = identify_crash_cause(classification, tombstone=tombstone,
                                  maps_text=maps_text, exit_entries=fresh)
 
+    # Bound the installed APK path (read-only) for crash-evidence binding.
+    irc, ipath = runner([adb, "-s", serial, "shell", "pm", "path", package],
+                        timeout=20)
+    installed_path = None
+    for line in (ipath or "").splitlines():
+        if line.startswith("package:"):
+            installed_path = line.split(":", 1)[1].strip()
+            break
+
     crashed = classification["crash_class"] in (NATIVE_CRASH, JAVA_EXCEPTION,
                                                 ANR, STARTUP_FAILURE,
                                                 PROCESS_KILLED)
+
+    # Automatic crash evidence: built whenever a crash or a package-associated
+    # fatal signal was observed in THIS session (fresh entries only).
+    crash_artifact = None
+    if crashed or (tombstone.get("fatal_signal")
+                   and tombstone.get("package_associated")):
+        crash_artifact = build_crash_artifact(
+            package, label, fresh, tombstone,
+            installed_path=installed_path,
+            artifact_apk=artifact_apk,
+            artifact_sha256=artifact_sha256,
+            session={
+                "started_at_epoch": started,
+                "observe_s": observe_s,
+                "launch_returncode": launch_rc,
+                "first_process_seen_epoch": proc.get("first_seen_epoch"),
+                "last_process_seen_epoch": proc.get("last_seen_epoch"),
+                "observed_process_lifetime_ms": proc.get("alive_ms"),
+                "process_alive_at_exit": proc.get("alive_at_exit"),
+            })
     if classification["crash_class"] == PACKAGE_NOT_PRESENT:
         startup = "PACKAGE_NOT_PRESENT"
     elif crashed:
@@ -492,6 +696,13 @@ def assess_startup(runner, adb, serial, package, label="instrumented",
         "process_alive_at_exit": proc["alive_at_exit"],
         "pids": proc["pids"],
         "launch_returncode": launch_rc,
+        "installed_apk_path": installed_path,
+        "session_timing": {
+            "started_at_epoch": started,
+            "first_process_seen_epoch": proc.get("first_seen_epoch"),
+            "last_process_seen_epoch": proc.get("last_seen_epoch"),
+        },
+        "crash_artifact": crash_artifact,
         "exit_reason": ("reason=%s (%s)" % (
             classification["exit_reason_code"], classification["exit_reason_name"])
             if classification.get("exit_reason_code") is not None else None),
