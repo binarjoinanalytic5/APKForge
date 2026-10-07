@@ -1835,12 +1835,23 @@ setTimeout(()=>{send({event:"TIMEOUT_WINDOW_COMPLETE"});Interceptor.detachAll();
     script.write_text(js, encoding="utf-8")
 
     preflight=write_runtime_toolchain_preflight(output)
+    gadget_mode = os.environ.get("REELSEC_USE_GADGET", "").strip().lower() in ("1", "true", "yes")
+    gadget_source = os.environ.get("REELSEC_FRIDA_GADGET", "").strip()
     result = {"status":"NOT_ATTEMPTED","package":package,"manifest":manifest,
               "package_source":package_source,
               "package_tool_checks":package_tool_checks,
               "module":module,"tooling":preflight.get("tooling",{}),"events":[],
-              "preflight_status":preflight.get("status")}
+              "preflight_status":preflight.get("status"),
+              "gadget_mode":gadget_mode,
+              "gadget_source":str(Path(gadget_source).expanduser().resolve()) if gadget_source else None}
     result["tooling"] = result["tooling"].copy()
+
+    if gadget_mode and (not gadget_source or not Path(gadget_source).expanduser().is_file()):
+        result["status"] = "GADGET_BINARY_REQUIRED"
+        result["reason"] = (
+            "REELSEC_USE_GADGET=1 requires REELSEC_FRIDA_GADGET to point to an existing file"
+        )
+        return result
 
     adb, adb_source, frida, frida_source = resolve_runtime_clients(preflight)
     result["tooling"].update(
@@ -2489,8 +2500,13 @@ def main():
             instrumented_copy = apply_text_probe(
                 instrumented_copy_root, copied_target
             )
+            gadget_requested = os.environ.get("REELSEC_USE_GADGET", "").strip().lower() in ("1", "true", "yes")
             gadget_path = os.environ.get("REELSEC_FRIDA_GADGET", "").strip()
-            if gadget_path:
+            if gadget_requested:
+                if not gadget_path:
+                    raise RuntimeError(
+                        "REELSEC_USE_GADGET=1 requires REELSEC_FRIDA_GADGET to point to an existing Frida Gadget binary"
+                    )
                 gadget_abi = os.environ.get("REELSEC_FRIDA_GADGET_ABI", "arm64-v8a").strip()
                 gadget_port = _positive_int_env("REELSEC_FRIDA_GADGET_PORT", 27042)
                 instrumented_copy = embed_frida_gadget(
@@ -2502,8 +2518,12 @@ def main():
                 )
                 instrumented_copy["gadget_enabled"] = True
                 instrumented_copy["gadget_source"] = str(Path(gadget_path).expanduser().resolve())
+                instrumented_copy["gadget_abi"] = gadget_abi
+                instrumented_copy["gadget_port"] = gadget_port
             else:
                 instrumented_copy["gadget_enabled"] = False
+                if gadget_path:
+                    instrumented_copy["gadget_source_ignored"] = str(Path(gadget_path).expanduser().resolve())
             instrumented_copy["instrumentation_target"] = str(copied_target)
         except Exception as exc:
             instrumented_copy = {"status": "FAILED", "error": str(exc)}
