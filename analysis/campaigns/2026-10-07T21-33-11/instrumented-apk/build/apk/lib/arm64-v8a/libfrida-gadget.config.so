@@ -1,0 +1,9 @@
+{
+  "interaction": {
+    "address": "127.0.0.1",
+    "on_load": "resume",
+    "port": 27042,
+    "type": "listen"
+  },
+  "teardown": "minimal"
+}
