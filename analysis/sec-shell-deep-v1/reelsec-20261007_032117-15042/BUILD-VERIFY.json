@@ -1,0 +1,41 @@
+{
+  "alignment_command": [
+    "/data/data/com.termux/files/usr/bin/zipalign",
+    "-P",
+    "16",
+    "-f",
+    "-v",
+    "4",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_032117-15042/instrumented-unsigned.apk",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_032117-15042/instrumented-unsigned-aligned.apk"
+  ],
+  "alignment_output_tail": "n_rules_english.txt (OK - compressed)\n60302651 org/apache/commons/codec/language/bm/gen_approx_russian.txt (OK - compressed)\n60303443 org/apache/commons/codec/language/bm/sep_exact_portuguese.txt (OK - compressed)\n60304006 org/apache/commons/codec/language/bm/sep_exact_any.txt (OK - compressed)\n60304575 org/apache/commons/codec/language/bm/ash_approx_spanish.txt (OK - compressed)\n60305157 org/apache/commons/codec/language/bm/gen_approx_cyrillic.txt (OK - compressed)\n60305743 org/apache/commons/codec/language/bm/ash_approx_hungarian.txt (OK - compressed)\n60306324 org/apache/commons/codec/language/bm/sep_approx_italian.txt (OK - compressed)\n60306896 org/apache/commons/codec/language/bm/sep_lang.txt (OK - compressed)\n60307948 org/apache/commons/codec/language/bm/gen_approx_greeklatin.txt (OK - compressed)\n60308536 org/apache/commons/codec/language/bm/gen_rules_polish.txt (OK - compressed)\n60310075 org/apache/commons/codec/language/bm/gen_exact_english.txt (OK - compressed)\n60310657 org/apache/commons/codec/language/bm/ash_rules_polish.txt (OK - compressed)\n60312206 org/apache/commons/codec/language/bm/ash_rules_cyrillic.txt (OK - compressed)\n60313275 org/apache/commons/codec/language/bm/gen_exact_cyrillic.txt (OK - compressed)\n60313861 org/apache/commons/codec/language/bm/sep_rules_portuguese.txt (OK - compressed)\n60315055 org/apache/commons/codec/language/bm/ash_approx_common.txt (OK - compressed)\n60316591 org/apache/commons/codec/language/bm/sep_approx_spanish.txt (OK - compressed)\n60317174 org/apache/commons/codec/language/bm/gen_rules_romanian.txt (OK - compressed)\n60317999 org/apache/commons/codec/language/bm/ash_exact_romanian.txt (OK - compressed)\n60318578 org/apache/commons/codec/language/bm/ash_rules_hebrew.txt (OK - compressed)\n60319362 org/apache/commons/codec/language/bm/sep_hebrew_common.txt (OK - compressed)\n60320373 org/apache/commons/codec/language/bm/gen_rules_hebrew.txt (OK - compressed)\n60321160 org/apache/commons/codec/language/bm/gen_rules_czech.txt (OK - compressed)\n60322000 org/apache/commons/codec/language/bm/ash_lang.txt (OK - compressed)\n60323631 org/apache/http/version.properties (OK - compressed)\n60324235 org/apache/http/client/version.properties (OK - compressed)\n60324924 google/protobuf/timestamp.proto (OK - compressed)\n60327823 google/protobuf/field_mask.proto (OK - compressed)\n60331017 google/protobuf/api.proto (OK - compressed)\n60334007 google/protobuf/duration.proto (OK - compressed)\n60336139 google/protobuf/struct.proto (OK - compressed)\n60337885 google/protobuf/wrappers.proto (OK - compressed)\n60339513 google/protobuf/source_context.proto (OK - compressed)\n60340778 google/protobuf/any.proto (OK - compressed)\n60343471 google/protobuf/type.proto (OK - compressed)\n60345921 google/protobuf/empty.proto (OK - compressed)\n60347220 okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n60388680 okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n60388944 com/applovin/shadow/okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n60430424 com/applovin/shadow/okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n60430676 com/google/api/client/http/google-http-client.properties (OK)\n60430784 com/google/api/client/googleapis/google.p12 (OK)\n60507333 com/google/api/client/googleapis/google.jks (OK - compressed)\n60550684 com/google/api/client/googleapis/google-api-client.properties (OK)\n60550782 src/google/protobuf/timestamp.proto (OK - compressed)\n60553685 src/google/protobuf/field_mask.proto (OK - compressed)\n60556883 src/google/protobuf/api.proto (OK - compressed)\n60559877 src/google/protobuf/duration.proto (OK - compressed)\n60562013 src/google/protobuf/struct.proto (OK - compressed)\n60563763 src/google/protobuf/wrappers.proto (OK - compressed)\n60565395 src/google/protobuf/source_context.proto (OK - compressed)\n60566664 src/google/protobuf/any.proto (OK - compressed)\n60569361 src/google/protobuf/type.proto (OK - compressed)\n60571815 src/google/protobuf/empty.proto (OK - compressed)\nVerification successful\n",
+  "alignment_page_size_kb": 16,
+  "alignment_returncode": 0,
+  "alignment_verify_command": [
+    "/data/data/com.termux/files/usr/bin/zipalign",
+    "-c",
+    "-P",
+    "16",
+    "-v",
+    "4",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_032117-15042/instrumented-unsigned-aligned.apk"
+  ],
+  "command": [
+    "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+    "-cp",
+    "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+    "brut.apktool.Main",
+    "b",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_032117-15042/instrumented-apk",
+    "-o",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_032117-15042/instrumented-unsigned.apk"
+  ],
+  "output_tail": "I: Using Apktool 2.7.0-dirty\nI: Checking whether sources has changed...\nI: Smaling smali folder into classes.dex...\nI: Checking whether resources has changed...\nI: Copying raw resources...\nI: Copying libs... (/lib)\nI: Copying libs... (/kotlin)\nI: Copying libs... (/META-INF/services)\nI: Building apk file...\nI: Copying unknown files/dir...\nI: Built apk into: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_032117-15042/instrumented-unsigned.apk\n",
+  "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_032117-15042/instrumented-unsigned-aligned.apk",
+  "raw_built_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_032117-15042/instrumented-unsigned.apk",
+  "returncode": 0,
+  "sha256": "69bd4d1074f03ebe87dc8dbb583a7aff59d4d8835061a9581b317ff73e1f4232",
+  "size": 60905545,
+  "status": "BUILT"
+}
