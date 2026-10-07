@@ -243,3 +243,28 @@ Expected progression:
 - Stage 13 may still report `dataflow_proven=False`; only direct runtime observations can advance the proof gate.
 
 Do not claim Screenshot/Recording protection from successful installation or Gadget readiness alone.
+
+
+## 2026-10-07 03:15 Gadget deployment diagnosis
+
+Campaign: `reelsec-20261007_031559-12375`
+
+Stage 10 failed during APK install with:
+`INSTALL_FAILED_INVALID_APK: Failed to extract native libraries, res=-2`.
+
+The failure happened before Gadget runtime observation. Therefore Stage 13 result
+`RUNTIME_PROBE_TIMEOUT_NO_TARGET_OBSERVED` is not evidence against the target;
+the instrumented artifact did not reach a runnable installed state.
+
+Root cause addressed in the toolchain: Gadget introduces an additional shared
+library into the APK, and the rebuilt APK must satisfy Android native-library
+packaging/alignment requirements before signing. The Gadget campaign path now
+runs `zipalign -P 16 -f -v 4` before signing and then verifies with
+`zipalign -c -P 16 -v 4`. The original APK remains untouched.
+
+Implementation commits:
+- native-library zipalign helpers and tests
+- Gadget campaign integration to align/verify before signing
+
+Next gate: rerun the Gadget campaign and require Stage 10 `INSTALLED` before
+treating any runtime timeout/result as meaningful evidence.
