@@ -36,3 +36,8 @@ strings, and native-library printable strings.
 
 **Important:** indicator presence is not execution or causal proof. The detector
 does not patch, disable, inject, sign, or rebuild the APK.
+
+
+## Evidence boundary
+
+The capture detector is deliberately evidence-gated. Strong static indicators are discovery signals only; DRM/native capture strings are contextual signals. No static hit is treated as proof of execution or causality. Causal status requires runtime observation tied to the exact artifact, matching code-path provenance, and an observable security decision or capture behavior.
