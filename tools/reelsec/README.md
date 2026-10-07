@@ -132,3 +132,41 @@ Adapters are optional and missing tools are reported as `UNAVAILABLE`, not as
 campaign failures. Adapter output is evidence only and never causal proof.
 No adapter patches, disables protections, injects hooks, signs, or rebuilds the
 input APK.
+
+## Runtime diagnostics (staged lifecycle + reason codes)
+
+`RUNTIME-PROBE.json` now records an auditable stage chain instead of a single
+opaque timeout:
+
+    ADB_CONNECTED -> PACKAGE_RESOLVED -> PACKAGE_PRESENT ->
+    APP_LAUNCH_ATTEMPTED -> PROCESS_OBSERVED -> TARGET_PROCESS_CONFIRMED ->
+    PROBE_ATTACHED -> MODULE_WAIT_STARTED -> MODULE_OBSERVED ->
+    TARGET_RESOLUTION -> TARGET_OBSERVED
+
+Each stage records status, timestamp, reason code, source, elapsed time, and
+pid where available. `lifecycle.reason_code` names the deepest failing layer:
+`APP_NOT_STARTED` (A), `TARGET_PROCESS_NOT_OBSERVED` (B),
+`TARGET_MODULE_NOT_OBSERVED` (C), `PROBE_ATTACH_FAILED` (D),
+`TARGET_NOT_EXECUTED_BEFORE_TIMEOUT` (E), `TARGET_OBSERVED` (F),
+`PROBE_TIMEOUT_AFTER_VALID_ATTACH` (G), plus pre-launch codes
+(`ADB_NO_ONLINE_DEVICE`, `PACKAGE_NOT_INSTALLED`).
+
+Environment knobs: `REELSEC_PROBE_WINDOW_MS` (probe window, default 12000),
+`REELSEC_ZIPALIGN` (optional alignment verifier path).
+
+Install diagnostics: pre-install preflight (uncompressed native libs,
+page alignment, ABI compatibility) and post-install verification
+(`pm path` + versionCode) are recorded in `ADB-DEPLOY.json`; failures carry
+explicit reason codes (e.g. `NATIVE_LIB_EXTRACTION_FAILED`).
+
+## Guarded behavioral capture (L4 producer, opt-in)
+
+`REELSEC_BEHAVIOR_CAPTURE=1` enables one bounded user-level `screencap`
+observation after Stage 12, producing `BEHAVIOR-CAPTURE.json` per the
+evidence-report contract. `secure_content_protected=true` additionally
+requires `REELSEC_BEHAVIOR_PLAYBACK_CONFIRMED=1` (explicit operator
+confirmation that protected playback was active). Observation only: no
+hooks, no protection modification, no circumvention.
+
+**Important:** `TARGET_OBSERVED` proves a runtime layer only (L3). It is
+never behavioral proof; L4 requires the independent behavioral record.

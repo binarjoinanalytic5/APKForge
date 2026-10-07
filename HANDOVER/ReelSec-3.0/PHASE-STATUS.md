@@ -291,3 +291,16 @@ Suite: 94/94 via `python -m unittest discover -s tools/reelsec`.
 Real-run artifacts: `analysis/evidence-platform-20261007/` — verdict
 `PACKED_STATIC_ANALYSIS_LIMITED`, causal chain `NOT_PROVEN` (L1 CONFIRMED,
 L2–L4 NOT_PROVEN). Handover: `حقيبة التسليم/REELSEC-EVIDENCE-PLATFORM-2026-10-07.md`.
+
+## Completed in this stage — 2026-10-07 (runtime diagnostics)
+
+Runtime probe rebuilt around an auditable lifecycle: staged chain
+(ADB -> PACKAGE -> PROCESS -> MODULE -> PROBE -> TARGET) with per-stage
+status/timestamp/reason_code/source, reason codes A-G, and a corrected
+probe script (the previous Process.attachModuleObserver call is not a
+Frida API and silently killed the script, collapsing all failures into one
+opaque timeout). Install diagnostics (preflight + failure classification +
+post-install verification) and a guarded opt-in L4 behavioral capture
+producer were added. Evidence gate unchanged: SCREENSHOT_BLOCKING remains
+NOT_PROVEN. Suite: 128/128. Handover:
+حقيبة التسليم/REELSEC-RUNTIME-DIAGNOSTICS-2026-10-07.md.
