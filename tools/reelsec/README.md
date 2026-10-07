@@ -62,6 +62,7 @@ Supported adapters:
 
 - **mobsfscan** — static source-pattern analysis when installed.
 - **radare2** — native ELF header/symbol inventory when an ELF is available.
+- **JADX** — optional APK/DEX decompilation into a disposable analysis directory.
 - **MobSF** — availability/version discovery; server upload/orchestration remains external.
 - **objection** — availability/version discovery; runtime observation stays in ReelSec's guarded path.
 
