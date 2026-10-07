@@ -12,6 +12,33 @@ from gadget_embed import embed_frida_gadget
 
 
 class GadgetEmbedTests(unittest.TestCase):
+    def test_native_library_packaging_marks_so_as_uncompressed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            (work / "apktool.yml").write_text(
+                "doNotCompress:\n- arsc\n- jpg\n- png\n", encoding="utf-8"
+            )
+            # Use the existing minimal fixture helper to exercise the embed path.
+            target = work / "AW.smali"
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(
+                ".class public LAW;\n.method public static run()V\n"
+                "    .locals 1\n"
+                "    const-string v0, \"x\"\n"
+                "    invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n"
+                ".end method\n",
+                encoding="utf-8",
+            )
+            (work / "INSTRUMENTED-COPY-MANIFEST.json").write_text(
+                '{"schema_version":1}\n', encoding="utf-8"
+            )
+            gadget = work / "gadget.so"
+            gadget.write_bytes(
+                b"\x7fELF" + bytes([2,1]) + b"\x00"*12 + (183).to_bytes(2,"little") + b"\x00"*46
+            )
+            embed_frida_gadget(work, target, gadget)
+            self.assertIn("- so", (work / "apktool.yml").read_text(encoding="utf-8"))
+
     def test_embed_isolated_gadget_and_manifest(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "tree"
