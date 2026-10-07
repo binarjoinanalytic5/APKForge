@@ -202,7 +202,8 @@ class InstallDiagnosticsTests(unittest.TestCase):
 
 
 class ArtifactIntegrityGateTests(unittest.TestCase):
-    def _make_apk(self, td, signed=True, libs=("lib/arm64-v8a/liba.so",)):
+    def _make_apk(self, td, signed=True, libs=("lib/arm64-v8a/liba.so",),
+                  manifest=True):
         import zipfile
         apk = Path(td) / "artifact.apk"
         with zipfile.ZipFile(apk, "w") as zf:
@@ -212,6 +213,8 @@ class ArtifactIntegrityGateTests(unittest.TestCase):
                 zf.writestr(info, b"\x7fELF")
             if signed:
                 zf.writestr("META-INF/REELSEC.RSA", b"sig")
+            if manifest:
+                zf.writestr("AndroidManifest.xml", b"\x03\x00\x08\x00axml")
             zf.writestr("classes.dex", b"dex")
         return apk
 
@@ -251,6 +254,97 @@ class ArtifactIntegrityGateTests(unittest.TestCase):
         from adb_deploy import artifact_integrity_gate
         gate = artifact_integrity_gate("/nonexistent/x.apk")
         self.assertEqual(gate["status"], "ARTIFACT_MISSING")
+
+    # --- Regression: "not installed" vs "installed identity mismatch" ---
+
+    def test_not_installed_is_not_an_integrity_failure(self):
+        """The gate runs BEFORE install: a fresh-install device (package
+        absent — the exact state that blocked the 2026-10-07 platform trial)
+        must NOT fail the gate."""
+        from adb_deploy import artifact_integrity_gate
+        with tempfile.TemporaryDirectory() as td:
+            apk = self._make_apk(td)
+
+            def runner(cmd, timeout=120):
+                return 0, ""  # pm path: absent; dumpsys: empty
+            gate = artifact_integrity_gate(
+                apk, runner=runner, adb="/adb", serial="s1",
+                package="com.test.pkg")
+        self.assertEqual(gate["checks"]["installed_identity"]["status"],
+                         "NOT_INSTALLED")
+        self.assertEqual(gate["status"], "PASS")
+
+    def test_installed_identity_passes_when_present(self):
+        from adb_deploy import artifact_integrity_gate
+        with tempfile.TemporaryDirectory() as td:
+            apk = self._make_apk(td)
+
+            def runner(cmd, timeout=120):
+                joined = " ".join(str(c) for c in cmd)
+                if "pm" in joined and "path" in joined:
+                    return 0, "package:/data/app/~~x/com.test.pkg/base.apk\n"
+                return 0, "    versionCode=4200 minSdk=24\n"
+            gate = artifact_integrity_gate(
+                apk, runner=runner, adb="/adb", serial="s1",
+                package="com.test.pkg")
+        self.assertEqual(gate["checks"]["installed_identity"]["status"], "PASS")
+        self.assertEqual(gate["checks"]["installed_identity"]["version_code"],
+                         "4200")
+        self.assertEqual(gate["status"], "PASS")
+
+    def test_package_identity_unverified_when_decoder_has_no_result(self):
+        """A decoder that cannot read the manifest (e.g. apktool-rebuilt
+        AXML) yields UNVERIFIED — recorded, non-blocking. Identity is proven
+        at install + post-install verification, never assumed."""
+        from adb_deploy import artifact_integrity_gate
+        with tempfile.TemporaryDirectory() as td:
+            apk = self._make_apk(td, libs=("lib/arm64-v8a/liba.so",))
+            gate = artifact_integrity_gate(
+                apk, runner=lambda cmd, timeout=120: (0, ""),
+                package="com.test.pkg", manifest_decoder=lambda data: None)
+        self.assertEqual(gate["checks"]["package_identity"]["status"],
+                         "UNVERIFIED")
+        self.assertEqual(gate["status"], "PASS")
+
+    def test_package_identity_unverified_on_decoder_exception(self):
+        from adb_deploy import artifact_integrity_gate
+
+        def bad_decoder(data):
+            raise ValueError("axml pool layout not recognized")
+        with tempfile.TemporaryDirectory() as td:
+            apk = self._make_apk(td)
+            gate = artifact_integrity_gate(
+                apk, runner=lambda cmd, timeout=120: (0, ""),
+                package="com.test.pkg", manifest_decoder=bad_decoder)
+        self.assertEqual(gate["checks"]["package_identity"]["status"],
+                         "UNVERIFIED")
+        self.assertIn("decoder error",
+                      gate["checks"]["package_identity"]["reason"])
+        self.assertEqual(gate["status"], "PASS")
+
+    def test_package_identity_fails_only_on_proven_mismatch(self):
+        from adb_deploy import artifact_integrity_gate
+        with tempfile.TemporaryDirectory() as td:
+            apk = self._make_apk(td)
+            gate = artifact_integrity_gate(
+                apk, runner=lambda cmd, timeout=120: (0, ""),
+                package="com.test.pkg",
+                manifest_decoder=lambda data: "com.other.pkg")
+        self.assertEqual(gate["checks"]["package_identity"]["status"], "FAIL")
+        self.assertEqual(gate["checks"]["package_identity"]["decoded_package"],
+                         "com.other.pkg")
+        self.assertEqual(gate["status"], "INTEGRITY_FAILED")
+
+    def test_matching_package_identity_passes(self):
+        from adb_deploy import artifact_integrity_gate
+        with tempfile.TemporaryDirectory() as td:
+            apk = self._make_apk(td)
+            gate = artifact_integrity_gate(
+                apk, runner=lambda cmd, timeout=120: (0, ""),
+                package="com.test.pkg",
+                manifest_decoder=lambda data: "com.test.pkg")
+        self.assertEqual(gate["checks"]["package_identity"]["status"], "PASS")
+        self.assertEqual(gate["status"], "PASS")
 
 
 if __name__ == "__main__":

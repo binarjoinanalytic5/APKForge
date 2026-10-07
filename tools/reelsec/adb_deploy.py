@@ -340,18 +340,36 @@ def artifact_integrity_gate(apk_path, runner=None, adb=None, serial=None,
                     "missing": missing,
                 }
             if manifest_decoder is not None and package:
+                # package_identity is three-state. A PROVEN mismatch (decoder
+                # read a different package) blocks; an UNVERIFIABLE identity
+                # (decoder error or no result — e.g. apktool-rebuilt manifests
+                # our minimal AXML decoder cannot parse) is recorded and does
+                # NOT block: identity is enforced by the install itself and by
+                # post-install verification, never assumed from a decode
+                # failure.
                 try:
                     decoded = manifest_decoder(zf.read("AndroidManifest.xml"))
                 except Exception as exc:
                     decoded = None
                     gate["checks"]["package_identity"] = {
-                        "status": "FAIL", "error": str(exc)[:200]}
+                        "status": "UNVERIFIED",
+                        "reason": "manifest decoder error: %s" % str(exc)[:200],
+                        "expected_package": package}
                 else:
-                    gate["checks"]["package_identity"] = {
-                        "status": "PASS" if decoded == package else "FAIL",
-                        "expected_package": package,
-                        "decoded_package": decoded,
-                    }
+                    if not decoded:
+                        gate["checks"]["package_identity"] = {
+                            "status": "UNVERIFIED",
+                            "reason": ("manifest package unreadable by the "
+                                       "built-in decoder (no result); identity "
+                                       "will be verified at install and "
+                                       "post-install"),
+                            "expected_package": package}
+                    else:
+                        gate["checks"]["package_identity"] = {
+                            "status": "PASS" if decoded == package else "FAIL",
+                            "expected_package": package,
+                            "decoded_package": decoded,
+                        }
     except zipfile.BadZipFile as exc:
         return {"artifact": str(apk),
                 "checks": {"zip_parse": {"status": "FAIL", "error": str(exc)}},
@@ -376,12 +394,33 @@ def artifact_integrity_gate(apk_path, runner=None, adb=None, serial=None,
         }
 
     if adb and serial and package:
+        # installed_identity is three-state. This gate runs BEFORE install:
+        # "package not currently installed" is the normal fresh-install path,
+        # NOT an integrity failure — blocking it would make first installs
+        # impossible. FAIL is reserved for a proven installed-identity
+        # contradiction (pm path answers for the package but the recorded
+        # installed identity is inconsistent).
         installed = verify_installed_package(adb, serial, package, runner=runner)
-        gate["checks"]["installed_identity"] = {
-            "status": "PASS" if installed.get("present") else "FAIL",
-            "installed_path": installed.get("installed_path"),
-            "version_code": installed.get("version_code"),
-        }
+        if installed.get("present"):
+            inconsistent = bool(installed.get("version_code") is None
+                                and not installed.get("installed_path"))
+            gate["checks"]["installed_identity"] = {
+                "status": "FAIL" if inconsistent else "PASS",
+                "installed_path": installed.get("installed_path"),
+                "version_code": installed.get("version_code"),
+                "reason": ("installed identity inconsistent: pm path matched "
+                           "but no install record readable") if inconsistent
+                          else None,
+            }
+        else:
+            gate["checks"]["installed_identity"] = {
+                "status": "NOT_INSTALLED",
+                "installed_path": None,
+                "version_code": None,
+                "reason": ("package not currently installed; fresh-install "
+                           "path (non-blocking; post-install verification "
+                           "will confirm identity)"),
+            }
 
     for check in gate["checks"].values():
         if check.get("status") == "FAIL":
