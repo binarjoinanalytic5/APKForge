@@ -104,3 +104,16 @@ The fetcher verifies ELF64 and the requested architecture before the file is use
 The official Frida release page currently lists 17.22.2 as the latest release (released October 5, 2026). The fetcher intentionally follows the locally installed CLI version rather than silently changing the analysis toolchain. citeturn305384view0
 
 Keep `original.apk` unchanged.
+
+
+## Deployment blocker resolved — native-library alignment
+
+The 20261007_031559-12375 Gadget campaign reached build/sign successfully but
+failed installation with `INSTALL_FAILED_INVALID_APK: Failed to extract native
+libraries, res=-2`. This is a pre-runtime packaging failure, not a target
+behavior result.
+
+The campaign now automatically page-aligns uncompressed native libraries with
+`zipalign -P 16` and verifies alignment before the APK is signed. This is
+enabled only for Gadget-enabled campaigns, preserving the prior non-Gadget
+path.
