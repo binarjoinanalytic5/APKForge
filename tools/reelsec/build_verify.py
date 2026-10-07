@@ -84,6 +84,41 @@ def zipalign_verify_command(zipalign, apk, page_size_kb=16):
     ]
 
 
+def verify_native_library_packaging(path):
+    """Verify that APK native libraries are stored, not compressed.
+
+    APKs using android:extractNativeLibs="false" must keep native shared
+    libraries uncompressed. This check is intentionally independent of
+    zipalign so a future APK build cannot reach ADB with an invalid package.
+    """
+    apk = Path(path).resolve()
+    if not apk.is_file():
+        raise BuildVerifyError("APK for native-library packaging verification is missing")
+    import zipfile
+    try:
+        with zipfile.ZipFile(apk) as zf:
+            native = [
+                info for info in zf.infolist()
+                if info.filename.startswith("lib/")
+                and info.filename.endswith(".so")
+                and not info.is_dir()
+            ]
+    except zipfile.BadZipFile as exc:
+        raise BuildVerifyError("invalid APK zip container: %s" % exc) from exc
+
+    compressed = [info.filename for info in native if info.compress_type != zipfile.ZIP_STORED]
+    return {
+        "status": "NATIVE_LIBRARIES_UNCOMPRESSED",
+        "native_library_count": len(native),
+        "compressed_native_libraries": compressed,
+    } if not compressed else (_ for _ in ()).throw(
+        BuildVerifyError(
+            "compressed native libraries incompatible with extractNativeLibs=false: %s"
+            % compressed[:20]
+        )
+    )
+
+
 def verify_artifact(path):
     apk = Path(path).resolve()
     if not apk.is_file():
