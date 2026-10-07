@@ -36,7 +36,11 @@ class GadgetEmbedTests(unittest.TestCase):
             self.assertTrue((root / "lib" / "arm64-v8a" / "libfrida-gadget.config.so").is_file())
             text = target.read_text(encoding="utf-8")
             self.assertIn('loadLibrary(Ljava/lang/String;)V', text)
-            self.assertIn('const-string v2, "frida-gadget"', text)
+            self.assertIn('.locals 3', text)
+            self.assertIn('const-string v1, "frida-gadget"', text)
+            self.assertIn('const-string v1, "ReelSec-Gadget-Load"', text)
+            self.assertIn('const-string v2, "loaded"', text)
+            self.assertIn('invoke-static {v1, v2}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I', text)
             self.assertIn("ReelSec-Gadget-Load", text)
             self.assertTrue(any(m["type"] == "FRIDA_GADGET_EMBED" for m in manifest["mutations"]))
 
