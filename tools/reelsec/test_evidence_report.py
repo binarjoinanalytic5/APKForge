@@ -75,9 +75,23 @@ def campaign_stub(target_sha=SHA, runtime_matches=2, behavior_ok=True):
         "runtime_matches": runtime_matches,
     }))
     (cd / "BEHAVIOR-CAPTURE.json").write_text(json.dumps({
+        "schema_version": "behavior-capture-2",
         "screenshot_attempted": True,
         "secure_content_protected": bool(behavior_ok),
         "session_bound": True,
+        "device_observations": {
+            "serial": "s1", "package": "com.x",
+            "foreground_dump": "topResumedActivity: com.x",
+            "foreground_is_target": True,
+            "screencap_attempted": True, "screencap_returncode": 0,
+            "screencap_bytes": 1024, "screencap_sha256": "ab" * 32,
+        },
+        "operator_inputs": {"playback_confirmed": True},
+        "program_analysis": {"analyzable": True, "uniform_dark": bool(behavior_ok),
+                             "max_channel": 0 if behavior_ok else 200, "threshold": 16},
+        "gate_inference": {"capture_result": "ALL_BLACK_FRAME" if behavior_ok
+                           else "CONTENT_VISIBLE",
+                           "secure_content_protected": bool(behavior_ok)},
     }))
     return d, cd
 
@@ -230,9 +244,14 @@ class EvidenceReportTests(unittest.TestCase):
             "runtime_matches": 1,
         }))
         (cd / "BEHAVIOR-CAPTURE.json").write_text(json.dumps({
+            "schema_version": "behavior-capture-2",
             "screenshot_attempted": True,
             "secure_content_protected": True,
             "session_bound": True,
+            "device_observations": {"screencap_sha256": "cd" * 32},
+            "operator_inputs": {"playback_confirmed": True},
+            "program_analysis": {"analyzable": True, "uniform_dark": True},
+            "gate_inference": {"capture_result": "ALL_BLACK_FRAME"},
         }))
         report = build_report(detection_stub(), campaign_dir=cd)
         status = {l["id"]: l["status"] for l in report["causal_chain"]["links"]}
@@ -241,6 +260,63 @@ class EvidenceReportTests(unittest.TestCase):
         self.assertEqual(status["L4_CAPTURE_BLOCK_BEHAVIOR_OBSERVED"], TIER_CONFIRMED)
         self.assertEqual(report["causal_chain"]["verdict"], TIER_NOT_PROVEN)
         self.assertFalse(report["causal_proof"])
+
+    def test_hand_written_protection_claim_without_observations_is_rejected(self):
+        """Anti-forgery: a bare claim (even v2 schema) without an auditable
+        device observation hash + frame analysis never confirms L4."""
+        d = tempfile.TemporaryDirectory()
+        self.addCleanup(d.cleanup)
+        cd = Path(d.name)
+        (cd / "target-sha256.txt").write_text(SHA + "\n")
+        (cd / "RUNTIME-PROBE.json").write_text(json.dumps({
+            "status": "PROVEN_RUNTIME_TARGET_DISPATCH",
+            "events": [{"event": "TARGET_FUNCTION_ENTER"}],
+            "runtime_matches": 1,
+        }))
+        (cd / "BEHAVIOR-CAPTURE.json").write_text(json.dumps({
+            "schema_version": "behavior-capture-2",
+            "screenshot_attempted": True,
+            "secure_content_protected": True,
+            "session_bound": True,
+            "operator_inputs": {"playback_confirmed": True},
+        }))
+        det = detection_stub()
+        det["input_sha256"] = SHA
+        report = build_report(det, campaign_dir=cd)
+        status = {l["id"]: l["status"] for l in report["causal_chain"]["links"]}
+        self.assertEqual(status["L4_CAPTURE_BLOCK_BEHAVIOR_OBSERVED"], TIER_NOT_PROVEN)
+        self.assertEqual(report["causal_chain"]["verdict"], TIER_NOT_PROVEN)
+        self.assertFalse(report["causal_proof"])
+
+    def test_operator_playback_flag_alone_is_not_behavioral_evidence(self):
+        """REELSEC_BEHAVIOR_PLAYBACK_CONFIRMED=1 without a real capture
+        observation keeps L4 NOT_PROVEN."""
+        d = tempfile.TemporaryDirectory()
+        self.addCleanup(d.cleanup)
+        cd = Path(d.name)
+        (cd / "target-sha256.txt").write_text(SHA + "\n")
+        (cd / "RUNTIME-PROBE.json").write_text(json.dumps({
+            "status": "PROVEN_RUNTIME_TARGET_DISPATCH",
+            "events": [{"event": "TARGET_FUNCTION_ENTER"}],
+            "runtime_matches": 1,
+        }))
+        (cd / "BEHAVIOR-CAPTURE.json").write_text(json.dumps({
+            "schema_version": "behavior-capture-2",
+            "screenshot_attempted": True,
+            "secure_content_protected": None,
+            "session_bound": True,
+            "device_observations": {"screencap_sha256": "ef" * 32},
+            "operator_inputs": {"playback_confirmed": True},
+            "program_analysis": {"analyzable": True, "uniform_dark": True},
+            "gate_inference": {"capture_result": "ALL_BLACK_FRAME",
+                               "secure_content_protected": None},
+        }))
+        det = detection_stub()
+        det["input_sha256"] = SHA
+        report = build_report(det, campaign_dir=cd)
+        status = {l["id"]: l["status"] for l in report["causal_chain"]["links"]}
+        self.assertEqual(status["L4_CAPTURE_BLOCK_BEHAVIOR_OBSERVED"], TIER_NOT_PROVEN)
+        self.assertEqual(report["causal_chain"]["verdict"], TIER_NOT_PROVEN)
 
 
 def main():

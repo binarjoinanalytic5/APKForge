@@ -25,7 +25,7 @@ import struct
 import time
 import zlib
 
-SCHEMA = "behavior-capture-1"
+SCHEMA = "behavior-capture-2"
 DARK_THRESHOLD = 16
 
 
@@ -125,48 +125,114 @@ def _default_runner(command, timeout=60, binary=False):
 
 def capture_behavior(adb, serial, package, artifact_sha256=None,
                      playback_confirmed=False, runner=None):
-    """One bounded screencap observation bound to the session/artifact."""
+    """One bounded screencap observation bound to the session/artifact.
+
+    The record is structured into four auditable layers so a reviewer can
+    always tell what was observed on the device, what was assumed by the
+    operator, what the program analyzed, and what the gate inferred:
+
+    - device_observations : facts returned by the device (foreground dump,
+      screencap exit code, capture size + SHA-256)
+    - operator_inputs     : operator-supplied assumptions (playback
+      confirmation) — explicitly NOT device observations
+    - program_analysis    : what the analyzer computed from the frame
+    - gate_inference      : the semantic verdict derived from the above
+    """
+    import hashlib
     runner = runner or _default_runner
     record = {
         "schema_version": SCHEMA,
         "timestamp_epoch": time.time(),
         "read_only": True,
-        "package": package,
-        "serial": serial,
-        "artifact_sha256": artifact_sha256,
+        "device_observations": {
+            "serial": serial,
+            "package": package,
+            "foreground_dump": None,
+            "foreground_is_target": False,
+            "screencap_attempted": False,
+            "screencap_returncode": None,
+            "screencap_bytes": None,
+            "screencap_sha256": None,
+        },
+        "operator_inputs": {
+            "playback_confirmed": bool(playback_confirmed),
+            "note": ("operator-supplied assumption about protected playback; "
+                     "not a device observation"),
+        },
+        "program_analysis": {
+            "analyzable": False, "uniform_dark": None,
+            "max_channel": None, "threshold": DARK_THRESHOLD,
+        },
+        "gate_inference": {
+            "capture_result": None,
+            "secure_content_protected": None,
+            "rationale": None,
+        },
+        # top-level contract fields (consumed by evidence_report)
         "screenshot_attempted": False,
         "capture_result": None,
-        "frame_analysis": None,
-        "playback_confirmed": bool(playback_confirmed),
         "secure_content_protected": None,
         "session_bound": False,
+        "artifact_sha256": artifact_sha256,
         "boundary": ("user-level screencap observation only; no hooks, no "
                      "protection modification, no circumvention attempt"),
     }
+    obs = record["device_observations"]
+    gate = record["gate_inference"]
+
     # foreground check (evidence that the test package is the visible app)
     rc, out = runner([adb, "-s", serial, "shell",
                       "dumpsys activity activities | grep -m1 topResumedActivity"],
                      timeout=20)
-    record["foreground"] = (out or "").strip()[:300]
-    record["foreground_is_target"] = bool(package and package in (out or ""))
+    obs["foreground_dump"] = (out or "").strip()[:300]
+    obs["foreground_is_target"] = bool(package and package in (out or ""))
+    record["foreground"] = obs["foreground_dump"]
+    record["foreground_is_target"] = obs["foreground_is_target"]
 
+    obs["screencap_attempted"] = True
     record["screenshot_attempted"] = True
     rc, png = runner([adb, "-s", serial, "exec-out", "screencap", "-p"],
                      timeout=30, binary=True)
+    obs["screencap_returncode"] = rc
     if rc != 0 or not png or not png.startswith(b"\x89PNG"):
+        gate["capture_result"] = "CAPTURE_FAILED"
+        gate["rationale"] = ("screencap did not return a PNG; no frame "
+                             "semantics can be inferred")
         record["capture_result"] = "CAPTURE_FAILED"
         return record
+    obs["screencap_bytes"] = len(png)
+    obs["screencap_sha256"] = hashlib.sha256(png).hexdigest()
 
     analysis = analyze_frame(png)
+    record["program_analysis"] = {
+        "analyzable": analysis["analyzable"],
+        "uniform_dark": analysis["uniform_dark"],
+        "max_channel": analysis["max_channel"],
+        "threshold": analysis.get("threshold", DARK_THRESHOLD),
+    }
     record["frame_analysis"] = analysis
     if not analysis["analyzable"]:
+        gate["capture_result"] = "FRAME_NOT_ANALYZABLE"
+        gate["rationale"] = "PNG could not be decoded; no frame semantics inferred"
         record["capture_result"] = "FRAME_NOT_ANALYZABLE"
         return record
-    record["capture_result"] = "ALL_BLACK_FRAME" if analysis["uniform_dark"] else "CONTENT_VISIBLE"
-    if analysis["uniform_dark"] and playback_confirmed:
-        record["secure_content_protected"] = True
-    elif not analysis["uniform_dark"]:
-        record["secure_content_protected"] = False
-    # else: dark frame without playback confirmation -> semantics unknown (None)
-    record["session_bound"] = bool(artifact_sha256 and record["foreground_is_target"])
+
+    dark = bool(analysis["uniform_dark"])
+    gate["capture_result"] = "ALL_BLACK_FRAME" if dark else "CONTENT_VISIBLE"
+    record["capture_result"] = gate["capture_result"]
+    if dark and playback_confirmed:
+        gate["secure_content_protected"] = True
+        gate["rationale"] = ("uniform dark frame observed while operator "
+                             "confirmed protected playback was active")
+    elif dark:
+        gate["secure_content_protected"] = None
+        gate["rationale"] = ("uniform dark frame observed but protected "
+                             "playback was NOT confirmed; semantics undetermined "
+                             "(idle/black screen is indistinguishable)")
+    else:
+        gate["secure_content_protected"] = False
+        gate["rationale"] = ("visible (non-dark) frame captured; content was "
+                             "not protected in this observation")
+    record["secure_content_protected"] = gate["secure_content_protected"]
+    record["session_bound"] = bool(artifact_sha256 and obs["foreground_is_target"])
     return record

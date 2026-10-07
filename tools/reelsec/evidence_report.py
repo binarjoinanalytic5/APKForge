@@ -247,12 +247,41 @@ def build_causal_chain(detection, facts, findings):
         l3 = (TIER_NOT_PROVEN, "no runtime probe evidence supplied")
     links.append({"id": "L3_RUNTIME_EXECUTION_OBSERVED", "status": l3[0], "detail": l3[1]})
 
-    # L4 — capture-block behavior observed
+    # L4 — capture-block behavior observed.
+    # Integrity requirement: an L4 confirmation must rest on an auditable
+    # behavior-capture-2 record: a real device observation (screencap hash),
+    # a program frame analysis, and the gate inference — never on the
+    # operator playback flag alone and never on a bare hand-written claim.
     beh = facts.get("behavior_capture")
-    if (isinstance(beh, dict) and beh.get("screenshot_attempted")
-            and beh.get("secure_content_protected") is True
-            and beh.get("session_bound")):
-        l4 = (TIER_CONFIRMED, "bounded behavioral observation recorded a blocked capture")
+    if isinstance(beh, dict):
+        obs = beh.get("device_observations") or {}
+        prog = beh.get("program_analysis") or {}
+        auditable = (
+            str(beh.get("schema_version", "")).startswith("behavior-capture-2")
+            and bool(obs.get("screencap_sha256"))
+            and prog.get("analyzable") is True
+        )
+        if (beh.get("screenshot_attempted")
+                and beh.get("secure_content_protected") is True
+                and beh.get("session_bound")
+                and auditable):
+            l4 = (TIER_CONFIRMED,
+                  "auditable behavioral record: dark frame (sha256=%s...) during "
+                  "operator-confirmed protected playback, target in foreground"
+                  % str(obs.get("screencap_sha256"))[:12])
+        elif beh.get("secure_content_protected") is True and not auditable:
+            l4 = (TIER_NOT_PROVEN,
+                  "behavior record claims protection but lacks auditable "
+                  "device observations (schema/observation hash/frame analysis); "
+                  "operator input alone is not behavioral evidence")
+        else:
+            l4 = (TIER_NOT_PROVEN,
+                  "no protected-capture behavior established (capture_result=%s, "
+                  "playback_confirmed=%s)" % (
+                      (beh.get("gate_inference") or {}).get("capture_result")
+                      or beh.get("capture_result"),
+                      (beh.get("operator_inputs") or {}).get("playback_confirmed",
+                                                             beh.get("playback_confirmed"))))
     else:
         l4 = (TIER_NOT_PROVEN, "no bounded behavioral capture-block observation recorded")
     links.append({"id": "L4_CAPTURE_BLOCK_BEHAVIOR_OBSERVED", "status": l4[0], "detail": l4[1]})

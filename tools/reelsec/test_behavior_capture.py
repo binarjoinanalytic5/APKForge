@@ -64,11 +64,30 @@ class CaptureBehaviorTests(unittest.TestCase):
             "/adb", "s1", "com.newleaf.app.android.victor",
             artifact_sha256="aa" * 32, playback_confirmed=True,
             runner=self._runner(make_png(8, 8, (0, 0, 0))))
+        self.assertEqual(record["schema_version"], "behavior-capture-2")
         self.assertTrue(record["screenshot_attempted"])
         self.assertEqual(record["capture_result"], "ALL_BLACK_FRAME")
         self.assertTrue(record["secure_content_protected"])
         self.assertTrue(record["session_bound"])
         self.assertTrue(record["read_only"])
+        # four auditable layers are separated
+        obs = record["device_observations"]
+        self.assertTrue(obs["foreground_is_target"])
+        self.assertEqual(len(obs["screencap_sha256"]), 64)
+        self.assertEqual(obs["screencap_returncode"], 0)
+        self.assertTrue(record["operator_inputs"]["playback_confirmed"])
+        self.assertIn("not a device observation", record["operator_inputs"]["note"])
+        self.assertTrue(record["program_analysis"]["analyzable"])
+        self.assertTrue(record["program_analysis"]["uniform_dark"])
+        self.assertTrue(record["gate_inference"]["rationale"])
+
+    def test_operator_flag_is_recorded_as_assumption_not_observation(self):
+        record = capture_behavior(
+            "/adb", "s1", "com.x", artifact_sha256="aa" * 32,
+            playback_confirmed=True,
+            runner=self._runner(make_png(8, 8, (0, 0, 0))))
+        self.assertNotIn("playback_confirmed", record["device_observations"])
+        self.assertTrue(record["operator_inputs"]["playback_confirmed"])
 
     def test_black_frame_without_playback_confirmation_stays_unknown(self):
         record = capture_behavior(
