@@ -35,6 +35,7 @@ from runtime_capture import capture_snapshot, bind_artifact
 from gadget_observer import plan_gadget_observation
 from proof_gate import build_evidence_ledger
 from capture_detector import run as run_capture_detection
+from optional_adapters import run as run_optional_adapters
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
 VERSION = "3.0.0"
@@ -2369,6 +2370,8 @@ def main():
     parser.add_argument("--elf")
     parser.add_argument("--output")
     parser.add_argument("--no-publish", action="store_true")
+    parser.add_argument("--adapters", default=os.environ.get("REELSEC_ADAPTERS", "auto"),
+                        help="optional read-only adapters: auto, all, or comma-separated mobsfscan,radare2,mobsf,objection")
     parser.add_argument("--version", action="version", version=VERSION)
     args = parser.parse_args()
 
