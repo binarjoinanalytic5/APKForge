@@ -1,0 +1,19 @@
+{
+  "BASELINE_STATUS": "BASELINE_SKIPPED_WORKING_CONTROL_PRESENT",
+  "CAMPAIGN_STATE": "CAUSAL_CHAIN_INCOMPLETE",
+  "CAMPAIGN_STATE_REASON": "no evidence report: causal chain not evaluated",
+  "COMMON_CAUSE_COMPARISON": "COMMON_CAUSE_BOTH_CRASH",
+  "CRASH_CAUSE": "NATIVE_LIBRARY:libc.so",
+  "CRASH_CAUSE_CONFIDENCE": "HIGH",
+  "CRASH_CLASS": "NATIVE_CRASH",
+  "CRASH_COMPARISON": "INSTRUMENTED_ONLY_CRASH",
+  "INSTRUMENTED_RUNTIME": "CRASH",
+  "NEXT_ACTION": "COMMON_CAUSE_BOTH_CRASH: the installed original AND the instrumented artifact crash with a common cause; instrumentation regression is NOT_ESTABLISHED and the crash MUST NOT be attributed to instrumentation. Investigate the common cause (device/OS/ROM or the app itself) with the working control left installed; no destructive operation is required or permitted.",
+  "ORIGINAL_RUNTIME": "CRASH",
+  "REGRESSION_STATUS": "NOT_ESTABLISHED",
+  "RUNTIME_PROOF_STATUS": "BLOCKED_BY_ARTIFACT_CRASH",
+  "RUNTIME_STATUS": "COMMON_CAUSE_BOTH_CRASH",
+  "WORKING_CONTROL": "CONTROL_CRASHED",
+  "runtime_probe_allowed": false,
+  "schema_version": "runtime-health-1"
+}

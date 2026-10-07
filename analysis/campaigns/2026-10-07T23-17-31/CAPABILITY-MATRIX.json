@@ -1,0 +1,115 @@
+{
+  "device": {
+    "online_count": 1,
+    "records": [
+      "192.168.8.8:34661      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+    ],
+    "state": "USABLE"
+  },
+  "policy": {
+    "available_is_not_usable": true,
+    "original_apk_is_immutable": true,
+    "resolver_does_not_install": true
+  },
+  "resolver": "ReelSec Environment Resolver",
+  "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00",
+  "schema_version": "1.0",
+  "tools": {
+    "adb": {
+      "device_query": "USABLE",
+      "devices": [
+        "192.168.8.8:34661      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+      ],
+      "name": "adb",
+      "path": "/data/data/com.termux/files/usr/bin/adb",
+      "returncode": 0,
+      "status": "USABLE",
+      "version": "Android Debug Bridge version 1.0.41"
+    },
+    "apksigner": {
+      "name": "apksigner",
+      "path": "/data/data/com.termux/files/usr/bin/apksigner",
+      "returncode": 0,
+      "status": "USABLE",
+      "version": "0.9"
+    },
+    "apktool": {
+      "attempts": [
+        {
+          "backend": "cli",
+          "path": "/data/data/com.termux/files/usr/bin/apktool",
+          "returncode": 1
+        },
+        {
+          "backend": "java-classpath",
+          "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+          "returncode": 0
+        }
+      ],
+      "backend": "java-classpath",
+      "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "name": "apktool-standalone",
+      "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "status": "USABLE",
+      "version": "2.7.0-dirty"
+    },
+    "frida": {
+      "name": "frida",
+      "path": "/data/data/com.termux/files/usr/bin/frida",
+      "returncode": 0,
+      "status": "USABLE",
+      "version": "17.2.14"
+    },
+    "jarsigner": {
+      "name": "jarsigner",
+      "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+      "returncode": 0,
+      "status": "USABLE",
+      "version": "jarsigner 21.0.12"
+    },
+    "java": {
+      "name": "java",
+      "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "returncode": 0,
+      "status": "USABLE",
+      "version": "openjdk 21.0.12 2026-07-21"
+    },
+    "python": {
+      "name": "python",
+      "path": "/data/data/com.termux/files/usr/bin/python3.14",
+      "returncode": 0,
+      "status": "USABLE",
+      "version": "Python 3.14.6"
+    },
+    "signing": {
+      "apksigner": {
+        "name": "apksigner",
+        "path": "/data/data/com.termux/files/usr/bin/apksigner",
+        "returncode": 0,
+        "status": "USABLE",
+        "version": "0.9"
+      },
+      "jarsigner": {
+        "name": "jarsigner",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+        "returncode": 0,
+        "status": "USABLE",
+        "version": "jarsigner 21.0.12"
+      },
+      "zipalign": {
+        "name": "zipalign",
+        "path": "/data/data/com.termux/files/usr/bin/zipalign",
+        "returncode": 127,
+        "status": "BROKEN",
+        "version": null
+      }
+    },
+    "zipalign": {
+      "name": "zipalign",
+      "path": "/data/data/com.termux/files/usr/bin/zipalign",
+      "returncode": 127,
+      "status": "BROKEN",
+      "version": null
+    }
+  }
+}
