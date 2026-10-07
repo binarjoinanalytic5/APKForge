@@ -1,0 +1,39 @@
+{
+  "events": [],
+  "execution_attempted": false,
+  "gadget_mode": false,
+  "gadget_source": null,
+  "lifecycle": {},
+  "manifest": "/home/user/ReelShort-v4.2.00-analysis/apktool-src/AndroidManifest.xml",
+  "missing_requirements": [
+    "adb",
+    "frida_cli"
+  ],
+  "module": "libsaasCorePlayer.so",
+  "package": "com.newleaf.app.android.victor",
+  "package_source": "analysis_root_manifest",
+  "package_tool_checks": [],
+  "preflight_status": "RUNTIME_TOOLCHAIN_INCOMPLETE",
+  "reason": "missing: adb,frida_cli",
+  "reason_code": "ADB_UNAVAILABLE",
+  "stages": [
+    {
+      "elapsed_ms": null,
+      "reason_code": "ADB_UNAVAILABLE",
+      "source": "preflight tooling resolution",
+      "stage": "ADB_CONNECTED",
+      "status": "FAIL",
+      "timestamp_epoch": 1791388313.4898968
+    }
+  ],
+  "status": "RUNTIME_ENVIRONMENT_UNAVAILABLE",
+  "tooling": {
+    "adb": null,
+    "adb_source": null,
+    "frida": null,
+    "frida_source": null,
+    "pkg": null,
+    "proot_distro": null,
+    "python": null
+  }
+}

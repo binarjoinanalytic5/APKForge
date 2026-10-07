@@ -1,0 +1,17 @@
+{
+  "actions": [],
+  "attempted": true,
+  "missing_requirements": [
+    "adb",
+    "frida_cli"
+  ],
+  "schema_version": "1.2",
+  "status": "RUNTIME_TOOLCHAIN_INCOMPLETE",
+  "tooling": {
+    "adb": null,
+    "frida": null,
+    "pkg": null,
+    "proot_distro": null,
+    "python": null
+  }
+}

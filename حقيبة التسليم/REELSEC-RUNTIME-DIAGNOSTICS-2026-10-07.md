@@ -158,3 +158,28 @@ SCREENSHOT_BLOCKING = NOT_PROVEN
 
 لم يتغير الحكم. لا مؤشرات رُفعت إلى CONFIRMED. بوابة السببية
 (`ALL_LINKS_MUST_BE_CONFIRMED`) كما هي.
+
+---
+
+## ADDENDUM — نفس اليوم: تشديد L4 + جولة بيئة Sandbox
+
+### تشديد قاعدة L4 (إلزامي — نُفّذ)
+- `BEHAVIOR-CAPTURE.json` صار `behavior-capture-2` بأربع طبقات قابلة للتدقيق:
+  `device_observations` (حقيقة الجهاز: foreground dump + screencap rc +
+  bytes + **SHA-256**) / `operator_inputs` (تأكيد التشغيل — **موسوم صراحةً
+  كافتراض مشغّل وليس ملاحظة جهاز**) / `program_analysis` (تحليل الإطار:
+  max_channel/threshold/uniform_dark) / `gate_inference` (الاستدلال + rationale).
+- `evidence_report.py` **لا يؤكد L4 إلا بسجل v2 قابل للتدقيق**: بصمة screencap
+  + تحليل إطار analyzable + session_bound. المطالبة اليدوية أو علم
+  `REELSEC_BEHAVIOR_PLAYBACK_CONFIRMED=1` وحده ⇒ `NOT_PROVEN` (اختبارات
+  مضادة للتزوير مضافة).
+- الاختبارات: **131/131 PASS** (+3: منع التزوير، العلم وحده ليس دليلًا، فصل الطبقات).
+
+### جولة 2026-10-07 (بيئة Sandbox — ليست دليل جهاز)
+`analysis/runtime-round-20261007-sandbox/` — أول تشغيل حقيقي للخط الجديد:
+- `lifecycle.reason_code = ADB_UNAVAILABLE` (البيئة بلا adb/frida ولا مسار
+  للجهاز) — **سبب محدد وقابل للتفسير** بدل timeout الغامض.
+- `execution_attempted=false` — لم يُدّعَ تنفيذ لم يحدث.
+- السلسلة: L1 CONFIRMED / L2 INDICATOR / L3 NOT_PROVEN / L4 NOT_PROVEN /
+  `SCREENSHOT_BLOCKING = NOT_PROVEN`.
+- جولة الجهاز الحقيقية ما زالت مطلوبة على Termux (استثناء الجهاز الفعلي).
