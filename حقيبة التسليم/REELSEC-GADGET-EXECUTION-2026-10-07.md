@@ -73,6 +73,7 @@ This is an operator-input failure, not runtime evidence. The campaign correctly 
 - Gadget embedding is now truly opt-in through `REELSEC_USE_GADGET`; merely setting a path does not enable embedding.
 - Smali injection now reserves two registers and uses separate tag/message registers for the `Log.i` telemetry marker.
 - `test_gadget_embed.py` now checks register allocation, Gadget config, and isolated mutation behavior.
+- Gadget transport now attaches to Frida's documented process name `Gadget` instead of the APK package name. citeturn668280search1
 
 Latest implementation commits:
 - `3f525c772d72d511392ab63fb7fe23319f8f10e5`
@@ -80,6 +81,13 @@ Latest implementation commits:
 - `89b1e4737b6508c815964fca3c866067482678e9`
 - `a6977b034c540c4df808325db3455c645e8a2433`
 - `b63cfe3344435dce62cef6a73b9571e4e6b4bb77`
+- `a338408cafd65245c581d9845c7dc1a77839becf`
+- `e7a32af2fe2f1d1274cf0da460be69f640545c2f`
+- `32392c9b045dd8627b1fec7b927abe0a12393f9e`
+- `d30fa2d5375f1ede22a03896da7b6f0545ed1bda`
+- `a2bde67c47d7d4c361e4864e212e5ef05ed55819`
+- `6a5b046dfcf460532fdaed07fe9a8544bec8d526`
+- `d6673b3c7d96c5cf86821ca885ccb198dfc8cd03`
 
 ## Next operator gate
 
