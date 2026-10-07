@@ -19,7 +19,9 @@ class OptionalAdaptersTests(unittest.TestCase):
             self.assertFalse(result["causal_proof"])
             self.assertIn("mobsf", result["results"])
             self.assertIn("objection", result["results"])
-            self.assertIn("jadx", result["results"])
+            # results are keyed exactly by the requested adapter names
+            self.assertEqual(sorted(result["results"]), ["mobsf", "objection"])
+            self.assertEqual(result["requested"], ["mobsf", "objection"])
 
 
 if __name__ == "__main__":
