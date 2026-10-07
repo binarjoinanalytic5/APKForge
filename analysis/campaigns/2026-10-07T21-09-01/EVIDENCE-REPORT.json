@@ -1,0 +1,626 @@
+{
+  "causal_chain": {
+    "claim": "CLAIM-SCREENSHOT-PROTECTION-ACTIVE",
+    "claim_statement": "The application actively blocks screenshots/screen-recording of protected content.",
+    "links": [
+      {
+        "detail": "capture-specific static mechanism identified (callbacks/symbols/FLAG_SECURE pattern)",
+        "id": "L1_MECHANISM_IDENTIFIED_STATIC",
+        "status": "CONFIRMED"
+      },
+      {
+        "detail": "container hash recorded; no independent target record supplied",
+        "id": "L2_TARGET_PROVENANCE_ESTABLISHED",
+        "status": "INDICATOR"
+      },
+      {
+        "detail": "no runtime probe evidence supplied",
+        "id": "L3_RUNTIME_EXECUTION_OBSERVED",
+        "status": "NOT_PROVEN"
+      },
+      {
+        "detail": "no bounded behavioral capture-block observation recorded",
+        "id": "L4_CAPTURE_BLOCK_BEHAVIOR_OBSERVED",
+        "status": "NOT_PROVEN"
+      }
+    ],
+    "missing": [
+      "L2_TARGET_PROVENANCE_ESTABLISHED",
+      "L3_RUNTIME_EXECUTION_OBSERVED",
+      "L4_CAPTURE_BLOCK_BEHAVIOR_OBSERVED"
+    ],
+    "rule": "ALL_LINKS_MUST_BE_CONFIRMED",
+    "runtime_validity": "NOT_BLOCKED",
+    "runtime_validity_detail": null,
+    "runtime_validity_reason": null,
+    "verdict": "NOT_PROVEN"
+  },
+  "causal_proof": false,
+  "counts_by_tier": {
+    "CONFIRMED": 2,
+    "INDICATOR": 6,
+    "NOT_PROVEN": 1,
+    "UNRELATED": 1
+  },
+  "detection_summary": {
+    "mechanisms": [
+      {
+        "confidence": "MEDIUM",
+        "evidence_count": 5,
+        "layer": "JAVA_CAPTURE_CALLBACKS",
+        "mechanism": "SCREEN_CAPTURE_CALLBACKS"
+      },
+      {
+        "confidence": "MEDIUM",
+        "evidence_count": 62,
+        "layer": "DRM",
+        "mechanism": "DRM_PROTECTION_STRINGS"
+      },
+      {
+        "confidence": "MEDIUM",
+        "evidence_count": 8,
+        "layer": "NATIVE_BUFFERS",
+        "mechanism": "PROTECTED_CONTENT_BUFFERS"
+      },
+      {
+        "confidence": "LOW_INDICATOR",
+        "evidence_count": 21,
+        "layer": "NATIVE_STRINGS",
+        "mechanism": "CAPTURE_RELATED_STRINGS"
+      },
+      {
+        "confidence": "MEDIUM",
+        "evidence_count": 11,
+        "layer": "NATIVE_SYMBOLS",
+        "mechanism": "CAPTURE_RELATED_EXPORTED_SYMBOLS"
+      },
+      {
+        "confidence": "LOW_INDICATOR",
+        "evidence_count": 16,
+        "layer": "TAMPER",
+        "mechanism": "ANTI_INSTRUMENTATION_STRINGS"
+      },
+      {
+        "confidence": "HIGH_STRUCTURAL",
+        "evidence_count": 1,
+        "layer": "PACKER",
+        "mechanism": "APP_HARDENING_SHELL"
+      }
+    ],
+    "note": "An app-hardening shell is present: the real application code is encrypted and only materializes at runtime, so Java-layer protection (e.g. FLAG_SECURE) cannot be fully enumerated from static files alone.",
+    "verdict": "PACKED_STATIC_ANALYSIS_LIMITED"
+  },
+  "evidence_graph": {
+    "edges": [
+      {
+        "relation": "PART_OF",
+        "source": "FILE-01",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "PART_OF",
+        "source": "FILE-02",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "PART_OF",
+        "source": "FILE-03",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "PART_OF",
+        "source": "FILE-04",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "PART_OF",
+        "source": "FILE-05",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "PART_OF",
+        "source": "FILE-06",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "PART_OF",
+        "source": "FILE-07",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "PART_OF",
+        "source": "FILE-08",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "PART_OF",
+        "source": "FILE-09",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "PART_OF",
+        "source": "FILE-10",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "PART_OF",
+        "source": "FILE-11",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "PART_OF",
+        "source": "FILE-12",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "DETECTED_IN",
+        "source": "MECH-01",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "DETECTED_IN",
+        "source": "MECH-02",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "DETECTED_IN",
+        "source": "MECH-03",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "DETECTED_IN",
+        "source": "MECH-04",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "DETECTED_IN",
+        "source": "MECH-05",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "DETECTED_IN",
+        "source": "MECH-06",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "DETECTED_IN",
+        "source": "MECH-07",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "SUPPORTS",
+        "source": "F001",
+        "target": "MECH-07"
+      },
+      {
+        "relation": "OBSERVED_IN",
+        "source": "F002",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "OBSERVED_IN",
+        "source": "F003",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "OBSERVED_IN",
+        "source": "F004",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "SUPPORTS",
+        "source": "F005",
+        "target": "MECH-05"
+      },
+      {
+        "relation": "OBSERVED_IN",
+        "source": "F006",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "OBSERVED_IN",
+        "source": "F007",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "OBSERVED_IN",
+        "source": "F008",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "OBSERVED_IN",
+        "source": "F009",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "OBSERVED_IN",
+        "source": "F010",
+        "target": "ARTIFACT-ROOT"
+      },
+      {
+        "relation": "REQUIRES",
+        "source": "CLAIM-SCREENSHOT-PROTECTION-ACTIVE",
+        "target": "LINK-L1_MECHANISM_IDENTIFIED_STATIC"
+      },
+      {
+        "relation": "REQUIRES",
+        "source": "CLAIM-SCREENSHOT-PROTECTION-ACTIVE",
+        "target": "LINK-L2_TARGET_PROVENANCE_ESTABLISHED"
+      },
+      {
+        "relation": "REQUIRES",
+        "source": "CLAIM-SCREENSHOT-PROTECTION-ACTIVE",
+        "target": "LINK-L3_RUNTIME_EXECUTION_OBSERVED"
+      },
+      {
+        "relation": "REQUIRES",
+        "source": "CLAIM-SCREENSHOT-PROTECTION-ACTIVE",
+        "target": "LINK-L4_CAPTURE_BLOCK_BEHAVIOR_OBSERVED"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "ARTIFACT-ROOT",
+        "label": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-09-01/decoded-apk-no-res",
+        "sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+        "type": "artifact"
+      },
+      {
+        "id": "FILE-01",
+        "label": "lib/arm64-v8a/libSecShell-x86.so",
+        "sha256": "acdf520119e452577c56666924d1a6cf0991116596505171cbd665ad38781e54",
+        "type": "file"
+      },
+      {
+        "id": "FILE-02",
+        "label": "lib/arm64-v8a/libSecShell.so",
+        "sha256": "155da548f25cd2d5d8d8b68511a135927b2706cea48500c11c820c5b99209a62",
+        "type": "file"
+      },
+      {
+        "id": "FILE-03",
+        "label": "lib/arm64-v8a/libalivcffmpeg.so",
+        "sha256": "73b3527f39e93c463f648514b25bdd9d239ddf856ed9ed51d849e5ba29b9ba98",
+        "type": "file"
+      },
+      {
+        "id": "FILE-04",
+        "label": "lib/arm64-v8a/libcrashlytics-common.so",
+        "sha256": "db3c33bc6e1c0d049466280c32bd7419f9708f53ca8f5f95d584ef281996918f",
+        "type": "file"
+      },
+      {
+        "id": "FILE-05",
+        "label": "lib/arm64-v8a/libprotect.so",
+        "sha256": "1725ce0c5528d65eae8e337d6b0878dcdc3565f35314840ace0c5d680b14526b",
+        "type": "file"
+      },
+      {
+        "id": "FILE-06",
+        "label": "lib/arm64-v8a/libsaasCorePlayer.so",
+        "sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+        "type": "file"
+      },
+      {
+        "id": "FILE-07",
+        "label": "lib/armeabi-v7a/libSecShell-x86.so",
+        "sha256": "1eeddda50ae53ea345d905ea59dd1219ff5d146837a26c02150321a508547632",
+        "type": "file"
+      },
+      {
+        "id": "FILE-08",
+        "label": "lib/armeabi-v7a/libSecShell.so",
+        "sha256": "213548b952b7acb63bb5f18848bb5e01ee8ef3ebbfca87bfbe22e1ee4db4abd3",
+        "type": "file"
+      },
+      {
+        "id": "FILE-09",
+        "label": "lib/armeabi-v7a/libalivcffmpeg.so",
+        "sha256": "526a26047992adedaed6e8854f42ee8ce296f3b92c399f7196410e15efb7c2bd",
+        "type": "file"
+      },
+      {
+        "id": "FILE-10",
+        "label": "lib/armeabi-v7a/libcrashlytics-common.so",
+        "sha256": "4b8bcec5c0464d7b1741386e30eef9308c43d4ca8f57501ae6734fa48e1c55d2",
+        "type": "file"
+      },
+      {
+        "id": "FILE-11",
+        "label": "lib/armeabi-v7a/libprotect.so",
+        "sha256": "94786c5616331de6f43b68faaa4ad6e6746390a31cbe46dada9d03e644ac7232",
+        "type": "file"
+      },
+      {
+        "id": "FILE-12",
+        "label": "lib/armeabi-v7a/libsaasCorePlayer.so",
+        "sha256": "ea99002d1c35783250616c381e04953bf7cbfbfd30054510f408a23a7f753054",
+        "type": "file"
+      },
+      {
+        "confidence": "MEDIUM",
+        "id": "MECH-01",
+        "label": "SCREEN_CAPTURE_CALLBACKS",
+        "layer": "JAVA_CAPTURE_CALLBACKS",
+        "type": "mechanism"
+      },
+      {
+        "confidence": "MEDIUM",
+        "id": "MECH-02",
+        "label": "DRM_PROTECTION_STRINGS",
+        "layer": "DRM",
+        "type": "mechanism"
+      },
+      {
+        "confidence": "MEDIUM",
+        "id": "MECH-03",
+        "label": "PROTECTED_CONTENT_BUFFERS",
+        "layer": "NATIVE_BUFFERS",
+        "type": "mechanism"
+      },
+      {
+        "confidence": "LOW_INDICATOR",
+        "id": "MECH-04",
+        "label": "CAPTURE_RELATED_STRINGS",
+        "layer": "NATIVE_STRINGS",
+        "type": "mechanism"
+      },
+      {
+        "confidence": "MEDIUM",
+        "id": "MECH-05",
+        "label": "CAPTURE_RELATED_EXPORTED_SYMBOLS",
+        "layer": "NATIVE_SYMBOLS",
+        "type": "mechanism"
+      },
+      {
+        "confidence": "LOW_INDICATOR",
+        "id": "MECH-06",
+        "label": "ANTI_INSTRUMENTATION_STRINGS",
+        "layer": "TAMPER",
+        "type": "mechanism"
+      },
+      {
+        "confidence": "HIGH_STRUCTURAL",
+        "id": "MECH-07",
+        "label": "APP_HARDENING_SHELL",
+        "layer": "PACKER",
+        "type": "mechanism"
+      },
+      {
+        "id": "F001",
+        "label": "App-hardening shell 'SecShell' is present in the analyzed artifact.",
+        "tier": "CONFIRMED",
+        "type": "finding"
+      },
+      {
+        "id": "F002",
+        "label": "Analyzed container hash recorded: e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+        "tier": "CONFIRMED",
+        "type": "finding"
+      },
+      {
+        "id": "F003",
+        "label": "DRM subsystem strings: 62 relevant indicator hit(s) across 4 file(s).",
+        "tier": "INDICATOR",
+        "type": "finding"
+      },
+      {
+        "id": "F004",
+        "label": "capture-related native strings: 21 relevant indicator hit(s) across 4 file(s).",
+        "tier": "INDICATOR",
+        "type": "finding"
+      },
+      {
+        "id": "F005",
+        "label": "capture-related exported native symbols: 11 relevant indicator hit(s) across 5 file(s).",
+        "tier": "INDICATOR",
+        "type": "finding"
+      },
+      {
+        "id": "F006",
+        "label": "protected-content buffer usage: 8 relevant indicator hit(s) across 2 file(s).",
+        "tier": "INDICATOR",
+        "type": "finding"
+      },
+      {
+        "id": "F007",
+        "label": "screen-capture callback surface: 5 relevant indicator hit(s) across 2 file(s).",
+        "tier": "INDICATOR",
+        "type": "finding"
+      },
+      {
+        "id": "F008",
+        "label": "anti-instrumentation strings: 16 relevant indicator hit(s) across 6 file(s).",
+        "tier": "INDICATOR",
+        "type": "finding"
+      },
+      {
+        "id": "F009",
+        "label": "anti-instrumentation strings: 2 hit(s) inside third-party SDK paths (classified unrelated).",
+        "tier": "UNRELATED",
+        "type": "finding"
+      },
+      {
+        "id": "F010",
+        "label": "Causal claim: the application actively blocks screenshots/screen-recording.",
+        "tier": "NOT_PROVEN",
+        "type": "finding"
+      },
+      {
+        "id": "CLAIM-SCREENSHOT-PROTECTION-ACTIVE",
+        "label": "The application actively blocks screenshots/screen-recording of protected content.",
+        "type": "claim",
+        "verdict": "NOT_PROVEN"
+      },
+      {
+        "id": "LINK-L1_MECHANISM_IDENTIFIED_STATIC",
+        "label": "L1_MECHANISM_IDENTIFIED_STATIC",
+        "status": "CONFIRMED",
+        "type": "chain_link"
+      },
+      {
+        "id": "LINK-L2_TARGET_PROVENANCE_ESTABLISHED",
+        "label": "L2_TARGET_PROVENANCE_ESTABLISHED",
+        "status": "INDICATOR",
+        "type": "chain_link"
+      },
+      {
+        "id": "LINK-L3_RUNTIME_EXECUTION_OBSERVED",
+        "label": "L3_RUNTIME_EXECUTION_OBSERVED",
+        "status": "NOT_PROVEN",
+        "type": "chain_link"
+      },
+      {
+        "id": "LINK-L4_CAPTURE_BLOCK_BEHAVIOR_OBSERVED",
+        "label": "L4_CAPTURE_BLOCK_BEHAVIOR_OBSERVED",
+        "status": "NOT_PROVEN",
+        "type": "chain_link"
+      }
+    ]
+  },
+  "findings": [
+    {
+      "basis": "STRUCTURAL_MATCH: manifest/lib/asset signatures",
+      "evidence": [
+        "native_lib:libsecshell-x86.so"
+      ],
+      "id": "F001",
+      "layer": "PACKER",
+      "statement": "App-hardening shell 'SecShell' is present in the analyzed artifact.",
+      "tier": "CONFIRMED"
+    },
+    {
+      "basis": "BYTE_LEVEL: SHA-256 of the exact input file",
+      "evidence": [
+        "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278"
+      ],
+      "id": "F002",
+      "layer": "PROVENANCE",
+      "statement": "Analyzed container hash recorded: e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+      "tier": "CONFIRMED"
+    },
+    {
+      "basis": "STATIC_PATTERN_MATCH",
+      "evidence": [
+        "files: lib/arm64-v8a/libprotect.so, lib/arm64-v8a/libsaasCorePlayer.so, lib/armeabi-v7a/libprotect.so, lib/armeabi-v7a/libsaasCorePlayer.so",
+        "sample: AMediaDrm_getPropertyByteArray",
+        "sample: AMediaDrm_createByUUID",
+        "sample: AMediaDrm_release"
+      ],
+      "id": "F003",
+      "layer": "DRM_PROTECTION",
+      "statement": "DRM subsystem strings: 62 relevant indicator hit(s) across 4 file(s).",
+      "tier": "INDICATOR",
+      "why_not_higher": "presence confirmed; security behavior not observed at runtime"
+    },
+    {
+      "basis": "STATIC_PATTERN_MATCH",
+      "evidence": [
+        "files: lib/arm64-v8a/libalivcffmpeg.so, lib/arm64-v8a/libsaasCorePlayer.so, lib/armeabi-v7a/libalivcffmpeg.so, lib/armeabi-v7a/libsaasCorePlayer.so",
+        "sample: Movie/video screen capture",
+        "sample: nativeOnCaptureScreen",
+        "sample: onCaptureScreen"
+      ],
+      "id": "F004",
+      "layer": "NATIVE_CAPTURE",
+      "statement": "capture-related native strings: 21 relevant indicator hit(s) across 4 file(s).",
+      "tier": "INDICATOR",
+      "why_not_higher": "presence confirmed; security behavior not observed at runtime"
+    },
+    {
+      "basis": "STATIC_PATTERN_MATCH",
+      "evidence": [
+        "files: lib/arm64-v8a/libcrashlytics-common.so, lib/arm64-v8a/libprotect.so, lib/armeabi-v7a/libcrashlytics-common.so, lib/armeabi-v7a/libprotect.so, lib/armeabi-v7a/libsaasCorePlayer.so",
+        "sample: ptrace",
+        "sample: AMediaDrm_getPropertyByteArray",
+        "sample: AMediaDrm_createByUUID"
+      ],
+      "id": "F005",
+      "layer": "NATIVE_SYMBOLS",
+      "statement": "capture-related exported native symbols: 11 relevant indicator hit(s) across 5 file(s).",
+      "tier": "INDICATOR",
+      "why_not_higher": "exported symbol presence confirmed; invocation not observed"
+    },
+    {
+      "basis": "STATIC_PATTERN_MATCH",
+      "evidence": [
+        "files: lib/arm64-v8a/libsaasCorePlayer.so, lib/armeabi-v7a/libsaasCorePlayer.so",
+        "sample: DRM-protected content cannot be decrypted without proper keys",
+        "sample: Use a certified device for DRM-protected content",
+        "sample: setForceInsecureDecoder"
+      ],
+      "id": "F006",
+      "layer": "PROTECTED_CONTENT",
+      "statement": "protected-content buffer usage: 8 relevant indicator hit(s) across 2 file(s).",
+      "tier": "INDICATOR",
+      "why_not_higher": "presence confirmed; security behavior not observed at runtime"
+    },
+    {
+      "basis": "STATIC_PATTERN_MATCH",
+      "evidence": [
+        "files: lib/arm64-v8a/libsaasCorePlayer.so, lib/armeabi-v7a/libsaasCorePlayer.so",
+        "sample: onCaptureScreen",
+        "sample: nativeOnCaptureScreen",
+        "sample: gj_NativePlayer_onCaptureScreen"
+      ],
+      "id": "F007",
+      "layer": "SCREEN_CAPTURE_CALLBACKS",
+      "statement": "screen-capture callback surface: 5 relevant indicator hit(s) across 2 file(s).",
+      "tier": "INDICATOR",
+      "why_not_higher": "presence confirmed; security behavior not observed at runtime"
+    },
+    {
+      "basis": "STATIC_PATTERN_MATCH",
+      "evidence": [
+        "files: lib/arm64-v8a/libSecShell-x86.so, lib/arm64-v8a/libSecShell.so, lib/arm64-v8a/libcrashlytics-common.so, lib/armeabi-v7a/libSecShell-x86.so, lib/armeabi-v7a/libSecShell.so",
+        "sample: _Z23is_magisk_check_processP7_JNIEnvP7_jclass",
+        "sample: ptrace",
+        "sample: no ptrace"
+      ],
+      "id": "F008",
+      "layer": "TAMPER_RESISTANCE",
+      "statement": "anti-instrumentation strings: 16 relevant indicator hit(s) across 6 file(s).",
+      "tier": "INDICATOR",
+      "why_not_higher": "presence confirmed; security behavior not observed at runtime"
+    },
+    {
+      "basis": "NOISE_CLASSIFICATION: third-party SDK context",
+      "evidence": [
+        "files: unknown/mozilla/public-suffix-list.txt"
+      ],
+      "id": "F009",
+      "layer": "TAMPER_RESISTANCE",
+      "statement": "anti-instrumentation strings: 2 hit(s) inside third-party SDK paths (classified unrelated).",
+      "tier": "UNRELATED"
+    },
+    {
+      "basis": "CAUSAL_CHAIN_GATE",
+      "evidence": [
+        "link:L1_MECHANISM_IDENTIFIED_STATIC=CONFIRMED",
+        "link:L2_TARGET_PROVENANCE_ESTABLISHED=INDICATOR",
+        "link:L3_RUNTIME_EXECUTION_OBSERVED=NOT_PROVEN",
+        "link:L4_CAPTURE_BLOCK_BEHAVIOR_OBSERVED=NOT_PROVEN"
+      ],
+      "id": "F010",
+      "layer": "CLAIM",
+      "statement": "Causal claim: the application actively blocks screenshots/screen-recording.",
+      "tier": "NOT_PROVEN",
+      "why_not_higher": "chain incomplete: L2_TARGET_PROVENANCE_ESTABLISHED, L3_RUNTIME_EXECUTION_OBSERVED, L4_CAPTURE_BLOCK_BEHAVIOR_OBSERVED"
+    }
+  ],
+  "generated_at_epoch": 1791407394.2951586,
+  "interpretation": "TIERED_EVIDENCE_STATIC_PLUS_OPTIONAL_RUNTIME",
+  "provenance": {
+    "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-09-01/decoded-apk-no-res",
+    "campaign_dir": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T21-09-01",
+    "detection_schema": "capture-detection-3",
+    "input_mode": "decoded_tree",
+    "input_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+    "target_sha256": null
+  },
+  "read_only": true,
+  "runtime_validity": "NOT_BLOCKED",
+  "runtime_validity_reason": null,
+  "safety_boundary": "This report classifies evidence only. It never patches, disables, injects, signs, or bypasses any protection mechanism.",
+  "schema_version": "evidence-report-1"
+}

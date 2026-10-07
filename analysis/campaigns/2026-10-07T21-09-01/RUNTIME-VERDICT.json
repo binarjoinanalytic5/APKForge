@@ -1,0 +1,14 @@
+{
+  "BASELINE_STATUS": "BASELINE_FAILED",
+  "CRASH_CAUSE": null,
+  "CRASH_CAUSE_CONFIDENCE": null,
+  "CRASH_CLASS": null,
+  "CRASH_COMPARISON": null,
+  "INSTRUMENTED_RUNTIME": "NOT_RUN",
+  "NEXT_ACTION": "Runtime proof recorded; evaluate evidence gate.",
+  "ORIGINAL_RUNTIME": "NOT_RUN",
+  "REGRESSION_STATUS": "NOT_COMPARABLE",
+  "RUNTIME_PROOF_STATUS": "NO_ONLINE_ANDROID_DEVICE",
+  "runtime_probe_allowed": false,
+  "schema_version": "runtime-health-1"
+}

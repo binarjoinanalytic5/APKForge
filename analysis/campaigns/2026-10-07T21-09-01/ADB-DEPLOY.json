@@ -1,0 +1,9 @@
+{
+  "error": "REELSEC_TEST_DEVICE=auto requires exactly one online device; current online devices=[]",
+  "install_failure_diagnosis": {
+    "hint": "message did not match a known failure class; see raw output",
+    "matches": [],
+    "reason_code": "INSTALL_FAILED_UNCLASSIFIED"
+  },
+  "status": "BLOCKED_OR_FAILED"
+}

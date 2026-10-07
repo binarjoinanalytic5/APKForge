@@ -1,0 +1,11 @@
+{
+  "diagnosis": {
+    "hint": "message did not match a known failure class; see raw output",
+    "matches": [],
+    "reason_code": "INSTALL_FAILED_UNCLASSIFIED"
+  },
+  "error": "REELSEC_TEST_DEVICE=auto requires exactly one online device; current online devices=[]",
+  "original_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+  "schema_version": "runtime-health-1",
+  "status": "BASELINE_FAILED"
+}
