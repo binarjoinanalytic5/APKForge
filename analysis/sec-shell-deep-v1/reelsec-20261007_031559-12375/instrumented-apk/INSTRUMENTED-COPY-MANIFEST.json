@@ -1,0 +1,32 @@
+{
+  "mutations": [
+    {
+      "anchor": "Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+      "file": "smali/com/SecShell/SecShell/AW.smali",
+      "log_message": "SecShell loadLibrary reached",
+      "log_tag": "ReelSec-Instrumentation",
+      "matched_registers": [
+        "v0"
+      ],
+      "purpose": "telemetry_only",
+      "registers_added": 2,
+      "type": "LOG_I_PROBE"
+    },
+    {
+      "abi": "arm64-v8a",
+      "config": "lib/arm64-v8a/libfrida-gadget.config.so",
+      "file": "smali/com/SecShell/SecShell/AW.smali",
+      "library": "lib/arm64-v8a/libfrida-gadget.so",
+      "library_sha256": "9a457f19c7fef6568a86b4d3028e7342b0bbc4cecc6449b47f5802c56f65b135",
+      "listen": "127.0.0.1:27042",
+      "original_apk_untouched": true,
+      "purpose": "guarded_runtime_observation",
+      "type": "FRIDA_GADGET_EMBED"
+    }
+  ],
+  "schema_version": 1,
+  "source_manifest_sha256": "3fe3d6c8811e4d4ece4108b94d9afca2301eb0cf3118d707648e9484a2c7a1f4",
+  "source_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_031559-12375/decoded-apk-no-res",
+  "status": "MUTATED",
+  "work_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_031559-12375/instrumented-apk"
+}

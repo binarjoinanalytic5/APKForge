@@ -1,0 +1,4 @@
+{
+  "error": "command failed (1): /data/data/com.termux/files/usr/bin/adb -s 192.168.8.8:32897 install -r /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_031559-12375/instrumented-signed.apk\nServing...\nPerforming Incremental Install\n\nException occurred while executing 'install-incremental':\njava.lang.IllegalArgumentException: Incremental installation not allowed.\n\tat com.android.server.pm.PackageInstallerSession.<init>(PackageInstallerSession.java:1051)\n\tat com.android.server.pm.Packa\nPerforming Streamed Install\nadb: failed to install /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_031559-12375/instrumented-signed.apk: Failure [INSTALL_FAILED_INVALID_APK: INSTALL_FAILED_INVALID_APK: Failed to extract native libraries, res=-2]\n\n",
+  "status": "BLOCKED_OR_FAILED"
+}

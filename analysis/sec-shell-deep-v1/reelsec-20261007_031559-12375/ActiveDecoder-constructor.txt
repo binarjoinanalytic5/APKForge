@@ -1,0 +1,90 @@
+
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_031559-12375/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+000000000027834c <_ZN18codecPluginManager14getAVCodecByIDE9AVCodecID>:
+  2783c0: d63f0100     	blr	x8
+  2783c4: 14000002     	b	0x2783cc <_ZN18codecPluginManager14getAVCodecByIDE9AVCodecID+0x80>
+  2783c8: aa1f03f3     	mov	x19, xzr
+  2783cc: f9401688     	ldr	x8, [x20, #0x28]
+  2783d0: f94007e9     	ldr	x9, [sp, #0x8]
+  2783d4: eb09011f     	cmp	x8, x9
+  2783d8: 540000c1     	b.ne	0x2783f0 <_ZN18codecPluginManager14getAVCodecByIDE9AVCodecID+0xa4>
+  2783dc: aa1303e0     	mov	x0, x19
+  2783e0: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  2783e4: a9414ff4     	ldp	x20, x19, [sp, #0x10]
+  2783e8: 9100c3ff     	add	sp, sp, #0x30
+  2783ec: d65f03c0     	ret
+  2783f0: 97f981c4     	bl	0xd8b00 <__stack_chk_fail@plt>
+
+00000000002783f4 <_ZN18codecPluginManager13dummyFunctionEv>:
+  2783f4: d10083ff     	sub	sp, sp, #0x20
+  2783f8: a9017bfd     	stp	x29, x30, [sp, #0x10]
+  2783fc: 910043fd     	add	x29, sp, #0x10
+  278400: d53bd048     	mrs	x8, TPIDR_EL0
+  278404: f9401509     	ldr	x9, [x8, #0x28]
+  278408: f90007e9     	str	x9, [sp, #0x8]
+  27840c: f9401508     	ldr	x8, [x8, #0x28]
+  278410: f94007e9     	ldr	x9, [sp, #0x8]
+  278414: eb09011f     	cmp	x8, x9
+  278418: 54000081     	b.ne	0x278428 <_ZN18codecPluginManager13dummyFunctionEv+0x34>
+  27841c: a9417bfd     	ldp	x29, x30, [sp, #0x10]
+  278420: 910083ff     	add	sp, sp, #0x20
+  278424: d65f03c0     	ret
+  278428: 97f981b6     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27842c: d10103ff     	sub	sp, sp, #0x40
+  278430: f9000bf5     	str	x21, [sp, #0x10]
+  278434: a9024ff4     	stp	x20, x19, [sp, #0x20]
+  278438: a9037bfd     	stp	x29, x30, [sp, #0x30]
+  27843c: 9100c3fd     	add	x29, sp, #0x30
+  278440: d53bd055     	mrs	x21, TPIDR_EL0
+  278444: f94016a8     	ldr	x8, [x21, #0x28]
+  278448: aa0003f3     	mov	x19, x0
+  27844c: f90007e8     	str	x8, [sp, #0x8]
+  278450: 97f99de0     	bl	0xdfbd0 <_ZN13ActiveDecoderC2Ev@plt>
+  278454: f00024e8     	adrp	x8, 0x717000 <_ZTVN6Cicada12avAESEncryptE+0x730>
+  278458: 91394108     	add	x8, x8, #0xe50
+  27845c: 910a0269     	add	x9, x19, #0x280
+  278460: 6f00e400     	movi	v0.2d, #0000000000000000
+  278464: f9014269     	str	x9, [x19, #0x280]
+  278468: f9014669     	str	x9, [x19, #0x288]
+  27846c: 91004109     	add	x9, x8, #0x10
+  278470: 910ac260     	add	x0, x19, #0x2b0
+  278474: 91052108     	add	x8, x8, #0x148
+  278478: f901567f     	str	xzr, [x19, #0x2a8]
+  27847c: f9000269     	str	x9, [x19]
+  278480: ad130260     	stp	q0, q0, [x19, #0x260]
+  278484: 3d809660     	str	q0, [x19, #0x250]
+  278488: 3d80a660     	str	q0, [x19, #0x290]
+  27848c: f9012668     	str	x8, [x19, #0x248]
+  278490: b902a27f     	str	wzr, [x19, #0x2a0]
+  278494: 97f981db     	bl	0xd8c00 <_ZNSt6__ndk115recursive_mutexC1Ev@plt>
+  278498: 910b7268     	add	x8, x19, #0x2dc
+  27849c: 390b627f     	strb	wzr, [x19, #0x2d8]
+  2784a0: 910c8269     	add	x9, x19, #0x320
+  2784a4: f900011f     	str	xzr, [x8]
+  2784a8: 91116268     	add	x8, x19, #0x458
+  2784ac: 6f00e400     	movi	v0.2d, #0000000000000000
+  2784b0: 7905ca7f     	strh	wzr, [x19, #0x2e4]
+  2784b4: 910ce26a     	add	x10, x19, #0x338
+  2784b8: 910e0260     	add	x0, x19, #0x380
+  2784bc: ad178260     	stp	q0, q0, [x19, #0x2f0]
+  2784c0: b903127f     	str	wzr, [x19, #0x310]
+  2784c4: f901767f     	str	xzr, [x19, #0x2e8]
+  2784c8: b903167f     	str	wzr, [x19, #0x314]
+  2784cc: f9018e69     	str	x9, [x19, #0x318]
+  2784d0: 3d80ca60     	str	q0, [x19, #0x320]
+  2784d4: b903327f     	str	wzr, [x19, #0x330]
+  2784d8: b904527f     	str	wzr, [x19, #0x450]
+  2784dc: 3d800100     	str	q0, [x8]
+  2784e0: 910d2268     	add	x8, x19, #0x348
+  2784e4: 52801682     	mov	w2, #0xb4               // =180
+  2784e8: 2a1f03e1     	mov	w1, wzr
+  2784ec: 9111a274     	add	x20, x19, #0x468
+  2784f0: b9035a7f     	str	wzr, [x19, #0x358]
+  2784f4: 3d800100     	str	q0, [x8]
+  2784f8: 3d800140     	str	q0, [x10]
+  2784fc: b9037a7f     	str	wzr, [x19, #0x378]
+
+[exit=0]
