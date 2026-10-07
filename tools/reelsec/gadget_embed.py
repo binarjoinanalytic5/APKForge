@@ -81,6 +81,25 @@ def embed_frida_gadget(work_dir, target_smali, gadget_path, abi="arm64-v8a", por
     except ValueError:
         raise GadgetEmbedError("target is outside isolated instrumentation tree")
 
+    # Android packages with android:extractNativeLibs="false" require native
+    # shared libraries to remain uncompressed in the APK. Apktool otherwise may
+    # compress them, producing INSTALL_FAILED_INVALID_APK at deployment.
+    apktool_yml = work / "apktool.yml"
+    if apktool_yml.is_file():
+        yml = apktool_yml.read_text(encoding="utf-8")
+        if re.search(r"(?m)^doNotCompress:\s*$", yml):
+            lines = yml.splitlines()
+            i = next(j for j, line in enumerate(lines) if line.strip() == "doNotCompress:")
+            if not any(line.strip() == "- so" for line in lines[i + 1:]):
+                insert_at = i + 1
+                while insert_at < len(lines) and (lines[insert_at].startswith("- ") or lines[insert_at].strip() == ""):
+                    insert_at += 1
+                lines.insert(insert_at, "- so")
+                yml = "\n".join(lines) + ("\n" if yml.endswith("\n") else "")
+        else:
+            yml = yml.rstrip() + "\ndoNotCompress:\n- so\n"
+        apktool_yml.write_text(yml, encoding="utf-8")
+
     lib_dir = work / "lib" / abi
     lib_dir.mkdir(parents=True, exist_ok=True)
     dst = lib_dir / "libfrida-gadget.so"
@@ -135,6 +154,7 @@ def embed_frida_gadget(work_dir, target_smali, gadget_path, abi="arm64-v8a", por
         "abi": abi,
         "listen": "127.0.0.1:%d" % int(port),
         "purpose": "guarded_runtime_observation",
+        "native_library_packaging": "apktool_doNotCompress_so",
         "original_apk_untouched": True,
     })
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
