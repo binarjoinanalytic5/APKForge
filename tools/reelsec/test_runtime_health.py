@@ -19,6 +19,7 @@ import importlib.util
 import json
 import os
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -239,6 +240,38 @@ SIGABRT_BASE_APK_LOG = """10-07 21:40:11.001 14210 14210 F libc    : Fatal signa
 10-07 21:40:11.200 14300 14300 F DEBUG   : pid: 14210, tid: 14210, name: com.newleaf.app.android.victor  >>> com.newleaf.app.android.victor <<<
 10-07 21:40:11.202 14300 14300 F DEBUG   :       #00 pc 00031e10  /data/app/~~abc==/com.newleaf.app.android.victor-xyz==/base.apk
 """
+
+TARGET_OFFSET = 0x31E10
+PACKED_ENTRY = "lib/arm64-v8a/libpacked.so"
+
+
+def _craft_apk_with_offset(path, target=TARGET_OFFSET, name=PACKED_ENTRY):
+    """Build an APK whose STORED entry provably contains `target`."""
+    import zipfile
+    apk = Path(path)
+    pad_size = target - 200
+    with zipfile.ZipFile(apk, "w") as zf:
+        pad = zipfile.ZipInfo("pad.bin")
+        pad.compress_type = zipfile.ZIP_STORED
+        zf.writestr(pad, b"\x00" * pad_size)
+        lib = zipfile.ZipInfo(name)
+        lib.compress_type = zipfile.ZIP_STORED
+        zf.writestr(lib, b"\x7fELF" + b"S" * 8192)
+    return apk
+
+
+def _stored_data_start(apk, entry_name):
+    import zipfile
+    with zipfile.ZipFile(apk) as zf, open(apk, "rb") as fh:
+        for info in zf.infolist():
+            if info.filename != entry_name:
+                continue
+            fh.seek(info.header_offset)
+            hdr = fh.read(30)
+            name_len = int.from_bytes(hdr[26:28], "little")
+            extra_len = int.from_bytes(hdr[28:30], "little")
+            return info.header_offset + 30 + name_len + extra_len
+    return None
 
 
 class CrashArtifactTests(unittest.TestCase):
@@ -593,6 +626,164 @@ class _ProbeHarness(unittest.TestCase):
         self.assertNotEqual(result["status"], "RUNTIME_ARTIFACT_CRASH")
         self.assertEqual(len(self.frida_calls), 1)
         self.assertIn("-f", self.frida_calls[0])  # spawn mode after health gate
+
+    def test_device_scenario_sigabrt_base_apk_0x31e10_resolved(self):
+        """End-to-end simulation of the observed device crash: SIGABRT ~1s
+        after start, fault at base.apk + 0x31e10, mixed-user exit-info. The
+        campaign path must write CRASH-ARTIFACT.json with UID/PID/APK-path
+        bindings and the offset resolved into the artifact's STORED entry."""
+        apk = _craft_apk_with_offset(self.out / "instrumented-signed.apk")
+        (self.out / "ADB-DEPLOY.json").write_text(json.dumps({
+            "artifact": str(apk), "artifact_sha256": "f" * 64}),
+            encoding="utf-8")
+        exit_info = EXIT_INFO_NATIVE.replace(
+            "com.newleaf.app.android.victor", "com.x")
+        log = SIGABRT_BASE_APK_LOG.replace(
+            "com.newleaf.app.android.victor", "com.x")
+        result = self._run_probe(self._runner(exit_post=exit_info,
+                                              crash_log=log))
+        self.assertEqual(result["status"], "RUNTIME_ARTIFACT_CRASH")
+        self.assertEqual(self.frida_calls, [])
+        art = json.loads((self.out / "CRASH-ARTIFACT.json").read_text())
+        self.assertEqual(art["schema_version"], "crash-artifact-1")
+        self.assertEqual(art["fatal_signal"], "SIGABRT")
+        self.assertEqual(art["fault_location"]["library"], "base.apk")
+        self.assertEqual(art["fault_location"]["pc"], "00031e10")
+        res = art["apk_offset_resolution"]
+        self.assertEqual(res["status"], "RESOLVED")
+        self.assertEqual(res["entry"], PACKED_ENTRY)
+        start = _stored_data_start(apk, PACKED_ENTRY)
+        self.assertEqual(int(res["offset_within_entry"], 16),
+                         TARGET_OFFSET - start)
+        inst = art["crash_instances"]
+        self.assertEqual(inst[0]["pid"], 14210)
+        self.assertEqual(inst[0]["uid"], 10285)
+        self.assertEqual(art["grouping"]["users"], [0, 95])
+        self.assertEqual(art["artifact"]["installed_path"],
+                         "/data/app/~~x/com.x/base.apk")
+        self.assertEqual(art["artifact"]["artifact_sha256"], "f" * 64)
+        self.assertEqual(art["artifact"]["label"], "instrumented")
+        self.assertIsNone(art["abort_message"])
+        self.assertTrue(any("MUST NOT be labeled anti-tamper" in n
+                            for n in art["integrity_notes"]))
+        self.assertIn("started_at_epoch", art["session"])
+
+
+class BaselineCrashArtifactTests(unittest.TestCase):
+    """BASELINE-CRASH-ARTIFACT.json must be produced by the gated baseline
+    round — every destructive step through safety_gate, and the assessment
+    runner itself never sees a destructive command."""
+
+    def test_baseline_round_writes_artifact_through_gate(self):
+        import safety_gate as sg
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td)
+            signed = out / "original-testsigned.apk"
+            _craft_apk_with_offset(signed)
+            auth = {
+                "schema_version": sg.SCHEMA_AUTH,
+                "operation": "UNINSTALL",
+                "package": "com.test.pkg",
+                "user": 0,
+                "device_serial": "s1",
+                "issued_at_epoch": time.time() - 10,
+                "expires_at_epoch": time.time() + 600,
+                "authorized_by": "operator",
+                "reason": "baseline round test",
+            }
+            auth_path = out / "auth.json"
+            auth_path.write_text(json.dumps(auth), encoding="utf-8")
+
+            state = {"present": True, "exit_calls": 0}
+            gate_cmds = []
+            assess_cmds = []
+
+            def fake_default_runner(cmd, timeout=120):
+                joined = " ".join(str(c) for c in cmd)
+                gate_cmds.append(joined)
+                if "getprop" in joined:
+                    return 0, "samsung/x/y:13"
+                if "pm list users" in joined:
+                    return 0, "Users:\n\tUserInfo{0:Owner:13}"
+                if "pm path" in joined:
+                    return (0, "package:/data/app/x/base.apk") \
+                        if state["present"] else (0, "")
+                if "ps -A" in joined:
+                    return 0, "USER PID PPID VSZ RSS WCHAN ADDR S NAME\n"
+                if "pm uninstall" in joined:
+                    state["present"] = False
+                    return 0, "Success"
+                return 1, ""
+
+            def fake_run_checked(cmd, timeout=120):
+                if "install" in " ".join(str(c) for c in cmd):
+                    state["present"] = True
+                return ""
+
+            exit_info = EXIT_INFO_NATIVE.replace(
+                "com.newleaf.app.android.victor", "com.test.pkg")
+            log = SIGABRT_BASE_APK_LOG.replace(
+                "com.newleaf.app.android.victor", "com.test.pkg")
+
+            def fake_run(cmd, timeout=60):
+                joined = " ".join(str(c) for c in cmd)
+                assess_cmds.append(joined)
+                if "exit-info" in joined:
+                    state["exit_calls"] += 1
+                    return 0, exit_info if state["exit_calls"] > 1 else ""
+                if "monkey" in joined:
+                    return 0, "Events injected: 1"
+                if joined.endswith("ps -A"):
+                    return 0, "USER PID PPID VSZ RSS WCHAN ADDR S NAME\n"
+                if "logcat" in joined:
+                    return 0, log
+                if "pm path" in joined:
+                    return 0, "package:/data/app/x/base.apk"
+                return 1, ""
+
+            env = {"REELSEC_TEST_PACKAGE": "com.test.pkg",
+                   "REELSEC_TEST_KEYSTORE": str(out / "ks"),
+                   "REELSEC_DESTRUCTIVE_AUTH": str(auth_path)}
+            caps = {"tools": {"adb": {"path": "/adb"},
+                              "apksigner": {"path": "/apksigner"}}}
+            with mock.patch.dict(os.environ, {
+                     "REELSEC_TEST_KEYSTORE_PASSWORD": "test-keystore-pw",
+                     "REELSEC_TEST_KEY_PASSWORD": "test-keystore-pw"},
+                     clear=False), \
+                 mock.patch.object(MODULE, "resolve_test_device",
+                                   lambda adb, serial=None: {"serial": "s1"}), \
+                 mock.patch.object(MODULE, "run_checked", fake_run_checked), \
+                 mock.patch.object(MODULE, "_default_runner",
+                                   fake_default_runner), \
+                 mock.patch.object(MODULE, "run", fake_run), \
+                 mock.patch.object(rh, "_poll_process",
+                                   lambda *a, **k: {
+                                       "pids": [], "observed": False,
+                                       "alive_ms": 0, "alive_at_exit": False,
+                                       "poll_attempts": 1,
+                                       "first_seen_epoch": None,
+                                       "last_seen_epoch": None}):
+                doc = MODULE.run_baseline_runtime(out, __file__, caps,
+                                                  env=env)
+            self.assertEqual(doc["status"], "BASELINE_ASSESSED")
+            self.assertEqual(doc["health"]["startup"], "CRASH")
+            art = json.loads(
+                (out / "BASELINE-CRASH-ARTIFACT.json").read_text())
+            self.assertEqual(art["artifact"]["label"], "original")
+            self.assertEqual(art["artifact"]["artifact_type"], "ORIGINAL_APK")
+            self.assertEqual(art["fatal_signal"], "SIGABRT")
+            self.assertEqual(art["apk_offset_resolution"]["status"],
+                             "RESOLVED")
+            self.assertEqual(art["apk_offset_resolution"]["entry"],
+                             PACKED_ENTRY)
+            # every destructive command went through the gate and was audited
+            audit = (out / "SAFETY-AUDIT.jsonl").read_text()
+            self.assertIn("EXECUTED_VERIFIED", audit)
+            self.assertTrue(any("pm uninstall" in c for c in gate_cmds))
+            # the assessment runner (non-gated path) never saw destruction
+            for c in assess_cmds:
+                self.assertNotIn("uninstall", c)
+                self.assertNotIn("pm clear", c)
 
 
 class EvidenceGateTests(unittest.TestCase):
