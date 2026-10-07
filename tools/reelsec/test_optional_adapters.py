@@ -18,7 +18,7 @@ class OptionalAdaptersTests(unittest.TestCase):
             self.assertTrue(result["read_only"])
             self.assertFalse(result["causal_proof"])
             self.assertIn("mobsf", result["results"])
-            self.assertIn("objection", result["results"])
+            self.assertIn("objection", result["results"])\n            self.assertIn("jadx", result["results"])
 
 
 if __name__ == "__main__":

@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
 
-ADAPTERS = ("mobsfscan", "radare2", "mobsf", "objection")
+ADAPTERS = ("mobsfscan", "radare2", "jadx", "mobsf", "objection")
 
 
 def _which(names: Iterable[str]) -> Optional[str]:
@@ -88,7 +88,7 @@ def _radare2(elf: Optional[Path]) -> Dict:
     return result
 
 
-def _availability(name: str, commands: Iterable[str]) -> Dict:
+def _jadx(apk: Optional[Path]) -> Dict:\n    tool = _which(("jadx",))\n    if not tool:\n        return {"status": "UNAVAILABLE", "tool": "jadx"}\n    result = _run([tool, "--version"])\n    result["tool"] = "jadx"\n    if apk and apk.is_file():\n        out = apk.parent / ".reelsec-jadx"\n        out.mkdir(parents=True, exist_ok=True)\n        # Decompile into a disposable workspace; input APK is never modified.\n        result["decompile"] = _run(\n            [tool, "-d", str(out), str(apk)], timeout=300\n        )\n        result["output_dir"] = str(out)\n    return result\n\n\ndef _availability(name: str, commands: Iterable[str]) -> Dict:
     tool = _which(commands)
     if not tool:
         return {"status": "UNAVAILABLE", "tool": name}
@@ -107,7 +107,7 @@ def run(
 ) -> Dict:
     """Run selected optional adapters and return a stable JSON evidence record."""
     root_path = Path(root).expanduser().resolve()
-    elf_path = Path(elf).expanduser().resolve() if elf else None
+    elf_path = Path(elf).expanduser().resolve() if elf else None\n    apk_path = Path(os.environ["REELSEC_INPUT_APK"]).expanduser().resolve() if os.environ.get("REELSEC_INPUT_APK") else None
     names = list(ADAPTERS) if requested.strip().lower() in ("", "auto", "all") else [
         n.strip().lower() for n in requested.split(",") if n.strip()
     ]
@@ -121,7 +121,7 @@ def run(
             results[name] = _mobsfscan(root_path)
         elif name == "radare2":
             results[name] = _radare2(elf_path)
-        elif name == "mobsf":
+        elif name == "jadx":\n            results[name] = _jadx(apk_path)\n        elif name == "mobsf":
             results[name] = _availability("mobsf", ("mobsf", "mobsfconsole"))
         elif name == "objection":
             results[name] = _availability("objection", ("objection",))
@@ -129,7 +129,7 @@ def run(
         "schema_version": "reelsec-optional-adapters-1",
         "read_only": True,
         "root": str(root_path),
-        "elf": str(elf_path) if elf_path else None,
+        "elf": str(elf_path) if elf_path else None,\n        "apk": str(apk_path) if apk_path else None,
         "requested": names,
         "results": results,
         "causal_proof": False,
