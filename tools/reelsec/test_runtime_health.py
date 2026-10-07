@@ -235,6 +235,164 @@ class AssessStartupTests(unittest.TestCase):
         self.assertTrue(h2["runtime_probe_allowed"])
 
 
+SIGABRT_BASE_APK_LOG = """10-07 21:40:11.001 14210 14210 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE), fault addr 0x0000000000003733 in tid 14210 (ewleaf.app.and), pid 14210 (ewleaf.app.android.victor)
+10-07 21:40:11.200 14300 14300 F DEBUG   : pid: 14210, tid: 14210, name: com.newleaf.app.android.victor  >>> com.newleaf.app.android.victor <<<
+10-07 21:40:11.202 14300 14300 F DEBUG   :       #00 pc 00031e10  /data/app/~~abc==/com.newleaf.app.android.victor-xyz==/base.apk
+"""
+
+
+class CrashArtifactTests(unittest.TestCase):
+    def _artifact_zip(self, td):
+        import zipfile
+        apk = Path(td) / "artifact.apk"
+        with zipfile.ZipFile(apk, "w") as zf:
+            zf.writestr("AndroidManifest.xml", b"\x03\x00\x08\x00axml")
+            info = zipfile.ZipInfo("lib/arm64-v8a/libpacked.so")
+            info.compress_type = zipfile.ZIP_STORED
+            zf.writestr(info, b"\x7fELF" + b"P" * 4096)
+        return apk
+
+    def _data_start(self, apk, entry_name):
+        import zipfile
+        with zipfile.ZipFile(apk) as zf, open(apk, "rb") as fh:
+            for info in zf.infolist():
+                if info.filename != entry_name:
+                    continue
+                fh.seek(info.header_offset)
+                hdr = fh.read(30)
+                name_len = int.from_bytes(hdr[26:28], "little")
+                extra_len = int.from_bytes(hdr[28:30], "little")
+                return info.header_offset + 30 + name_len + extra_len
+        return None
+
+    def test_frame_regex_parses_base_apk_fault(self):
+        t = rh.parse_tombstone_logcat(SIGABRT_BASE_APK_LOG,
+                                      "com.newleaf.app.android.victor")
+        self.assertEqual(t["fatal_signal"], "SIGABRT")
+        self.assertEqual(t["fault_addr"], "0x0000000000003733")
+        self.assertEqual(t["backtrace_frames"][0]["library"], "base.apk")
+        self.assertEqual(t["backtrace_frames"][0]["pc"], "00031e10")
+        self.assertTrue(t["package_associated"])
+
+    def test_symbol_annotation_still_captured_for_so_frames(self):
+        t = rh.parse_tombstone_logcat(TOMBSTONE_LOG,
+                                      "com.newleaf.app.android.victor")
+        self.assertEqual(t["backtrace_frames"][0]["library"],
+                         "libsaasCorePlayer.so")
+        self.assertEqual(t["backtrace_frames"][0]["symbol"], "Java_com_x+40")
+
+    def test_missing_abort_message_forbids_anti_tamper_labeling(self):
+        t = rh.parse_tombstone_logcat(SIGABRT_BASE_APK_LOG,
+                                      "com.newleaf.app.android.victor")
+        art = rh.build_crash_artifact(
+            "com.newleaf.app.android.victor", "instrumented", [], t)
+        self.assertIsNone(art["abort_message"])
+        self.assertFalse(art["abort_message_present"])
+        self.assertTrue(any("MUST NOT be labeled anti-tamper" in n
+                            for n in art["integrity_notes"]))
+
+    def test_abort_message_extracted_when_present(self):
+        t = rh.parse_tombstone_logcat(TOMBSTONE_LOG,
+                                      "com.newleaf.app.android.victor")
+        art = rh.build_crash_artifact("com.x", "instrumented", [], t)
+        self.assertEqual(art["abort_message"], "fortify check failed")
+        self.assertTrue(art["abort_message_present"])
+
+    def test_crash_instances_grouped_per_uid_and_user(self):
+        entries = rh.parse_exit_info(EXIT_INFO_NATIVE)
+        t = rh.parse_tombstone_logcat(SIGABRT_BASE_APK_LOG,
+                                      "com.newleaf.app.android.victor")
+        art = rh.build_crash_artifact("com.newleaf.app.android.victor",
+                                      "instrumented", entries, t)
+        self.assertEqual(art["grouping"]["instance_count"], 2)
+        self.assertEqual(art["grouping"]["uids"], [10285, 9510285])
+        self.assertEqual(art["grouping"]["users"], [0, 95])
+        self.assertTrue(any("must not be merged" in n
+                            for n in art["integrity_notes"]))
+
+    def test_apk_offset_resolves_to_stored_entry(self):
+        with tempfile.TemporaryDirectory() as td:
+            apk = self._artifact_zip(td)
+            start = self._data_start(apk, "lib/arm64-v8a/libpacked.so")
+            res = rh.resolve_apk_offset(apk, start + 5)
+            self.assertEqual(res["status"], "RESOLVED")
+            self.assertEqual(res["entry"], "lib/arm64-v8a/libpacked.so")
+            self.assertEqual(res["offset_within_entry"], hex(5))
+            # offset outside any stored entry stays unresolved (never invented)
+            res2 = rh.resolve_apk_offset(apk, 4)
+            self.assertEqual(res2["status"], "UNRESOLVED")
+            res3 = rh.resolve_apk_offset(None, start + 5)
+            self.assertEqual(res3["status"], "UNRESOLVED")
+
+    def test_crash_artifact_binds_apk_offset_from_base_apk_frame(self):
+        with tempfile.TemporaryDirectory() as td:
+            apk = self._artifact_zip(td)
+            start = self._data_start(apk, "lib/arm64-v8a/libpacked.so")
+            # craft a frame whose pc offset lands inside the stored entry
+            log = SIGABRT_BASE_APK_LOG.replace(
+                "#00 pc 00031e10", "#00 pc %08x" % (start + 16))
+            t = rh.parse_tombstone_logcat(
+                log, "com.newleaf.app.android.victor")
+            art = rh.build_crash_artifact(
+                "com.newleaf.app.android.victor", "instrumented", [], t,
+                artifact_apk=str(apk))
+            self.assertEqual(art["fault_location"]["library"], "base.apk")
+            self.assertEqual(art["apk_offset_resolution"]["status"], "RESOLVED")
+            self.assertEqual(art["apk_offset_resolution"]["entry"],
+                             "lib/arm64-v8a/libpacked.so")
+            self.assertEqual(art["apk_offset_resolution"]["offset_within_entry"],
+                             hex(16))
+
+    def test_assess_startup_attaches_bound_crash_artifact(self):
+        def runner(cmd, timeout=30):
+            state = getattr(runner, "_exit_calls", 0)
+            joined = " ".join(str(c) for c in cmd)
+            if "exit-info" in joined:
+                runner._exit_calls = state + 1
+                return 0, EXIT_INFO_NATIVE if state >= 1 else ""
+            if "monkey" in joined:
+                return 0, "Events injected: 1"
+            if joined.endswith("ps -A"):
+                return 0, "USER PID PPID VSZ RSS WCHAN ADDR S NAME\n"
+            if "logcat" in joined:
+                return 0, SIGABRT_BASE_APK_LOG
+            if "pm path" in joined:
+                return 0, "package:/data/app/~~x/com.newleaf.app.android.victor/base.apk"
+            return 1, ""
+        with mock.patch("time.sleep"):
+            h = rh.assess_startup(runner, "/adb", "s1",
+                                  "com.newleaf.app.android.victor",
+                                  observe_s=1, interval=0)
+        self.assertEqual(h["startup"], "CRASH")
+        art = h["crash_artifact"]
+        self.assertEqual(art["schema_version"], "crash-artifact-1")
+        self.assertEqual(art["artifact"]["label"], "instrumented")
+        self.assertEqual(
+            art["artifact"]["installed_path"],
+            "/data/app/~~x/com.newleaf.app.android.victor/base.apk")
+        self.assertEqual(art["grouping"]["users"], [0, 95])
+        self.assertIn("session", art)
+        self.assertIsNotNone(h["installed_apk_path"])
+        self.assertIn("started_at_epoch", h["session_timing"])
+
+    def test_healthy_startup_has_no_crash_artifact(self):
+        def runner(cmd, timeout=30):
+            joined = " ".join(str(c) for c in cmd)
+            if "exit-info" in joined:
+                return 0, ""
+            if joined.endswith("ps -A"):
+                return 0, ("USER PID PPID VSZ RSS WCHAN ADDR S NAME\n"
+                           "u0_a1 999 500 1 1 0 0 S com.x")
+            if "pm path" in joined:
+                return 0, "package:/data/app/x/base.apk"
+            return 0, ""
+        with mock.patch("time.sleep"):
+            h = rh.assess_startup(runner, "/adb", "s1", "com.x",
+                                  observe_s=1, interval=0)
+        self.assertEqual(h["startup"], "PASS")
+        self.assertIsNone(h["crash_artifact"])
+
+
 class ComparisonTests(unittest.TestCase):
     def _h(self, startup, cls=None):
         return {"startup": startup, "crash_class": cls, "crash_cause": None,
@@ -418,6 +576,9 @@ class _ProbeHarness(unittest.TestCase):
         health = json.loads((self.out / "RUNTIME-HEALTH.json").read_text())
         self.assertEqual(health["startup"], "CRASH")
         self.assertEqual(health["crash_class"], rh.NATIVE_CRASH)
+        crash_art = json.loads((self.out / "CRASH-ARTIFACT.json").read_text())
+        self.assertEqual(crash_art["schema_version"], "crash-artifact-1")
+        self.assertEqual(crash_art["artifact"]["label"], "instrumented")
         verdict = json.loads((self.out / "RUNTIME-VERDICT.json").read_text())
         self.assertEqual(verdict["INSTRUMENTED_RUNTIME"], "CRASH")
         self.assertEqual(verdict["RUNTIME_PROOF_STATUS"], "BLOCKED_BY_ARTIFACT_CRASH")
