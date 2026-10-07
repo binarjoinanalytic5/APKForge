@@ -314,7 +314,7 @@ def resolve_apk_offset(apk_path, offset):
 
 def build_crash_artifact(package, label, exit_entries, tombstone,
                          installed_path=None, artifact_apk=None,
-                         artifact_sha256=None, session=None):
+                         artifact_sha256=None, session=None, identity=None):
     """CRASH-ARTIFACT-1: per package/UID/session crash evidence record.
 
     Collected automatically when a fatal signal or fresh crash exit-info is
@@ -333,6 +333,7 @@ def build_crash_artifact(package, label, exit_entries, tombstone,
     crashes = []
     for e in exit_entries or []:
         crashes.append({
+            "source": "APPLICATION_EXIT_INFO",
             "package": e.get("package"),
             "uid": e.get("uid"),
             "user": (e.get("uid") // 100000) if e.get("uid") is not None
@@ -346,6 +347,43 @@ def build_crash_artifact(package, label, exit_entries, tombstone,
             "description": e.get("description"),
             "tombstone_path": e.get("trace"),
         })
+    # End-to-end fix (requirement 8): tombstone evidence with no exit-info
+    # entry must NOT collapse to crash_instances=[]. When the crash buffer
+    # carries a package-associated fatal signal, a structured instance is
+    # synthesized from what the tombstone actually contains (pid, signal,
+    # thread name); unavailable bindings stay null and the record is
+    # classified EVIDENCE_PRESENT_BUT_INSTANCE_INCOMPLETE — the raw
+    # evidence lines are kept and the scientific verdict is never upgraded
+    # from incomplete parsing.
+    tombstone_lines = ((tombstone.get("fatal_lines") or [])
+                       + (tombstone.get("package_matched_lines") or []))
+    if not crashes and tombstone.get("fatal_signal") and (
+            tombstone.get("package_associated") or tombstone_lines):
+        crashes.append({
+            "source": "LOGCAT_TOMBSTONE_ECHO",
+            "package": package,
+            "uid": None,
+            "user": None,
+            "pid": tombstone.get("pid"),
+            "timestamp_device": None,
+            "reason_code": None,
+            "reason_name": None,
+            "status": None,
+            "description": ("synthesized from logcat crash-buffer tombstone "
+                            "echo (signal %s, pid %s, thread %s); UID/user "
+                            "binding unavailable in this source"
+                            % (tombstone.get("fatal_signal"),
+                               tombstone.get("pid"),
+                               tombstone.get("thread_name"))),
+            "tombstone_path": None,
+            "fatal_signal": tombstone.get("fatal_signal"),
+        })
+    if any(c.get("source") == "APPLICATION_EXIT_INFO" for c in crashes):
+        instances_completeness = "EXIT_INFO_COMPLETE"
+    elif crashes:
+        instances_completeness = "EVIDENCE_PRESENT_BUT_INSTANCE_INCOMPLETE"
+    else:
+        instances_completeness = "NO_CRASH_INSTANCE_EVIDENCE"
     uids = sorted({c["uid"] for c in crashes if c.get("uid") is not None})
     users = sorted({c["user"] for c in crashes if c.get("user") is not None})
 
@@ -365,7 +403,21 @@ def build_crash_artifact(package, label, exit_entries, tombstone,
                 off = int(f0.get("pc"), 16)
             except (TypeError, ValueError):
                 off = None
-            if off is not None:
+            installed_sha = ((identity or {}).get("apk_sha256") or "").lower()
+            if (installed_sha and artifact_sha256
+                    and installed_sha != str(artifact_sha256).lower()):
+                # End-to-end requirement 9: an offset may be resolved ONLY
+                # against the local artifact that is byte-identical to the
+                # installed APK. Different artifacts => UNRESOLVED, never
+                # a nearest-symbol guess.
+                offset_resolution = {
+                    "status": "UNRESOLVED",
+                    "reason": ("installed APK sha256 (%s...) != local "
+                               "artifact sha256 (%s...): offsets must not "
+                               "be resolved across different artifacts"
+                               % (installed_sha[:12],
+                                  str(artifact_sha256)[:12]))}
+            elif off is not None:
                 offset_resolution = resolve_apk_offset(artifact_apk, off)
             else:
                 offset_resolution = {"status": "UNRESOLVED",
@@ -383,6 +435,12 @@ def build_crash_artifact(package, label, exit_entries, tombstone,
             "crash buffer mixes multiple users/runs (uids=%s users=%s); "
             "entries are grouped per UID/session and must not be merged "
             "into a single narrative" % (uids, users))
+    if instances_completeness == "EVIDENCE_PRESENT_BUT_INSTANCE_INCOMPLETE":
+        integrity_notes.append(
+            "crash evidence present but structured instance incomplete "
+            "(no ApplicationExitInfo entry): raw fatal/package-matched "
+            "lines are preserved; UID/user binding unavailable; this MUST "
+            "NOT upgrade any scientific verdict")
 
     return {
         "schema_version": "crash-artifact-1",
@@ -397,6 +455,11 @@ def build_crash_artifact(package, label, exit_entries, tombstone,
             "local_artifact": str(artifact_apk) if artifact_apk else None,
             "artifact_sha256": artifact_sha256,
         },
+        # Unified per-side identity (end-to-end requirement 6): the SAME
+        # identity fields the working-control round records, collected
+        # read-only via dumpsys package for THIS side. Null when the
+        # source is unavailable — never fabricated.
+        "identity": identity or {},
         "session": session,
         "fatal_signal": tombstone.get("fatal_signal"),
         "fault_addr": tombstone.get("fault_addr"),
@@ -409,6 +472,7 @@ def build_crash_artifact(package, label, exit_entries, tombstone,
             "uids": uids,
             "users": users,
             "instance_count": len(crashes),
+            "instances_completeness": instances_completeness,
             "sessions_detected": len({(c.get("uid"), c.get("pid"))
                                       for c in crashes}),
         },
@@ -420,19 +484,49 @@ def build_crash_artifact(package, label, exit_entries, tombstone,
     }
 
 
+# ------------------------------------------------------------------
+# End-to-end coherence (mission: ReelSec End-to-End before a new run)
+# ------------------------------------------------------------------
+# One unified per-side schema is used by EVERY A/B comparison document
+# (CRASH-COMPARISON and COMMON-CAUSE-COMPARISON). Both sides expose the
+# SAME field set; a field the round did not collect is null — never a
+# fabricated value and never a differently-named twin that silently
+# makes the comparison incomplete.
+UNIFIED_SIDE_FIELDS = (
+    "package", "artifact_type", "artifact_sha256", "installed_path",
+    "uid", "uids", "users", "version_name", "version_code",
+    "primary_cpu_abi", "pids", "startup", "lifetime_ms", "fatal_signal",
+    "fault_library", "fault_pc", "abort_message_present", "exit_reason",
+    "logcat_evidence_lines",
+)
+
+
+def unified_side(**values):
+    """Build a unified side record: every UNIFIED_SIDE_FIELDS key is
+    present; anything not supplied stays null (never fabricated)."""
+    side = {field: None for field in UNIFIED_SIDE_FIELDS}
+    for key, val in values.items():
+        if key in UNIFIED_SIDE_FIELDS:
+            side[key] = val
+    return side
+
+
 def _crash_side_summary(art):
-    """Independent per-artifact crash summary (never merged across sides).
+    """Unified per-artifact crash side (never merged across sides).
 
     Keeps each side's own package/user/UID/PID/APK-path/artifact-SHA and
-    timing bindings exactly as collected for THAT artifact.
+    timing bindings exactly as collected for THAT artifact, in the
+    UNIFIED_SIDE_FIELDS schema shared with the working-control side.
     """
     if not art:
         return None
     artifact = art.get("artifact") or {}
+    identity = art.get("identity") or {}
     session = art.get("session") or {}
     grouping = art.get("grouping") or {}
     fl = art.get("fault_location") or {}
     res = art.get("apk_offset_resolution") or {}
+    lines = art.get("evidence_lines") or {}
     seen = session.get("first_process_seen_epoch")
     if seen is None:
         stage = "CRASHED_BEFORE_PROCESS_OBSERVED"
@@ -440,14 +534,38 @@ def _crash_side_summary(art):
         stage = "STILL_ALIVE_AT_WINDOW_EXIT_THEN_CRASH_EXIT_INFO"
     else:
         stage = "CRASHED_AFTER_PROCESS_OBSERVED"
-    return {
-        "label": artifact.get("label"),
-        "artifact_type": artifact.get("artifact_type"),
-        "artifact_sha256": artifact.get("artifact_sha256"),
-        "installed_path": artifact.get("installed_path"),
+    instances = art.get("crash_instances") or []
+    exit_reasons = sorted({i.get("reason_name") for i in instances
+                           if i.get("reason_name")})
+    side = unified_side(
+        package=art.get("package"),
+        artifact_type=artifact.get("artifact_type"),
+        artifact_sha256=artifact.get("artifact_sha256"),
+        installed_path=artifact.get("installed_path"),
+        uid=identity.get("uid"),
+        uids=grouping.get("uids"),
+        users=grouping.get("users"),
+        version_name=identity.get("version_name"),
+        version_code=identity.get("version_code"),
+        primary_cpu_abi=identity.get("primary_cpu_abi"),
+        pids=sorted({i.get("pid") for i in instances
+                     if i.get("pid") is not None}),
+        startup="CRASH",
+        lifetime_ms=session.get("observed_process_lifetime_ms"),
+        fatal_signal=art.get("fatal_signal"),
+        fault_library=fl.get("library") if fl else None,
+        fault_pc=fl.get("pc") if fl else None,
+        abort_message_present=bool(art.get("abort_message_present")),
+        exit_reason=", ".join(exit_reasons) if exit_reasons else None,
+        logcat_evidence_lines=len(lines.get("fatal_lines") or [])
+                              + len(lines.get("package_matched_lines") or []),
+    )
+    # Side-specific extras (comparison inputs, identity bindings).
+    side.update({
+        "role": artifact.get("label"),
         "local_artifact": artifact.get("local_artifact"),
-        "package": art.get("package"),
-        "fatal_signal": art.get("fatal_signal"),
+        "signing_certificate_sha256":
+            identity.get("signing_certificate_sha256"),
         "fault_location": ({"library": fl.get("library"),
                             "pc": fl.get("pc"),
                             "symbol": fl.get("symbol")} if fl else None),
@@ -455,14 +573,11 @@ def _crash_side_summary(art):
             {"status": res.get("status"), "entry": res.get("entry"),
              "offset_within_entry": res.get("offset_within_entry"),
              "reason": res.get("reason")} if res else None),
-        "abort_message_present": bool(art.get("abort_message_present")),
         "startup_stage": stage,
-        "observed_process_lifetime_ms":
-            session.get("observed_process_lifetime_ms"),
         "instance_count": grouping.get("instance_count"),
-        "uids": grouping.get("uids"),
-        "users": grouping.get("users"),
-    }
+        "instances_completeness": grouping.get("instances_completeness"),
+    })
+    return side
 
 
 def build_crash_comparison(instrumented_artifact, original_artifact):
@@ -723,28 +838,47 @@ def _control_side_summary(control_doc):
         return None
     identity = control_doc.get("identity") or {}
     process = control_doc.get("process") or {}
+    health = control_doc.get("health") or {}
     art = control_doc.get("crash_artifact") or {}
     fl = art.get("fault_location") or {}
-    return {
+    lines = (art.get("evidence_lines") or {})
+    side = unified_side(
+        package=control_doc.get("package"),
+        artifact_type=control_doc.get("artifact_type", "ORIGINAL_APK"),
+        artifact_sha256=identity.get("apk_sha256"),
+        installed_path=control_doc.get("installed_path"),
+        uid=identity.get("uid"),
+        uids=([identity.get("uid")] if identity.get("uid") is not None
+              else None),
+        users=identity.get("users_installed"),
+        version_name=identity.get("version_name"),
+        version_code=identity.get("version_code"),
+        primary_cpu_abi=identity.get("primary_cpu_abi"),
+        pids=process.get("pids"),
+        startup=health.get("startup"),
+        lifetime_ms=process.get("alive_ms"),
+        fatal_signal=art.get("fatal_signal"),
+        fault_library=fl.get("library") if fl else None,
+        fault_pc=fl.get("pc") if fl else None,
+        abort_message_present=(bool(art.get("abort_message_present"))
+                               if art else None),
+        exit_reason=None,
+        logcat_evidence_lines=(len(lines.get("fatal_lines") or [])
+                               + len(lines.get("package_matched_lines")
+                                     or [])) if art else None,
+    )
+    side.update({
+        "role": "working_control",
         "status": control_doc.get("status"),
-        "package": control_doc.get("package"),
-        "installed_path": control_doc.get("installed_path"),
-        "apk_sha256": identity.get("apk_sha256"),
         "signing_certificate_sha256":
             identity.get("signing_certificate_sha256"),
-        "version_name": identity.get("version_name"),
-        "version_code": identity.get("version_code"),
-        "uid": identity.get("uid"),
-        "users_installed": identity.get("users_installed"),
+        "local_reference_apk": identity.get("local_reference_apk"),
+        "matches_installed": identity.get("matches_installed"),
         "code_path": identity.get("code_path"),
-        "primary_cpu_abi": identity.get("primary_cpu_abi"),
-        "pids": process.get("pids"),
-        "observed_process_lifetime_ms": process.get("alive_ms"),
-        "fatal_signal": art.get("fatal_signal"),
         "fault_location": ({"library": fl.get("library"),
                             "pc": fl.get("pc")} if fl else None),
-        "abort_message_present": bool(art.get("abort_message_present")),
-    }
+    })
+    return side
 
 
 def build_common_cause_comparison(control_doc, instrumented_artifact):
@@ -864,7 +998,7 @@ def build_common_cause_comparison(control_doc, instrumented_artifact):
             },
             "apk_identity": {
                 "working_control_sha256":
-                    (ctrl or {}).get("apk_sha256"),
+                    (ctrl or {}).get("artifact_sha256"),
                 "instrumented_sha256":
                     (ins or {}).get("artifact_sha256"),
                 "note": ("different artifacts by construction: the control "
@@ -1135,6 +1269,18 @@ def assess_startup(runner, adb, serial, package, label="instrumented",
             installed_path = line.split(":", 1)[1].strip()
             break
 
+    # Unified per-side identity (end-to-end requirement 6): every side —
+    # baseline, instrumented, working control — records the SAME identity
+    # fields (uid, version, ABI, users) read-only via dumpsys package.
+    drc, dout = runner([adb, "-s", serial, "shell", "dumpsys", "package",
+                        package], timeout=30)
+    identity = parse_package_identity(dout if drc == 0 else "")
+    if installed_path:
+        src, sha = runner([adb, "-s", serial, "shell", "sha256sum",
+                           installed_path], timeout=120)
+        if src == 0 and sha and sha.strip().split():
+            identity["apk_sha256"] = sha.strip().split()[0]
+
     crashed = classification["crash_class"] in (NATIVE_CRASH, JAVA_EXCEPTION,
                                                 ANR, STARTUP_FAILURE,
                                                 PROCESS_KILLED)
@@ -1149,6 +1295,7 @@ def assess_startup(runner, adb, serial, package, label="instrumented",
             installed_path=installed_path,
             artifact_apk=artifact_apk,
             artifact_sha256=artifact_sha256,
+            identity=identity,
             session={
                 "started_at_epoch": started,
                 "observe_s": observe_s,
@@ -1185,6 +1332,7 @@ def assess_startup(runner, adb, serial, package, label="instrumented",
             "last_process_seen_epoch": proc.get("last_seen_epoch"),
         },
         "crash_artifact": crash_artifact,
+        "installed_identity": identity,
         "exit_reason": ("reason=%s (%s)" % (
             classification["exit_reason_code"], classification["exit_reason_name"])
             if classification.get("exit_reason_code") is not None else None),
@@ -1316,6 +1464,137 @@ def compare_artifacts(baseline_health, instrumented_health,
     }
 
 
+# --------------------------------------------------------------- state machine
+# End-to-end requirement 4: ONE explicit campaign state machine. The pipeline
+# state is derived here from the collected documents — never from scattered
+# booleans — and every transition carries a reason.
+
+CAMPAIGN_STATES = (
+    "SAFETY_BLOCKED",
+    "NO_DEVICE",
+    "DEVICE_READY",
+    "CONTROL_NOT_INSTALLED",
+    "CONTROL_HEALTHY",
+    "CONTROL_CRASHED",
+    "INSTRUMENTED_NOT_RUN",
+    "INSTRUMENTED_HEALTHY",
+    "INSTRUMENTED_CRASHED",
+    "COMMON_CAUSE_BOTH_CRASH",
+    "INSTRUMENTATION_ONLY_CRASH",
+    "ORIGINAL_ONLY_CRASH",
+    "COMPARISON_INCOMPLETE",
+    "CAUSAL_CHAIN_INCOMPLETE",
+    "PROVEN",
+)
+
+
+def campaign_state_machine(safety=None, device_ok=None, working_control=None,
+                           instrumented_health=None, common_cause=None,
+                           crash_comparison=None, evidence=None):
+    """Derive the single campaign state with an auditable transition log.
+
+    Inputs are the collected documents (dicts or None). The machine walks
+    Safety -> Device -> Control -> Instrumented -> Comparison -> Science and
+    stops at the first terminal state; every step records its reason.
+    """
+    transitions = []
+
+    def move(to, reason):
+        transitions.append({"from": transitions[-1]["to"] if transitions
+                            else None, "to": to, "reason": reason})
+        return to
+
+    if safety is not None and safety.get("safety") == "BLOCKED":
+        move("SAFETY_BLOCKED", "safety gate blocked the run: %s"
+             % (safety.get("reason") or "environment violation"))
+        return _state_result(transitions)
+
+    if device_ok is False:
+        move("NO_DEVICE", "no online authorized Android device reachable")
+        return _state_result(transitions)
+    if device_ok is True:
+        move("DEVICE_READY", "adb device online and authorized")
+
+    wc = working_control or {}
+    wc_status = wc.get("status")
+    if wc_status == CONTROL_NOT_INSTALLED:
+        move("CONTROL_NOT_INSTALLED",
+             "pm path reports no installed original package")
+    elif wc_status == CONTROL_ASSESSED:
+        move("CONTROL_HEALTHY",
+             "installed original observed starting cleanly in place")
+    elif wc_status == CONTROL_CRASHED:
+        move("CONTROL_CRASHED",
+             "installed original itself crashed under observation")
+
+    ih = instrumented_health or {}
+    ins_startup = ih.get("startup")
+    if not ih:
+        move("INSTRUMENTED_NOT_RUN", "no instrumented runtime health recorded")
+    elif ins_startup == "CRASH":
+        move("INSTRUMENTED_CRASHED",
+             "instrumented artifact crashed (class=%s)"
+             % ih.get("crash_class"))
+    elif ins_startup == "PASS":
+        move("INSTRUMENTED_HEALTHY",
+             "instrumented artifact started cleanly")
+    else:
+        move("INSTRUMENTED_NOT_RUN",
+             "instrumented startup not established (%s)"
+             % (ins_startup or "NOT_RUN"))
+
+    cc = common_cause or {}
+    cc_status = cc.get("status")
+    if cc_status == "COMMON_CAUSE_BOTH_CRASH":
+        move("COMMON_CAUSE_BOTH_CRASH",
+             "installed original AND instrumented artifact crash with a "
+             "common cause; instrumentation regression NOT_ESTABLISHED")
+    elif cc_status == "CONTROL_HEALTHY_INSTRUMENTED_CRASH":
+        move("INSTRUMENTATION_ONLY_CRASH",
+             "control starts cleanly while the instrumented artifact "
+             "crashes: instrumentation is a candidate, not proven")
+    elif cc_status == "CONTROL_ONLY_CRASH":
+        move("ORIGINAL_ONLY_CRASH",
+             "only the installed original crashed; no instrumented crash "
+             "evidence in this session")
+    elif cc_status == "COMMON_CAUSE_INCOMPLETE":
+        move("COMPARISON_INCOMPLETE",
+             "common-cause comparison incomplete: %s"
+             % ((cc.get("attribution") or {}).get("guard")
+                or "missing side evidence"))
+    elif (crash_comparison or {}).get("status") in (
+            "BOTH_CRASH", "INSTRUMENTED_ONLY_CRASH", "ORIGINAL_ONLY_CRASH"):
+        move(crash_comparison.get("status") if crash_comparison.get("status")
+             in ("COMMON_CAUSE_BOTH_CRASH", "INSTRUMENTATION_ONLY_CRASH",
+                 "ORIGINAL_ONLY_CRASH") else
+             {"BOTH_CRASH": "COMMON_CAUSE_BOTH_CRASH",
+              "INSTRUMENTED_ONLY_CRASH": "INSTRUMENTATION_ONLY_CRASH",
+              "ORIGINAL_ONLY_CRASH": "ORIGINAL_ONLY_CRASH"}
+             [crash_comparison.get("status")],
+             "baseline-vs-instrumented crash comparison recorded")
+    elif ins_startup == "CRASH":
+        move("COMPARISON_INCOMPLETE",
+             "instrumented crash without any original-side comparison")
+
+    ev = evidence or {}
+    if ev.get("causal_proof") is True:
+        move("PROVEN", "full causal chain L1-L4 confirmed by evidence report")
+    elif ev:
+        move("CAUSAL_CHAIN_INCOMPLETE",
+             "evidence report present; causal chain not complete (%s)"
+             % ", ".join(ev.get("missing") or [])[:200] or "links unproven")
+    else:
+        move("CAUSAL_CHAIN_INCOMPLETE",
+             "no evidence report: causal chain not evaluated")
+    return _state_result(transitions)
+
+
+def _state_result(transitions):
+    return {"state": transitions[-1]["to"],
+            "reason": transitions[-1]["reason"],
+            "transitions": transitions}
+
+
 def runtime_verdict(baseline_health, instrumented_health, comparison=None,
                     runtime_probe=None, probe_allowed=None,
                     crash_comparison=None, working_control=None,
@@ -1338,21 +1617,88 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
         else:
             proof = st or "NOT_RUN"
 
-    if ih.get("startup") == "CRASH":
-        if comparison["regression_status"] == REGRESSION_CONFIRMED:
-            next_action = ("Instrumentation regression confirmed: review "
-                           "INSTRUMENTATION-IMPACT.json change linkage; do NOT "
-                           "run further probe rounds until the injected "
-                           "loader/gadget change set is reduced or rebuilt.")
-        elif comparison["regression_status"] == BASELINE_RUNTIME_FAILURE:
-            next_action = ("Baseline runtime failure: the unmodified original "
-                           "also crashes on this device/build; do not attribute "
-                           "to ReelSec. Record device/build constraints; runtime "
-                           "proof remains blocked.")
+    # ---------------------------------------------------------------
+    # End-to-end fix (requirement 3): the verdict consumes the NEW
+    # comparison documents FIRST. WORKING-CONTROL.json is the
+    # authoritative original-side runtime record when the baseline
+    # round was skipped; COMMON_CAUSE_BOTH_CRASH forces
+    # REGRESSION_STATUS=NOT_ESTABLISHED (never NOT_COMPARABLE); and
+    # NEXT_ACTION never recommends a destructive baseline or any
+    # uninstall permission flag.
+    # ---------------------------------------------------------------
+    cc_status = (common_cause or {}).get("status")
+    wc_status = (working_control or {}).get("status")
+
+    original_runtime = (baseline_health or {}).get("startup")
+    if not original_runtime:
+        original_runtime = {
+            CONTROL_ASSESSED: "PASS",
+            CONTROL_CRASHED: "CRASH",
+            CONTROL_NOT_INSTALLED: "NOT_INSTALLED",
+        }.get(wc_status, "NOT_RUN")
+
+    regression = comparison["regression_status"]
+    if cc_status == "COMMON_CAUSE_BOTH_CRASH":
+        regression = "NOT_ESTABLISHED"
+    elif cc_status == "CONTROL_HEALTHY_INSTRUMENTED_CRASH" and \
+            regression == "NOT_COMPARABLE":
+        regression = "SUSPECTED_NOT_PROVEN"
+
+    if cc_status == "COMMON_CAUSE_BOTH_CRASH":
+        runtime_status = "COMMON_CAUSE_BOTH_CRASH"
+    elif cc_status == "CONTROL_ONLY_CRASH":
+        runtime_status = "CONTROL_ONLY_CRASH"
+    elif cc_status == "CONTROL_HEALTHY_INSTRUMENTED_CRASH":
+        runtime_status = "CONTROL_HEALTHY_INSTRUMENTED_CRASH"
+    elif ih.get("startup") == "CRASH":
+        runtime_status = "BLOCKED_BY_ARTIFACT_CRASH"
+    else:
+        runtime_status = proof
+
+    if cc_status == "COMMON_CAUSE_BOTH_CRASH":
+        next_action = (
+            "COMMON_CAUSE_BOTH_CRASH: the installed original AND the "
+            "instrumented artifact crash with a common cause; "
+            "instrumentation regression is NOT_ESTABLISHED and the crash "
+            "MUST NOT be attributed to instrumentation. Investigate the "
+            "common cause (device/OS/ROM or the app itself) with the "
+            "working control left installed; no destructive operation is "
+            "required or permitted.")
+    elif ih.get("startup") == "CRASH":
+        if regression == REGRESSION_CONFIRMED:
+            next_action = (
+                "Instrumentation regression confirmed: review "
+                "INSTRUMENTATION-IMPACT.json change linkage; do NOT "
+                "run further probe rounds until the injected "
+                "loader/gadget change set is reduced or rebuilt.")
+        elif regression == BASELINE_RUNTIME_FAILURE or \
+                cc_status == "CONTROL_ONLY_CRASH":
+            next_action = (
+                "Original-side runtime failure: the unmodified original "
+                "also crashes on this device/build; do not attribute to "
+                "ReelSec. Record device/build constraints; runtime proof "
+                "remains blocked.")
+        elif cc_status == "CONTROL_HEALTHY_INSTRUMENTED_CRASH":
+            next_action = (
+                "Control starts cleanly while the instrumented artifact "
+                "crashes: instrumentation is a CANDIDATE cause "
+                "(SUSPECTED_NOT_PROVEN); review INSTRUMENTATION-IMPACT.json "
+                "change linkage before any further round. No destructive "
+                "operation is required.")
         else:
-            next_action = ("Artifact crash without baseline comparison: run the "
-                           "gated baseline round (REELSEC_ALLOW_TEST_DEVICE_"
-                           "UNINSTALL=1) to attribute the failure.")
+            next_action = (
+                "Artifact crash without original-side comparison: run the "
+                "non-destructive working-control round "
+                "(REELSEC_WORKING_CONTROL, default on) to attribute the "
+                "failure. The installed original is the control; no "
+                "uninstall, clear-data or reinstall is required.")
+    elif cc_status == "CONTROL_ONLY_CRASH":
+        next_action = (
+            "Original-side failure: the installed working control itself "
+            "crashed while no instrumented crash evidence exists; this "
+            "crash is NOT caused by instrumentation. Record the "
+            "device/build constraint; no destructive operation is "
+            "required or permitted.")
     elif probe_allowed is False:
         next_action = "Runtime probe blocked: %s" % ih.get("crash_class")
     elif proof in ("NOT_RUN", "NOT_OBSERVED"):
@@ -1360,18 +1706,27 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
     else:
         next_action = "Runtime proof recorded; evaluate evidence gate."
 
+    state = campaign_state_machine(
+        working_control=working_control,
+        instrumented_health=instrumented_health,
+        common_cause=common_cause,
+        crash_comparison=crash_comparison)
+
     return {
         "schema_version": SCHEMA,
-        "ORIGINAL_RUNTIME": (baseline_health or {}).get("startup") or "NOT_RUN",
+        "ORIGINAL_RUNTIME": original_runtime,
         "INSTRUMENTED_RUNTIME": ih.get("startup") or "NOT_RUN",
         "CRASH_CLASS": ih.get("crash_class"),
         "CRASH_CAUSE": ih.get("crash_cause"),
         "CRASH_CAUSE_CONFIDENCE": ih.get("crash_cause_confidence"),
-        "REGRESSION_STATUS": comparison["regression_status"],
+        "REGRESSION_STATUS": regression,
+        "RUNTIME_STATUS": runtime_status,
         "CRASH_COMPARISON": (crash_comparison or {}).get("status"),
-        "WORKING_CONTROL": (working_control or {}).get("status"),
-        "COMMON_CAUSE_COMPARISON": (common_cause or {}).get("status"),
+        "WORKING_CONTROL": wc_status,
+        "COMMON_CAUSE_COMPARISON": cc_status,
         "RUNTIME_PROOF_STATUS": proof,
+        "CAMPAIGN_STATE": state["state"],
+        "CAMPAIGN_STATE_REASON": state["reason"],
         "runtime_probe_allowed": bool(probe_allowed),
         "NEXT_ACTION": next_action,
     }

@@ -448,3 +448,87 @@ state-changing commands in every control path, hash-bound-only offset
 resolution, all five comparison statuses, blanket-flag refusal, skip
 logic). No campaign was run; no destructive operation performed.
 Scientific verdict unchanged: SCREENSHOT_BLOCKING = NOT_PROVEN.
+
+---
+
+## 2026-10-08 — End-to-End Coherence Round (e2e-coherence-1)
+
+Mission: make `reelsec.py platform ./original.apk` ONE coherent path —
+Safety → Device → Original Control → Static → Instrumented Runtime →
+A/B Comparison → Evidence Aggregation → Final Verdict → Git Publish —
+before any new device run. Fixed root causes across all affected stages;
+no old campaign or evidence was modified.
+
+1) FINAL VERDICT AGGREGATION (confirmed bug, campaign
+2026-10-07T22-06-53): `_final_verdict_logic` (orchestrator) now reads
+WORKING-CONTROL.json + COMMON-CAUSE-COMPARISON.json FIRST. A completed
+COMMON_CAUSE_BOTH_CRASH investigation is a VALID campaign:
+final_verdict=NOT_PROVEN, runtime_status=COMMON_CAUSE_BOTH_CRASH,
+regression_status=NOT_ESTABLISHED (never NOT_COMPARABLE), and the
+legacy `ORIGINAL_RUNTIME=NOT_RUN` is recovered from the working control
+(CONTROL_CRASHED→CRASH, CONTROL_ASSESSED→PASS). FINAL == RUNTIME ==
+COMMON-CAUSE on runtime/regression status (requirement 17).
+
+2) EXPLICIT STATE MACHINE (runtime_health.campaign_state_machine):
+SAFETY_BLOCKED / NO_DEVICE / DEVICE_READY / CONTROL_NOT_INSTALLED /
+CONTROL_HEALTHY / CONTROL_CRASHED / INSTRUMENTED_NOT_RUN /
+INSTRUMENTED_HEALTHY / INSTRUMENTED_CRASHED / COMMON_CAUSE_BOTH_CRASH /
+INSTRUMENTATION_ONLY_CRASH / ORIGINAL_ONLY_CRASH / COMPARISON_INCOMPLETE
+/ CAUSAL_CHAIN_INCOMPLETE / PROVEN — every transition records a reason;
+surfaced as CAMPAIGN_STATE in RUNTIME-VERDICT.json and
+campaign_state(+transitions) in FINAL-VERDICT.json. No scattered
+booleans decide the pipeline state anymore.
+
+3) UNIFIED PER-SIDE SCHEMA: WORKING CONTROL and INSTRUMENTED sides now
+share ONE field set (package, artifact_type, artifact_sha256,
+installed_path, uid/uids/users, version, ABI, pids, startup,
+lifetime_ms, fatal_signal, fault_library, fault_pc,
+abort_message_present, exit_reason, logcat_evidence_lines). The
+instrumented health gate now collects the same read-only identity
+(dumpsys package + installed sha256sum). Unavailable ⇒ null, never
+fabricated.
+
+4) CRASH EVIDENCE: tombstone-only evidence (fatal_lines /
+package_matched_lines, no ApplicationExitInfo entry) no longer collapses
+to crash_instances=[] — a structured instance is synthesized from what
+the tombstone actually contains and the record is classified
+EVIDENCE_PRESENT_BUT_INSTANCE_INCOMPLETE (UID/user stay null); raw
+evidence lines are preserved and incomplete parsing never upgrades a
+scientific verdict.
+
+5) APK OFFSET: an offset resolves ONLY when the installed APK SHA equals
+the local artifact SHA (verified in assess_startup/build_crash_artifact);
+mismatch ⇒ UNRESOLVED with reason. No nearest-symbol identity.
+
+6) NEXT_ACTION PURGE: the legacy recommendation "run the gated baseline
+round (REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1)" was removed from
+runtime_verdict and the adb_deploy SIGNATURE_MISMATCH hint; the
+aggregator additionally sanitizes any stale destructive NEXT_ACTION
+(defense in depth). Destructive operations stay deny-by-default; the
+hash-bound authorization document is the only path and is never
+suggested automatically.
+
+7) EXIT CODES: campaign exit now splits infrastructure failure (2:
+NO_ONLINE_ANDROID_DEVICE, package unresolved, decode/artifact invalid)
+from scientific incomplete (3: crash without original-side comparison,
+no evidence report) from a VALID COMPLETED INVESTIGATION (0 — including
+COMMON_CAUSE_BOTH_CRASH: an app crash with successful collection +
+comparison is a scientific finding, never CAMPAIGN_EXIT_2).
+run_platform maps these to COMPLETED / SCIENTIFIC_INCOMPLETE /
+INFRASTRUCTURE_FAILURE.
+
+8) PUBLISHER: PUSH_FAILED/PUBLISH_FAILED is recorded as
+PUBLISH_FAILURE (infrastructure only; scientific and runtime verdicts
+unaffected) — verdict fields are computed before publishing and are
+never altered by a push result.
+
+Scientific gate untouched: L1=CONFIRMED, L2=INDICATOR, L3/L4=NOT_PROVEN,
+SCREENSHOT_BLOCKING=NOT_PROVEN; evidence_report.py L1–L4 logic unchanged.
+No destructive operation anywhere; original.apk unmodified; no old
+campaign rewritten.
+
+Suite: 258/258 (28 new hermetic regression tests: state machine paths,
+crash-instance synthesis, offset SHA binding, verdict aggregation for
+both-crash/control-only/no-comparison, destructive-NEXT_ACTION purge,
+exit-code classification, platform exit mapping, publisher failure
+classification). No campaign was run in this round.

@@ -1233,9 +1233,13 @@ class CommonCauseComparisonTests(unittest.TestCase):
         self.assertEqual(q["fault_location"]["working_control"],
                          "base.apk+00031e10")
         self.assertFalse(q["abort_message"]["captured_either"])
-        # per-side bindings stay independent
-        self.assertEqual(cmp["working_control"]["apk_sha256"], "e" * 64)
+        # per-side bindings stay independent — both sides use the SAME
+        # unified schema field names (end-to-end requirement 6)
+        self.assertEqual(cmp["working_control"]["artifact_sha256"], "e" * 64)
         self.assertEqual(cmp["instrumented"]["artifact_sha256"], "f" * 64)
+        for field in rh.UNIFIED_SIDE_FIELDS:
+            self.assertIn(field, cmp["working_control"])
+            self.assertIn(field, cmp["instrumented"])
 
     def test_control_healthy_instrumented_crash_is_candidate_not_proven(self):
         ins = _simulated_crash_artifact("instrumented", "f" * 64)
@@ -1388,6 +1392,237 @@ class BaselineGatingTests(unittest.TestCase):
                 doc = MODULE.run_baseline_runtime(td, __file__, {"tools": {}})
             self.assertEqual(doc["status"], "BASELINE_NOT_RUN")
             self.assertEqual(doc["reason"], "REELSEC_BASELINE_RUNTIME=0")
+
+
+class CampaignStateMachineTests(unittest.TestCase):
+    """End-to-end requirement 4: one explicit state machine, every
+    transition with a reason."""
+
+    def test_safety_blocked_is_terminal(self):
+        sm = rh.campaign_state_machine(
+            safety={"safety": "BLOCKED", "reason": "blanket flag"})
+        self.assertEqual(sm["state"], "SAFETY_BLOCKED")
+        self.assertEqual(len(sm["transitions"]), 1)
+        self.assertTrue(sm["transitions"][0]["reason"])
+
+    def test_no_device(self):
+        sm = rh.campaign_state_machine(device_ok=False)
+        self.assertEqual(sm["state"], "NO_DEVICE")
+
+    def test_both_crash_common_cause_path(self):
+        sm = rh.campaign_state_machine(
+            safety={"safety": "OK"}, device_ok=True,
+            working_control={"status": "CONTROL_CRASHED"},
+            instrumented_health={"startup": "CRASH",
+                                 "crash_class": "NATIVE_CRASH"},
+            common_cause={"status": "COMMON_CAUSE_BOTH_CRASH"})
+        states = [t["to"] for t in sm["transitions"]]
+        self.assertIn("DEVICE_READY", states)
+        self.assertIn("CONTROL_CRASHED", states)
+        self.assertIn("INSTRUMENTED_CRASHED", states)
+        self.assertIn("COMMON_CAUSE_BOTH_CRASH", states)
+        self.assertTrue(all(t["reason"] for t in sm["transitions"]))
+
+    def test_instrumentation_only_crash_path(self):
+        sm = rh.campaign_state_machine(
+            working_control={"status": "CONTROL_ASSESSED"},
+            instrumented_health={"startup": "CRASH"},
+            common_cause={"status": "CONTROL_HEALTHY_INSTRUMENTED_CRASH"})
+        self.assertIn("INSTRUMENTATION_ONLY_CRASH",
+                      [t["to"] for t in sm["transitions"]])
+
+    def test_original_only_crash_path(self):
+        sm = rh.campaign_state_machine(
+            working_control={"status": "CONTROL_CRASHED"},
+            common_cause={"status": "CONTROL_ONLY_CRASH"})
+        self.assertIn("ORIGINAL_ONLY_CRASH",
+                      [t["to"] for t in sm["transitions"]])
+
+    def test_proven_requires_full_chain(self):
+        sm = rh.campaign_state_machine(
+            instrumented_health={"startup": "PASS"},
+            evidence={"causal_proof": True})
+        self.assertEqual(sm["state"], "PROVEN")
+
+    def test_incomplete_chain_is_explicit(self):
+        sm = rh.campaign_state_machine(
+            instrumented_health={"startup": "PASS"},
+            evidence={"causal_proof": False, "missing": ["L4"]})
+        self.assertEqual(sm["state"], "CAUSAL_CHAIN_INCOMPLETE")
+
+
+class CrashInstanceSynthesisTests(unittest.TestCase):
+    """End-to-end requirement 8: tombstone evidence never collapses to
+    crash_instances=[] and incomplete parsing never upgrades a verdict."""
+
+    def _tombstone(self, pid=14210):
+        return {"fatal_signal": "SIGABRT", "package_associated": True,
+                "pid": pid, "thread_name": "com.x",
+                "fatal_lines": ["F/libc: Fatal signal 6 (SIGABRT), code -1"],
+                "package_matched_lines": ["pid: %d, tid: %d, name: com.x"
+                                          % (pid, pid)],
+                "backtrace_frames": [], "abort_message": None}
+
+    def test_tombstone_only_builds_structured_instance(self):
+        art = rh.build_crash_artifact("com.x", "instrumented", [],
+                                      self._tombstone())
+        self.assertEqual(len(art["crash_instances"]), 1)
+        inst = art["crash_instances"][0]
+        self.assertEqual(inst["source"], "LOGCAT_TOMBSTONE_ECHO")
+        self.assertEqual(inst["pid"], 14210)
+        self.assertIsNone(inst["uid"])   # never fabricated
+        self.assertIsNone(inst["user"])
+        self.assertEqual(art["grouping"]["instances_completeness"],
+                         "EVIDENCE_PRESENT_BUT_INSTANCE_INCOMPLETE")
+        self.assertTrue(any("MUST NOT upgrade" in n
+                            for n in art["integrity_notes"]))
+        # raw evidence preserved
+        self.assertTrue(art["evidence_lines"]["fatal_lines"])
+
+    def test_exit_info_instances_are_complete(self):
+        entries = [{"package": "com.x", "uid": 10285, "pid": 111,
+                    "timestamp": "t", "reason_code": 6, "status": 0}]
+        art = rh.build_crash_artifact("com.x", "instrumented", entries, {})
+        self.assertEqual(art["grouping"]["instances_completeness"],
+                         "EXIT_INFO_COMPLETE")
+        self.assertEqual(art["crash_instances"][0]["source"],
+                         "APPLICATION_EXIT_INFO")
+
+    def test_no_evidence_no_instances(self):
+        art = rh.build_crash_artifact("com.x", "instrumented", [], {})
+        self.assertEqual(art["crash_instances"], [])
+        self.assertEqual(art["grouping"]["instances_completeness"],
+                         "NO_CRASH_INSTANCE_EVIDENCE")
+
+
+class OffsetShaBindingTests(unittest.TestCase):
+    """End-to-end requirement 9: offsets resolve ONLY against the local
+    artifact byte-identical to the installed APK."""
+
+    def _tombstone_with_apk_frame(self):
+        return {"fatal_signal": "SIGABRT", "package_associated": True,
+                "pid": 1, "fatal_lines": ["x"], "package_matched_lines": [],
+                "backtrace_frames": [{
+                    "pc": "%x" % TARGET_OFFSET, "library": "base.apk",
+                    "library_path": "/data/app/~~x/com.x/base.apk",
+                    "symbol": None}],
+                "abort_message": None}
+
+    def test_sha_mismatch_forces_unresolved(self):
+        with tempfile.TemporaryDirectory() as td:
+            apk = _craft_apk_with_offset(Path(td) / "a.apk")
+            art = rh.build_crash_artifact(
+                "com.x", "instrumented", [], self._tombstone_with_apk_frame(),
+                artifact_apk=str(apk), artifact_sha256="f" * 64,
+                identity={"apk_sha256": "a" * 64})
+        res = art["apk_offset_resolution"]
+        self.assertEqual(res["status"], "UNRESOLVED")
+        self.assertIn("different artifacts", res["reason"])
+
+    def test_sha_match_resolves(self):
+        with tempfile.TemporaryDirectory() as td:
+            apk = _craft_apk_with_offset(Path(td) / "a.apk")
+            art = rh.build_crash_artifact(
+                "com.x", "instrumented", [], self._tombstone_with_apk_frame(),
+                artifact_apk=str(apk), artifact_sha256="f" * 64,
+                identity={"apk_sha256": "f" * 64})
+        res = art["apk_offset_resolution"]
+        self.assertEqual(res["status"], "RESOLVED")
+        self.assertEqual(res["entry"], PACKED_ENTRY)
+
+
+class VerdictAggregationTests(unittest.TestCase):
+    """End-to-end requirement 3+7: the verdict consumes the new
+    comparison documents first and never recommends a destructive
+    baseline."""
+
+    def test_both_crash_verdict_fields(self):
+        v = rh.runtime_verdict(
+            None, {"startup": "CRASH", "crash_class": "NATIVE_CRASH"},
+            working_control={"status": "CONTROL_CRASHED"},
+            common_cause={"status": "COMMON_CAUSE_BOTH_CRASH"})
+        self.assertEqual(v["ORIGINAL_RUNTIME"], "CRASH")
+        self.assertEqual(v["REGRESSION_STATUS"], "NOT_ESTABLISHED")
+        self.assertEqual(v["RUNTIME_STATUS"], "COMMON_CAUSE_BOTH_CRASH")
+        self.assertEqual(v["CAMPAIGN_STATE"], "CAUSAL_CHAIN_INCOMPLETE")
+        self.assertNotIn("REELSEC_ALLOW_TEST_DEVICE_UNINSTALL",
+                         v["NEXT_ACTION"])
+        self.assertNotIn("gated baseline", v["NEXT_ACTION"])
+        self.assertIn("NOT_ESTABLISHED", v["NEXT_ACTION"])
+
+    def test_crash_without_comparison_next_action_is_working_control(self):
+        v = rh.runtime_verdict(
+            None, {"startup": "CRASH", "crash_class": "NATIVE_CRASH"})
+        self.assertNotIn("REELSEC_ALLOW_TEST_DEVICE_UNINSTALL",
+                         v["NEXT_ACTION"])
+        self.assertNotIn("gated baseline", v["NEXT_ACTION"])
+        self.assertIn("working-control", v["NEXT_ACTION"])
+
+    def test_control_healthy_instrumented_crash_is_suspected(self):
+        v = rh.runtime_verdict(
+            None, {"startup": "CRASH"},
+            working_control={"status": "CONTROL_ASSESSED"},
+            common_cause={"status": "CONTROL_HEALTHY_INSTRUMENTED_CRASH"})
+        self.assertEqual(v["ORIGINAL_RUNTIME"], "PASS")
+        self.assertEqual(v["REGRESSION_STATUS"], "SUSPECTED_NOT_PROVEN")
+        self.assertIn("CANDIDATE", v["NEXT_ACTION"])
+
+    def test_control_only_crash_not_instrumentation(self):
+        v = rh.runtime_verdict(
+            None, {"startup": "PASS"},
+            working_control={"status": "CONTROL_CRASHED"},
+            common_cause={"status": "CONTROL_ONLY_CRASH"})
+        self.assertEqual(v["ORIGINAL_RUNTIME"], "CRASH")
+        self.assertIn("not", v["NEXT_ACTION"].lower())
+
+
+class ExitClassificationTests(unittest.TestCase):
+    """End-to-end requirement 13: exit codes split infrastructure /
+    scientific-incomplete / valid-completed-investigation."""
+
+    def test_completed_is_zero(self):
+        with tempfile.TemporaryDirectory() as td:
+            code, cls = MODULE.classify_campaign_exit(td, "COMPLETED")
+        self.assertEqual(code, 0)
+
+    def test_no_device_is_infrastructure(self):
+        with tempfile.TemporaryDirectory() as td:
+            (Path(td) / "RUNTIME-PROBE.json").write_text(json.dumps(
+                {"status": "NO_ONLINE_ANDROID_DEVICE"}))
+            code, cls = MODULE.classify_campaign_exit(
+                td, "COMPLETED_WITH_ISSUES")
+        self.assertEqual(code, 2)
+        self.assertIn("INFRASTRUCTURE", cls)
+
+    def test_both_crash_with_comparison_is_valid_investigation(self):
+        with tempfile.TemporaryDirectory() as td:
+            (Path(td) / "RUNTIME-HEALTH.json").write_text(
+                json.dumps({"startup": "CRASH"}))
+            (Path(td) / "COMMON-CAUSE-COMPARISON.json").write_text(
+                json.dumps({"status": "COMMON_CAUSE_BOTH_CRASH"}))
+            (Path(td) / "EVIDENCE-REPORT.json").write_text("{}")
+            code, cls = MODULE.classify_campaign_exit(
+                td, "COMPLETED_WITH_ISSUES")
+        self.assertEqual(code, 0)
+        self.assertIn("VALID_INVESTIGATION", cls)
+
+    def test_crash_without_comparison_is_scientific_incomplete(self):
+        with tempfile.TemporaryDirectory() as td:
+            (Path(td) / "RUNTIME-HEALTH.json").write_text(
+                json.dumps({"startup": "CRASH"}))
+            code, cls = MODULE.classify_campaign_exit(
+                td, "COMPLETED_WITH_ISSUES")
+        self.assertEqual(code, 3)
+        self.assertIn("SCIENTIFIC_INCOMPLETE", cls)
+
+    def test_healthy_with_evidence_is_valid(self):
+        with tempfile.TemporaryDirectory() as td:
+            (Path(td) / "RUNTIME-HEALTH.json").write_text(
+                json.dumps({"startup": "PASS"}))
+            (Path(td) / "EVIDENCE-REPORT.json").write_text("{}")
+            code, cls = MODULE.classify_campaign_exit(
+                td, "COMPLETED_WITH_ISSUES")
+        self.assertEqual(code, 0)
 
 
 if __name__ == "__main__":

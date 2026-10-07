@@ -24,6 +24,7 @@ import time
 from pathlib import Path
 
 import collectors as collectors_mod
+import runtime_health as rh_mod
 import safety_gate
 
 SCHEMA_VERDICT = "final-verdict-1"
@@ -96,14 +97,35 @@ def create_campaign_dir(root, now=None):
 # ------------------------------------------------------------ aggregation
 
 def _final_verdict_logic(campaign_dir, campaign_status=None):
+    """Evidence aggregation -> FINAL-VERDICT (end-to-end requirement 3).
+
+    The NEW comparison documents are read FIRST: when a working control
+    was observed and a common-cause comparison exists, those documents —
+    not the legacy baseline-round fields — drive the verdict. A completed
+    COMMON_CAUSE_BOTH_CRASH investigation is a VALID campaign:
+    final_verdict=NOT_PROVEN, runtime_status=COMMON_CAUSE_BOTH_CRASH,
+    regression_status=NOT_ESTABLISHED, and NEXT_ACTION never recommends a
+    destructive baseline or any uninstall permission flag.
+    """
     cd = Path(campaign_dir)
     safety = _read_json(cd / "SAFETY-GATE.json") or {}
     runtime_verdict = _read_json(cd / "RUNTIME-VERDICT.json") or {}
     evidence = _read_json(cd / "EVIDENCE-REPORT.json") or {}
     health = _read_json(cd / "RUNTIME-HEALTH.json") or {}
+    working_control = _read_json(cd / "WORKING-CONTROL.json") or {}
+    common_cause = _read_json(cd / "COMMON-CAUSE-COMPARISON.json") or {}
+    cc_status = common_cause.get("status")
 
     if safety.get("safety") == "BLOCKED":
         final, reason = "SAFETY_BLOCKED", safety.get("reason")
+    elif cc_status == "COMMON_CAUSE_BOTH_CRASH":
+        # Requirement 12: a completed both-crash comparison is a valid
+        # investigation — the scientific verdict is simply NOT_PROVEN.
+        final = "NOT_PROVEN"
+        reason = ("COMMON_CAUSE_BOTH_CRASH: the installed original AND the "
+                  "instrumented artifact crash with a common cause; "
+                  "instrumentation regression NOT_ESTABLISHED; runtime "
+                  "proof remains blocked")
     elif health.get("startup") == "CRASH":
         final = "BLOCKED_BY_ARTIFACT_CRASH"
         reason = health.get("crash_class")
@@ -120,6 +142,51 @@ def _final_verdict_logic(campaign_dir, campaign_status=None):
         final = "NOT_PROVEN"
         reason = "no runtime or evidence artifacts produced"
 
+    # Runtime fields — sourced from RUNTIME-VERDICT, then reconciled
+    # against the working-control / common-cause documents (requirement
+    # 17: FINAL == RUNTIME == COMMON-CAUSE on runtime/regression status).
+    regression = runtime_verdict.get("REGRESSION_STATUS")
+    runtime_status = runtime_verdict.get("RUNTIME_STATUS")
+    next_action = runtime_verdict.get("NEXT_ACTION")
+    original_runtime = runtime_verdict.get("ORIGINAL_RUNTIME")
+    if original_runtime in (None, "NOT_RUN") and working_control:
+        original_runtime = {
+            "CONTROL_ASSESSED": "PASS",
+            "CONTROL_CRASHED": "CRASH",
+            "CONTROL_NOT_INSTALLED": "NOT_INSTALLED",
+        }.get(working_control.get("status"), original_runtime)
+    if cc_status == "COMMON_CAUSE_BOTH_CRASH":
+        regression = "NOT_ESTABLISHED"
+        runtime_status = "COMMON_CAUSE_BOTH_CRASH"
+        next_action = (
+            "Investigate the common cause (device/OS/ROM or the app itself) "
+            "with the working control left installed; instrumentation "
+            "regression is NOT_ESTABLISHED and the crash MUST NOT be "
+            "attributed to instrumentation. No destructive operation is "
+            "required or permitted.")
+    if runtime_status is None:
+        runtime_status = ("BLOCKED_BY_ARTIFACT_CRASH"
+                          if health.get("startup") == "CRASH"
+                          else runtime_verdict.get("RUNTIME_PROOF_STATUS"))
+    # Defense in depth: a destructive-baseline recommendation must never
+    # surface as NEXT_ACTION, whatever produced the legacy document.
+    if next_action and ("REELSEC_ALLOW_TEST_DEVICE_UNINSTALL" in next_action
+                        or "gated baseline round" in next_action):
+        next_action = (
+            "Run the non-destructive working-control round "
+            "(REELSEC_WORKING_CONTROL, default on): the installed original "
+            "is the control. Destructive operations are deny-by-default and "
+            "are never a NEXT_ACTION.")
+
+    state = rh_mod.campaign_state_machine(
+        safety=safety,
+        working_control=working_control or None,
+        instrumented_health=health or None,
+        common_cause=common_cause or None,
+        evidence=({"causal_proof": evidence.get("causal_proof"),
+                   "missing": (evidence.get("causal_chain") or {}).get(
+                       "missing")} if evidence else None))
+
     chain = (evidence.get("causal_chain") or {})
     links = {l["id"].split("_", 1)[0]: l["status"]
              for l in chain.get("links", [])}
@@ -132,14 +199,22 @@ def _final_verdict_logic(campaign_dir, campaign_status=None):
         "reason": reason,
         "safety": safety.get("safety"),
         "safety_reason": safety.get("reason"),
+        "campaign_state": state["state"],
+        "campaign_state_reason": state["reason"],
+        "campaign_state_transitions": state["transitions"],
         "runtime": {
-            "ORIGINAL_RUNTIME": runtime_verdict.get("ORIGINAL_RUNTIME"),
+            "ORIGINAL_RUNTIME": original_runtime,
             "INSTRUMENTED_RUNTIME": runtime_verdict.get("INSTRUMENTED_RUNTIME"),
             "CRASH_CLASS": runtime_verdict.get("CRASH_CLASS"),
             "CRASH_CAUSE": runtime_verdict.get("CRASH_CAUSE"),
-            "REGRESSION_STATUS": runtime_verdict.get("REGRESSION_STATUS"),
+            "REGRESSION_STATUS": regression,
+            "RUNTIME_STATUS": runtime_status,
+            "WORKING_CONTROL": (working_control.get("status")
+                                or runtime_verdict.get("WORKING_CONTROL")),
+            "COMMON_CAUSE_COMPARISON": (cc_status or runtime_verdict.get(
+                "COMMON_CAUSE_COMPARISON")),
             "RUNTIME_PROOF_STATUS": runtime_verdict.get("RUNTIME_PROOF_STATUS"),
-            "NEXT_ACTION": runtime_verdict.get("NEXT_ACTION"),
+            "NEXT_ACTION": next_action,
         },
         "scientific_status": {
             "L1": links.get("L1", "NOT_EVALUATED"),
@@ -317,7 +392,17 @@ def run_platform(apk, root, runner=None, git_runner=None, env=None,
                           "--output", str(campaign_dir), "--no-publish"],
                          timeout=5400)
         logs.write_text((out or "")[-200000:], encoding="utf-8")
-        if rc != 0:
+        # Exit-code split (end-to-end requirement 13):
+        #   rc 0 = valid completed investigation (an app crash WITH
+        #          successful evidence collection + comparison is VALID,
+        #          never CAMPAIGN_EXIT_2),
+        #   rc 3 = scientific incomplete (e.g. crash without comparison),
+        #   rc 2 = infrastructure failure (no device, invalid artifact).
+        if rc == 3:
+            campaign_status = "SCIENTIFIC_INCOMPLETE"
+        elif rc == 2:
+            campaign_status = "INFRASTRUCTURE_FAILURE"
+        elif rc != 0:
             campaign_status = "CAMPAIGN_EXIT_%d" % rc
     except Exception as exc:
         campaign_status = "CAMPAIGN_EXCEPTION"
@@ -342,6 +427,14 @@ def run_platform(apk, root, runner=None, git_runner=None, env=None,
     if publish:
         publish_result = git_publish_campaign(
             root, campaign_dir, runner=git_runner or _default_git_runner)
+        if publish_result.get("status") in ("PUSH_FAILED", "PUBLISH_FAILED"):
+            # Requirement 14: a push failure (e.g. HTTP 403) is an
+            # INFRASTRUCTURE-only issue. It is recorded as PUBLISH_FAILURE
+            # and must never alter the scientific or runtime verdicts —
+            # every verdict field above was computed before publishing.
+            publish_result["classification"] = (
+                "PUBLISH_FAILURE (infrastructure only; scientific and "
+                "runtime verdicts unaffected)")
         verdict["publish"] = publish_result
 
     (campaign_dir / "FINAL-VERDICT.json").write_text(
