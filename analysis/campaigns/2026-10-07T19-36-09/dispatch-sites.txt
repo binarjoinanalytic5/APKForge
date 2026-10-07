@@ -1,0 +1,264 @@
+
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+00000000002783f4 <_ZN18codecPluginManager13dummyFunctionEv>:
+  27ae80: f94007e9     	ldr	x9, [sp, #0x8]
+  27ae84: eb09011f     	cmp	x8, x9
+  27ae88: 540000c1     	b.ne	0x27aea0 <_ZN18codecPluginManager13dummyFunctionEv+0x2aac>
+  27ae8c: a9417bfd     	ldp	x29, x30, [sp, #0x10]
+  27ae90: b0002520     	adrp	x0, 0x71f000 <_ZTIN6Cicada12avAESEncryptE+0x340>
+  27ae94: 9114e000     	add	x0, x0, #0x538
+  27ae98: 910083ff     	add	sp, sp, #0x20
+  27ae9c: d65f03c0     	ret
+  27aea0: 97f97718     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27aea4: d10183ff     	sub	sp, sp, #0x60
+  27aea8: f90013f7     	str	x23, [sp, #0x20]
+  27aeac: a90357f6     	stp	x22, x21, [sp, #0x30]
+  27aeb0: a9044ff4     	stp	x20, x19, [sp, #0x40]
+  27aeb4: a9057bfd     	stp	x29, x30, [sp, #0x50]
+  27aeb8: 910143fd     	add	x29, sp, #0x50
+  27aebc: d53bd055     	mrs	x21, TPIDR_EL0
+  27aec0: f94016a8     	ldr	x8, [x21, #0x28]
+  27aec4: aa0003f3     	mov	x19, x0
+  27aec8: f9000fe8     	str	x8, [sp, #0x18]
+  27aecc: b4001c00     	cbz	x0, 0x27b24c <_ZN18codecPluginManager13dummyFunctionEv+0x2e58>
+  27aed0: 90002696     	adrp	x22, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27aed4: f94132c8     	ldr	x8, [x22, #0x260]
+  27aed8: b5001ba8     	cbnz	x8, 0x27b24c <_ZN18codecPluginManager13dummyFunctionEv+0x2e58>
+  27aedc: d0001a02     	adrp	x2, 0x5bc000
+  27aee0: 91171842     	add	x2, x2, #0x5c6
+  27aee4: 910023e0     	add	x0, sp, #0x8
+  27aee8: aa1303e1     	mov	x1, x19
+  27aeec: 9402012a     	bl	0x2fb394 <_ZN12JniException14clearExceptionEP7_JNIEnv+0x4c>
+  27aef0: f9400268     	ldr	x8, [x19]
+  27aef4: f9400be1     	ldr	x1, [sp, #0x10]
+  27aef8: aa1303e0     	mov	x0, x19
+  27aefc: f9405508     	ldr	x8, [x8, #0xa8]
+  27af00: d63f0100     	blr	x8
+  27af04: f90132c0     	str	x0, [x22, #0x260]
+  27af08: f9400268     	ldr	x8, [x19]
+  27af0c: f0001902     	adrp	x2, 0x59d000 <__cxa_demangle+0x182b4>
+  27af10: f0001903     	adrp	x3, 0x59d000 <__cxa_demangle+0x182b4>
+  27af14: aa0003e1     	mov	x1, x0
+  27af18: f9408508     	ldr	x8, [x8, #0x108]
+  27af1c: 91141042     	add	x2, x2, #0x504
+  27af20: 91142c63     	add	x3, x3, #0x50b
+  27af24: aa1303e0     	mov	x0, x19
+  27af28: d63f0100     	blr	x8
+  27af2c: 90002688     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27af30: f9013500     	str	x0, [x8, #0x268]
+  27af34: f9400268     	ldr	x8, [x19]
+  27af38: f94132c1     	ldr	x1, [x22, #0x260]
+  27af3c: d0001a02     	adrp	x2, 0x5bc000
+  27af40: f0001903     	adrp	x3, 0x59d000 <__cxa_demangle+0x182b4>
+  27af44: f9408508     	ldr	x8, [x8, #0x108]
+  27af48: 9117d842     	add	x2, x2, #0x5f6
+  27af4c: 9138e063     	add	x3, x3, #0xe38
+  27af50: aa1303e0     	mov	x0, x19
+  27af54: d63f0100     	blr	x8
+  27af58: 90002688     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27af5c: f9013900     	str	x0, [x8, #0x270]
+  27af60: f9400268     	ldr	x8, [x19]
+  27af64: f94132c1     	ldr	x1, [x22, #0x260]
+  27af68: d0001a02     	adrp	x2, 0x5bc000
+  27af6c: d0001a03     	adrp	x3, 0x5bc000
+  27af70: f9408508     	ldr	x8, [x8, #0x108]
+  27af74: 91182c42     	add	x2, x2, #0x60b
+  27af78: 91185863     	add	x3, x3, #0x616
+  27af7c: aa1303e0     	mov	x0, x19
+  27af80: d63f0100     	blr	x8
+  27af84: 90002688     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27af88: f9013d00     	str	x0, [x8, #0x278]
+  27af8c: f9400268     	ldr	x8, [x19]
+  27af90: f94132c1     	ldr	x1, [x22, #0x260]
+  27af94: d0001a02     	adrp	x2, 0x5bc000
+  27af98: f0001903     	adrp	x3, 0x59d000 <__cxa_demangle+0x182b4>
+  27af9c: f9408508     	ldr	x8, [x8, #0x108]
+  27afa0: 9118b842     	add	x2, x2, #0x62e
+  27afa4: 9139c463     	add	x3, x3, #0xe71
+  27afa8: aa1303e0     	mov	x0, x19
+  27afac: d63f0100     	blr	x8
+  27afb0: 90002688     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27afb4: f9014100     	str	x0, [x8, #0x280]
+  27afb8: f9400268     	ldr	x8, [x19]
+  27afbc: f94132c1     	ldr	x1, [x22, #0x260]
+  27afc0: d0001a02     	adrp	x2, 0x5bc000
+  27afc4: d0001a03     	adrp	x3, 0x5bc000
+  27afc8: f9408508     	ldr	x8, [x8, #0x108]
+  27afcc: 91191842     	add	x2, x2, #0x646
+  27afd0: 91195463     	add	x3, x3, #0x655
+  27afd4: aa1303e0     	mov	x0, x19
+  27afd8: d63f0100     	blr	x8
+  27afdc: 90002688     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27afe0: f9014500     	str	x0, [x8, #0x288]
+  27afe4: f9400268     	ldr	x8, [x19]
+  27afe8: f94132c1     	ldr	x1, [x22, #0x260]
+  27afec: d0001a02     	adrp	x2, 0x5bc000
+  27aff0: d0001a03     	adrp	x3, 0x5bc000
+  27aff4: f9408508     	ldr	x8, [x8, #0x108]
+  27aff8: 911a0442     	add	x2, x2, #0x681
+  27affc: 911a4063     	add	x3, x3, #0x690
+  27b000: aa1303e0     	mov	x0, x19
+  27b004: d63f0100     	blr	x8
+  27b008: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b00c: f9014900     	str	x0, [x8, #0x290]
+  27b010: f9400268     	ldr	x8, [x19]
+  27b014: f94132c1     	ldr	x1, [x22, #0x260]
+  27b018: d0001914     	adrp	x20, 0x59d000 <__cxa_demangle+0x182b4>
+  27b01c: b00019e2     	adrp	x2, 0x5b8000
+  27b020: f9408508     	ldr	x8, [x8, #0x108]
+  27b024: 91174694     	add	x20, x20, #0x5d1
+  27b028: 91118842     	add	x2, x2, #0x462
+  27b02c: aa1303e0     	mov	x0, x19
+  27b030: aa1403e3     	mov	x3, x20
+  27b034: d63f0100     	blr	x8
+  27b038: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b03c: f9014d00     	str	x0, [x8, #0x298]
+  27b040: f9400268     	ldr	x8, [x19]
+  27b044: f94132c1     	ldr	x1, [x22, #0x260]
+  27b048: b00019e2     	adrp	x2, 0x5b8000
+  27b04c: 91146042     	add	x2, x2, #0x518
+  27b050: f9408508     	ldr	x8, [x8, #0x108]
+  27b054: aa1303e0     	mov	x0, x19
+  27b058: aa1403e3     	mov	x3, x20
+  27b05c: d63f0100     	blr	x8
+  27b060: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b064: f9015100     	str	x0, [x8, #0x2a0]
+  27b068: f9400268     	ldr	x8, [x19]
+  27b06c: f94132c1     	ldr	x1, [x22, #0x260]
+  27b070: b00019e2     	adrp	x2, 0x5b8000
+  27b074: 9111a042     	add	x2, x2, #0x468
+  27b078: f9408508     	ldr	x8, [x8, #0x108]
+  27b07c: aa1303e0     	mov	x0, x19
+  27b080: aa1403e3     	mov	x3, x20
+  27b084: d63f0100     	blr	x8
+  27b088: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b08c: f9015500     	str	x0, [x8, #0x2a8]
+  27b090: f9400268     	ldr	x8, [x19]
+  27b094: f94132c1     	ldr	x1, [x22, #0x260]
+  27b098: d0001962     	adrp	x2, 0x5a9000
+  27b09c: 91166042     	add	x2, x2, #0x598
+  27b0a0: f9408508     	ldr	x8, [x8, #0x108]
+  27b0a4: aa1303e0     	mov	x0, x19
+  27b0a8: aa1403e3     	mov	x3, x20
+  27b0ac: d63f0100     	blr	x8
+  27b0b0: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b0b4: f9015900     	str	x0, [x8, #0x2b0]
+  27b0b8: f9400268     	ldr	x8, [x19]
+  27b0bc: f94132c1     	ldr	x1, [x22, #0x260]
+  27b0c0: b0001a02     	adrp	x2, 0x5bc000
+  27b0c4: b0001a03     	adrp	x3, 0x5bc000
+  27b0c8: f9408508     	ldr	x8, [x8, #0x108]
+  27b0cc: 911aa442     	add	x2, x2, #0x6a9
+  27b0d0: 911af463     	add	x3, x3, #0x6bd
+  27b0d4: aa1303e0     	mov	x0, x19
+  27b0d8: d63f0100     	blr	x8
+  27b0dc: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b0e0: f9015d00     	str	x0, [x8, #0x2b8]
+  27b0e4: f9400268     	ldr	x8, [x19]
+  27b0e8: f94132c1     	ldr	x1, [x22, #0x260]
+  27b0ec: b0001a14     	adrp	x20, 0x5bc000
+  27b0f0: b0001a02     	adrp	x2, 0x5bc000
+  27b0f4: f9408508     	ldr	x8, [x8, #0x108]
+  27b0f8: 911b6e94     	add	x20, x20, #0x6db
+  27b0fc: 911b0c42     	add	x2, x2, #0x6c3
+  27b100: aa1303e0     	mov	x0, x19
+  27b104: aa1403e3     	mov	x3, x20
+  27b108: d63f0100     	blr	x8
+  27b10c: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b110: f9016100     	str	x0, [x8, #0x2c0]
+  27b114: f9400268     	ldr	x8, [x19]
+  27b118: f94132c1     	ldr	x1, [x22, #0x260]
+  27b11c: b0001a02     	adrp	x2, 0x5bc000
+  27b120: b0001a03     	adrp	x3, 0x5bc000
+  27b124: f9408508     	ldr	x8, [x8, #0x108]
+  27b128: 911b8042     	add	x2, x2, #0x6e0
+  27b12c: 911bc463     	add	x3, x3, #0x6f1
+  27b130: aa1303e0     	mov	x0, x19
+  27b134: d63f0100     	blr	x8
+  27b138: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b13c: f9016500     	str	x0, [x8, #0x2c8]
+  27b140: f9400268     	ldr	x8, [x19]
+  27b144: f94132c1     	ldr	x1, [x22, #0x260]
+  27b148: b0001a02     	adrp	x2, 0x5bc000
+  27b14c: b0001a03     	adrp	x3, 0x5bc000
+  27b150: f9408508     	ldr	x8, [x8, #0x108]
+  27b154: 911be842     	add	x2, x2, #0x6fa
+  27b158: 911c4463     	add	x3, x3, #0x711
+  27b15c: aa1303e0     	mov	x0, x19
+  27b160: d63f0100     	blr	x8
+  27b164: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b168: f9016900     	str	x0, [x8, #0x2d0]
+  27b16c: f9400268     	ldr	x8, [x19]
+  27b170: f94132c1     	ldr	x1, [x22, #0x260]
+  27b174: b0001a02     	adrp	x2, 0x5bc000
+  27b178: 911cb042     	add	x2, x2, #0x72c
+  27b17c: f9408508     	ldr	x8, [x8, #0x108]
+  27b180: aa1303e0     	mov	x0, x19
+  27b184: aa1403e3     	mov	x3, x20
+  27b188: d63f0100     	blr	x8
+  27b18c: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b190: f9016d00     	str	x0, [x8, #0x2d8]
+  27b194: f9400268     	ldr	x8, [x19]
+  27b198: f94132c1     	ldr	x1, [x22, #0x260]
+  27b19c: 90001934     	adrp	x20, 0x59f000
+  27b1a0: b0001a02     	adrp	x2, 0x5bc000
+  27b1a4: f9408508     	ldr	x8, [x8, #0x108]
+  27b1a8: 91189694     	add	x20, x20, #0x625
+  27b1ac: 911d1442     	add	x2, x2, #0x745
+  27b1b0: aa1303e0     	mov	x0, x19
+  27b1b4: aa1403e3     	mov	x3, x20
+  27b1b8: d63f0100     	blr	x8
+  27b1bc: f0002677     	adrp	x23, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b1c0: 910bc2f7     	add	x23, x23, #0x2f0
+  27b1c4: f90002e0     	str	x0, [x23]
+  27b1c8: f9400268     	ldr	x8, [x19]
+  27b1cc: f94132c1     	ldr	x1, [x22, #0x260]
+  27b1d0: b0001a02     	adrp	x2, 0x5bc000
+  27b1d4: 911d6442     	add	x2, x2, #0x759
+  27b1d8: f9408508     	ldr	x8, [x8, #0x108]
+  27b1dc: aa1303e0     	mov	x0, x19
+  27b1e0: aa1403e3     	mov	x3, x20
+  27b1e4: d63f0100     	blr	x8
+  27b1e8: f90006e0     	str	x0, [x23, #0x8]
+  27b1ec: f9400268     	ldr	x8, [x19]
+  27b1f0: f94132c1     	ldr	x1, [x22, #0x260]
+  27b1f4: b0001a02     	adrp	x2, 0x5bc000
+  27b1f8: f0001903     	adrp	x3, 0x59e000
+  27b1fc: f9408508     	ldr	x8, [x8, #0x108]
+  27b200: 911d9842     	add	x2, x2, #0x766
+  27b204: 91389c63     	add	x3, x3, #0xe27
+  27b208: aa1303e0     	mov	x0, x19
+  27b20c: d63f0100     	blr	x8
+  27b210: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b214: f9017100     	str	x0, [x8, #0x2e0]
+  27b218: f9400268     	ldr	x8, [x19]
+  27b21c: f94132c1     	ldr	x1, [x22, #0x260]
+  27b220: b0001a02     	adrp	x2, 0x5bc000
+  27b224: f0001923     	adrp	x3, 0x5a2000
+  27b228: f9408508     	ldr	x8, [x8, #0x108]
+  27b22c: 911dd442     	add	x2, x2, #0x775
+  27b230: 91192863     	add	x3, x3, #0x64a
+  27b234: aa1303e0     	mov	x0, x19
+  27b238: d63f0100     	blr	x8
+  27b23c: f0002668     	adrp	x8, 0x74a000 <_ZN18codecPluginManager14_nextCodecSlotE+0x2d0>
+  27b240: f9017500     	str	x0, [x8, #0x2e8]
+  27b244: 910023e0     	add	x0, sp, #0x8
+  27b248: 94020069     	bl	0x2fb3ec <_ZN12JniException14clearExceptionEP7_JNIEnv+0xa4>
+  27b24c: f94016a8     	ldr	x8, [x21, #0x28]
+  27b250: f9400fe9     	ldr	x9, [sp, #0x18]
+  27b254: eb09011f     	cmp	x8, x9
+  27b258: 540000e1     	b.ne	0x27b274 <_ZN18codecPluginManager13dummyFunctionEv+0x2e80>
+  27b25c: a9457bfd     	ldp	x29, x30, [sp, #0x50]
+  27b260: a9444ff4     	ldp	x20, x19, [sp, #0x40]
+  27b264: a94357f6     	ldp	x22, x21, [sp, #0x30]
+  27b268: f94013f7     	ldr	x23, [sp, #0x20]
+  27b26c: 910183ff     	add	sp, sp, #0x60
+  27b270: d65f03c0     	ret
+  27b274: 97f97623     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27b278: d100c3ff     	sub	sp, sp, #0x30
+  27b27c: a9014ff4     	stp	x20, x19, [sp, #0x10]
+
+[exit=0]

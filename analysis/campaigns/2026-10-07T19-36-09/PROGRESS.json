@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.0",
+  "started_at": "2026-10-07T22:36:09+0300",
+  "total": 14,
+  "stages": [
+    {
+      "index": 1,
+      "name": "Input / provenance",
+      "status": "PASS",
+      "detail": "APK SHA-256=e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+      "timestamp": "2026-10-07T22:36:09+0300"
+    },
+    {
+      "index": 2,
+      "name": "Environment / capabilities",
+      "status": "RUNNING",
+      "detail": "discovering installed tools and device capabilities",
+      "timestamp": "2026-10-07T22:36:09+0300"
+    },
+    {
+      "index": 2,
+      "name": "Environment / capabilities",
+      "status": "PASS",
+      "detail": "capability matrix written",
+      "timestamp": "2026-10-07T22:36:11+0300"
+    },
+    {
+      "index": 3,
+      "name": "Apktool backend",
+      "status": "RUNNING",
+      "detail": "selecting a usable decode/build backend",
+      "timestamp": "2026-10-07T22:36:11+0300"
+    },
+    {
+      "index": 3,
+      "name": "Apktool backend",
+      "status": "PASS",
+      "detail": "apktool-standalone",
+      "timestamp": "2026-10-07T22:36:11+0300"
+    },
+    {
+      "index": 4,
+      "name": "APK decode",
+      "status": "RUNNING",
+      "detail": "decoding original.apk into isolated campaign workspace",
+      "timestamp": "2026-10-07T22:36:11+0300"
+    },
+    {
+      "index": 4,
+      "name": "APK decode",
+      "status": "PASS",
+      "detail": "decoded with resources disabled (instrumentable Smali)",
+      "timestamp": "2026-10-07T22:36:18+0300"
+    },
+    {
+      "index": 5,
+      "name": "Input inventory",
+      "status": "RUNNING",
+      "detail": "inventorying manifest, Smali, DEX and native libraries",
+      "timestamp": "2026-10-07T22:36:18+0300"
+    },
+    {
+      "index": 5,
+      "name": "Input inventory",
+      "status": "PASS",
+      "detail": "READY",
+      "timestamp": "2026-10-07T22:36:36+0300"
+    },
+    {
+      "index": 6,
+      "name": "SecShell instrumentation plan",
+      "status": "RUNNING",
+      "detail": "locating the SecShell Application loadLibrary anchor",
+      "timestamp": "2026-10-07T22:36:36+0300"
+    },
+    {
+      "index": 6,
+      "name": "SecShell instrumentation plan",
+      "status": "PASS",
+      "detail": "READY",
+      "timestamp": "2026-10-07T22:36:37+0300"
+    },
+    {
+      "index": 7,
+      "name": "Instrumented copy",
+      "status": "RUNNING",
+      "detail": "preparing an isolated copy; original.apk remains untouched",
+      "timestamp": "2026-10-07T22:36:37+0300"
+    },
+    {
+      "index": 7,
+      "name": "Instrumented copy",
+      "status": "PASS",
+      "detail": "telemetry probe applied",
+      "timestamp": "2026-10-07T22:36:38+0300"
+    },
+    {
+      "index": 8,
+      "name": "Build instrumented APK",
+      "status": "RUNNING",
+      "detail": "building only the isolated instrumented tree",
+      "timestamp": "2026-10-07T22:36:38+0300"
+    },
+    {
+      "index": 8,
+      "name": "Build instrumented APK",
+      "status": "PASS",
+      "detail": "BUILT",
+      "timestamp": "2026-10-07T22:36:48+0300"
+    },
+    {
+      "index": 9,
+      "name": "Sign / verify artifact",
+      "status": "RUNNING",
+      "detail": "signing and verifying the isolated APK artifact",
+      "timestamp": "2026-10-07T22:36:48+0300"
+    },
+    {
+      "index": 9,
+      "name": "Sign / verify artifact",
+      "status": "PASS",
+      "detail": "SIGNED_VERIFIED",
+      "timestamp": "2026-10-07T22:36:53+0300"
+    },
+    {
+      "index": 10,
+      "name": "ADB deploy",
+      "status": "RUNNING",
+      "detail": "checking the explicit test device and installing only the signed artifact",
+      "timestamp": "2026-10-07T22:36:56+0300"
+    },
+    {
+      "index": 10,
+      "name": "ADB deploy",
+      "status": "PASS",
+      "detail": "INSTALLED",
+      "timestamp": "2026-10-07T22:37:10+0300"
+    },
+    {
+      "index": 11,
+      "name": "Gadget observation",
+      "status": "RUNNING",
+      "detail": "preparing guarded Frida Gadget observation metadata",
+      "timestamp": "2026-10-07T22:37:10+0300"
+    },
+    {
+      "index": 11,
+      "name": "Gadget observation",
+      "status": "PASS",
+      "detail": "READY",
+      "timestamp": "2026-10-07T22:37:11+0300"
+    },
+    {
+      "index": 12,
+      "name": "Runtime evidence",
+      "status": "RUNNING",
+      "detail": "capturing bounded ADB runtime evidence for the signed artifact",
+      "timestamp": "2026-10-07T22:37:11+0300"
+    },
+    {
+      "index": 12,
+      "name": "Runtime evidence",
+      "status": "PASS",
+      "detail": "CAPTURED",
+      "timestamp": "2026-10-07T22:37:27+0300"
+    },
+    {
+      "index": 13,
+      "name": "Native / proof analysis",
+      "status": "RUNNING",
+      "detail": "ELF, vtable, dispatch, dataflow, runtime readiness",
+      "timestamp": "2026-10-07T22:37:50+0300"
+    },
+    {
+      "index": 13,
+      "name": "Native / proof analysis",
+      "status": "PASS",
+      "detail": "dataflow_proven=False runtime=RUNTIME_ARTIFACT_CRASH",
+      "timestamp": "2026-10-07T22:38:09+0300"
+    },
+    {
+      "index": 14,
+      "name": "Report publication",
+      "status": "SKIP",
+      "detail": "publication disabled or failed",
+      "timestamp": "2026-10-07T22:38:09+0300"
+    }
+  ],
+  "current": "Report publication",
+  "current_status": "SKIP",
+  "completed_at": "2026-10-07T22:38:09+0300",
+  "final_status": "COMPLETED"
+}

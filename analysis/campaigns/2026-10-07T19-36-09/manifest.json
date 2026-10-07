@@ -1,0 +1,602 @@
+{
+  "tool": "ReelSec",
+  "version": "3.0.0",
+  "probes": [
+    "elf",
+    "symbols",
+    "strings",
+    "vtable",
+    "dispatch",
+    "critical-function",
+    "protection-bridge",
+    "vtable-abi",
+    "critical-function-behavior",
+    "native-security-api",
+    "java-screen-security",
+    "auto-publish",
+    "autonomous-dataflow",
+    "runtime-proof-readiness",
+    "runtime-frida-probe",
+    "target-provenance",
+    "runtime-toolchain-preflight",
+    "environment-capability",
+    "campaign-cli"
+  ],
+  "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so",
+  "created_at": "2026-10-07T22:37:28+0300",
+  "mode": "campaign",
+  "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+  "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+  "capabilities": {
+    "schema_version": "1.0",
+    "resolver": "ReelSec Environment Resolver",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00",
+    "tools": {
+      "java": {
+        "name": "java",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "openjdk 21.0.12 2026-07-21",
+        "returncode": 0
+      },
+      "python": {
+        "name": "python",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/python3.14",
+        "version": "Python 3.14.6",
+        "returncode": 0
+      },
+      "adb": {
+        "name": "adb",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/adb",
+        "version": "Android Debug Bridge version 1.0.41",
+        "returncode": 0,
+        "device_query": "USABLE",
+        "devices": [
+          "192.168.8.8:45441      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+        ]
+      },
+      "apktool": {
+        "name": "apktool-standalone",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "2.7.0-dirty",
+        "backend": "java-classpath",
+        "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+        "attempts": [
+          {
+            "backend": "cli",
+            "path": "/data/data/com.termux/files/usr/bin/apktool",
+            "returncode": 1
+          },
+          {
+            "backend": "java-classpath",
+            "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+            "returncode": 0
+          }
+        ]
+      },
+      "frida": {
+        "name": "frida",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/frida",
+        "version": "17.2.14",
+        "returncode": 0
+      },
+      "signing": {
+        "zipalign": {
+          "name": "zipalign",
+          "status": "BROKEN",
+          "path": "/data/data/com.termux/files/usr/bin/zipalign",
+          "version": null,
+          "returncode": 127
+        },
+        "apksigner": {
+          "name": "apksigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/bin/apksigner",
+          "version": "0.9",
+          "returncode": 0
+        },
+        "jarsigner": {
+          "name": "jarsigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+          "version": "jarsigner 21.0.12",
+          "returncode": 0
+        }
+      },
+      "zipalign": {
+        "name": "zipalign",
+        "status": "BROKEN",
+        "path": "/data/data/com.termux/files/usr/bin/zipalign",
+        "version": null,
+        "returncode": 127
+      },
+      "apksigner": {
+        "name": "apksigner",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/apksigner",
+        "version": "0.9",
+        "returncode": 0
+      },
+      "jarsigner": {
+        "name": "jarsigner",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+        "version": "jarsigner 21.0.12",
+        "returncode": 0
+      }
+    },
+    "device": {
+      "online_count": 1,
+      "state": "USABLE",
+      "records": [
+        "192.168.8.8:45441      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+      ]
+    },
+    "policy": {
+      "available_is_not_usable": true,
+      "resolver_does_not_install": true,
+      "original_apk_is_immutable": true
+    }
+  },
+  "apktool_backend": {
+    "name": "apktool-standalone",
+    "backend": "java-classpath",
+    "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+    "version": "2.7.0-dirty",
+    "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+    "status": "SELECTED"
+  },
+  "apktool_decode": {
+    "status": "DECODED_NO_RES",
+    "returncode": 0,
+    "command": [
+      "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "-cp",
+      "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "brut.apktool.Main",
+      "d",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+      "-o",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/decoded-apk-no-res",
+      "-r"
+    ],
+    "output_dir": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/decoded-apk-no-res",
+    "log": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/decoded-apk-no-res/reelsec-apktool-recovery.log",
+    "mode": "APKTOOL_NO_RES",
+    "resources_decoded": false,
+    "instrumentable_smali": true,
+    "buildable_with_apktool": true,
+    "selection_strategy": "NO_RES_FIRST"
+  },
+  "decoded_input_inventory": {
+    "schema_version": "1.1",
+    "status": "READY",
+    "analysis_mode": "DECODED_SMALI_NATIVE",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/decoded-apk-no-res",
+    "manifest": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/decoded-apk-no-res/AndroidManifest.xml",
+    "smali_roots": [
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/decoded-apk-no-res/smali"
+    ],
+    "smali_file_count": 514,
+    "native_library_count": 50,
+    "native_libraries": [
+      "lib/arm64-v8a/libSecShell-x86.so",
+      "lib/arm64-v8a/libSecShell.so",
+      "lib/arm64-v8a/libalinetworkdiagnosis.so",
+      "lib/arm64-v8a/libalivcffmpeg.so",
+      "lib/arm64-v8a/libapplovin-native-crash-reporter.so",
+      "lib/arm64-v8a/libbuffer_pgl.so",
+      "lib/arm64-v8a/libc++_shared.so",
+      "lib/arm64-v8a/libcrashlytics-common.so",
+      "lib/arm64-v8a/libcrashlytics-handler.so",
+      "lib/arm64-v8a/libcrashlytics-trampoline.so",
+      "lib/arm64-v8a/libcrashlytics.so",
+      "lib/arm64-v8a/libdatastore_shared_counter.so",
+      "lib/arm64-v8a/libfile_lock_pgl.so",
+      "lib/arm64-v8a/libmarsxlog.so",
+      "lib/arm64-v8a/libmku_aaab.so",
+      "lib/arm64-v8a/libmmkv.so",
+      "lib/arm64-v8a/libnms.so",
+      "lib/arm64-v8a/libpglarmor.so",
+      "lib/arm64-v8a/libprotect.so",
+      "lib/arm64-v8a/libsaasCorePlayer.so",
+      "lib/arm64-v8a/libsaasDownloader.so",
+      "lib/arm64-v8a/libsls_producer.so",
+      "lib/arm64-v8a/libstupid.so",
+      "lib/arm64-v8a/libtapjoy.so",
+      "lib/arm64-v8a/libtt_ugen_layout.so",
+      "lib/armeabi-v7a/libSecShell-x86.so",
+      "lib/armeabi-v7a/libSecShell.so",
+      "lib/armeabi-v7a/libalinetworkdiagnosis.so",
+      "lib/armeabi-v7a/libalivcffmpeg.so",
+      "lib/armeabi-v7a/libapplovin-native-crash-reporter.so",
+      "lib/armeabi-v7a/libbuffer_pgl.so",
+      "lib/armeabi-v7a/libc++_shared.so",
+      "lib/armeabi-v7a/libcrashlytics-common.so",
+      "lib/armeabi-v7a/libcrashlytics-handler.so",
+      "lib/armeabi-v7a/libcrashlytics-trampoline.so",
+      "lib/armeabi-v7a/libcrashlytics.so",
+      "lib/armeabi-v7a/libdatastore_shared_counter.so",
+      "lib/armeabi-v7a/libfile_lock_pgl.so",
+      "lib/armeabi-v7a/libmarsxlog.so",
+      "lib/armeabi-v7a/libmku_aaab.so",
+      "lib/armeabi-v7a/libmmkv.so",
+      "lib/armeabi-v7a/libnms.so",
+      "lib/armeabi-v7a/libpglarmor.so",
+      "lib/armeabi-v7a/libprotect.so",
+      "lib/armeabi-v7a/libsaasCorePlayer.so",
+      "lib/armeabi-v7a/libsaasDownloader.so",
+      "lib/armeabi-v7a/libsls_producer.so",
+      "lib/armeabi-v7a/libstupid.so",
+      "lib/armeabi-v7a/libtapjoy.so",
+      "lib/armeabi-v7a/libtt_ugen_layout.so"
+    ],
+    "dex_count": 0,
+    "dex_files": [],
+    "decode_mode": "APKTOOL_NO_RES",
+    "resources_decoded": false
+  },
+  "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/decoded-apk-no-res",
+  "target_source": "decoded-apk-no-res",
+  "input_provenance": {
+    "schema_version": "1.1",
+    "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+    "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+    "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/decoded-apk-no-res",
+    "analysis_root_kind": "repository_or_external_root",
+    "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_relative_path": "lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+    "target_relation": "WITHIN_ANALYSIS_ROOT",
+    "evidence_scope": "static-analysis-input-provenance",
+    "causality_proven": false
+  },
+  "instrumentation_plan": {
+    "status": "READY",
+    "mode": "NON_MUTATING_PLAN",
+    "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+    "class_name": "com/SecShell/SecShell/AW",
+    "loadlibrary_line": 135,
+    "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+    "anchor": "System.loadLibrary(\"SecShell\")",
+    "placement": "immediately_after_loadLibrary_before_normal_application_init",
+    "runtime_proof": false,
+    "discovery": "STRUCTURAL_CONTENT",
+    "candidate_count": 1,
+    "candidates": [
+      {
+        "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+        "class_name": "com/SecShell/SecShell/AW",
+        "loadlibrary_line": 135,
+        "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "is_application": true,
+        "has_attach_base_context": true
+      }
+    ],
+    "discovered_candidates": [
+      {
+        "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+        "relative_path": "smali/com/SecShell/SecShell/AW.smali",
+        "class_name": "com/SecShell/SecShell/AW",
+        "score": 185,
+        "is_application": true,
+        "has_attach_base_context": true,
+        "manifest_application": null,
+        "manifest_match": false,
+        "loadlibrary_line": 135,
+        "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "secshell_reference_in_class": true
+      }
+    ]
+  },
+  "instrumented_copy": {
+    "mutations": [
+      {
+        "anchor": "Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "file": "smali/com/SecShell/SecShell/AW.smali",
+        "log_message": "SecShell loadLibrary reached",
+        "log_tag": "ReelSec-Instrumentation",
+        "matched_registers": [
+          "v0"
+        ],
+        "purpose": "telemetry_only",
+        "registers_added": 2,
+        "type": "LOG_I_PROBE"
+      },
+      {
+        "type": "FRIDA_GADGET_EMBED",
+        "file": "smali/com/SecShell/SecShell/AW.smali",
+        "library": "lib/arm64-v8a/libfrida-gadget.so",
+        "library_sha256": "9a457f19c7fef6568a86b4d3028e7342b0bbc4cecc6449b47f5802c56f65b135",
+        "config": "lib/arm64-v8a/libfrida-gadget.config.so",
+        "abi": "arm64-v8a",
+        "listen": "127.0.0.1:27042",
+        "purpose": "guarded_runtime_observation",
+        "native_library_packaging": "apktool_doNotCompress_so",
+        "original_apk_untouched": true
+      }
+    ],
+    "schema_version": 1,
+    "source_manifest_sha256": "3fe3d6c8811e4d4ece4108b94d9afca2301eb0cf3118d707648e9484a2c7a1f4",
+    "source_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/decoded-apk-no-res",
+    "status": "MUTATED",
+    "work_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-apk",
+    "gadget_enabled": true,
+    "gadget_source": "/data/data/com.termux/files/home/apk-lab/reelsec-gadget/frida-gadget-17.2.14-android-arm64.so",
+    "gadget_abi": "arm64-v8a",
+    "gadget_port": 27042,
+    "instrumentation_target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-apk/smali/com/SecShell/SecShell/AW.smali"
+  },
+  "build_verify": {
+    "status": "BUILT",
+    "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-unsigned-aligned.apk",
+    "size": 75944997,
+    "sha256": "fb0c7af99a75be3bb2f64e840567f0d486e5f30fcbe54b57cf253964af5483dd",
+    "command": [
+      "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "-cp",
+      "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "brut.apktool.Main",
+      "b",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-apk",
+      "-o",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-unsigned.apk"
+    ],
+    "returncode": 0,
+    "output_tail": "I: Using Apktool 2.7.0-dirty\nI: Checking whether sources has changed...\nI: Smaling smali folder into classes.dex...\nI: Checking whether resources has changed...\nI: Copying raw resources...\nI: Copying libs... (/lib)\nI: Copying libs... (/kotlin)\nI: Copying libs... (/META-INF/services)\nI: Building apk file...\nI: Copying unknown files/dir...\nI: Built apk into: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-unsigned.apk\n",
+    "raw_built_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-unsigned.apk",
+    "alignment_command": [
+      "/data/data/com.termux/files/usr/bin/zipalign",
+      "-P",
+      "16",
+      "-f",
+      "-v",
+      "4",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-unsigned.apk",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-unsigned-aligned.apk"
+    ],
+    "alignment_returncode": 0,
+    "alignment_output_tail": "n_rules_english.txt (OK - compressed)\n75342103 org/apache/commons/codec/language/bm/gen_approx_russian.txt (OK - compressed)\n75342895 org/apache/commons/codec/language/bm/sep_exact_portuguese.txt (OK - compressed)\n75343458 org/apache/commons/codec/language/bm/sep_exact_any.txt (OK - compressed)\n75344027 org/apache/commons/codec/language/bm/ash_approx_spanish.txt (OK - compressed)\n75344609 org/apache/commons/codec/language/bm/gen_approx_cyrillic.txt (OK - compressed)\n75345195 org/apache/commons/codec/language/bm/ash_approx_hungarian.txt (OK - compressed)\n75345776 org/apache/commons/codec/language/bm/sep_approx_italian.txt (OK - compressed)\n75346348 org/apache/commons/codec/language/bm/sep_lang.txt (OK - compressed)\n75347400 org/apache/commons/codec/language/bm/gen_approx_greeklatin.txt (OK - compressed)\n75347988 org/apache/commons/codec/language/bm/gen_rules_polish.txt (OK - compressed)\n75349527 org/apache/commons/codec/language/bm/gen_exact_english.txt (OK - compressed)\n75350109 org/apache/commons/codec/language/bm/ash_rules_polish.txt (OK - compressed)\n75351658 org/apache/commons/codec/language/bm/ash_rules_cyrillic.txt (OK - compressed)\n75352727 org/apache/commons/codec/language/bm/gen_exact_cyrillic.txt (OK - compressed)\n75353313 org/apache/commons/codec/language/bm/sep_rules_portuguese.txt (OK - compressed)\n75354507 org/apache/commons/codec/language/bm/ash_approx_common.txt (OK - compressed)\n75356043 org/apache/commons/codec/language/bm/sep_approx_spanish.txt (OK - compressed)\n75356626 org/apache/commons/codec/language/bm/gen_rules_romanian.txt (OK - compressed)\n75357451 org/apache/commons/codec/language/bm/ash_exact_romanian.txt (OK - compressed)\n75358030 org/apache/commons/codec/language/bm/ash_rules_hebrew.txt (OK - compressed)\n75358814 org/apache/commons/codec/language/bm/sep_hebrew_common.txt (OK - compressed)\n75359825 org/apache/commons/codec/language/bm/gen_rules_hebrew.txt (OK - compressed)\n75360612 org/apache/commons/codec/language/bm/gen_rules_czech.txt (OK - compressed)\n75361452 org/apache/commons/codec/language/bm/ash_lang.txt (OK - compressed)\n75363083 org/apache/http/version.properties (OK - compressed)\n75363687 org/apache/http/client/version.properties (OK - compressed)\n75364376 google/protobuf/timestamp.proto (OK - compressed)\n75367275 google/protobuf/field_mask.proto (OK - compressed)\n75370469 google/protobuf/api.proto (OK - compressed)\n75373459 google/protobuf/duration.proto (OK - compressed)\n75375591 google/protobuf/struct.proto (OK - compressed)\n75377337 google/protobuf/wrappers.proto (OK - compressed)\n75378965 google/protobuf/source_context.proto (OK - compressed)\n75380230 google/protobuf/any.proto (OK - compressed)\n75382923 google/protobuf/type.proto (OK - compressed)\n75385373 google/protobuf/empty.proto (OK - compressed)\n75386672 okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75428132 okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75428396 com/applovin/shadow/okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75469876 com/applovin/shadow/okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75470128 com/google/api/client/http/google-http-client.properties (OK)\n75470236 com/google/api/client/googleapis/google.p12 (OK)\n75546785 com/google/api/client/googleapis/google.jks (OK - compressed)\n75590136 com/google/api/client/googleapis/google-api-client.properties (OK)\n75590234 src/google/protobuf/timestamp.proto (OK - compressed)\n75593137 src/google/protobuf/field_mask.proto (OK - compressed)\n75596335 src/google/protobuf/api.proto (OK - compressed)\n75599329 src/google/protobuf/duration.proto (OK - compressed)\n75601465 src/google/protobuf/struct.proto (OK - compressed)\n75603215 src/google/protobuf/wrappers.proto (OK - compressed)\n75604847 src/google/protobuf/source_context.proto (OK - compressed)\n75606116 src/google/protobuf/any.proto (OK - compressed)\n75608813 src/google/protobuf/type.proto (OK - compressed)\n75611267 src/google/protobuf/empty.proto (OK - compressed)\nVerification successful\n",
+    "alignment_verify_command": [
+      "/data/data/com.termux/files/usr/bin/zipalign",
+      "-c",
+      "-P",
+      "16",
+      "-v",
+      "4",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-unsigned-aligned.apk"
+    ],
+    "alignment_page_size_kb": 16,
+    "native_library_packaging": {
+      "status": "NATIVE_LIBRARIES_UNCOMPRESSED",
+      "native_library_count": 52,
+      "compressed_native_libraries": []
+    }
+  },
+  "sign_verify": {
+    "unsigned_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-unsigned-aligned.apk",
+    "unsigned_sha256": "fb0c7af99a75be3bb2f64e840567f0d486e5f30fcbe54b57cf253964af5483dd",
+    "signed_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-signed.apk",
+    "signed_sha256": "624ac7a6efd5ecc2c27f81000558ccc641893269dc9b943d61a049ad64734fdc",
+    "original_mutation": false,
+    "status": "SIGNED_VERIFIED",
+    "sign_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "sign",
+      "--ks",
+      "/data/data/com.termux/files/home/apk-lab/reelsec-test/reelsec-test.jks",
+      "--ks-key-alias",
+      "reelsec-test",
+      "--ks-pass",
+      "env:REELSEC_TEST_KEYSTORE_PASSWORD",
+      "--key-pass",
+      "env:REELSEC_TEST_KEY_PASSWORD",
+      "--out",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-signed.apk",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-unsigned-aligned.apk"
+    ],
+    "verify_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "verify",
+      "--verbose",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-signed.apk"
+    ],
+    "sign_output_tail": "",
+    "verify_output_tail": "Verifies\nVerified using v1 scheme (JAR signing): true\nVerified using v2 scheme (APK Signature Scheme v2): true\nVerified using v3 scheme (APK Signature Scheme v3): true\nVerified using v3.1 scheme (APK Signature Scheme v3.1): false\nVerified using v3.2 scheme (APK Signature Scheme v3.2): false\nVerified using v4 scheme (APK Signature Scheme v4): false\nVerified for SourceStamp: false\nNumber of signers: 1\nWARNING: META-INF/services/io.ktor.client.HttpClientEngineContainer not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.CoroutineExceptionHandler not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.internal.MainDispatcherFactory not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\n"
+  },
+  "adb_deploy": {
+    "status": "INSTALLED",
+    "serial": "192.168.8.8:45441",
+    "requested_serial": null,
+    "device_resolution": "AUTO_SINGLE_ONLINE_DEVICE",
+    "online_devices": [
+      "192.168.8.8:45441"
+    ],
+    "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-signed.apk",
+    "artifact_sha256": "624ac7a6efd5ecc2c27f81000558ccc641893269dc9b943d61a049ad64734fdc",
+    "artifact_kind": "INSTRUMENTED_TEST_ARTIFACT",
+    "device_inventory_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "devices",
+      "-l"
+    ],
+    "device_check_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "-s",
+      "192.168.8.8:45441",
+      "get-state"
+    ],
+    "artifact_preflight": {
+      "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-signed.apk",
+      "checks": {
+        "native_libs_uncompressed": {
+          "status": "PASS",
+          "so_count": 52,
+          "compressed_entries": []
+        },
+        "abi_directories": {
+          "status": "PASS",
+          "abis": [
+            "arm64-v8a",
+            "armeabi-v7a"
+          ]
+        },
+        "zipalign_page_alignment": {
+          "status": "PASS",
+          "command": [
+            "/data/data/com.termux/files/usr/bin/zipalign",
+            "-c",
+            "-P",
+            "16",
+            "-v",
+            "4",
+            "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-signed.apk"
+          ],
+          "returncode": 0,
+          "output_tail": "google/protobuf/any.proto (OK - compressed)\n75383119 google/protobuf/type.proto (OK - compressed)\n75385569 google/protobuf/empty.proto (OK - compressed)\n75386876 okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75428336 okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75428604 com/applovin/shadow/okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75470084 com/applovin/shadow/okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75470344 com/google/api/client/http/google-http-client.properties (OK)\n75470456 com/google/api/client/googleapis/google.p12 (OK)\n75547005 com/google/api/client/googleapis/google.jks (OK - compressed)\n75590364 com/google/api/client/googleapis/google-api-client.properties (OK)\n75590462 src/google/protobuf/timestamp.proto (OK - compressed)\n75593365 src/google/protobuf/field_mask.proto (OK - compressed)\n75596563 src/google/protobuf/api.proto (OK - compressed)\n75599557 src/google/protobuf/duration.proto (OK - compressed)\n75601693 src/google/protobuf/struct.proto (OK - compressed)\n75603443 src/google/protobuf/wrappers.proto (OK - compressed)\n75605075 src/google/protobuf/source_context.proto (OK - compressed)\n75606344 src/google/protobuf/any.proto (OK - compressed)\n75609041 src/google/protobuf/type.proto (OK - compressed)\n75611495 src/google/protobuf/empty.proto (OK - compressed)\n75612767 META-INF/REELSEC-.SF (OK - compressed)\n75771976 META-INF/REELSEC-.RSA (OK - compressed)\n75773115 META-INF/MANIFEST.MF (OK - compressed)\nVerification successful\n"
+        },
+        "abi_compatibility": {
+          "status": "PASS",
+          "device_abilist": "arm64-v8a,armeabi-v7a,armeabi",
+          "apk_abis": [
+            "arm64-v8a",
+            "armeabi-v7a"
+          ],
+          "compatible": true
+        }
+      },
+      "status": "PASS"
+    },
+    "install_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "-s",
+      "192.168.8.8:45441",
+      "install",
+      "-r",
+      "--no-incremental",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-signed.apk"
+    ],
+    "install_mode": "UPDATE",
+    "uninstall_command": null,
+    "uninstall_output_tail": "",
+    "install_output_tail": "Performing Streamed Install\nSuccess\n",
+    "installed_verification": {
+      "present": true,
+      "installed_path": "/data/app/~~kqdjrDbeBvPE-jeaYetdeg==/com.newleaf.app.android.victor-XMPi-UQVw2HRGjQVbSytlw==/base.apk",
+      "version_code": "4200",
+      "status": "VERIFIED_INSTALLED"
+    }
+  },
+  "runtime_capture": {
+    "schema_version": 1,
+    "captured_at_epoch": 1791401831.0646844,
+    "device_serial": "192.168.8.8:45441",
+    "package": "com.newleaf.app.android.victor",
+    "observations": {
+      "state": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:45441",
+          "get-state"
+        ],
+        "returncode": 0,
+        "output": "device\n"
+      },
+      "package_path": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:45441",
+          "shell",
+          "pm",
+          "path",
+          "com.newleaf.app.android.victor"
+        ],
+        "returncode": 0,
+        "output": "package:/data/app/~~kqdjrDbeBvPE-jeaYetdeg==/com.newleaf.app.android.victor-XMPi-UQVw2HRGjQVbSytlw==/base.apk\n"
+      },
+      "process": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:45441",
+          "shell",
+          "sh",
+          "-c",
+          "ps -A | grep -F com.newleaf.app.android.victor || true"
+        ],
+        "returncode": 0,
+        "output": ""
+      },
+      "logcat_tail": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:45441",
+          "logcat",
+          "-d",
+          "-t",
+          "250",
+          "-v",
+          "threadtime"
+        ],
+        "returncode": 0,
+        "output": "--------- beginning of main\n10-07 22:37:11.077 26776 26776 W FeatureFlagsImplExport: java.lang.NoClassDefFoundError: Failed resolution of: Landroid/os/flagging/AconfigPackage;\n10-07 22:37:11.077 26776 26776 W FeatureFlagsImplExport: java.lang.NoClassDefFoundError: Failed resolution of: Landroid/os/flagging/AconfigPackage;\n10-07 22:37:11.077 26776 26776 W FeatureFlagsImplExport: java.lang.NoClassDefFoundError: Failed resolution of: Landroid/os/flagging/AconfigPackage;\n10-07 22:37:11.077 22259 26717 I ProximityAuth: [MessageProcessorManager] MessageProcessorManager instantiated for user UserHandle{0}\n10-07 22:37:11.078 26716 26716 V GraphicsEnvironment: ANGLE GameManagerService for com.google.android.adservices.api: false\n10-07 22:37:11.086   921   921 D Zygote  : Forked child process 26814\n--------- beginning of system\n10-07 22:37:11.086  1269  1639 W ActivityManager: Slow operation: 59ms so far, now at startProcess: returned from zygote!\n10-07 22:37:11.086  1269  1639 W ActivityManager: Slow operation: 60ms so far, now at startProcess: done updating battery stats\n10-07 22:37:11.086  1269  1639 W ActivityManager: Slow operation: 60ms so far, now at startProcess: building log message\n10-07 22:37:11.086  1269  1639 I ActivityManager: Start proc 26814:com.samsung.android.app.routines:RoutineUIProcess/u0a40 for service {com.samsung.android.app.routines/com.samsung.android.app.routines.domainmodel.notification.NotificationUpdateService}\n10-07 22:37:11.086  1269  1639 W ActivityManager: Slow operation: 60ms so far, now at startProcess: starting to update pids map\n10-07 22:37:11.087  1269  1639 W ActivityManager: Slow operation: 60ms so far, now at startProcess: done updating pids map\n10-07 22:37:11.094 26776 26776 W FeatureFlagsImplExport: java.lang.NoClassDefFoundError: Failed resolution of: Landroid/os/flagging/AconfigPackage;\n10-07 22:37:11.098  1269  2301 D PackageManager: setEnabledSetting : userId = 95 packageName = com.google.android.permissioncontroller cmp = com.android.permissioncontroller.role.ui.SpecialAppAccessListActivity newState = 2 callingPackage = 9510282/com.google.android.permissioncontroller\n10-07 22:37:11.109 25659 26762 I ProximityAuth: [RecentAppsMediator] Package added: (user=UserHandle{95}) com.newleaf.app.android.victor\n10-07 22:37:11.112 26814 26814 I outineUIProcess: Using generational CollectorTypeCC GC.\n10-07 22:37:11.119 26716 26716 D NetworkSecurityConfig: No Network Security Config specified, using platform default\n10-07 22:37:11.119 26814 26814 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok\n10-07 22:37:11.121 26814 26814 D ActivityThread: setConscryptValidator\n10-07 22:37:11.122 26814 26814 D ActivityThread: setConscryptValidator - put\n10-07 22:37:11.131  1269  1614 W Looper  : Slow dispatch took 108ms android.fg h=android.os.Handler c=<recycled PooledLambda@d2e33d9> m=0\n10-07 22:37:11.133 22259 26808 I FraudProtectUtils: Not in testing population, skipping local test bank apps. [CONTEXT service_id=469 ]\n10-07 22:37:11.133 22259 26808 I FraudProtectUtils: (REDACTED) Latest bank app list size: %d, %s isBankApp: false\n10-07 22:37:11.134  2888  2907 I com.android.nfc: Background concurrent copying GC freed 5966KB AllocSpace bytes, 6(312KB) LOS objects, 58% free, 4315KB/10MB, paused 96us,25us total 300.318ms\n10-07 22:37:11.136 22259 26808 I PackageInstallIntentOp: (REDACTED) Package %s is not a bank app. Skipping updates.\n10-07 22:37:11.139 22259 26792 W AppInstallOperation: FDL Migration::InstallIntentOperation by FDL Module [CONTEXT service_id=77 ]\n10-07 22:37:11.145 22259 26809 I Dck     : [DckModuleInit] Package added intent processing... [CONTEXT service_id=289 ]\n10-07 22:37:11.149  1269  1341 I ActivityManager: DSS OFF for com.samsung.android.app.routines\n10-07 22:37:11.150 22259 26809 I Dck     : [DckModuleInit] Package added is not voem app [CONTEXT service_id=289 ]\n10-07 22:37:11.165 26814 26814 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10040; state: ENABLED\n10-07 22:37:11.178  2528 20834 D SecFgsManagerControllerImpl: onForegroundStateChanged: dialogShown:false, isForeground:true, packageName:com.flashget.kidscontrol , token:android.os.BinderProxy@1236c04, userId:0\n10-07 22:37:11.182  1269  1638 D ApplicationPolicy: isStatusBarNotificationAllowedAsUser: packageName = com.flashget.kidscontrol,userId = 0\n10-07 22:37:11.183  1269  1638 D ApplicationPolicy: isStatusBarNotificationAllowedAsUser: packageName = com.flashget.kidscontrol,userId = 0\n10-07 22:37:11.184  1269  1638 E NotificationService: Suppressing notification from package com.flashget.kidscontrol by user request.\n10-07 22:37:11.187  1269  1637 I AccessibilityServiceInfo: took more than 100ms mComponentName : ComponentInfo{com.samsung.android.accessibility.talkback/com.samsung.android.marvin.talkback.TalkBackService}, elapsedTime : 222\n10-07 22:37:11.199 25659 26816 E gle.android.gms: hiddenapi: Accessing hidden method Landroid/net/ConnectivityManager;->isNetworkTypeMobile(I)Z (runtime_flags=0, domain=platform, api=max-target-p) from Lcjxh; (domain=app, TargetSdkVersion=37) using reflection: denied\n10-07 22:37:11.199  1269  4911 W AppSearchIcing: status-util.h:31: Error: 3, Message: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.\n10-07 22:37:11.199 25659 26816 E gle.android.gms: hiddenapi: Accessing hidden method Landroid/os/PowerManager;->isLightDeviceIdleMode()Z (runtime_flags=0, domain=platform, api=max-target-s) from Lcjxh; (domain=app, TargetSdkVersion=37) using reflection: denied\n10-07 22:37:11.203  9465  9518 I Finsky  : [2455] WM::SCH: Logging work initialize for 12-1\n10-07 22:37:11.210  1269  4911 W AppSearchResult: Converting throwable to failed result.\n10-07 22:37:11.210  1269  4911 W AppSearchResult: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.\n10-07 22:37:11.210  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.checkCodeOneOf(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:22)\n10-07 22:37:11.210  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.checkSuccess(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:7)\n10-07 22:37:11.210  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.doSetSchemaNoChangeNotificationLocked(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:877)\n10-07 22:37:11.210  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.doSetSchemaWithChangeNotificationNoGetSchemaLocked(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:76)\n10-07 22:37:11.210  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.setSchema(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:100)\n10-07 22:37:11.210  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.AppSearchManagerService$Stub.lambda$setSchema$0(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:23)\n10-07 22:37:11.210  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.AppSearchManagerService$Stub$$ExternalSyntheticLambda9.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:41)\n10-07 22:37:11.210  1269  4911 W AppSearchResult: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-07 22:37:11.210  1269  4911 W AppSearchResult: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-07 22:37:11.210  1269  4911 W AppSearchResult: \tat java.lang.Thread.run(Thread.java:1571)\n10-07 22:37:11.211  1269  4918 E AppSearchAppIndxrHlp: Failed to setSchema in batch due to invalid schema.\n10-07 22:37:11.211  1269  4918 E AppSearchAppIndxrHlp: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.\n10-07 22:37:11.211  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.sync.SyncAppSearchBase.executeAppSearchResultOperation(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:50)\n10-07 22:37:11.211  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.sync.SyncAppSearchSessionImpl.setSchema(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:20)\n10-07 22:37:11.211  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppSearchHelper.setSchemasForPackages(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:488)\n10-07 22:37:11.211  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerImpl.doUpdateIncrementalPut(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:194)\n10-07 22:37:11.211  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance.doUpdate(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:129)\n10-07 22:37:11.211  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance$$ExternalSyntheticLambda2.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:9)\n10-07 22:37:11.211  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance$$ExternalSyntheticLambda0.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:12)\n10-07 22:37:11.211  1269  4918 E AppSearchAppIndxrHlp: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-07 22:37:11.211  1269  4918 E AppSearchAppIndxrHlp: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-07 22:37:11.211  1269  4918 E AppSearchAppIndxrHlp: \tat java.lang.Thread.run(Thread.java:1571)\n10-07 22:37:11.230 25659 26762 E gle.android.gms: Invalid ID 0x00000000.\n10-07 22:37:11.233 26716 26716 D NetworkSecurityConfig: No Network Security Config specified, using platform default\n10-07 22:37:11.240 22259 26717 W GCM     : Unexpected forwarded intent: Intent { act=android.intent.action.PACKAGE_ADDED dat=package: flg=0x4000010 pkg=com.google.android.gms cmp=com.google.android.gms/.chimera.PersistentIntentOperationService (has extras) }\n10-07 22:37:11.247  1269  4911 W AppSearchIcing: status-util.h:31: Error: 3, Message: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.\n10-07 22:37:11.248  1269  4911 W AppSearchResult: Converting throwable to failed result.\n10-07 22:37:11.248  1269  4911 W AppSearchResult: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.\n10-07 22:37:11.248  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.checkCodeOneOf(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:22)\n10-07 22:37:11.248  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.checkSuccess(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:7)\n10-07 22:37:11.248  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.doSetSchemaNoChangeNotificationLocked(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:877)\n10-07 22:37:11.248  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.doSetSchemaWithChangeNotificationNoGetSchemaLocked(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:76)\n10-07 22:37:11.248  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.setSchema(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:100)\n10-07 22:37:11.248  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.AppSearchManagerService$Stub.lambda$setSchema$0(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:23)\n10-07 22:37:11.248  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.AppSearchManagerService$Stub$$ExternalSyntheticLambda9.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:41)\n10-07 22:37:11.248  1269  4911 W AppSearchResult: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-07 22:37:11.248  1269  4911 W AppSearchResult: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-07 22:37:11.248  1269  4911 W AppSearchResult: \tat java.lang.Thread.run(Thread.java:1571)\n10-07 22:37:11.251  1269  4918 E AppSearchAppIndxrHlp: Skipping invalid schemas for package: com.google.android.googlequicksearchbox\n10-07 22:37:11.251  1269  4918 E AppSearchAppIndxrHlp: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.\n10-07 22:37:11.251  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.sync.SyncAppSearchBase.executeAppSearchResultOperation(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:50)\n10-07 22:37:11.251  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.sync.SyncAppSearchSessionImpl.setSchema(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:20)\n10-07 22:37:11.251  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppSearchHelper.setSchemasForPackages(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:588)\n10-07 22:37:11.251  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerImpl.doUpdateIncrementalPut(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:194)\n10-07 22:37:11.251  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance.doUpdate(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:129)\n10-07 22:37:11.251  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance$$ExternalSyntheticLambda2.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:9)\n10-07 22:37:11.251  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance$$ExternalSyntheticLambda0.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:12)\n10-07 22:37:11.251  1269  4918 E AppSearchAppIndxrHlp: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-07 22:37:11.251  1269  4918 E AppSearchAppIndxrHlp: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-07 22:37:11.251  1269  4918 E AppSearchAppIndxrHlp: \tat java.lang.Thread.run(Thread.java:1571)\n10-07 22:37:11.259  1269  2450 D NetdEventListenerService: DNS Requested by : 102, 10240\n10-07 22:37:11.267 31132 31132 E Routine@Core[4.2.01.2]: RoutineDataMigrator: addHiddenAttributeForOldTag() ActionMeta with oldTag(notification_tts) does not exist.\n10-07 22:37:11.268 31132 31132 E Routine@Core[4.2.01.2]: RoutineDataMigrator: addHiddenAttributeForOldTag() ActionMeta with oldTag(flash) does not exist.\n10-07 22:37:11.279  1269  1637 W AccessibilitySecurityPolicy: Skipping accessibility service com.vzw.hss.myverizon/com.vz.assisttouch.services.AssistiveTouchService: it does not require the permission android.permission.BIND_ACCESSIBILITY_SERVICE\n10-07 22:37:11.288 31132 31132 E Routine@Core[4.2.01.2]: RoutineDataMigrator: addHiddenAttributeForOldTag() ConditionMeta with oldTag(message_include_keyword) does not exist.\n10-07 22:37:11.288  1269  4911 W AppSearchIcing: status-util.h:31: Error: 3, Message: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.apps.adm' references or inherits from itself.\n10-07 22:37:11.289  1269  4911 W AppSearchResult: Converting throwable to failed result.\n10-07 22:37:11.289  1269  4911 W AppSearchResult: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.apps.adm' references or inherits from itself.\n10-07 22:37:11.289  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.checkCodeOneOf(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:22)\n10-07 22:37:11.289  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.checkSuccess(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:7)\n10-07 22:37:11.289  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.doSetSchemaNoChangeNotificationLocked(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:877)\n10-07 22:37:11.289  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.doSetSchemaWithChangeNotificationNoGetSchemaLocked(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:76)\n10-07 22:37:11.289  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.setSchema(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:100)\n10-07 22:37:11.289  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.AppSearchManagerService$Stub.lambda$setSchema$0(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:23)\n10-07 22:37:11.289  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.AppSearchManagerService$Stub$$ExternalSyntheticLambda9.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:41)\n10-07 22:37:11.289  1269  4911 W AppSearchResult: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-07 22:37:11.289  1269  4911 W AppSearchResult: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-07 22:37:11.289  1269  4911 W AppSearchResult: \tat java.lang.Thread.run(Thread.java:1571)\n10-07 22:37:11.289  1269  4918 E AppSearchAppIndxrHlp: Skipping invalid schemas for package: com.google.android.apps.adm\n10-07 22:37:11.289  1269  4918 E AppSearchAppIndxrHlp: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.apps.adm' references or inherits from itself.\n10-07 22:37:11.289  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.sync.SyncAppSearchBase.executeAppSearchResultOperation(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:50)\n10-07 22:37:11.289  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.sync.SyncAppSearchSessionImpl.setSchema(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:20)\n10-07 22:37:11.289  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppSearchHelper.setSchemasForPackages(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:588)\n10-07 22:37:11.289  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerImpl.doUpdateIncrementalPut(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:194)\n10-07 22:37:11.289  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance.doUpdate(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:129)\n10-07 22:37:11.289  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance$$ExternalSyntheticLambda2.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:9)\n10-07 22:37:11.289  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance$$ExternalSyntheticLambda0.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:12)\n10-07 22:37:11.289  1269  4918 E AppSearchAppIndxrHlp: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-07 22:37:11.289  1269  4918 E AppSearchAppIndxrHlp: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-07 22:37:11.289  1269  4918 E AppSearchAppIndxrHlp: \tat java.lang.Thread.run(Thread.java:1571)\n10-07 22:37:11.291 31132 31132 E Routine@Core[4.2.01.2]: RoutineDataMigrator: addHiddenAttributeForOldTag() ConditionMeta with oldTag(message_from_someone) does not exist.\n10-07 22:37:11.298  3922  3922 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color,raw:pm path com.newleaf.app.android.victor'\n10-07 22:37:11.298  9465  9529 I Finsky  : [2464] SCH: Scheduling phonesky job Id: 12-1, CT: 1791401830440, Constraints: [{ L: 15000, D: 86400000, C: CHARGING_NONE, I: IDLE_NONE, N: NET_ANY, B: BATTERY_ANY }]\n10-07 22:37:11.315  1269  1720 E VerityUtils: Failed to measure fs-verity, errno 95: /data/app/~~kqdjrDbeBvPE-jeaYetdeg==/com.newleaf.app.android.victor-XMPi-UQVw2HRGjQVbSytlw==/base.apk\n10-07 22:37:11.315  1269  1637 W AccessibilitySecurityPolicy: Skipping accessibility service pro.bingbon.app/pro.bingintl.widget.suspendedwindow.service.WorkAccessibilityService: it does not require the permission android.permission.BIND_ACCESSIBILITY_SERVICE\n10-07 22:37:11.325  1269  2404 D SemNscXgbMsL1: Probability - Cloud gaming: [0.22478718]\n10-07 22:37:11.325  1269  2404 D SemNscXgbMsL1: Probability - Real time: [0.114095256]\n10-07 22:37:11.325  1269  2404 D SemNscXgbMsL1: Probability - Non real time: [0.16895737]\n10-07 22:37:11.325  1269  2404 D SemNscXgbMsL1: 1 sample inference time: 0.220938 msecs\n10-07 22:37:11.325 31132 31132 E Routine@Core[4.2.01.2]: RoutineDataMigrator: addHiddenAttributeForOldTag() ActionMeta with oldTag(aod_on) does not exist.\n10-07 22:37:11.325  1269  2404 D SemNscXgbL2Rt: L2 RT 1 sample inference time: 0.364844 msecs\n10-07 22:37:11.326  1269  2404 D SemNscXgbL2Nrt: L2 NRT 1 sample inference time: 0.307188 msecs\n10-07 22:37:11.331 31132 31132 W Routine@Core[4.2.01.2]: RoutineDataMigrator: migrate: newTag (sec_eye_comfort_shield_routine) is not available to migrate for (blue_light_filter_on) oldTag\n10-07 22:37:11.331 31132 31132 E Routine@Core[4.2.01.2]: RoutineDataMigrator: addHiddenAttributeForOldTag() ActionMeta with oldTag(vibration) does not exist.\n10-07 22:37:11.332 31132 31132 E Routine@Core[4.2.01.2]: RoutineDataMigrator: addHiddenAttributeForOldTag() ActionMeta with oldTag(device_control) does not exist.\n10-07 22:37:11.332 31132 31132 E Routine@Core[4.2.01.2]: RoutineDataMigrator: addHiddenAttributeForOldTag() ActionMeta with oldTag(run_a_scene) does not exist.\n10-07 22:37:11.338 26524 26607 I GetConfigSnapshotOp: (REDACTED) Succeeded but not registered: %s\n10-07 22:37:11.348 26716 26716 I ApplicationContextProvider: onCreate(): setting application context from android.app.Application@fd6eeda\n10-07 22:37:11.358 26716 26716 I adservices-shared: set(): set singleton context as android.app.Application@fd6eeda\n10-07 22:37:11.361 31132 31132 W Routine@Core[4.2.01.2]: RoutineDataMigrator: migrate: newTag (command://com.samsung.accessibility.command/ColorCorrectionRoutine) is not available to migrate for (color_adjustment) oldTag\n10-07 22:37:11.362 31132 31132 W Routine@Core[4.2.01.2]: RoutineDataMigrator: migrate: newTag (dc_power_mode_action) is not available to migrate for (upsm_on) oldTag\n10-07 22:37:11.363 31132 31132 W Routine@Core[4.2.01.2]: RoutineDataMigrator: migrate: newTag (watch_theater_mode) is not available to migrate for (watch_theater_mode) oldTag\n10-07 22:37:11.363 31132 31132 W Routine@Core[4.2.01.2]: RoutineDataMigrator: migrate: newTag (watch_theater_mode) is not available to migrate for (watch_theater_mode) oldTag\n10-07 22:37:11.364 31132 31132 I Routine@Core[4.2.01.2]: RoutineDataMigrator: deprecateOldTag() oldTag and newTag are same, it doesn't have to be deprecated - show_action_list\n10-07 22:37:11.364 31132 31132 I Routine@Core[4.2.01.2]: RoutineDataMigrator: migration - end\n10-07 22:37:11.364 31132 31132 I Routine@Core[4.2.01.2]: RoutineHistoryDumpImpl: [RoutineDataMigrator]  done. results=[]\n10-07 22:37:11.384 22259 26687 I GmsModuleInitializer: Using ContainerGservicesDelegate\n10-07 22:37:11.394  9465  9529 I Finsky  : [2464] SCH: Scheduling 1 system job(s)\n10-07 22:37:11.394  9465  9529 I Finsky  : [2464] SCH: Scheduling system job Id: 9151, L: 14046, D: 51441899, C: false, I: false, N: 1\n10-07 22:37:11.404  1269  1614 W Looper  : Slow dispatch took 216ms android.fg h=android.os.Handler c=<recycled PooledLambda@e950bb> m=0\n10-07 22:37:11.406  1269  2420 D SemWifiSwitchForIndividualAppsService: isSkipTcpMonitorInfo - result:2\n10-07 22:37:11.415 22259 26792 I GamesModuleFactoryProvi: Creating production RootComponent. [CONTEXT service_id=1 ]\n10-07 22:37:11.429  3922  3922 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color,raw:sh -c ps -A | grep -F com.newleaf.app.android.victor || true'\n10-07 22:37:11.453 25659 26762 I AppIconSolution: return the original icon because tray option is set to None for com.newleaf.app.android.victor, isNight = false\n10-07 22:37:11.488  1269  1730 D PackageSettings: ++ writeStateForUserSyncLPr(0)\n10-07 22:37:11.488  1269  1730 W PackageSettings: -- writeStateForUserSyncLPr(0)\n10-07 22:37:11.499  2528 20834 D SecFgsManagerControllerImpl: onForegroundStateChanged: dialogShown:false, isForeground:true, packageName:com.flashget.kidscontrol , token:android.os.BinderProxy@1236c04, userId:0\n10-07 22:37:11.499  1269  1638 D ApplicationPolicy: isStatusBarNotificationAllowedAsUser: packageName = com.flashget.kidscontrol,userId = 0\n10-07 22:37:11.499  1269  1638 D ApplicationPolicy: isStatusBarNotificationAllowedAsUser: packageName = com.flashget.kidscontrol,userId = 0\n10-07 22:37:11.499  1269  1638 E NotificationService: Suppressing notification from package com.flashget.kidscontrol by user request.\n10-07 22:37:11.505 22259 26809 I NearbyDiscovery: (REDACTED) processGrantSlicePermission: %s\n10-07 22:37:11.510 26510 26715 D CompatibilityChangeReporter: Compat change id reported: 183155436; UID 15010241; state: ENABLED\n10-07 22:37:11.514 22259 24403 I GmscoreIpa: (REDACTED) Using %s flags by method %d\n10-07 22:37:11.558  9465  9520 I Finsky  : [2457] [ContentSync] finished, scheduled=true\n10-07 22:37:11.559  1269  1637 I AccessibilityShortcutInfo: took more than 100ms mComponentName : ComponentInfo{com.google.audio.hearing.visualization.accessibility.scribe/com.google.audio.hearing.visualization.accessibility.scribe.MainActivity}, elapsedTime : 128\n10-07 22:37:11.596  1269  2587 I GenerationRegistry: mBackingStore.isClosed() : false\n10-07 22:37:11.601  1269  5189 D IntervalStats: Unable to parse usage stats packages: [1424, 2059, 2155, 2156]\n10-07 22:37:11.601 26716 26716 E adservices: Measurement Install Attribution Receiver is disabled\n10-07 22:37:11.605  1008  4321 I sensors-hal: handle_sns_client_event:541, [0][3021860] accel_sample [ 4.434,  8.760, -1.310] 34073966588853\n10-07 22:37:11.610  1269  5189 D IntervalStats: Unable to parse event packages: [2059, 2156]\n10-07 22:37:11.614  1008  6545 I sensors-hal: handle_sns_client_event:252, auto_rotation_debug_2 mode,255, type,1,0 acc,4.467,8.736,-1.262, ar,0, ver,10\n10-07 22:37:11.643  1269  1323 I system_server: Background concurrent copying GC freed 52MB AllocSpace bytes, 68(2156KB) LOS objects, 12% free, 174MB/198MB, paused 373us,497us total 1.363s\n10-07 22:37:11.646 22259 22603 D CompatibilityChangeReporter: Compat change id reported: 150939131; UID 10240; state: ENABLED\n10-07 22:37:11.665  1269  5189 D IntervalStats: Unable to parse usage stats packages: [2059, 2156, 2167, 2168]\n10-07 22:37:11.667 25659 26762 I ProximityAuth: [MessageProcessorManager] MessageProcessorManager instantiated for user UserHandle{95}\n10-07 22:37:11.672 22259 23395 I cn_CronetUrlRequestContext: destroyNativeStreamLocked org.chromium.net.impl.CronetBidirectionalStream@6ee3053\n10-07 22:37:11.689  1269  5189 D IntervalStats: Unable to parse event packages: [2168]\n10-07 22:37:11.689 22259 25273 I AppLinksAsyncVerifierV2: (REDACTED) Verification result: checking for a statement with source %s, relation delegate_permission/common.handle_all_urls, and target %s --> %b.\n10-07 22:37:11.691 22259 26683 I AppLinksHostsVerifierV2: (REDACTED) Verification %s complete. Successful hosts: %s. Failed hosts: %s. Error hosts: %s.\n10-07 22:37:11.706  1269  1341 D CompatibilityChangeReporter: Compat change id reported: 161252188; UID 10810; state: DISABLED\n10-07 22:37:11.708 22259 26683 I WebApkHostsVerifierV2: (REDACTED) Processing %d input requests\n10-07 22:37:11.709 22259 26683 I AppLinksUtilsV1: Legacy cross-profile verification enabled [CONTEXT service_id=244 ]\n10-07 22:37:11.710 22259 26683 I WebApkHostsVerifierV2: (REDACTED) Returning %d non-WebAPK requests\n10-07 22:37:11.726 22259 26875 I Icing   : IndexChimeraService.getServiceInterface callingPackage=com.google.android.gms componentName=ContactsIndexer serviceId=33\n10-07 22:37:11.730 22259 22259 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.common.telemetry.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }\n10-07 22:37:11.747 31132 31132 I Routine@Core[4.2.01.2]: SleepScheduleInfoRequester: getMigrationDataAboutSleepSchedule\n10-07 22:37:11.750  1269  1341 I ActivityManager: com.sec.android.app.clockpackage is exempt from freezer by list\n10-07 22:37:11.750  1269  1341 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10217; state: DISABLED\n10-07 22:37:11.750  1269  1341 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 10217; state: DISABLED\n10-07 22:37:11.750  1269  1341 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 10217; state: DISABLED\n10-07 22:37:11.750  1269  1341 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 10217; state: ENABLED\n10-07 22:37:11.751 25659 26722 I GmsModuleInitializer: Using ContainerGservicesDelegate\n10-07 22:37:11.752  9465  9528 I Finsky  : [2463] AIM: AppInfoManager-Perf > getApps > data collection finished\n10-07 22:37:11.752  9465  9528 I Finsky  : [2463] AIM: AppInfoManager-Perf > maybeDestroyAppInfoManager is called. actives = 0\n10-07 22:37:11.752  1269  1639 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10217; state: ENABLED\n10-07 22:37:11.765   921   921 D Zygote  : Forked child process 26887\n10-07 22:37:11.768  1269  1639 I ActivityManager: Start proc 26887:com.sec.android.app.clockpackage/u0a217 for content provider {com.sec.android.app.clockpackage/com.sec.android.app.clockpackage.alarm.model.AlarmProvider}\n10-07 22:37:11.706  4963  6225 I SDHMS:D : SIOP:: AP:499 BAT:424 USB:394 CHG:468 PA:460 CP:469 WIFI:473 BLK:0 SUBBAT:0 SKIN:426 SKINF:426 SKINB:419 LRP:426 LRF:426 LRB:419 BLRF:426 BLRB:419 APT:417 APR:410 \n10-07 22:37:11.706  4963  6225 I SDHMS:D : MODEMQ:: \n10-07 22:37:11.796 31551 26886 V MVS_VZWAVSService: com.verizon.provider.PACKAGE_ADDED\n10-07 22:37:11.800 26887 26887 I pp.clockpackage: Using generational CollectorTypeCC GC.\n10-07 22:37:11.810 26887 26887 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok\n10-07 22:37:11.811 26887 26887 D ActivityThread: setConscryptValidator\n10-07 22:37:11.811 26887 26887 D ActivityThread: setConscryptValidator - put\n10-07 22:37:11.818  1269  1637 D AccessibilityManagerService: currentTargets : [] targetsFromSetting : []\n10-07 22:37:11.819  1269  1637 D AccessibilityManagerService: componentId : null userState.getTargetAssignedToAccessibilityButton() : null\n10-07 22:37:11.820  1269  1637 D AccessibilityManagerService: readAccessibilityDirectAccessSettingLocked currentTargets : [] targetsFromSetting : []\n10-07 22:37:11.822  1269  1637 D SettingsProvider: isChangeAllowed() : name = accessibility_enabled\n10-07 22:37:11.826  1269  2404 D SemNscXgbMsL1: Probability - Cloud gaming: [0.094934344]\n10-07 22:37:11.826  1269  2404 D SemNscXgbMsL1: Probability - Real time: [0.17320167]\n10-07 22:37:11.826  1269  2404 D SemNscXgbMsL1: Probability - Non real time: [0.8743303]\n10-07 22:37:11.826  1269  2404 D SemNscXgbMsL1: 1 sample inference time: 0.178021 msecs\n10-07 22:37:11.826  1269  2404 D SemNscXgbL2Rt: L2 RT 1 sample inference time: 0.273906 msecs\n10-07 22:37:11.826  1269  2404 D SemNscXgbL2Nrt: L2 NRT 1 sample inference time: 0.247552 msecs\n10-07 22:37:11.828 22259 26841 W PlayGamesServices[UiUtils]: AppVersion: Cannot find the installed destination app.\n10-07 22:37:11.831 22259 26841 I GetServiceValidatorImpl: (REDACTED) onGetService() from Client SDK version [%s], Module version [%s], PGA version [%s], Account [%s], Calling package [%s], Game package [%s]\n10-07 22:37:11.838  1269  1637 D WindowMagnificationMgr: requestConnection :false mConnectionState : 3\n10-07 22:37:11.838  1269  1637 W WindowMagnificationMgr: requestConnection duplicated request: connect=false, mConnectionState=DISCONNECTED\n10-07 22:37:11.838  1269  1637 I SGM:GameManager: PkgUpdateReceiver, onReceive action =android.intent.action.PACKAGE_ADDED changingUserId =0\n10-07 22:37:11.839  1269  1637 I SGM:GameManager: PkgUpdateReceiver, onPackageAdded : com.newleaf.app.android.victor userHandle : UserHandle{0} userId : 0\n10-07 22:37:11.839 22259 26841 I GetGamesServiceReqFacto: (REDACTED) Parsing request with ignored arguments. signInOptionsBundle [%s], isRetryingSignIn [%s], skipWelcomePopup [%s], requireGooglePlus [%s]\n10-07 22:37:11.840 22259 26841 I GetGamesServiceReqFacto: Replacing request for `games` scope with `games_lite`\n10-07 22:37:11.844  1269  2588 W system_server: Long monitor contention with owner android.bg (1637) at com.android.server.accessibility.magnification.WindowMagnificationManager com.android.server.accessibility.magnification.MagnificationController.getWindowMagnificationMgr()(MagnificationController.java:748) waiters=0 in void com.android.server.accessibility.AccessibilityManagerService.onSystemActionsChanged() for 809ms\n10-07 22:37:11.844  1269  1637 I SGM:GameManager: PkgUpdateReceiver, com.samsung.android.game.gos is enabled : true\n10-07 22:37:11.846  1269  2323 D SGM:GosNotifyThread: notifyPackageChangedToGos(), before send intent to GOS. type:15, changeType: 0, pkgName:com.newleaf.app.android.victor, userHandleId:0\n10-07 22:37:11.848  1269  2982 W system_server: Long monitor contention with owner android.bg (1637) at com.android.server.accessibility.magnification.WindowMagnificationManager com.android.server.accessibility.magnification.MagnificationController.getWindowMagnificationMgr()(MagnificationController.java:748) waiters=1 in long com.android.server.accessibility.AccessibilityManagerService.addClient(android.view.accessibility.IAccessibilityManagerClient, int) for 739ms\n10-07 22:37:11.887 22259 22264 W gle.android.gms: Cleared Reference was only reachable from finalizer (only reported once)\n10-07 22:37:11.904 22259 22264 I gle.android.gms: Background young concurrent copying GC freed 7990KB AllocSpace bytes, 41(1012KB) LOS objects, 24% free, 26MB/35MB, paused 2.468ms,203us total 108.811ms\n10-07 22:37:11.908 22259 25180 I Icing   : Storage manager: low false usage 67.74MB avail 119.71GB capacity 464.29GB\n10-07 22:37:11.947  1269  2450 D NetdEventListenerService: DNS Requested by : 102, 10699\n10-07 22:37:11.959  1269  2418 D SemWifiTransportLayerUtils: getPlaystoreCategory, indexCategoryStart : -1\n10-07 22:37:11.960  1269  1637 I SearchManagerService: updateSearchables\n10-07 22:37:11.962 25659 26807 I Auth    : (REDACTED) [SupervisedAccountIntentOperation] onHandleIntent: %s\n10-07 22:37:11.964  1269  2418 D SemWifiTransportLayerUtils: getPlaystoreCategory, indexDownloadStart : -1\n10-07 22:37:11.964  1269  2418 D SemWifiTransportLayerMonitor.TcpMonitorHandler: MSG_SAVE_PACKAGE_INFO\n10-07 22:37:11.964  1269  2418 D SemWifiTransportLayerFileManager: saveWifiPackageInfoToFile\n10-07 22:37:11.964  1269  2418 D SemWifiTransportLayerFileManager: writeWifiPackageInfoList\n10-07 22:37:11.973  1269  2418 D SemWifiTransportLayerMonitor.TcpMonitorHandler: MSG_SAVE_PACKAGE_INFO\n10-07 22:37:11.973  1269  2418 D SemWifiTransportLayerFileManager: saveWifiPackageInfoToFile\n10-07 22:37:11.973  1269  2418 D SemWifiTransportLayerFileManager: writeWifiPackageInfoList\n10-07 22:37:11.985 22259 25180 D nativeloader: Load /data/app/~~5jZ00Ywmtqn5Wx4wjpd1oA==/com.google.android.gms-foKbZreYw2KAYBDmMlfLyg==/base.apk!/lib/arm64-v8a/libAppDataSearch.so using class loader ns clns-11 (caller=/data/app/~~5jZ00Ywmtqn5Wx4wjpd1oA==/com.google.android.gms-foKbZreYw2KAYBDmMlfLyg==/base.apk): ok\n10-07 22:37:12.000 22259 25180 E native  : E0000 00:00:1791401831.998427   25180 model-utils.cc:41] Not a valid Model flatbuffer\n10-07 22:37:12.000 22259 25180 E native  : E0000 00:00:1791401832.000427   25180 model-provider-from-fb.cc:105] Unable to initialize ModelProviderFromFlatbuffer\n10-07 22:37:12.001 22259 25180 I native  : I0000 00:00:1791401832.001139   25180 model-api.cc:46] Registered model under key tmp-segmentation-model\n10-07 22:37:12.017  1269  1323 I system_server: Background young concurrent copying GC freed 33MB AllocSpace bytes, 64(10176KB) LOS objects, 12% free, 172MB/196MB, paused 3.166ms,807us total 161.454ms\n10-07 22:37:12.024 25659 26714 I Blockstore: (REDACTED) [DataStoreImpl] Clearing Blockstore Data for package %s\n10-07 22:37:12.028 22259 25180 I native  : I0000 00:00:1791401832.028100   25180 permission-checker.cc:82] Creating PermissionChecker based on ACL with config_version 1 having 9 permissions defined.\n10-07 22:37:12.097  1269  1341 W system_server: Long monitor contention with owner PackageManagerBg (1720) at void com.android.server.pm.Settings$RuntimePermissionPersistence.lambda$writeStateForUser$1(java.lang.Object, boolean, boolean, com.android.server.pm.permission.LegacyPermissionDataProvider, com.android.server.utils.WatchedArrayMap, int, com.android.server.utils.WatchedArrayMap, int, java.lang.String, android.os.Handler)(Settings.java:5855) waiters=0 in void com.android.server.pm.PackageManagerService$PackageManagerInternalImpl.notifyPackageUse(java.lang.String, int) for 307ms\n10-07 22:37:12.114  1269  2323 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 10070; state: DISABLED\n10-07 22:37:12.115  1269  2323 D SGM:GosNotifyThread: notifyPackageChangedToGos(), after send intent to GOS. ComponentInfo{com.samsung.android.game.gos/com.samsung.android.game.gos.service.GameIntentService}\n10-07 22:37:12.116  1269  2587 W system_server: Long monitor contention with owner binder:1269_2 (1341) at android.content.ComponentName com.android.server.am.ActivityManagerService.startService(android.app.IApplicationThread, android.content.Intent, java.lang.String, boolean, java.lang.String, java.lang.String, int)(ActivityManagerService.java:14950) waiters=4 in void com.android.server.am.ActivityManagerService.serviceDoneExecuting(android.os.IBinder, int, int, int) for 252ms\n10-07 22:37:12.132 25659 26807 W AppInstallOperation: FDL Migration::InstallIntentOperation by FDL Module [CONTEXT service_id=77 ]\n10-07 22:37:12.132  1269  1614 W Looper  : Slow dispatch took 295ms android.fg h=android.os.Handler c=<recycled PooledLambda@1ccfa66> m=0\n10-07 22:37:12.133 26305 26930 I GOS:GameIntentService: onHandleIntent. GameIntentService. type: 15, pkgName: com.newleaf.app.android.victor\n10-07 22:37:12.136  1269  1323 I system_server: Background young concurrent copying GC freed 11MB AllocSpace bytes, 37(4956KB) LOS objects, 12% free, 166MB/190MB, paused 891us,402us total 117.814ms\n10-07 22:37:12.136 26776 26900 D CompatibilityChangeReporter: Compat change id reported: 303742236; UID 9510282; state: ENABLED\n10-07 22:37:12.136  1269  5167 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 10217; state: DISABLED\n10-07 22:37:12.137  1269  5167 I ActivityManager: DSS OFF for com.sec.android.app.clockpackage\n10-07 22:37:12.146 22259 22259 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.icing.LIGHTWEIGHT_INDEX_SERVICE dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }\n10-07 22:37:12.146 22259 22259 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.icing.LIGHTWEIGHT_INDEX_SERVICE dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }\n10-07 22:37:12.150 26691 26691 I Process : Sending signal. PID: 26691 SIG: 9\n10-07 22:37:12.155 26776 26787 I PermissionControllerServiceImpl: Updating user sensitive for uid 9510810\n10-07 22:37:12.159 26887 26887 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10217; state: ENABLED\n10-07 22:37:12.162 25659 25659 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.common.BIND_SHARED_PREFS pkg=com.google.android.gms }\n10-07 22:37:12.162 25659 25659 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.common.BIND_SHARED_PREFS pkg=com.google.android.gms }\n10-07 22:37:12.166  3922  3922 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color:export ANDROID_LOG_TAGS=''; exec logcat '-d' '-t' '250' '-v' 'threadtime''\n10-07 22:37:12.167  1269  5167 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package: flg=0x4000010 (has extras) } to com.google.android.gms/.gass.chimera.PackageChangeBroadcastReceiver\n10-07 22:37:12.168  1269  1638 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.PACKAGE_ADDED dat=package: flg=0x4000010 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver\n10-07 22:37:12.171  1269  1638 I ActivityManager: com.samsung.android.provider.filterprovider is exempt from freezer\n10-07 22:37:12.171  1269  1638 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 1000; state: DISABLED\n10-07 22:37:12.171  1269  1638 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 1000; state: DISABLED\n10-07 22:37:12.171  1269  1638 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 1000; state: DISABLED\n10-07 22:37:12.171  1269  1638 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 1000; state: ENABLED\n10-07 22:37:12.175 25659 26914 I Dck     : (REDACTED) disableDckSupport: %s\n10-07 22:37:12.186 26776 26900 E RoleControllerServiceImpl: Default/fallback role holder package doesn't qualify for the role, package: com.google.android.gms.supervision, role: android.app.role.SYSTEM_SUPERVISION, user: 95\n10-07 22:37:12.193 22259 26929 I DynamiteModule: Considering local module com.google.android.gms.googlecertificates:7 and remote module com.google.android.gms.googlecertificates:7\n10-07 22:37:12.193 22259 26929 I DynamiteModule: Selected local version of com.google.android.gms.googlecertificates\n10-07 22:37:12.194 25659 26914 E Dck     : Could not get ProviderInfo when resolving the content provider authority. [CONTEXT service_id=289 ]\n10-07 22:37:12.194 25659 26914 I Dck     : Samsung Content Provider failed app verification [CONTEXT service_id=289 ]\n10-07 22:37:12.195 25659 26914 I Dck     : [WirelessCapabilitiesFeatures] wccSysProp: 3 [CONTEXT service_id=289 ]\n10-07 22:37:12.195 25659 26914 I Dck     : [WirelessCapabilitiesFeatures] wccOverride: not set [CONTEXT service_id=289 ]\n10-07 22:37:12.196 25659 26914 I Dck     : [WirelessCapabilitiesFeatures] Found Samsung native app without content provider. This indicates that the app is too old to support the signal. Override WCC to 1. [CONTEXT service_id=289 ]\n10-07 22:37:12.196 22259 26929 I SignInPerformer-0: (REDACTED) Handling request [%s], isFirstPartyCaller [%s]\n10-07 22:37:12.197 26776 26900 W SignedPackage: Package doesn't have required signing certificate: com.google.android.apps.work.clouddpc\n10-07 22:37:12.199   921   921 D Zygote  : Forked child process 26941\n10-07 22:37:12.199  1269  1639 I ActivityManager: Start proc 26941:com.samsung.android.provider.filterprovider/1000 for broadcast {com.samsung.android.provider.filterprovider/com.samsung.android.provider.filterprovider.PackageIntentReceiver}\n10-07 22:37:12.203 22259 26929 I SignInPerformer-0: Successfully brokered first-party unauthenticated GamesService [CONTEXT service_id=1 ]\n10-07 22:37:12.207 22259 26929 I GetGamesServiceV2Op: (REDACTED) Successfully brokered GamesService for request %s\n10-07 22:37:12.208 25659 26914 I Dck     : (REDACTED) [WirelessCapabilitiesFeatures] returned wcc: %s\n10-07 22:37:12.209 25659 26914 I Dck     : Dck module condition - isDckModuleEligible: true [CONTEXT service_id=289 ]\n10-07 22:37:12.213 22259 22259 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.feedback.internal.IFeedbackService dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }\n10-07 22:37:12.213 22259 22259 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.feedback.internal.IFeedbackService dat=chimera-action:/... cmp=com.google.android.gms/.chimera.GmsBoundBrokerService }\n10-07 22:37:12.225 22259 26841 I GamesModuleInfoProvider: (REDACTED) Retrieved module info: %s\n10-07 22:37:12.226 22259 26841 W PlayGamesServices[UiUtils]: AppVersion: Cannot find the installed destination app.\n10-07 22:37:12.226 22259 26841 W PlayGamesServices[UiUtils]: AppVersionName: Cannot find the installed destination app.\n10-07 22:37:12.239 25659 26927 I FraudProtectUtils: Not in testing population, skipping local test bank apps. [CONTEXT service_id=469 ]\n10-07 22:37:12.239 25659 26927 I FraudProtectUtils: (REDACTED) Latest bank app list size: %d, %s isBankApp: false\n10-07 22:37:12.240 25659 26927 I PackageInstallIntentOp: (REDACTED) Package %s is not a bank app. Skipping updates.\n10-07 22:37:12.244 26941 26941 I .filterprovider: Using generational CollectorTypeCC GC.\n10-07 22:37:12.245 26776 26900 W FeatureFlagsImplExport: java.lang.NoClassDefFoundError: Failed resolution of: Landroid/os/flagging/AconfigPackage;\n10-07 22:37:12.246 26814 26814 I Routine@Ui[4.2.01.2]: Routine: Routine:onCreate: sIsDebugLevelMid=false, secLevel=false\n10-07 22:37:12.247 26814 26814 I Routine@Ui[4.2.01.2]: RoutineHistoryDumpImpl: [APPLICATION] Routine@Ui[4.2.01.2](pid:26814) onCreate: sIsDebugLevelMid=false, secLevel=false\n10-07 22:37:12.252 26941 26941 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok\n10-07 22:37:12.255 26941 26941 D ActivityThread: setConscryptValidator\n10-07 22:37:12.256 26941 26941 D ActivityThread: setConscryptValidator - put\n10-07 22:37:12.256  1269  5167 D CompatibilityChangeReporter: Compat change id reported: 161145287; UID 9510282; state: DISABLED\n10-07 22:37:12.259  1269  1341 I ActivityManager: DSS OFF for com.samsung.android.provider.filterprovider\n10-07 22:37:12.261 26776 26956 W FeatureFlagsImplExport: java.lang.NoClassDefFoundError: Failed resolution of: Landroid/os/flagging/AconfigPackage;\n10-07 22:37:12.277 26941 26941 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 1000; state: ENABLED\n10-07 22:37:12.301 26776 26900 E RoleControllerServiceImpl: Default/fallback role holder package doesn't qualify for the role, package: com.android.shell, role: android.app.role.SYSTEM_SHELL, user: 95\n10-07 22:37:12.305 22259 25062 W PhBaseOp: Phenotype API error. Event: # jgnq@45343f0c, EventCode: COMMIT_CONFIG [CONTEXT service_id=51 ]\n10-07 22:37:12.305 22259 25062 W PhBaseOp: fneu: 29547: Stale snapshot for com.google.android.gms.gmslogger#com.google.android.gms(new configuration available)\n10-07 22:37:12.305 22259 25062 W PhBaseOp: \tat fngx.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):441)\n10-07 22:37:12.305 22259 25062 W PhBaseOp: \tat fngx.b(:com.google.android.gms@263635029@26.36.35 (190400-991383798):44)\n10-07 22:37:12.305 22259 25062 W PhBaseOp: \tat fngw.i(:com.google.android.gms@263635029@26.36.35 (190400-991383798):3)\n10-07 22:37:12.305 22259 25062 W PhBaseOp: \tat fngs.h(:com.google.android.gms@263635029@26.36.35 (190400-991383798):34)\n10-07 22:37:12.305 22259 25062 W PhBaseOp: \tat fngs.f(:com.google.android.gms@263635029@26.36.35 (190400-991383798):16)\n10-07 22:37:12.305 22259 25062 W PhBaseOp: \tat dgtx.fy(:com.google.android.gms@263635029@26.36.35 (190400-991383798):1)\n10-07 22:37:12.305 22259 25062 W PhBaseOp: \tat dguj.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):122)\n10-07 22:37:12.305 22259 25062 W PhBaseOp: \tat hpzh.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):23)\n10-07 22:37:12.305 22259 25062 W PhBaseOp: \tat boph.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):50)\n10-07 22:37:12.305 22259 25062 W PhBaseOp: \tat boph.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):6)\n10-07 22:37:12.305 22259 25062 W PhBaseOp: \tat boph.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):33)\n10-07 22:37:12.305 22259 25062 W PhBaseOp: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-07 22:37:12.305 22259 25062 W PhBaseOp: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-07 22:37:12.305 22259 25062 W PhBaseOp: \tat bovg.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-07 22:37:12.305 22259 25062 W PhBaseOp: \tat java.lang.Thread.run(Thread.java:1571)\n10-07 22:37:12.306 22259 25062 W AsyncOperation: operation=CommitToConfigurationOperationCall, opStatusCode=29547 [CONTEXT service_id=51 ]\n10-07 22:37:12.306 22259 25062 W AsyncOperation: OperationException[Status{statusCode=Stale snapshot for com.google.android.gms.gmslogger#com.google.android.gms(new configuration available), resolution=null}]\n10-07 22:37:12.306 22259 25062 W AsyncOperation: \tat fngs.h(:com.google.android.gms@263635029@26.36.35 (190400-991383798):63)\n10-07 22:37:12.306 22259 25062 W AsyncOperation: \tat fngs.f(:com.google.android.gms@263635029@26.36.35 (190400-991383798):16)\n10-07 22:37:12.306 22259 25062 W AsyncOperation: \tat dgtx.fy(:com.google.android.gms@263635029@26.36.35 (190400-991383798):1)\n10-07 22:37:12.306 22259 25062 W AsyncOperation: \tat dguj.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):122)\n10-07 22:37:12.306 22259 25062 W AsyncOperation: \tat hpzh.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):23)\n10-07 22:37:12.306 22259 25062 W AsyncOperation: \tat boph.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):50)\n10-07 22:37:12.306 22259 25062 W AsyncOperation: \tat boph.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):6)\n10-07 22:37:12.306 22259 25062 W AsyncOperation: \tat boph.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):33)\n10-07 22:37:12.306 22259 25062 W AsyncOperation: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-07 22:37:12.306 22259 25062 W AsyncOperation: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-07 22:37:12.306 22259 25062 W AsyncOperation: \tat bovg.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-07 22:37:12.306 22259 25062 W AsyncOperation: \tat java.lang.Thread.run(Thread.java:1571)\n10-07 22:37:12.313 26814 26814 I Routine@Ui[4.2.01.2]: SALogger: setConfiguration start\n10-07 22:37:12.332 26776 26900 E RoleControllerServiceImpl: Default/fallback role holder package doesn't qualify for the role, package: com.google.android.projection.gearhead, role: android.app.role.SYSTEM_AUTOMOTIVE_PROJECTION, user: 95\n10-07 22:37:12.336 26814 26814 I Routine@Ui[4.2.01.2]: SALogger: registerSharedPreferences\n10-07 22:37:12.337 26814 26814 I Routine@Ui[4.2.01.2]: SALogger: setConfiguration done\n"
+      }
+    },
+    "artifact": {
+      "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-signed.apk",
+      "sha256": "624ac7a6efd5ecc2c27f81000558ccc641893269dc9b943d61a049ad64734fdc"
+    },
+    "evidence_class": "OBSERVED",
+    "causal_proof": false,
+    "status": "CAPTURED"
+  },
+  "gadget_observation": {
+    "schema_version": 1,
+    "status": "READY",
+    "mode": "OBSERVATION_ONLY",
+    "artifact": {
+      "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-36-09/instrumented-signed.apk",
+      "sha256": "624ac7a6efd5ecc2c27f81000558ccc641893269dc9b943d61a049ad64734fdc"
+    },
+    "package": "com.newleaf.app.android.victor",
+    "module": "libsaasCorePlayer.so",
+    "target_offset": "0x27a510",
+    "requires_gadget": true,
+    "mutates_original_apk": false,
+    "causal_proof": false,
+    "proof_class": "OBSERVED_ONLY"
+  },
+  "evidence_ledger": {
+    "status": "NOT_READY"
+  },
+  "status": "completed",
+  "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+  "critical_pointer": "0x27a510",
+  "jni_semantic_found": true,
+  "vtable_abi": {
+    "address_point": "0x717e60",
+    "slot": "0x717f68",
+    "rtti": "0x71f4d0",
+    "type_name": "N6Cicada17mediaCodecDecoderE",
+    "container_vtable": null,
+    "pointer": "0x27a510",
+    "function_symbol": null
+  },
+  "critical_function_behavior": "NO_SECURITY_OPERATION_OBSERVED",
+  "autonomous_dataflow": {
+    "status": "completed",
+    "proven": 0,
+    "candidates": 473,
+    "cxx_unresolved": 354,
+    "jni_excluded_count": 6,
+    "constructor_calls": 4
+  },
+  "runtime_probe_status": "RUNTIME_ARTIFACT_CRASH"
+}
