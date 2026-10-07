@@ -198,6 +198,52 @@ class RuntimeLifecycleTests(unittest.TestCase):
         self.assertEqual(pids, [12345])
         self.assertEqual(stage["status"], rp.PASS)
 
+    def test_crash_log_detects_fatal_signal_for_package(self):
+        rp = self.rp
+
+        def fake_runner(cmd, timeout=30):
+            if "logcat" in cmd:
+                return 0, (
+                    "10-07 20:00:01.000  1234  1234 F libc: Fatal signal 11 (SIGSEGV), "
+                    "code 1 (SEGV_MAPERR), fault addr 0x27a510 in tid 1234 "
+                    "(newleaf.app.and), pid 1234 (ewleaf.app.android.victor)\n"
+                    "10-07 20:00:01.100  2000  2000 F DEBUG: pid: 1234, tid: 1234, "
+                    "name: com.newleaf.app.android.victor\n")
+            return 0, ""
+        ev = rp.check_crash_log(fake_runner, "/adb", "s1",
+                                "com.newleaf.app.android.victor")
+        self.assertTrue(ev["detected"])
+        self.assertEqual(ev["fatal_signal"], "SIGSEGV")
+        self.assertTrue(ev["package_matched_lines"])
+
+    def test_crash_log_clean_buffer_is_not_detected(self):
+        rp = self.rp
+
+        def fake_runner(cmd, timeout=30):
+            return 0, "10-07 20:00:01.000 1269 1619 I ActivityManager: routine line\n"
+        ev = rp.check_crash_log(fake_runner, "/adb", "s1", "com.x")
+        self.assertFalse(ev["detected"])
+        self.assertIsNone(ev["fatal_signal"])
+
+    def test_process_absent_with_crash_keeps_reason_B_and_records_evidence(self):
+        rp = self.rp
+
+        def fake_runner(cmd, timeout=30):
+            if "logcat" in cmd:
+                return 0, ("F libc: Fatal signal 6 (SIGABRT) in tid 999 "
+                           "(x), pid 999 (com.x)\n")
+            return 0, "USER PID PPID VSZ RSS WCHAN ADDR S NAME\n"
+        observed, pids, stage = rp.observe_process(
+            fake_runner, "/adb", "s1", "com.x", attempts=2, interval=0)
+        self.assertFalse(observed)
+        self.assertEqual(stage["reason_code"], rp.TARGET_PROCESS_NOT_OBSERVED)
+        self.assertTrue(stage["crash_evidence"]["detected"])
+        self.assertEqual(stage["crash_evidence"]["fatal_signal"], "SIGABRT")
+        out = rp.derive_lifecycle([], frida_rc=None, process_stage=stage)
+        self.assertEqual(out["reason_code"], rp.TARGET_PROCESS_NOT_OBSERVED)
+        self.assertTrue(out["lifecycle"]["crash_detected"])
+        self.assertEqual(out["lifecycle"]["crash_signal"], "SIGABRT")
+
     def test_check_package_present_absent(self):
         rp = self.rp
 

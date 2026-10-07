@@ -28,6 +28,7 @@ bypasses any protection mechanism. TARGET_OBSERVED proves a runtime layer
 only (L3); it is never behavioral proof (L4).
 """
 import json
+import re
 import time
 
 SCHEMA = "runtime-probe-lifecycle-1"
@@ -196,7 +197,64 @@ def check_package_present(runner, adb, serial, package):
     return present, stage
 
 
-def observe_process(runner, adb, serial, package, attempts=12, interval=1.0):
+CRASH_SIGNAL_RE = re.compile(
+    r"Fatal signal\s+(\d+)\s+\((SIG[A-Z0-9]+)\)|Fatal signal\s+(\d+)", re.I)
+
+
+def check_crash_log(runner, adb, serial, package, tail=300):
+    """Bounded crash-buffer query. Read-only; enriches process diagnostics.
+
+    Android truncates the process comm in `Fatal signal` lines to 15 chars,
+    while tombstone/DEBUG lines carry the full package name. Detection
+    therefore requires: at least one fatal-signal line AND the package
+    associated either on the fatal line (full or truncated comm) or on
+    another line in the same bounded buffer. All matched lines are recorded
+    so the association is auditable.
+
+    A crash here is recorded as evidence; it never changes the layer reason
+    code contract (A-G), it explains a TARGET_PROCESS_NOT_OBSERVED (B).
+    """
+    started = time.time()
+    rc, out = runner([adb, "-s", serial, "logcat", "-b", "crash", "-d",
+                      "-t", str(tail)], timeout=30)
+    source = "adb:logcat -b crash -d -t %d" % tail
+    if rc != 0:
+        # older devices without a crash buffer: bounded main-buffer fallback
+        rc, out = runner([adb, "-s", serial, "logcat", "-d", "-t", "2000"],
+                         timeout=45)
+        source = "adb:logcat -d -t 2000 (fallback)"
+    truncated_comm = package[-15:] if package and len(package) > 15 else package
+    fatal_signal = None
+    fatal_lines = []
+    package_lines = []
+    for line in (out or "").splitlines():
+        if "Fatal signal" in line or "crash_dump" in line:
+            m = CRASH_SIGNAL_RE.search(line)
+            if m and "Fatal signal" in line:
+                fatal_lines.append(line.strip()[:240])
+                if fatal_signal is None:
+                    fatal_signal = m.group(2) or ("signal %s" %
+                                                  (m.group(1) or m.group(3)))
+                if package and (package in line or
+                                (truncated_comm and truncated_comm in line)):
+                    package_lines.append(line.strip()[:240])
+                continue
+        if package and package in line:
+            package_lines.append(line.strip()[:240])
+    detected = bool(fatal_signal) and bool(package_lines)
+    return {
+        "detected": detected,
+        "fatal_signal": fatal_signal,
+        "fatal_lines": fatal_lines[:5],
+        "package_matched_lines": package_lines[:10],
+        "source": source,
+        "returncode": rc,
+        "elapsed_ms": int((time.time() - started) * 1000),
+    }
+
+
+def observe_process(runner, adb, serial, package, attempts=12, interval=1.0,
+                    crash_check=True):
     """Bounded ps polling for the package process. Observation only."""
     started = time.time()
     pids = []
@@ -218,11 +276,15 @@ def observe_process(runner, adb, serial, package, attempts=12, interval=1.0):
             break
         if i + 1 < attempts:
             time.sleep(interval)
+    crash_evidence = None
+    if crash_check:
+        crash_evidence = check_crash_log(runner, adb, serial, package)
     stage = make_stage(
         "PROCESS_OBSERVED", PASS if observed else FAIL,
         reason_code=None if observed else TARGET_PROCESS_NOT_OBSERVED,
         source="adb:ps -A polling x%d" % attempts, started=started,
         package=package, pids=pids,
+        crash_evidence=crash_evidence,
     )
     return observed, pids, stage
 
@@ -326,6 +388,9 @@ def derive_lifecycle(events, frida_rc=None, process_stage=None,
     lifecycle = {
         "process_observed": bool(process_stage and process_stage["status"] == PASS) or pid is not None,
         "pid": pid or (process_stage.get("pids") or [None])[0] if process_stage else pid,
+        "crash_detected": bool(process_stage and
+                               (process_stage.get("crash_evidence") or {}).get("detected")),
+        "crash_signal": ((process_stage or {}).get("crash_evidence") or {}).get("fatal_signal"),
         "module_observed": module_seen,
         "module": (by_event.get("MODULE_OBSERVED") or [{}])[0].get("module"),
         "probe_attached": attached,
