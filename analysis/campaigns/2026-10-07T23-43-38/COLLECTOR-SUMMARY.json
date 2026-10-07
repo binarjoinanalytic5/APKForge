@@ -1,0 +1,64 @@
+[
+  {
+    "collector": "DEVICE-SNAPSHOT",
+    "errors": [
+      "no adb endpoint in context"
+    ],
+    "status": "SKIPPED"
+  },
+  {
+    "collector": "PACKAGE",
+    "errors": [
+      "no adb endpoint or package in context"
+    ],
+    "status": "SKIPPED"
+  },
+  {
+    "collector": "PROCESS",
+    "errors": [
+      "no adb endpoint or package in context"
+    ],
+    "status": "SKIPPED"
+  },
+  {
+    "collector": "CRASH",
+    "errors": [
+      "no adb endpoint or package in context"
+    ],
+    "status": "SKIPPED"
+  },
+  {
+    "collector": "LOGCAT",
+    "errors": [
+      "no adb endpoint or package in context"
+    ],
+    "status": "SKIPPED"
+  },
+  {
+    "collector": "ARTIFACT-INTEGRITY",
+    "errors": [],
+    "status": "OK"
+  },
+  {
+    "collector": "RUNTIME-HEALTH",
+    "errors": [],
+    "status": "FAILED"
+  },
+  {
+    "collector": "BASELINE",
+    "errors": [],
+    "status": "OK"
+  },
+  {
+    "collector": "BEHAVIOR",
+    "errors": [
+      "BEHAVIOR-CAPTURE.json absent (L4 capture not attempted)"
+    ],
+    "status": "SKIPPED"
+  },
+  {
+    "collector": "EVIDENCE",
+    "errors": [],
+    "status": "OK"
+  }
+]

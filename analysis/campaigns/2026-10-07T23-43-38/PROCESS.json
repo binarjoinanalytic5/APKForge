@@ -1,0 +1,10 @@
+{
+  "collected_at_epoch": 1791416751.2203603,
+  "collector": "PROCESS",
+  "data": {},
+  "errors": [
+    "no adb endpoint or package in context"
+  ],
+  "schema_version": "collector-1",
+  "status": "SKIPPED"
+}

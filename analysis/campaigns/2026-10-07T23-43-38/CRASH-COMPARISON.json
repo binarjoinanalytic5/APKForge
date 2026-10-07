@@ -1,0 +1,123 @@
+{
+  "attribution": {
+    "guard": "both the ORIGINAL and the INSTRUMENTED artifact crashed on this device: the crash MUST NOT be attributed to instrumentation; a common cause (device/OS/ROM or the app itself) must be investigated and only differential evidence may isolate instrumentation",
+    "instrumentation_regression": "NOT_ESTABLISHED"
+  },
+  "instrumented": {
+    "abort_message_present": false,
+    "apk_offset_resolution": null,
+    "artifact_sha256": "69a57ded52e99d194c2f151b3d7c21c3451e7893db085c8a9b92010439e61057",
+    "artifact_type": "INSTRUMENTED_TEST_ARTIFACT",
+    "exit_reason": null,
+    "fatal_signal": "SIGABRT",
+    "fault_library": "libc.so",
+    "fault_location": {
+      "library": "libc.so",
+      "pc": "00000000000537d4",
+      "symbol": "abort+168"
+    },
+    "fault_pc": "00000000000537d4",
+    "installed_path": "/data/app/~~Qog5c_NTa7vFLrvKWxREqA==/com.newleaf.app.android.victor-SQSVeF-6OnBIjMXDvrXlJg==/base.apk",
+    "instance_count": 1,
+    "instances_completeness": "EVIDENCE_PRESENT_BUT_INSTANCE_INCOMPLETE",
+    "lifetime_ms": 0,
+    "local_artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-signed.apk",
+    "logcat_evidence_lines": 15,
+    "package": "com.newleaf.app.android.victor",
+    "pids": [
+      18792
+    ],
+    "primary_cpu_abi": "arm64-v8a",
+    "role": "instrumented",
+    "signing_certificate_sha256": null,
+    "startup": "CRASH",
+    "startup_stage": "CRASHED_AFTER_PROCESS_OBSERVED",
+    "uid": "10813",
+    "uids": [],
+    "users": [],
+    "version_code": "4200",
+    "version_name": "4.2.00"
+  },
+  "integrity_notes": [
+    "both the ORIGINAL and the INSTRUMENTED artifact crashed on this device: the crash MUST NOT be attributed to instrumentation; a common cause (device/OS/ROM or the app itself) must be investigated and only differential evidence may isolate instrumentation",
+    "no textual abort() message captured on either side; the cause MUST NOT be labeled anti-tamper or screenshot protection on this evidence"
+  ],
+  "original": {
+    "abort_message_present": false,
+    "apk_offset_resolution": null,
+    "artifact_sha256": "53e49f50271f83cc40e7c2c0a0b8baa5f0bbda5da3280aee9a4baa308433f056",
+    "artifact_type": "ORIGINAL_APK",
+    "exit_reason": null,
+    "fatal_signal": "SIGABRT",
+    "fault_library": "libc.so",
+    "fault_location": {
+      "library": "libc.so",
+      "pc": "00000000000537d4",
+      "symbol": "abort+168"
+    },
+    "fault_pc": "00000000000537d4",
+    "installed_path": "/data/app/~~XKhAsMnkK3UGVv-BjNskqg==/com.newleaf.app.android.victor--yJHowfJScPUUcTraNK84Q==/base.apk",
+    "instance_count": 1,
+    "instances_completeness": "EVIDENCE_PRESENT_BUT_INSTANCE_INCOMPLETE",
+    "lifetime_ms": 6745,
+    "local_artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/original-testsigned.apk",
+    "logcat_evidence_lines": 15,
+    "package": "com.newleaf.app.android.victor",
+    "pids": [
+      30953
+    ],
+    "primary_cpu_abi": "arm64-v8a",
+    "role": "original",
+    "signing_certificate_sha256": null,
+    "startup": "CRASH",
+    "startup_stage": "STILL_ALIVE_AT_WINDOW_EXIT_THEN_CRASH_EXIT_INFO",
+    "uid": "10813",
+    "uids": [],
+    "users": [],
+    "version_code": "4200",
+    "version_name": "4.2.00"
+  },
+  "questions": {
+    "abort_message": {
+      "captured_either": false,
+      "instrumented_captured": false,
+      "original_captured": false
+    },
+    "apk_offset_resolution": {
+      "instrumented": {
+        "entry": null,
+        "offset_within_entry": null,
+        "status": null
+      },
+      "note": "offsets are resolved independently against each side's own local artifact (different builds bound by artifact_sha256); identical resolution shows the same relative code location but never by itself proves a shared cause",
+      "original": {
+        "entry": null,
+        "offset_within_entry": null,
+        "status": null
+      },
+      "resolved_identically": false
+    },
+    "both_sigabrt": true,
+    "fatal_signals": {
+      "instrumented": "SIGABRT",
+      "match": true,
+      "original": "SIGABRT"
+    },
+    "fault_location": {
+      "instrumented": "libc.so+00000000000537d4",
+      "match": true,
+      "original": "libc.so+00000000000537d4"
+    },
+    "startup_stage": {
+      "instrumented": "CRASHED_AFTER_PROCESS_OBSERVED",
+      "match": false,
+      "original": "STILL_ALIVE_AT_WINDOW_EXIT_THEN_CRASH_EXIT_INFO"
+    }
+  },
+  "schema_version": "crash-comparison-1",
+  "source_documents": {
+    "instrumented": "CRASH-ARTIFACT.json",
+    "original": "BASELINE-CRASH-ARTIFACT.json"
+  },
+  "status": "BOTH_CRASH"
+}

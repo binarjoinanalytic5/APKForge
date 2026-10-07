@@ -1,0 +1,400 @@
+
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+00000000002783f4 <_ZN18codecPluginManager13dummyFunctionEv>:
+  27a3f0: f9000bf3     	str	x19, [sp, #0x10]
+  27a3f4: a9027bfd     	stp	x29, x30, [sp, #0x20]
+  27a3f8: 910083fd     	add	x29, sp, #0x20
+  27a3fc: d53bd053     	mrs	x19, TPIDR_EL0
+  27a400: f9401669     	ldr	x9, [x19, #0x28]
+  27a404: 91120001     	add	x1, x0, #0x480
+  27a408: aa0803e0     	mov	x0, x8
+  27a40c: f90007e9     	str	x9, [sp, #0x8]
+  27a410: 97fa3811     	bl	0x108454 <_ZN10JavaLogger17java_SetLogOptionEP7_JNIEnvP7_jclassP8_jstringi+0x488c>
+  27a414: f9401668     	ldr	x8, [x19, #0x28]
+  27a418: f94007e9     	ldr	x9, [sp, #0x8]
+  27a41c: eb09011f     	cmp	x8, x9
+  27a420: 540000a1     	b.ne	0x27a434 <_ZN18codecPluginManager13dummyFunctionEv+0x2040>
+  27a424: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  27a428: f9400bf3     	ldr	x19, [sp, #0x10]
+  27a42c: 9100c3ff     	add	sp, sp, #0x30
+  27a430: d65f03c0     	ret
+  27a434: 97f979b3     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a438: d100c3ff     	sub	sp, sp, #0x30
+  27a43c: f9000bf3     	str	x19, [sp, #0x10]
+  27a440: a9027bfd     	stp	x29, x30, [sp, #0x20]
+  27a444: 910083fd     	add	x29, sp, #0x20
+  27a448: d53bd053     	mrs	x19, TPIDR_EL0
+  27a44c: f9401668     	ldr	x8, [x19, #0x28]
+  27a450: f90007e8     	str	x8, [sp, #0x8]
+  27a454: f9422c00     	ldr	x0, [x0, #0x458]
+  27a458: b40000c0     	cbz	x0, 0x27a470 <_ZN18codecPluginManager13dummyFunctionEv+0x207c>
+  27a45c: f9400008     	ldr	x8, [x0]
+  27a460: f9400908     	ldr	x8, [x8, #0x10]
+  27a464: d63f0100     	blr	x8
+  27a468: 52000008     	eor	w8, w0, #0x1
+  27a46c: 14000002     	b	0x27a474 <_ZN18codecPluginManager13dummyFunctionEv+0x2080>
+  27a470: 320003e8     	orr	w8, wzr, #0x1
+  27a474: f9401669     	ldr	x9, [x19, #0x28]
+  27a478: f94007ea     	ldr	x10, [sp, #0x8]
+  27a47c: eb0a013f     	cmp	x9, x10
+  27a480: 540000c1     	b.ne	0x27a498 <_ZN18codecPluginManager13dummyFunctionEv+0x20a4>
+  27a484: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  27a488: f9400bf3     	ldr	x19, [sp, #0x10]
+  27a48c: 12000100     	and	w0, w8, #0x1
+  27a490: 9100c3ff     	add	sp, sp, #0x30
+  27a494: d65f03c0     	ret
+  27a498: 97f9799a     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a49c: d10083ff     	sub	sp, sp, #0x20
+  27a4a0: a9017bfd     	stp	x29, x30, [sp, #0x10]
+  27a4a4: 910043fd     	add	x29, sp, #0x10
+  27a4a8: d53bd048     	mrs	x8, TPIDR_EL0
+  27a4ac: f9401509     	ldr	x9, [x8, #0x28]
+  27a4b0: f90007e9     	str	x9, [sp, #0x8]
+  27a4b4: f9401508     	ldr	x8, [x8, #0x28]
+  27a4b8: f94007e9     	ldr	x9, [sp, #0x8]
+  27a4bc: eb09011f     	cmp	x8, x9
+  27a4c0: 54000081     	b.ne	0x27a4d0 <_ZN18codecPluginManager13dummyFunctionEv+0x20dc>
+  27a4c4: a9417bfd     	ldp	x29, x30, [sp, #0x10]
+  27a4c8: 910083ff     	add	sp, sp, #0x20
+  27a4cc: d65f03c0     	ret
+  27a4d0: 97f9798c     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a4d4: d10083ff     	sub	sp, sp, #0x20
+  27a4d8: a9017bfd     	stp	x29, x30, [sp, #0x10]
+  27a4dc: 910043fd     	add	x29, sp, #0x10
+  27a4e0: d53bd048     	mrs	x8, TPIDR_EL0
+  27a4e4: f9401509     	ldr	x9, [x8, #0x28]
+  27a4e8: f90007e9     	str	x9, [sp, #0x8]
+  27a4ec: f9401508     	ldr	x8, [x8, #0x28]
+  27a4f0: f94007e9     	ldr	x9, [sp, #0x8]
+  27a4f4: eb09011f     	cmp	x8, x9
+  27a4f8: 540000a1     	b.ne	0x27a50c <_ZN18codecPluginManager13dummyFunctionEv+0x2118>
+  27a4fc: a9417bfd     	ldp	x29, x30, [sp, #0x10]
+  27a500: 2a1f03e0     	mov	w0, wzr
+  27a504: 910083ff     	add	sp, sp, #0x20
+  27a508: d65f03c0     	ret
+  27a50c: 97f9797d     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a510: d10083ff     	sub	sp, sp, #0x20
+  27a514: a9017bfd     	stp	x29, x30, [sp, #0x10]
+  27a518: 910043fd     	add	x29, sp, #0x10
+  27a51c: d53bd048     	mrs	x8, TPIDR_EL0
+  27a520: f9401509     	ldr	x9, [x8, #0x28]
+  27a524: f90007e9     	str	x9, [sp, #0x8]
+  27a528: f9401508     	ldr	x8, [x8, #0x28]
+  27a52c: f94007e9     	ldr	x9, [sp, #0x8]
+  27a530: eb09011f     	cmp	x8, x9
+  27a534: 54000081     	b.ne	0x27a544 <_ZN18codecPluginManager13dummyFunctionEv+0x2150>
+  27a538: a9417bfd     	ldp	x29, x30, [sp, #0x10]
+  27a53c: 910083ff     	add	sp, sp, #0x20
+  27a540: d65f03c0     	ret
+  27a544: 97f9796f     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a548: d100c3ff     	sub	sp, sp, #0x30
+  27a54c: a9014ff4     	stp	x20, x19, [sp, #0x10]
+  27a550: a9027bfd     	stp	x29, x30, [sp, #0x20]
+  27a554: 910083fd     	add	x29, sp, #0x20
+  27a558: d53bd054     	mrs	x20, TPIDR_EL0
+  27a55c: f9401688     	ldr	x8, [x20, #0x28]
+  27a560: 52809400     	mov	w0, #0x4a0              // =1184
+  27a564: f90007e8     	str	x8, [sp, #0x8]
+  27a568: 97f97982     	bl	0xd8b70 <_Znwm@plt>
+  27a56c: aa0003f3     	mov	x19, x0
+  27a570: 97fff7af     	bl	0x27842c <_ZN18codecPluginManager13dummyFunctionEv+0x38>
+  27a574: f9401688     	ldr	x8, [x20, #0x28]
+  27a578: f94007e9     	ldr	x9, [sp, #0x8]
+  27a57c: eb09011f     	cmp	x8, x9
+  27a580: 540000c1     	b.ne	0x27a598 <_ZN18codecPluginManager13dummyFunctionEv+0x21a4>
+  27a584: aa1303e0     	mov	x0, x19
+  27a588: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  27a58c: a9414ff4     	ldp	x20, x19, [sp, #0x10]
+  27a590: 9100c3ff     	add	sp, sp, #0x30
+  27a594: d65f03c0     	ret
+  27a598: 97f9795a     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a59c: d100c3ff     	sub	sp, sp, #0x30
+  27a5a0: f9000bf3     	str	x19, [sp, #0x10]
+  27a5a4: a9027bfd     	stp	x29, x30, [sp, #0x20]
+  27a5a8: 910083fd     	add	x29, sp, #0x20
+  27a5ac: d53bd053     	mrs	x19, TPIDR_EL0
+  27a5b0: f9401668     	ldr	x8, [x19, #0x28]
+  27a5b4: f90007e8     	str	x8, [sp, #0x8]
+  27a5b8: 370800e2     	tbnz	w2, #0x1, 0x27a5d4 <_ZN18codecPluginManager13dummyFunctionEv+0x21e0>
+  27a5bc: f9401668     	ldr	x8, [x19, #0x28]
+  27a5c0: f94007e9     	ldr	x9, [sp, #0x8]
+  27a5c4: eb09011f     	cmp	x8, x9
+  27a5c8: 540001e1     	b.ne	0x27a604 <_ZN18codecPluginManager13dummyFunctionEv+0x2210>
+  27a5cc: 2a1f03e0     	mov	w0, wzr
+  27a5d0: 14000009     	b	0x27a5f4 <_ZN18codecPluginManager13dummyFunctionEv+0x2200>
+  27a5d4: aa0103e0     	mov	x0, x1
+  27a5d8: aa0203e1     	mov	x1, x2
+  27a5dc: 97fff889     	bl	0x278800 <_ZN18codecPluginManager13dummyFunctionEv+0x40c>
+  27a5e0: f9401668     	ldr	x8, [x19, #0x28]
+  27a5e4: f94007e9     	ldr	x9, [sp, #0x8]
+  27a5e8: eb09011f     	cmp	x8, x9
+  27a5ec: 540000c1     	b.ne	0x27a604 <_ZN18codecPluginManager13dummyFunctionEv+0x2210>
+  27a5f0: 12000000     	and	w0, w0, #0x1
+  27a5f4: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  27a5f8: f9400bf3     	ldr	x19, [sp, #0x10]
+  27a5fc: 9100c3ff     	add	sp, sp, #0x30
+  27a600: d65f03c0     	ret
+  27a604: 97f9793f     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a608: d100c3ff     	sub	sp, sp, #0x30
+  27a60c: a9014ff4     	stp	x20, x19, [sp, #0x10]
+  27a610: a9027bfd     	stp	x29, x30, [sp, #0x20]
+  27a614: 910083fd     	add	x29, sp, #0x20
+  27a618: d53bd054     	mrs	x20, TPIDR_EL0
+  27a61c: f9401688     	ldr	x8, [x20, #0x28]
+  27a620: aa0103f3     	mov	x19, x1
+  27a624: f90007e8     	str	x8, [sp, #0x8]
+  27a628: b4000181     	cbz	x1, 0x27a658 <_ZN18codecPluginManager13dummyFunctionEv+0x2264>
+  27a62c: 91006260     	add	x0, x19, #0x18
+  27a630: 9401935a     	bl	0x2df398 <_ZN6Cicada8UrlUtils9url_splitEPciS1_iS1_iPiS1_iPKc+0x14>
+  27a634: 36000120     	tbz	w0, #0x0, 0x27a658 <_ZN18codecPluginManager13dummyFunctionEv+0x2264>
+  27a638: aa1303e0     	mov	x0, x19
+  27a63c: 97f99599     	bl	0xdfca0 <_ZN6Cicada19DrmHandlerPrototype9isSupportEPKNS_7DrmInfoE@plt>
+  27a640: f9401688     	ldr	x8, [x20, #0x28]
+  27a644: f94007e9     	ldr	x9, [sp, #0x8]
+  27a648: eb09011f     	cmp	x8, x9
+  27a64c: 54000181     	b.ne	0x27a67c <_ZN18codecPluginManager13dummyFunctionEv+0x2288>
+  27a650: 12000000     	and	w0, w0, #0x1
+  27a654: 14000006     	b	0x27a66c <_ZN18codecPluginManager13dummyFunctionEv+0x2278>
+  27a658: f9401688     	ldr	x8, [x20, #0x28]
+  27a65c: f94007e9     	ldr	x9, [sp, #0x8]
+  27a660: eb09011f     	cmp	x8, x9
+  27a664: 540000c1     	b.ne	0x27a67c <_ZN18codecPluginManager13dummyFunctionEv+0x2288>
+  27a668: 2a1f03e0     	mov	w0, wzr
+  27a66c: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  27a670: a9414ff4     	ldp	x20, x19, [sp, #0x10]
+  27a674: 9100c3ff     	add	sp, sp, #0x30
+  27a678: d65f03c0     	ret
+  27a67c: 97f97921     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a680: d100c3ff     	sub	sp, sp, #0x30
+  27a684: f9000bf3     	str	x19, [sp, #0x10]
+  27a688: a9027bfd     	stp	x29, x30, [sp, #0x20]
+  27a68c: 910083fd     	add	x29, sp, #0x20
+  27a690: d53bd053     	mrs	x19, TPIDR_EL0
+  27a694: f9401668     	ldr	x8, [x19, #0x28]
+  27a698: d1092000     	sub	x0, x0, #0x248
+  27a69c: f90007e8     	str	x8, [sp, #0x8]
+  27a6a0: 97ffffaa     	bl	0x27a548 <_ZN18codecPluginManager13dummyFunctionEv+0x2154>
+  27a6a4: f9401668     	ldr	x8, [x19, #0x28]
+  27a6a8: f94007e9     	ldr	x9, [sp, #0x8]
+  27a6ac: eb09011f     	cmp	x8, x9
+  27a6b0: 540000a1     	b.ne	0x27a6c4 <_ZN18codecPluginManager13dummyFunctionEv+0x22d0>
+  27a6b4: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  27a6b8: f9400bf3     	ldr	x19, [sp, #0x10]
+  27a6bc: 9100c3ff     	add	sp, sp, #0x30
+  27a6c0: d65f03c0     	ret
+  27a6c4: 97f9790f     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a6c8: d100c3ff     	sub	sp, sp, #0x30
+  27a6cc: f9000bf3     	str	x19, [sp, #0x10]
+  27a6d0: a9027bfd     	stp	x29, x30, [sp, #0x20]
+  27a6d4: 910083fd     	add	x29, sp, #0x20
+  27a6d8: d53bd053     	mrs	x19, TPIDR_EL0
+  27a6dc: f9401668     	ldr	x8, [x19, #0x28]
+  27a6e0: d1092000     	sub	x0, x0, #0x248
+  27a6e4: f90007e8     	str	x8, [sp, #0x8]
+  27a6e8: 97ffffad     	bl	0x27a59c <_ZN18codecPluginManager13dummyFunctionEv+0x21a8>
+  27a6ec: f9401668     	ldr	x8, [x19, #0x28]
+  27a6f0: f94007e9     	ldr	x9, [sp, #0x8]
+  27a6f4: eb09011f     	cmp	x8, x9
+  27a6f8: 540000c1     	b.ne	0x27a710 <_ZN18codecPluginManager13dummyFunctionEv+0x231c>
+  27a6fc: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  27a700: f9400bf3     	ldr	x19, [sp, #0x10]
+  27a704: 12000000     	and	w0, w0, #0x1
+  27a708: 9100c3ff     	add	sp, sp, #0x30
+  27a70c: d65f03c0     	ret
+  27a710: 97f978fc     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a714: d100c3ff     	sub	sp, sp, #0x30
+  27a718: f9000bf3     	str	x19, [sp, #0x10]
+  27a71c: a9027bfd     	stp	x29, x30, [sp, #0x20]
+  27a720: 910083fd     	add	x29, sp, #0x20
+  27a724: d53bd053     	mrs	x19, TPIDR_EL0
+  27a728: f9401668     	ldr	x8, [x19, #0x28]
+  27a72c: d1092000     	sub	x0, x0, #0x248
+  27a730: f90007e8     	str	x8, [sp, #0x8]
+  27a734: 97ffffb5     	bl	0x27a608 <_ZN18codecPluginManager13dummyFunctionEv+0x2214>
+  27a738: f9401668     	ldr	x8, [x19, #0x28]
+  27a73c: f94007e9     	ldr	x9, [sp, #0x8]
+  27a740: eb09011f     	cmp	x8, x9
+  27a744: 540000c1     	b.ne	0x27a75c <_ZN18codecPluginManager13dummyFunctionEv+0x2368>
+  27a748: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  27a74c: f9400bf3     	ldr	x19, [sp, #0x10]
+  27a750: 12000000     	and	w0, w0, #0x1
+  27a754: 9100c3ff     	add	sp, sp, #0x30
+  27a758: d65f03c0     	ret
+  27a75c: 97f978e9     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a760: d100c3ff     	sub	sp, sp, #0x30
+  27a764: f9000bf3     	str	x19, [sp, #0x10]
+  27a768: a9027bfd     	stp	x29, x30, [sp, #0x20]
+  27a76c: 910083fd     	add	x29, sp, #0x20
+  27a770: d53bd053     	mrs	x19, TPIDR_EL0
+  27a774: f9401668     	ldr	x8, [x19, #0x28]
+  27a778: f90007e8     	str	x8, [sp, #0x8]
+  27a77c: f9400401     	ldr	x1, [x0, #0x8]
+  27a780: 9400000a     	bl	0x27a7a8 <_ZN18codecPluginManager13dummyFunctionEv+0x23b4>
+  27a784: f9401668     	ldr	x8, [x19, #0x28]
+  27a788: f94007e9     	ldr	x9, [sp, #0x8]
+  27a78c: eb09011f     	cmp	x8, x9
+  27a790: 540000a1     	b.ne	0x27a7a4 <_ZN18codecPluginManager13dummyFunctionEv+0x23b0>
+  27a794: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  27a798: f9400bf3     	ldr	x19, [sp, #0x10]
+  27a79c: 9100c3ff     	add	sp, sp, #0x30
+  27a7a0: d65f03c0     	ret
+  27a7a4: 97f978d7     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a7a8: d10103ff     	sub	sp, sp, #0x40
+  27a7ac: f9000bf5     	str	x21, [sp, #0x10]
+  27a7b0: a9024ff4     	stp	x20, x19, [sp, #0x20]
+  27a7b4: a9037bfd     	stp	x29, x30, [sp, #0x30]
+  27a7b8: 9100c3fd     	add	x29, sp, #0x30
+  27a7bc: d53bd055     	mrs	x21, TPIDR_EL0
+  27a7c0: f94016a8     	ldr	x8, [x21, #0x28]
+  27a7c4: aa0103f3     	mov	x19, x1
+  27a7c8: aa0003f4     	mov	x20, x0
+  27a7cc: f90007e8     	str	x8, [sp, #0x8]
+  27a7d0: b4000121     	cbz	x1, 0x27a7f4 <_ZN18codecPluginManager13dummyFunctionEv+0x2400>
+  27a7d4: f9400261     	ldr	x1, [x19]
+  27a7d8: aa1403e0     	mov	x0, x20
+  27a7dc: 97fffff3     	bl	0x27a7a8 <_ZN18codecPluginManager13dummyFunctionEv+0x23b4>
+  27a7e0: f9400661     	ldr	x1, [x19, #0x8]
+  27a7e4: aa1403e0     	mov	x0, x20
+  27a7e8: 97fffff0     	bl	0x27a7a8 <_ZN18codecPluginManager13dummyFunctionEv+0x23b4>
+  27a7ec: aa1303e0     	mov	x0, x19
+  27a7f0: 97f978d4     	bl	0xd8b40 <_ZdlPv@plt>
+  27a7f4: f94016a8     	ldr	x8, [x21, #0x28]
+  27a7f8: f94007e9     	ldr	x9, [sp, #0x8]
+  27a7fc: eb09011f     	cmp	x8, x9
+  27a800: 540000c1     	b.ne	0x27a818 <_ZN18codecPluginManager13dummyFunctionEv+0x2424>
+  27a804: a9437bfd     	ldp	x29, x30, [sp, #0x30]
+  27a808: a9424ff4     	ldp	x20, x19, [sp, #0x20]
+  27a80c: f9400bf5     	ldr	x21, [sp, #0x10]
+  27a810: 910103ff     	add	sp, sp, #0x40
+  27a814: d65f03c0     	ret
+  27a818: 97f978ba     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a81c: d10143ff     	sub	sp, sp, #0x50
+  27a820: f9000bf7     	str	x23, [sp, #0x10]
+  27a824: a90257f6     	stp	x22, x21, [sp, #0x20]
+  27a828: a9034ff4     	stp	x20, x19, [sp, #0x30]
+  27a82c: a9047bfd     	stp	x29, x30, [sp, #0x40]
+  27a830: 910103fd     	add	x29, sp, #0x40
+  27a834: d53bd056     	mrs	x22, TPIDR_EL0
+  27a838: f94016c8     	ldr	x8, [x22, #0x28]
+  27a83c: aa0003f3     	mov	x19, x0
+  27a840: f90007e8     	str	x8, [sp, #0x8]
+  27a844: f9400808     	ldr	x8, [x0, #0x10]
+  27a848: b40002c8     	cbz	x8, 0x27a8a0 <_ZN18codecPluginManager13dummyFunctionEv+0x24ac>
+  27a84c: a9405268     	ldp	x8, x20, [x19]
+  27a850: f9400509     	ldr	x9, [x8, #0x8]
+  27a854: f940028a     	ldr	x10, [x20]
+  27a858: eb13029f     	cmp	x20, x19
+  27a85c: f9000549     	str	x9, [x10, #0x8]
+  27a860: f9400508     	ldr	x8, [x8, #0x8]
+  27a864: f900010a     	str	x10, [x8]
+  27a868: f9000a7f     	str	xzr, [x19, #0x10]
+  27a86c: 540001a0     	b.eq	0x27a8a0 <_ZN18codecPluginManager13dummyFunctionEv+0x24ac>
+  27a870: a940d697     	ldp	x23, x21, [x20, #0x8]
+  27a874: f9000a9f     	str	xzr, [x20, #0x10]
+  27a878: b40000b5     	cbz	x21, 0x27a88c <_ZN18codecPluginManager13dummyFunctionEv+0x2498>
+  27a87c: aa1503e0     	mov	x0, x21
+  27a880: 94000036     	bl	0x27a958 <_ZN18codecPluginManager13dummyFunctionEv+0x2564>
+  27a884: aa1503e0     	mov	x0, x21
+  27a888: 97f978ae     	bl	0xd8b40 <_ZdlPv@plt>
+  27a88c: aa1403e0     	mov	x0, x20
+  27a890: 97f978ac     	bl	0xd8b40 <_ZdlPv@plt>
+  27a894: eb1302ff     	cmp	x23, x19
+  27a898: aa1703f4     	mov	x20, x23
+  27a89c: 54fffea1     	b.ne	0x27a870 <_ZN18codecPluginManager13dummyFunctionEv+0x247c>
+  27a8a0: f94016c8     	ldr	x8, [x22, #0x28]
+  27a8a4: f94007e9     	ldr	x9, [sp, #0x8]
+  27a8a8: eb09011f     	cmp	x8, x9
+  27a8ac: 540000e1     	b.ne	0x27a8c8 <_ZN18codecPluginManager13dummyFunctionEv+0x24d4>
+  27a8b0: a9447bfd     	ldp	x29, x30, [sp, #0x40]
+  27a8b4: a9434ff4     	ldp	x20, x19, [sp, #0x30]
+  27a8b8: a94257f6     	ldp	x22, x21, [sp, #0x20]
+  27a8bc: f9400bf7     	ldr	x23, [sp, #0x10]
+  27a8c0: 910143ff     	add	sp, sp, #0x50
+  27a8c4: d65f03c0     	ret
+  27a8c8: 97f9788e     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a8cc: d10103ff     	sub	sp, sp, #0x40
+  27a8d0: f9000bf5     	str	x21, [sp, #0x10]
+  27a8d4: a9024ff4     	stp	x20, x19, [sp, #0x20]
+  27a8d8: a9037bfd     	stp	x29, x30, [sp, #0x30]
+  27a8dc: 9100c3fd     	add	x29, sp, #0x30
+  27a8e0: d53bd054     	mrs	x20, TPIDR_EL0
+  27a8e4: f9401688     	ldr	x8, [x20, #0x28]
+  27a8e8: aa0003f3     	mov	x19, x0
+  27a8ec: f90007e8     	str	x8, [sp, #0x8]
+  27a8f0: f9400808     	ldr	x8, [x0, #0x10]
+  27a8f4: b40001e8     	cbz	x8, 0x27a930 <_ZN18codecPluginManager13dummyFunctionEv+0x253c>
+  27a8f8: a9400268     	ldp	x8, x0, [x19]
+  27a8fc: f9400509     	ldr	x9, [x8, #0x8]
+  27a900: f940000a     	ldr	x10, [x0]
+  27a904: eb13001f     	cmp	x0, x19
+  27a908: f9000549     	str	x9, [x10, #0x8]
+  27a90c: f9400508     	ldr	x8, [x8, #0x8]
+  27a910: f900010a     	str	x10, [x8]
+  27a914: f9000a7f     	str	xzr, [x19, #0x10]
+  27a918: 540000c0     	b.eq	0x27a930 <_ZN18codecPluginManager13dummyFunctionEv+0x253c>
+  27a91c: f9400415     	ldr	x21, [x0, #0x8]
+  27a920: 97f97888     	bl	0xd8b40 <_ZdlPv@plt>
+  27a924: eb1302bf     	cmp	x21, x19
+  27a928: aa1503e0     	mov	x0, x21
+  27a92c: 54ffff81     	b.ne	0x27a91c <_ZN18codecPluginManager13dummyFunctionEv+0x2528>
+  27a930: f9401688     	ldr	x8, [x20, #0x28]
+  27a934: f94007e9     	ldr	x9, [sp, #0x8]
+  27a938: eb09011f     	cmp	x8, x9
+  27a93c: 540000c1     	b.ne	0x27a954 <_ZN18codecPluginManager13dummyFunctionEv+0x2560>
+  27a940: a9437bfd     	ldp	x29, x30, [sp, #0x30]
+  27a944: a9424ff4     	ldp	x20, x19, [sp, #0x20]
+  27a948: f9400bf5     	ldr	x21, [sp, #0x10]
+  27a94c: 910103ff     	add	sp, sp, #0x40
+  27a950: d65f03c0     	ret
+  27a954: 97f9786b     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a958: d100c3ff     	sub	sp, sp, #0x30
+  27a95c: a9014ff4     	stp	x20, x19, [sp, #0x10]
+  27a960: a9027bfd     	stp	x29, x30, [sp, #0x20]
+  27a964: 910083fd     	add	x29, sp, #0x20
+  27a968: d53bd054     	mrs	x20, TPIDR_EL0
+  27a96c: f9401688     	ldr	x8, [x20, #0x28]
+  27a970: aa0003f3     	mov	x19, x0
+  27a974: f90007e8     	str	x8, [sp, #0x8]
+  27a978: f9400c00     	ldr	x0, [x0, #0x18]
+  27a97c: 97f97919     	bl	0xd8de0 <free@plt>
+  27a980: aa1303e0     	mov	x0, x19
+  27a984: 97f9f724     	bl	0xf8614 <.text+0x17d54>
+  27a988: f9401688     	ldr	x8, [x20, #0x28]
+  27a98c: f94007e9     	ldr	x9, [sp, #0x8]
+  27a990: eb09011f     	cmp	x8, x9
+  27a994: 540000a1     	b.ne	0x27a9a8 <_ZN18codecPluginManager13dummyFunctionEv+0x25b4>
+  27a998: a9427bfd     	ldp	x29, x30, [sp, #0x20]
+  27a99c: a9414ff4     	ldp	x20, x19, [sp, #0x10]
+  27a9a0: 9100c3ff     	add	sp, sp, #0x30
+  27a9a4: d65f03c0     	ret
+  27a9a8: 97f97856     	bl	0xd8b00 <__stack_chk_fail@plt>
+  27a9ac: d10103ff     	sub	sp, sp, #0x40
+  27a9b0: f9000bf5     	str	x21, [sp, #0x10]
+  27a9b4: a9024ff4     	stp	x20, x19, [sp, #0x20]
+  27a9b8: a9037bfd     	stp	x29, x30, [sp, #0x30]
+  27a9bc: 9100c3fd     	add	x29, sp, #0x30
+  27a9c0: d53bd054     	mrs	x20, TPIDR_EL0
+  27a9c4: f9401688     	ldr	x8, [x20, #0x28]
+  27a9c8: aa0003f5     	mov	x21, x0
+  27a9cc: aa0003f3     	mov	x19, x0
+  27a9d0: f90007e8     	str	x8, [sp, #0x8]
+  27a9d4: f8408ea1     	ldr	x1, [x21, #0x8]!
+  27a9d8: 97ffff74     	bl	0x27a7a8 <_ZN18codecPluginManager13dummyFunctionEv+0x23b4>
+  27a9dc: f9000275     	str	x21, [x19]
+  27a9e0: f9000a7f     	str	xzr, [x19, #0x10]
+  27a9e4: f90002bf     	str	xzr, [x21]
+  27a9e8: f9401688     	ldr	x8, [x20, #0x28]
+  27a9ec: f94007e9     	ldr	x9, [sp, #0x8]
+  27a9f0: eb09011f     	cmp	x8, x9
+  27a9f4: 540000c1     	b.ne	0x27aa0c <_ZN18codecPluginManager13dummyFunctionEv+0x2618>
+  27a9f8: a9437bfd     	ldp	x29, x30, [sp, #0x30]
+  27a9fc: a9424ff4     	ldp	x20, x19, [sp, #0x20]
+  27aa00: f9400bf5     	ldr	x21, [sp, #0x10]
+  27aa04: 910103ff     	add	sp, sp, #0x40
+  27aa08: d65f03c0     	ret
+  27aa0c: 97f9783d     	bl	0xd8b00 <__stack_chk_fail@plt>
+
+[exit=0]

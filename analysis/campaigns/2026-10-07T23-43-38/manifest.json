@@ -1,0 +1,602 @@
+{
+  "tool": "ReelSec",
+  "version": "3.0.0",
+  "probes": [
+    "elf",
+    "symbols",
+    "strings",
+    "vtable",
+    "dispatch",
+    "critical-function",
+    "protection-bridge",
+    "vtable-abi",
+    "critical-function-behavior",
+    "native-security-api",
+    "java-screen-security",
+    "auto-publish",
+    "autonomous-dataflow",
+    "runtime-proof-readiness",
+    "runtime-frida-probe",
+    "target-provenance",
+    "runtime-toolchain-preflight",
+    "environment-capability",
+    "campaign-cli"
+  ],
+  "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so",
+  "created_at": "2026-10-08T02:45:16+0300",
+  "mode": "campaign",
+  "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+  "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+  "capabilities": {
+    "schema_version": "1.0",
+    "resolver": "ReelSec Environment Resolver",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00",
+    "tools": {
+      "java": {
+        "name": "java",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "openjdk 21.0.12 2026-07-21",
+        "returncode": 0
+      },
+      "python": {
+        "name": "python",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/python3.14",
+        "version": "Python 3.14.6",
+        "returncode": 0
+      },
+      "adb": {
+        "name": "adb",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/adb",
+        "version": "Android Debug Bridge version 1.0.41",
+        "returncode": 0,
+        "device_query": "USABLE",
+        "devices": [
+          "192.168.8.8:34661      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+        ]
+      },
+      "apktool": {
+        "name": "apktool-standalone",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "2.7.0-dirty",
+        "backend": "java-classpath",
+        "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+        "attempts": [
+          {
+            "backend": "cli",
+            "path": "/data/data/com.termux/files/usr/bin/apktool",
+            "returncode": 1
+          },
+          {
+            "backend": "java-classpath",
+            "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+            "returncode": 0
+          }
+        ]
+      },
+      "frida": {
+        "name": "frida",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/frida",
+        "version": "17.2.14",
+        "returncode": 0
+      },
+      "signing": {
+        "zipalign": {
+          "name": "zipalign",
+          "status": "BROKEN",
+          "path": "/data/data/com.termux/files/usr/bin/zipalign",
+          "version": null,
+          "returncode": 127
+        },
+        "apksigner": {
+          "name": "apksigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/bin/apksigner",
+          "version": "0.9",
+          "returncode": 0
+        },
+        "jarsigner": {
+          "name": "jarsigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+          "version": "jarsigner 21.0.12",
+          "returncode": 0
+        }
+      },
+      "zipalign": {
+        "name": "zipalign",
+        "status": "BROKEN",
+        "path": "/data/data/com.termux/files/usr/bin/zipalign",
+        "version": null,
+        "returncode": 127
+      },
+      "apksigner": {
+        "name": "apksigner",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/apksigner",
+        "version": "0.9",
+        "returncode": 0
+      },
+      "jarsigner": {
+        "name": "jarsigner",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+        "version": "jarsigner 21.0.12",
+        "returncode": 0
+      }
+    },
+    "device": {
+      "online_count": 1,
+      "state": "USABLE",
+      "records": [
+        "192.168.8.8:34661      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+      ]
+    },
+    "policy": {
+      "available_is_not_usable": true,
+      "resolver_does_not_install": true,
+      "original_apk_is_immutable": true
+    }
+  },
+  "apktool_backend": {
+    "name": "apktool-standalone",
+    "backend": "java-classpath",
+    "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+    "version": "2.7.0-dirty",
+    "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+    "status": "SELECTED"
+  },
+  "apktool_decode": {
+    "status": "DECODED_NO_RES",
+    "returncode": 0,
+    "command": [
+      "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "-cp",
+      "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "brut.apktool.Main",
+      "d",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+      "-o",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/decoded-apk-no-res",
+      "-r"
+    ],
+    "output_dir": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/decoded-apk-no-res",
+    "log": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/decoded-apk-no-res/reelsec-apktool-recovery.log",
+    "mode": "APKTOOL_NO_RES",
+    "resources_decoded": false,
+    "instrumentable_smali": true,
+    "buildable_with_apktool": true,
+    "selection_strategy": "NO_RES_FIRST"
+  },
+  "decoded_input_inventory": {
+    "schema_version": "1.1",
+    "status": "READY",
+    "analysis_mode": "DECODED_SMALI_NATIVE",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/decoded-apk-no-res",
+    "manifest": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/decoded-apk-no-res/AndroidManifest.xml",
+    "smali_roots": [
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/decoded-apk-no-res/smali"
+    ],
+    "smali_file_count": 514,
+    "native_library_count": 50,
+    "native_libraries": [
+      "lib/arm64-v8a/libSecShell-x86.so",
+      "lib/arm64-v8a/libSecShell.so",
+      "lib/arm64-v8a/libalinetworkdiagnosis.so",
+      "lib/arm64-v8a/libalivcffmpeg.so",
+      "lib/arm64-v8a/libapplovin-native-crash-reporter.so",
+      "lib/arm64-v8a/libbuffer_pgl.so",
+      "lib/arm64-v8a/libc++_shared.so",
+      "lib/arm64-v8a/libcrashlytics-common.so",
+      "lib/arm64-v8a/libcrashlytics-handler.so",
+      "lib/arm64-v8a/libcrashlytics-trampoline.so",
+      "lib/arm64-v8a/libcrashlytics.so",
+      "lib/arm64-v8a/libdatastore_shared_counter.so",
+      "lib/arm64-v8a/libfile_lock_pgl.so",
+      "lib/arm64-v8a/libmarsxlog.so",
+      "lib/arm64-v8a/libmku_aaab.so",
+      "lib/arm64-v8a/libmmkv.so",
+      "lib/arm64-v8a/libnms.so",
+      "lib/arm64-v8a/libpglarmor.so",
+      "lib/arm64-v8a/libprotect.so",
+      "lib/arm64-v8a/libsaasCorePlayer.so",
+      "lib/arm64-v8a/libsaasDownloader.so",
+      "lib/arm64-v8a/libsls_producer.so",
+      "lib/arm64-v8a/libstupid.so",
+      "lib/arm64-v8a/libtapjoy.so",
+      "lib/arm64-v8a/libtt_ugen_layout.so",
+      "lib/armeabi-v7a/libSecShell-x86.so",
+      "lib/armeabi-v7a/libSecShell.so",
+      "lib/armeabi-v7a/libalinetworkdiagnosis.so",
+      "lib/armeabi-v7a/libalivcffmpeg.so",
+      "lib/armeabi-v7a/libapplovin-native-crash-reporter.so",
+      "lib/armeabi-v7a/libbuffer_pgl.so",
+      "lib/armeabi-v7a/libc++_shared.so",
+      "lib/armeabi-v7a/libcrashlytics-common.so",
+      "lib/armeabi-v7a/libcrashlytics-handler.so",
+      "lib/armeabi-v7a/libcrashlytics-trampoline.so",
+      "lib/armeabi-v7a/libcrashlytics.so",
+      "lib/armeabi-v7a/libdatastore_shared_counter.so",
+      "lib/armeabi-v7a/libfile_lock_pgl.so",
+      "lib/armeabi-v7a/libmarsxlog.so",
+      "lib/armeabi-v7a/libmku_aaab.so",
+      "lib/armeabi-v7a/libmmkv.so",
+      "lib/armeabi-v7a/libnms.so",
+      "lib/armeabi-v7a/libpglarmor.so",
+      "lib/armeabi-v7a/libprotect.so",
+      "lib/armeabi-v7a/libsaasCorePlayer.so",
+      "lib/armeabi-v7a/libsaasDownloader.so",
+      "lib/armeabi-v7a/libsls_producer.so",
+      "lib/armeabi-v7a/libstupid.so",
+      "lib/armeabi-v7a/libtapjoy.so",
+      "lib/armeabi-v7a/libtt_ugen_layout.so"
+    ],
+    "dex_count": 0,
+    "dex_files": [],
+    "decode_mode": "APKTOOL_NO_RES",
+    "resources_decoded": false
+  },
+  "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/decoded-apk-no-res",
+  "target_source": "decoded-apk-no-res",
+  "input_provenance": {
+    "schema_version": "1.1",
+    "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+    "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+    "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/decoded-apk-no-res",
+    "analysis_root_kind": "repository_or_external_root",
+    "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_relative_path": "lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+    "target_relation": "WITHIN_ANALYSIS_ROOT",
+    "evidence_scope": "static-analysis-input-provenance",
+    "causality_proven": false
+  },
+  "instrumentation_plan": {
+    "status": "READY",
+    "mode": "NON_MUTATING_PLAN",
+    "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+    "class_name": "com/SecShell/SecShell/AW",
+    "loadlibrary_line": 135,
+    "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+    "anchor": "System.loadLibrary(\"SecShell\")",
+    "placement": "immediately_after_loadLibrary_before_normal_application_init",
+    "runtime_proof": false,
+    "discovery": "STRUCTURAL_CONTENT",
+    "candidate_count": 1,
+    "candidates": [
+      {
+        "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+        "class_name": "com/SecShell/SecShell/AW",
+        "loadlibrary_line": 135,
+        "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "is_application": true,
+        "has_attach_base_context": true
+      }
+    ],
+    "discovered_candidates": [
+      {
+        "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+        "relative_path": "smali/com/SecShell/SecShell/AW.smali",
+        "class_name": "com/SecShell/SecShell/AW",
+        "score": 185,
+        "is_application": true,
+        "has_attach_base_context": true,
+        "manifest_application": null,
+        "manifest_match": false,
+        "loadlibrary_line": 135,
+        "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "secshell_reference_in_class": true
+      }
+    ]
+  },
+  "instrumented_copy": {
+    "mutations": [
+      {
+        "anchor": "Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "file": "smali/com/SecShell/SecShell/AW.smali",
+        "log_message": "SecShell loadLibrary reached",
+        "log_tag": "ReelSec-Instrumentation",
+        "matched_registers": [
+          "v0"
+        ],
+        "purpose": "telemetry_only",
+        "registers_added": 2,
+        "type": "LOG_I_PROBE"
+      },
+      {
+        "type": "FRIDA_GADGET_EMBED",
+        "file": "smali/com/SecShell/SecShell/AW.smali",
+        "library": "lib/arm64-v8a/libfrida-gadget.so",
+        "library_sha256": "9a457f19c7fef6568a86b4d3028e7342b0bbc4cecc6449b47f5802c56f65b135",
+        "config": "lib/arm64-v8a/libfrida-gadget.config.so",
+        "abi": "arm64-v8a",
+        "listen": "127.0.0.1:27042",
+        "purpose": "guarded_runtime_observation",
+        "native_library_packaging": "apktool_doNotCompress_so",
+        "original_apk_untouched": true
+      }
+    ],
+    "schema_version": 1,
+    "source_manifest_sha256": "3fe3d6c8811e4d4ece4108b94d9afca2301eb0cf3118d707648e9484a2c7a1f4",
+    "source_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/decoded-apk-no-res",
+    "status": "MUTATED",
+    "work_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-apk",
+    "gadget_enabled": true,
+    "gadget_source": "/data/data/com.termux/files/home/apk-lab/reelsec-gadget/frida-gadget-17.2.14-android-arm64.so",
+    "gadget_abi": "arm64-v8a",
+    "gadget_port": 27042,
+    "instrumentation_target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-apk/smali/com/SecShell/SecShell/AW.smali"
+  },
+  "build_verify": {
+    "status": "BUILT",
+    "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-unsigned-aligned.apk",
+    "size": 75944997,
+    "sha256": "641d17d51f7f49ff56eed37779c07753c3005e9e781f362152149236cde6726b",
+    "command": [
+      "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "-cp",
+      "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "brut.apktool.Main",
+      "b",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-apk",
+      "-o",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-unsigned.apk"
+    ],
+    "returncode": 0,
+    "output_tail": "I: Using Apktool 2.7.0-dirty\nI: Checking whether sources has changed...\nI: Smaling smali folder into classes.dex...\nI: Checking whether resources has changed...\nI: Copying raw resources...\nI: Copying libs... (/lib)\nI: Copying libs... (/kotlin)\nI: Copying libs... (/META-INF/services)\nI: Building apk file...\nI: Copying unknown files/dir...\nI: Built apk into: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-unsigned.apk\n",
+    "raw_built_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-unsigned.apk",
+    "alignment_command": [
+      "/data/data/com.termux/files/usr/bin/zipalign",
+      "-P",
+      "16",
+      "-f",
+      "-v",
+      "4",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-unsigned.apk",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-unsigned-aligned.apk"
+    ],
+    "alignment_returncode": 0,
+    "alignment_output_tail": "n_rules_english.txt (OK - compressed)\n75342103 org/apache/commons/codec/language/bm/gen_approx_russian.txt (OK - compressed)\n75342895 org/apache/commons/codec/language/bm/sep_exact_portuguese.txt (OK - compressed)\n75343458 org/apache/commons/codec/language/bm/sep_exact_any.txt (OK - compressed)\n75344027 org/apache/commons/codec/language/bm/ash_approx_spanish.txt (OK - compressed)\n75344609 org/apache/commons/codec/language/bm/gen_approx_cyrillic.txt (OK - compressed)\n75345195 org/apache/commons/codec/language/bm/ash_approx_hungarian.txt (OK - compressed)\n75345776 org/apache/commons/codec/language/bm/sep_approx_italian.txt (OK - compressed)\n75346348 org/apache/commons/codec/language/bm/sep_lang.txt (OK - compressed)\n75347400 org/apache/commons/codec/language/bm/gen_approx_greeklatin.txt (OK - compressed)\n75347988 org/apache/commons/codec/language/bm/gen_rules_polish.txt (OK - compressed)\n75349527 org/apache/commons/codec/language/bm/gen_exact_english.txt (OK - compressed)\n75350109 org/apache/commons/codec/language/bm/ash_rules_polish.txt (OK - compressed)\n75351658 org/apache/commons/codec/language/bm/ash_rules_cyrillic.txt (OK - compressed)\n75352727 org/apache/commons/codec/language/bm/gen_exact_cyrillic.txt (OK - compressed)\n75353313 org/apache/commons/codec/language/bm/sep_rules_portuguese.txt (OK - compressed)\n75354507 org/apache/commons/codec/language/bm/ash_approx_common.txt (OK - compressed)\n75356043 org/apache/commons/codec/language/bm/sep_approx_spanish.txt (OK - compressed)\n75356626 org/apache/commons/codec/language/bm/gen_rules_romanian.txt (OK - compressed)\n75357451 org/apache/commons/codec/language/bm/ash_exact_romanian.txt (OK - compressed)\n75358030 org/apache/commons/codec/language/bm/ash_rules_hebrew.txt (OK - compressed)\n75358814 org/apache/commons/codec/language/bm/sep_hebrew_common.txt (OK - compressed)\n75359825 org/apache/commons/codec/language/bm/gen_rules_hebrew.txt (OK - compressed)\n75360612 org/apache/commons/codec/language/bm/gen_rules_czech.txt (OK - compressed)\n75361452 org/apache/commons/codec/language/bm/ash_lang.txt (OK - compressed)\n75363083 org/apache/http/version.properties (OK - compressed)\n75363687 org/apache/http/client/version.properties (OK - compressed)\n75364376 google/protobuf/timestamp.proto (OK - compressed)\n75367275 google/protobuf/field_mask.proto (OK - compressed)\n75370469 google/protobuf/api.proto (OK - compressed)\n75373459 google/protobuf/duration.proto (OK - compressed)\n75375591 google/protobuf/struct.proto (OK - compressed)\n75377337 google/protobuf/wrappers.proto (OK - compressed)\n75378965 google/protobuf/source_context.proto (OK - compressed)\n75380230 google/protobuf/any.proto (OK - compressed)\n75382923 google/protobuf/type.proto (OK - compressed)\n75385373 google/protobuf/empty.proto (OK - compressed)\n75386672 okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75428132 okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75428396 com/applovin/shadow/okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75469876 com/applovin/shadow/okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75470128 com/google/api/client/http/google-http-client.properties (OK)\n75470236 com/google/api/client/googleapis/google.p12 (OK)\n75546785 com/google/api/client/googleapis/google.jks (OK - compressed)\n75590136 com/google/api/client/googleapis/google-api-client.properties (OK)\n75590234 src/google/protobuf/timestamp.proto (OK - compressed)\n75593137 src/google/protobuf/field_mask.proto (OK - compressed)\n75596335 src/google/protobuf/api.proto (OK - compressed)\n75599329 src/google/protobuf/duration.proto (OK - compressed)\n75601465 src/google/protobuf/struct.proto (OK - compressed)\n75603215 src/google/protobuf/wrappers.proto (OK - compressed)\n75604847 src/google/protobuf/source_context.proto (OK - compressed)\n75606116 src/google/protobuf/any.proto (OK - compressed)\n75608813 src/google/protobuf/type.proto (OK - compressed)\n75611267 src/google/protobuf/empty.proto (OK - compressed)\nVerification successful\n",
+    "alignment_verify_command": [
+      "/data/data/com.termux/files/usr/bin/zipalign",
+      "-c",
+      "-P",
+      "16",
+      "-v",
+      "4",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-unsigned-aligned.apk"
+    ],
+    "alignment_page_size_kb": 16,
+    "native_library_packaging": {
+      "status": "NATIVE_LIBRARIES_UNCOMPRESSED",
+      "native_library_count": 52,
+      "compressed_native_libraries": []
+    }
+  },
+  "sign_verify": {
+    "unsigned_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-unsigned-aligned.apk",
+    "unsigned_sha256": "641d17d51f7f49ff56eed37779c07753c3005e9e781f362152149236cde6726b",
+    "signed_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-signed.apk",
+    "signed_sha256": "69a57ded52e99d194c2f151b3d7c21c3451e7893db085c8a9b92010439e61057",
+    "original_mutation": false,
+    "status": "SIGNED_VERIFIED",
+    "sign_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "sign",
+      "--ks",
+      "/data/data/com.termux/files/home/apk-lab/reelsec-test/reelsec-test.jks",
+      "--ks-key-alias",
+      "reelsec-test",
+      "--ks-pass",
+      "env:REELSEC_TEST_KEYSTORE_PASSWORD",
+      "--key-pass",
+      "env:REELSEC_TEST_KEY_PASSWORD",
+      "--out",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-signed.apk",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-unsigned-aligned.apk"
+    ],
+    "verify_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "verify",
+      "--verbose",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-signed.apk"
+    ],
+    "sign_output_tail": "",
+    "verify_output_tail": "Verifies\nVerified using v1 scheme (JAR signing): true\nVerified using v2 scheme (APK Signature Scheme v2): true\nVerified using v3 scheme (APK Signature Scheme v3): true\nVerified using v3.1 scheme (APK Signature Scheme v3.1): false\nVerified using v3.2 scheme (APK Signature Scheme v3.2): false\nVerified using v4 scheme (APK Signature Scheme v4): false\nVerified for SourceStamp: false\nNumber of signers: 1\nWARNING: META-INF/services/io.ktor.client.HttpClientEngineContainer not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.CoroutineExceptionHandler not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.internal.MainDispatcherFactory not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\n"
+  },
+  "adb_deploy": {
+    "status": "INSTALLED",
+    "serial": "192.168.8.8:34661",
+    "requested_serial": null,
+    "device_resolution": "AUTO_SINGLE_ONLINE_DEVICE",
+    "online_devices": [
+      "192.168.8.8:34661"
+    ],
+    "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-signed.apk",
+    "artifact_sha256": "69a57ded52e99d194c2f151b3d7c21c3451e7893db085c8a9b92010439e61057",
+    "artifact_kind": "INSTRUMENTED_TEST_ARTIFACT",
+    "device_inventory_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "devices",
+      "-l"
+    ],
+    "device_check_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "-s",
+      "192.168.8.8:34661",
+      "get-state"
+    ],
+    "artifact_preflight": {
+      "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-signed.apk",
+      "checks": {
+        "native_libs_uncompressed": {
+          "status": "PASS",
+          "so_count": 52,
+          "compressed_entries": []
+        },
+        "abi_directories": {
+          "status": "PASS",
+          "abis": [
+            "arm64-v8a",
+            "armeabi-v7a"
+          ]
+        },
+        "zipalign_page_alignment": {
+          "status": "PASS",
+          "command": [
+            "/data/data/com.termux/files/usr/bin/zipalign",
+            "-c",
+            "-P",
+            "16",
+            "-v",
+            "4",
+            "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-signed.apk"
+          ],
+          "returncode": 0,
+          "output_tail": "google/protobuf/any.proto (OK - compressed)\n75383119 google/protobuf/type.proto (OK - compressed)\n75385569 google/protobuf/empty.proto (OK - compressed)\n75386876 okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75428336 okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75428604 com/applovin/shadow/okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n75470084 com/applovin/shadow/okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n75470344 com/google/api/client/http/google-http-client.properties (OK)\n75470456 com/google/api/client/googleapis/google.p12 (OK)\n75547005 com/google/api/client/googleapis/google.jks (OK - compressed)\n75590364 com/google/api/client/googleapis/google-api-client.properties (OK)\n75590462 src/google/protobuf/timestamp.proto (OK - compressed)\n75593365 src/google/protobuf/field_mask.proto (OK - compressed)\n75596563 src/google/protobuf/api.proto (OK - compressed)\n75599557 src/google/protobuf/duration.proto (OK - compressed)\n75601693 src/google/protobuf/struct.proto (OK - compressed)\n75603443 src/google/protobuf/wrappers.proto (OK - compressed)\n75605075 src/google/protobuf/source_context.proto (OK - compressed)\n75606344 src/google/protobuf/any.proto (OK - compressed)\n75609041 src/google/protobuf/type.proto (OK - compressed)\n75611495 src/google/protobuf/empty.proto (OK - compressed)\n75612767 META-INF/REELSEC-.SF (OK - compressed)\n75771974 META-INF/REELSEC-.RSA (OK - compressed)\n75773114 META-INF/MANIFEST.MF (OK - compressed)\nVerification successful\n"
+        },
+        "abi_compatibility": {
+          "status": "PASS",
+          "device_abilist": "arm64-v8a,armeabi-v7a,armeabi",
+          "apk_abis": [
+            "arm64-v8a",
+            "armeabi-v7a"
+          ],
+          "compatible": true
+        }
+      },
+      "status": "PASS"
+    },
+    "install_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "-s",
+      "192.168.8.8:34661",
+      "install",
+      "-r",
+      "--no-incremental",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-signed.apk"
+    ],
+    "install_mode": "UPDATE",
+    "uninstall_command": null,
+    "uninstall_output_tail": "",
+    "install_output_tail": "Performing Streamed Install\nSuccess\n",
+    "installed_verification": {
+      "present": true,
+      "installed_path": "/data/app/~~Qog5c_NTa7vFLrvKWxREqA==/com.newleaf.app.android.victor-SQSVeF-6OnBIjMXDvrXlJg==/base.apk",
+      "version_code": "4200",
+      "status": "VERIFIED_INSTALLED"
+    }
+  },
+  "runtime_capture": {
+    "schema_version": 1,
+    "captured_at_epoch": 1791416711.3121943,
+    "device_serial": "192.168.8.8:34661",
+    "package": "com.newleaf.app.android.victor",
+    "observations": {
+      "state": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:34661",
+          "get-state"
+        ],
+        "returncode": 0,
+        "output": "device\n"
+      },
+      "package_path": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:34661",
+          "shell",
+          "pm",
+          "path",
+          "com.newleaf.app.android.victor"
+        ],
+        "returncode": 0,
+        "output": "package:/data/app/~~Qog5c_NTa7vFLrvKWxREqA==/com.newleaf.app.android.victor-SQSVeF-6OnBIjMXDvrXlJg==/base.apk\n"
+      },
+      "process": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:34661",
+          "shell",
+          "sh",
+          "-c",
+          "ps -A | grep -F com.newleaf.app.android.victor || true"
+        ],
+        "returncode": 0,
+        "output": ""
+      },
+      "logcat_tail": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:34661",
+          "logcat",
+          "-d",
+          "-t",
+          "250",
+          "-v",
+          "threadtime"
+        ],
+        "returncode": 0,
+        "output": "--------- beginning of main\n10-08 02:45:12.297 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1088, 0, -102, 2, 21, UserHandle{0}, 0, ArcReel, -1, -1\n10-08 02:45:12.297 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1089, 0, -102, 2, 22, UserHandle{0}, 0, CapCut, -1, -1\n10-08 02:45:12.297 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1090, 0, -102, 2, 23, UserHandle{0}, 0, TikTok, -1, -1\n10-08 02:45:12.297 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1093, 0, -102, 2, 24, UserHandle{0}, 0, \u0622\u064a\u0627\u062a\u064a, -1, -1\n10-08 02:45:12.297 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1108, 0, -102, 2, 25, UserHandle{0}, 0, ReelShort, -1, -1\n10-08 02:45:12.297 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1109, 0, -102, 2, 26, UserHandle{95}, 0, ReelShort, -1, -1\n--------- beginning of system\n10-08 02:45:12.299  1269  1637 I SGM:GameManager: PkgUpdateReceiver, onReceive action =android.intent.action.PACKAGE_REPLACED changingUserId =95\n10-08 02:45:12.299  1269  1637 I SGM:GameManager: PkgUpdateReceiver, onPackageReplaced : com.newleaf.app.android.victor userID : UserHandle{95}\n10-08 02:45:12.299  1269  1637 D MetaDataCollector: onReceive: begin action=android.intent.action.PACKAGE_REPLACED\n10-08 02:45:12.299  1269  1637 D MetaDataCollector: onReceive: done pkgName=com.newleaf.app.android.victor\n10-08 02:45:12.299  1269  2323 D SGM:GosNotifyThread: notifyPackageChangedToGos(), before send intent to GOS. type:15, changeType: 8, pkgName:com.newleaf.app.android.victor, userHandleId:95\n10-08 02:45:12.299  1269  2323 D SGM:GosNotifyThread: notifyPackageChangedToGos(), not supported user. do nothing. userHandleId: 95\n10-08 02:45:12.301 24262 24377 I AppsModelWriter: updateItems(end) : updateItem> 0, 1108, 0, -102, 2, 25, UserHandle{0}, 0, ReelShort, -1, -1\n10-08 02:45:12.301 24262 24377 I PostPositionOperator: addAllItems() - All\n10-08 02:45:12.301 24262 24377 I PostPositionOperator: addItem() - , isWidgetOnly : false\n10-08 02:45:12.302 24262 24262 I AppsModelWriter: bindAppsItems() - visibleAddItems : 0, visibleUpdateItems : 1, removeItems : 0\n10-08 02:45:12.302 24262 24262 I Launcher.AppsContainerView: bindAppsUpdates() => add: 0, update: 1, remove: 0\n10-08 02:45:12.302 24262 24262 I Launcher.AppsPagedView: UpdateItems => id: 1108, rank: 25, screenId: 2, cellX: 0, cellY: 5, container: -102, dirty: false, title: ReelShort, isFolder: false, user: UserHandle{0}, disabled: false, screenType: 0\n10-08 02:45:12.303 24262 24377 I PostPositionOperator: activity is not single. size: 0\n10-08 02:45:12.303 24262 24377 I PostPositionOperator: addItem(): Can't find ActivityInfo. - com.verizon.messaging.vzmsgs/com.verizon.mms.ui.activity.Provisioning\n10-08 02:45:12.304 24262 24377 I PostPositionOperator: activity is not single. size: 0\n10-08 02:45:12.304 24262 24377 I PostPositionOperator: addItem(): Can't find ActivityInfo. - com.verizontelematics.verizonhum/.ui.HomeActivity\n10-08 02:45:12.317 23718 23718 D BubblesManager: onNotificationChannelModified : pkg=com.samsung.android.app.routines ,modificationType:3\n10-08 02:45:12.318 23718 23718 D BubblesManager: onNotificationChannelModified : pkg=com.samsung.android.app.routines ,modificationType:1\n10-08 02:45:12.321  1269  1614 W Looper  : Slow dispatch took 146ms android.fg h=android.os.Handler c=<recycled PooledLambda@15e392b> m=0\n10-08 02:45:12.325  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.pocketpalai' not found Error while validating document (android$apps-db/apps, com.pocketpalai)\n10-08 02:45:12.325  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.pocketpalai' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.stripe.link.android' not found Error while validating document (android$apps-db/apps, com.stripe.link.android)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.stripe.link.android' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.meitu.roboneo' not found Error while validating document (android$apps-db/apps, com.meitu.roboneo)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.meitu.roboneo' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.qtbbank.alqutaibi' not found Error while validating document (android$apps-db/apps, com.qtbbank.alqutaibi)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.qtbbank.alqutaibi' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.zhiliaoapp.musically' not found Error while validating document (android$apps-db/apps, com.zhiliaoapp.musically)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.zhiliaoapp.musically' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-dev.tokforge' not found Error while validating document (android$apps-db/apps, dev.tokforge)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-dev.tokforge' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.lemon.lvoverseas' not found Error while validating document (android$apps-db/apps, com.lemon.lvoverseas)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.lemon.lvoverseas' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.adenBank.adenCash' not found Error while validating document (android$apps-db/apps, com.adenBank.adenCash)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.adenBank.adenCash' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.AamalTech.Aden_Bank' not found Error while validating document (android$apps-db/apps, com.AamalTech.Aden_Bank)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.AamalTech.Aden_Bank' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.freereels.app' not found Error while validating document (android$apps-db/apps, com.freereels.app)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.freereels.app' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.pixelfed.loops' not found Error while validating document (android$apps-db/apps, com.pixelfed.loops)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.pixelfed.loops' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.echosign' not found Error while validating document (android$apps-db/apps, com.adobe.echosign)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.echosign' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-apk.signer' not found Error while validating document (android$apps-db/apps, apk.signer)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-apk.signer' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.alrajhiretailapp' not found Error while validating document (android$apps-db/apps, com.alrajhiretailapp)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.alrajhiretailapp' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.x.ai.grok' not found Error while validating document (android$apps-db/apps, com.x.ai.grok)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.x.ai.grok' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.newleaf.app.android.victor' not found Error while validating document (android$apps-db/apps, com.newleaf.app.android.victor)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.newleaf.app.android.victor' not found\n10-08 02:45:12.326  1269  4911 E AppSearchIcing: document-validator.cc:88: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.reader' not found Error while validating document (android$apps-db/apps, com.adobe.reader)\n10-08 02:45:12.326  1269  4911 W AppSearchIcing: status-util.h:31: Error: 5, Message: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.reader' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.lemon.lvoverseas' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-dev.tokforge' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.x.ai.grok' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.alrajhiretailapp' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.qtbbank.alqutaibi' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.AamalTech.Aden_Bank' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.stripe.link.android' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.meitu.roboneo' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.freereels.app' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.newleaf.app.android.victor' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.pocketpalai' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.zhiliaoapp.musically' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-apk.signer' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.adenBank.adenCash' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.reader' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.pixelfed.loops' not found\n10-08 02:45:12.330  1269  4918 E AppSearchAppIndxrHlp: Ran into error while indexing apps: [FAILURE(6)]: Schema type config 'android$apps-db/builtin:MobileApplication-com.adobe.echosign' not found\n10-08 02:45:12.335 24262 24377 I WidgetsModel: EasyModeWidget will be excluded on WidgetList.\n10-08 02:45:12.345 15045 17550 I GOS:GameIntentService: onHandleIntent. GameIntentService. type: 15, pkgName: com.newleaf.app.android.victor\n10-08 02:45:12.351 24262 24377 I PostPositionOperator: addItem() - com.newleaf.app.android.victor, isWidgetOnly : true\n10-08 02:45:12.352 24262 24377 W PackageUpdatedTask: refreshSearchLayout return, operation is not matched\n10-08 02:45:12.358  1008 17936 I sensors-hal: handle_sns_client_event:541, [0][739662] accel_sample [ 0.967,  9.914,  0.029] 48954841495051\n10-08 02:45:12.374 24262 24377 I PackageUpdatedTask: mAllAppsList.updatePackage com.newleaf.app.android.victor\n10-08 02:45:12.399 24262 24377 I AppIconSolution: return the original icon because tray option is set to None for com.newleaf.app.android.victor, isNight = false\n10-08 02:45:12.404  1269  2404 D SemNscXgbMsL1: Probability - Cloud gaming: [0.035776813]\n10-08 02:45:12.404  1269  2404 D SemNscXgbMsL1: Probability - Real time: [0.22077176]\n10-08 02:45:12.404  1269  2404 D SemNscXgbMsL1: Probability - Non real time: [0.28866094]\n10-08 02:45:12.404  1269  2404 D SemNscXgbMsL1: 1 sample inference time: 0.204219 msecs\n10-08 02:45:12.404  1269  2404 D SemNscXgbL2Rt: L2 RT 1 sample inference time: 0.337136 msecs\n10-08 02:45:12.404  1269  2404 D SemNscXgbL2Nrt: L2 NRT 1 sample inference time: 0.289635 msecs\n10-08 02:45:12.417 24262 24377 I LauncherActivityInfo: packageName: com.newleaf.app.android.victor, useThemeIcon: true, height: 189, width: 189, density: 640\n10-08 02:45:12.449 24262 24377 I HsAllAppsList: set ComponentInfo{com.newleaf.app.android.victor/com.newleaf.app.android.victor.MainActivity} app progress level to 100\n10-08 02:45:12.453 24262 24377 I WidgetsModel: EasyModeWidget will be excluded on WidgetList.\n10-08 02:45:12.462  1269  1323 I system_server: Background young concurrent copying GC freed 30MB AllocSpace bytes, 36(1472KB) LOS objects, 12% free, 162MB/186MB, paused 365us,521us total 133.672ms\n10-08 02:45:12.469 24262 24377 I AppIconSolution: return the original icon because tray option is set to None for com.newleaf.app.android.victor, isNight = false\n10-08 02:45:12.484  1269  4918 E AppSearchAppIndxrImpl: Certificate not found for package: org.chromium.webapk.aaf3db2baa3d2f863_v2\n10-08 02:45:12.509  3922  3922 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color:export ANDROID_LOG_TAGS=''; exec logcat '-d' '-t' '250' '-v' 'threadtime''\n10-08 02:45:12.515  5408 16941 W Bundle  : Key identifier expected Parcelable[] but value was a [Ljava.lang.String;.  The default value <null> was returned.\n10-08 02:45:12.515  5408 16941 W Bundle  : Attempt to cast generated internal exception:\n10-08 02:45:12.515  5408 16941 W Bundle  : java.lang.ClassCastException: java.lang.String[] cannot be cast to android.os.Parcelable[]\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat android.os.Bundle.getParcelableArray(Bundle.java:974)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat mdg.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):14)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635029@26.36.35 (190400-991383798):5)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqjb.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):582)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqjb.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):63)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqiu.i(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqhl.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):19)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqiw.f(:com.google.android.gms@263635029@26.36.35 (190400-991383798):26)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqhl.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):3)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqhs.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):10)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqpp.k(:com.google.android.gms@263635029@26.36.35 (190400-991383798):103)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqpm.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):71)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:520)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat java.util.concurrent.FutureTask.run(FutureTask.java:328)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat boph.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):50)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat boph.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):6)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat boph.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):33)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat bovg.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat java.lang.Thread.run(Thread.java:1571)\n10-08 02:45:12.515  5408 16941 W Bundle  : Key name expected Parcelable[] but value was a [Ljava.lang.String;.  The default value <null> was returned.\n10-08 02:45:12.515  5408 16941 W Bundle  : Attempt to cast generated internal exception:\n10-08 02:45:12.515  5408 16941 W Bundle  : java.lang.ClassCastException: java.lang.String[] cannot be cast to android.os.Parcelable[]\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat android.os.Bundle.getParcelableArray(Bundle.java:974)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat mdg.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):14)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635029@26.36.35 (190400-991383798):5)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqjb.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):582)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqjb.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):63)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqiu.i(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqhl.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):19)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqiw.f(:com.google.android.gms@263635029@26.36.35 (190400-991383798):26)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqhl.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):3)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqhs.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):10)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqpp.k(:com.google.android.gms@263635029@26.36.35 (190400-991383798):103)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat cqpm.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):71)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:520)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat java.util.concurrent.FutureTask.run(FutureTask.java:328)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat boph.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):50)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat boph.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):6)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat boph.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):33)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat bovg.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 02:45:12.515  5408 16941 W Bundle  : \tat java.lang.Thread.run(Thread.java:1571)\n10-08 02:45:12.516  5408 16941 W Bundle  : Key image expected Parcelable[] but value was a [Ljava.lang.String;.  The default value <null> was returned.\n10-08 02:45:12.516  5408 16941 W Bundle  : Attempt to cast generated internal exception:\n10-08 02:45:12.516  5408 16941 W Bundle  : java.lang.ClassCastException: java.lang.String[] cannot be cast to android.os.Parcelable[]\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat android.os.Bundle.getParcelableArray(Bundle.java:974)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat mdg.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):14)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635029@26.36.35 (190400-991383798):5)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqjb.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):582)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqjb.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):63)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqiu.i(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqhl.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):19)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqiw.f(:com.google.android.gms@263635029@26.36.35 (190400-991383798):26)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqhl.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):3)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqhs.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):10)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqpp.k(:com.google.android.gms@263635029@26.36.35 (190400-991383798):103)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqpm.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):71)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:520)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat java.util.concurrent.FutureTask.run(FutureTask.java:328)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat boph.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):50)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat boph.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):6)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat boph.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):33)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat bovg.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat java.lang.Thread.run(Thread.java:1571)\n10-08 02:45:12.516  5408 16941 W Bundle  : Key dateModified expected Parcelable[] but value was a [J.  The default value <null> was returned.\n10-08 02:45:12.516  5408 16941 W Bundle  : Attempt to cast generated internal exception:\n10-08 02:45:12.516  5408 16941 W Bundle  : java.lang.ClassCastException: long[] cannot be cast to android.os.Parcelable[]\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat android.os.Bundle.getParcelableArray(Bundle.java:974)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat mdg.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):14)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat com.google.firebase.appindexing.internal.Thing.h(:com.google.android.gms@263635029@26.36.35 (190400-991383798):5)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqjb.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):582)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqjb.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):63)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqiu.i(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqhl.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):19)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqiw.f(:com.google.android.gms@263635029@26.36.35 (190400-991383798):26)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqhl.g(:com.google.android.gms@263635029@26.36.35 (190400-991383798):3)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqhs.a(:com.google.android.gms@263635029@26.36.35 (190400-991383798):10)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqpp.k(:com.google.android.gms@263635029@26.36.35 (190400-991383798):103)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat cqpm.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):71)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:520)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat java.util.concurrent.FutureTask.run(FutureTask.java:328)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat boph.d(:com.google.android.gms@263635029@26.36.35 (190400-991383798):50)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat boph.c(:com.google.android.gms@263635029@26.36.35 (190400-991383798):6)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat boph.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):33)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat bovg.run(:com.google.android.gms@263635029@26.36.35 (190400-991383798):8)\n10-08 02:45:12.516  5408 16941 W Bundle  : \tat java.lang.Thread.run(Thread.java:1571)\n10-08 02:45:12.523  1269  4911 W AppSearchIcing: status-util.h:31: Error: 3, Message: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.\n10-08 02:45:12.523  1269  4911 W AppSearchResult: Converting throwable to failed result.\n10-08 02:45:12.523  1269  4911 W AppSearchResult: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.\n10-08 02:45:12.523  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.checkCodeOneOf(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:22)\n10-08 02:45:12.523  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.checkSuccess(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:7)\n10-08 02:45:12.523  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.doSetSchemaNoChangeNotificationLocked(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:877)\n10-08 02:45:12.523  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.doSetSchemaWithChangeNotificationNoGetSchemaLocked(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:76)\n10-08 02:45:12.523  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.setSchema(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:100)\n10-08 02:45:12.523  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.AppSearchManagerService$Stub.lambda$setSchema$0(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:23)\n10-08 02:45:12.523  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.AppSearchManagerService$Stub$$ExternalSyntheticLambda9.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:41)\n10-08 02:45:12.523  1269  4911 W AppSearchResult: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 02:45:12.523  1269  4911 W AppSearchResult: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 02:45:12.523  1269  4911 W AppSearchResult: \tat java.lang.Thread.run(Thread.java:1571)\n10-08 02:45:12.523  1269  4918 E AppSearchAppIndxrHlp: Failed to setSchema in batch due to invalid schema.\n10-08 02:45:12.523  1269  4918 E AppSearchAppIndxrHlp: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.\n10-08 02:45:12.523  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.sync.SyncAppSearchBase.executeAppSearchResultOperation(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:50)\n10-08 02:45:12.523  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.sync.SyncAppSearchSessionImpl.setSchema(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:20)\n10-08 02:45:12.523  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppSearchHelper.setSchemasForPackages(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:488)\n10-08 02:45:12.523  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerImpl.doUpdateIncrementalPut(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:194)\n10-08 02:45:12.523  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance.doUpdate(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:129)\n10-08 02:45:12.523  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance$$ExternalSyntheticLambda2.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:9)\n10-08 02:45:12.523  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance$$ExternalSyntheticLambda0.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:12)\n10-08 02:45:12.523  1269  4918 E AppSearchAppIndxrHlp: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 02:45:12.523  1269  4918 E AppSearchAppIndxrHlp: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 02:45:12.523  1269  4918 E AppSearchAppIndxrHlp: \tat java.lang.Thread.run(Thread.java:1571)\n10-08 02:45:12.541 24262 24377 I PackageUpdatedTask: modified, appInfo : AppInfo(id=1109 type=APP hidden=0 container=all_apps screen=2 rank=26 rankOfList=-1 user=UserHandle{95} title=ReelShort componentName=ComponentInfo{com.newleaf.app.android.victor/com.newleaf.app.android.victor.MainActivity} screenType=0 runtimeStatusFlags=128 status=0)\n10-08 02:45:12.542 24262 24377 I AppsModelWriter: updateItems(start) : needToNormalize = true\n10-08 02:45:12.542 24262 24377 I AppsModelWriter: updateItems(start) > needToBind = true\n10-08 02:45:12.542 24262 24377 I AppsModelWriter: updateItems(start)> 0, 1109, 0, -102, 2, 26, UserHandle{95}, 0, ReelShort, -1, -1\n10-08 02:45:12.542 24262 24377 I AppsModelWriter: normalizeVisibleItems : [matched = true] col = 5, raw : 6\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 161, 2, -102, 0, 0, UserHandle{0}, 0, Google, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 174, 2, -102, 0, 1, UserHandle{0}, 0, Samsung, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 183, 2, -102, 0, 2, UserHandle{0}, 0, Verizon, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 960, 2, -102, 0, 3, UserHandle{0}, 0, Microsoft, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 958, 2, -102, 0, 4, UserHandle{0}, 0, \u0630\u0643\u0627\u0621 \u0627\u0635\u0637\u0646\u0627\u0639\u064a, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 962, 2, -102, 0, 5, UserHandle{0}, 0, \u0635\u0648\u062a\u064a\u0627\u062a, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 957, 2, -102, 0, 6, UserHandle{0}, 0, \u0645\u062d\u0627\u0641\u0638\u0629 \u0648\u0645\u0646\u0635\u0627\u062a \u062a\u062f\u0627\u0648\u0644, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 486, 2, -102, 0, 7, UserHandle{0}, 0, \u0645\u062d\u0627\u0641\u0638\u0629 \u0648\u0628\u0646\u0648\u0643 \u064a\u0645\u0646\u064a\u0629, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 961, 2, -102, 0, 8, UserHandle{0}, 0, \u0637\u0627\u0642\u0629 \u0627\u0644\u0634\u0645\u0633\u064a\u0629, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 964, 2, -102, 0, 9, UserHandle{0}, 0, \u0645\u0631\u0627\u0633\u0644\u0629, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 220, 0, -102, 0, 10, UserHandle{0}, 0, MyAppSharer, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 949, 0, -102, 0, 11, UserHandle{0}, 0, \u0627\u0644\u0631\u0633\u0627\u0626\u0644, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 188, 0, -102, 0, 12, UserHandle{0}, 0, \u0627\u0644\u062a\u0642\u0648\u064a\u0645, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 187, 0, -102, 0, 13, UserHandle{0}, 0, \u0627\u0644\u062d\u0627\u0633\u0628\u0629, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 189, 0, -102, 0, 14, UserHandle{0}, 0, \u0627\u0644\u0643\u0627\u0645\u064a\u0631\u0627, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 191, 0, -102, 0, 15, UserHandle{0}, 0, \u0627\u0644\u0633\u0627\u0639\u0629, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 192, 0, -102, 0, 16, UserHandle{0}, 0, \u062c\u0647\u0627\u062a \u0627\u0644\u0627\u062a\u0635\u0627\u0644, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 193, 0, -102, 0, 17, UserHandle{0}, 0, \u0627\u0644\u0628\u0631\u064a\u062f \u0627\u0644\u0625\u0644\u0643\u062a\u0631\u0648\u0646\u064a, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 194, 0, -102, 0, 18, UserHandle{0}, 0, \u0627\u0644\u0627\u0633\u062a\u0648\u062f\u064a\u0648\u202c, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 195, 0, -102, 0, 19, UserHandle{0}, 0, Gaming Hub, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 197, 0, -102, 0, 20, UserHandle{0}, 0, \u0627\u0644\u0647\u0627\u062a\u0641, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 199, 0, -102, 0, 21, UserHandle{0}, 0, \u0627\u0644\u0636\u0628\u0637, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 200, 0, -102, 0, 22, UserHandle{0}, 0, \u062a\u0644\u0645\u064a\u062d\u0627\u062a, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 211, 0, -102, 0, 23, UserHandle{0}, 0, Total Commander, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 242, 0, -102, 0, 24, UserHandle{0}, 0, Bluetooth Remote, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1031, 0, -102, 0, 25, UserHandle{0}, 0, Termux, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 244, 0, -102, 0, 26, UserHandle{0}, 0, \u0645\u062f\u064a\u0631 \u0627\u0644\u0645\u0644\u0641\u0627\u062a +, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 251, 0, -102, 0, 27, UserHandle{0}, 0, \u0645\u062d\u0641\u0638\u0629, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 288, 0, -102, 0, 28, UserHandle{0}, 0, \u062a\u0648\u0635\u064a\u0644 \u0648\u0646, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 330, 0, -102, 1, 0, UserHandle{0}, 0, \u0627\u0644\u0645\u0639\u064a\u0634\u0629 \u0627\u0644\u0630\u0643\u064a\u0629, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 461, 0, -102, 1, 1, UserHandle{0}, 0, \u0627\u0644\u0628\u0631\u064a\u062f \u0627\u0644\u0635\u0648\u062a\u064a \u0627\u0644\u0645\u0631\u0626\u064a, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 473, 0, -102, 1, 2, UserHandle{0}, 0, My Yemen Mobile, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 534, 0, -102, 1, 3, UserHandle{0}, 0, \u0633\u062c\u0644 \u0627\u0644\u062d\u0633\u0627\u0628\u0627\u062a, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 541, 0, -102, 1, 4, UserHandle{0}, 0, \u0648\u0636\u0639 4G LTE \u0641\u0642\u0637, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 556, 0, -102, 1, 5, UserHandle{0}, 0, \u0627\u0644\u0623\u0648\u0636\u0627\u0639 \u0648\u0627\u0644\u0631\u0648\u062a\u064a\u0646\u0627\u062a, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 582, 0, -102, 1, 6, UserHandle{0}, 0, Open Camera, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 628, 0, -102, 1, 7, UserHandle{0}, 0, ZTELink, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 786, 0, -102, 1, 8, UserHandle{0}, 0, Samsung Wallet, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 832, 0, -102, 1, 9, UserHandle{0}, 0, DWG FastView, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 963, 2, -102, 1, 10, UserHandle{0}, 0, , -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 923, 0, -102, 1, 11, UserHandle{0}, 0, Bas-\u0628\u0633, -1, -1\n10-08 02:45:12.543 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 940, 0, -102, 1, 12, UserHandle{0}, 0, Family Tree, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 943, 0, -102, 1, 13, UserHandle{0}, 0, \u0634\u062c\u0631\u0629 \u0627\u0644\u0639\u0627\u0626\u0644\u0629, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 946, 0, -102, 1, 14, UserHandle{0}, 0, FlashGet Kids, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 953, 0, -102, 1, 15, UserHandle{0}, 0, \u062f\u0648\u0648\u0644\u064a\u0646\u062c\u0648, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 954, 0, -102, 1, 16, UserHandle{0}, 0, Psiphon Pro, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 955, 0, -102, 1, 17, UserHandle{0}, 0, YouTube, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 968, 0, -102, 1, 18, UserHandle{0}, 0, MX Player Pro, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 972, 0, -102, 1, 19, UserHandle{0}, 0, \u0627\u0644\u0639\u0646\u0627\u064a\u0629 \u0628\u0627\u0644\u062c\u0647\u0627\u0632, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 983, 0, -102, 1, 20, UserHandle{0}, 0, CamScanner, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1024, 0, -102, 1, 21, UserHandle{0}, 0, \u062f\u0641\u062a\u0631 \u0627\u0644\u0646\u0642\u062f\u064a\u0629, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1030, 0, -102, 1, 22, UserHandle{0}, 0, \u0625\u0641-\u062f\u0631\u0648\u064a\u062f, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1034, 0, -102, 1, 23, UserHandle{0}, 0, Kiwi Browser, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1035, 0, -102, 1, 24, UserHandle{0}, 0, \u0625\u0639\u0644\u0627\u0646\u0627\u062a Google, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1036, 0, -102, 2, 0, UserHandle{0}, 0, \u062c\u0648\u0627\u0644\u064a \u062b\u0642\u0629, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1037, 0, -102, 2, 1, UserHandle{0}, 0, IQ Masters, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1038, 0, -102, 2, 2, UserHandle{0}, 0, Axion, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1043, 0, -102, 2, 3, UserHandle{0}, 0, BlueMail, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1044, 0, -102, 2, 4, UserHandle{0}, 0, Microsoft exFAT/NTFS for USB by Paragon Software, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1047, 0, -102, 2, 5, UserHandle{0}, 0, Zapya, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1048, 0, -102, 2, 6, UserHandle{0}, 0, DramaBox, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1049, 0, -102, 2, 7, UserHandle{0}, 0, MoreShort, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1051, 0, -102, 2, 8, UserHandle{0}, 0, Meet, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1054, 0, -102, 2, 9, UserHandle{0}, 0, Chrome Beta, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1060, 0, -102, 2, 10, UserHandle{0}, 0, TokForge, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1061, 0, -102, 2, 11, UserHandle{0}, 0, PocketPal, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1062, 0, -102, 2, 12, UserHandle{0}, 0, AI Chatbot, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1070, 0, -102, 2, 13, UserHandle{0}, 0, Loops, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1074, 0, -102, 2, 14, UserHandle{0}, 0, Acrobat Sign, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1075, 0, -102, 2, 15, UserHandle{0}, 0, Adobe Acrobat, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1073, 0, -102, 2, 16, UserHandle{0}, 0, FreeReels, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1077, 0, -102, 2, 17, UserHandle{0}, 0, NetShort, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1079, 0, -102, 2, 18, UserHandle{0}, 0, apk-signer, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1081, 0, -102, 2, 19, UserHandle{0}, 0, RoboNeo, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1086, 0, -102, 2, 20, UserHandle{0}, 0, Link, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1088, 0, -102, 2, 21, UserHandle{0}, 0, ArcReel, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1089, 0, -102, 2, 22, UserHandle{0}, 0, CapCut, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1090, 0, -102, 2, 23, UserHandle{0}, 0, TikTok, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1093, 0, -102, 2, 24, UserHandle{0}, 0, \u0622\u064a\u0627\u062a\u064a, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1108, 0, -102, 2, 25, UserHandle{0}, 0, ReelShort, -1, -1\n10-08 02:45:12.544 24262 24377 I AppsModelWriter: normalizeVisibleItems(visibleItems)> 0, 1109, 0, -102, 2, 26, UserHandle{95}, 0, ReelShort, -1, -1\n10-08 02:45:12.546 24262 24377 I AppsModelWriter: updateItems(end) : updateItem> 0, 1109, 0, -102, 2, 26, UserHandle{95}, 0, ReelShort, -1, -1\n10-08 02:45:12.546 24262 24377 I PostPositionOperator: addAllItems() - All\n10-08 02:45:12.546 24262 24262 I AppsModelWriter: bindAppsItems() - visibleAddItems : 0, visibleUpdateItems : 1, removeItems : 0\n10-08 02:45:12.546 24262 24377 I PostPositionOperator: addItem() - , isWidgetOnly : false\n10-08 02:45:12.546 24262 24262 I Launcher.AppsContainerView: bindAppsUpdates() => add: 0, update: 1, remove: 0\n10-08 02:45:12.546 24262 24262 I Launcher.AppsPagedView: UpdateItems => id: 1109, rank: 26, screenId: 2, cellX: 1, cellY: 5, container: -102, dirty: false, title: ReelShort, isFolder: false, user: UserHandle{95}, disabled: false, screenType: 0\n10-08 02:45:12.547 24262 24377 I PostPositionOperator: activity is not single. size: 0\n10-08 02:45:12.547 24262 24377 I PostPositionOperator: addItem(): Can't find ActivityInfo. - com.verizon.messaging.vzmsgs/com.verizon.mms.ui.activity.Provisioning\n10-08 02:45:12.547 24262 24377 I PostPositionOperator: activity is not single. size: 0\n10-08 02:45:12.547 24262 24377 I PostPositionOperator: addItem(): Can't find ActivityInfo. - com.verizontelematics.verizonhum/.ui.HomeActivity\n10-08 02:45:12.550  1269  4911 W AppSearchIcing: status-util.h:31: Error: 3, Message: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.\n10-08 02:45:12.559  1269  4911 W AppSearchResult: Converting throwable to failed result.\n10-08 02:45:12.559  1269  4911 W AppSearchResult: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.\n10-08 02:45:12.559  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.checkCodeOneOf(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:22)\n10-08 02:45:12.559  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.checkSuccess(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:7)\n10-08 02:45:12.559  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.doSetSchemaNoChangeNotificationLocked(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:877)\n10-08 02:45:12.559  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.doSetSchemaWithChangeNotificationNoGetSchemaLocked(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:76)\n10-08 02:45:12.559  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.setSchema(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:100)\n10-08 02:45:12.559  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.AppSearchManagerService$Stub.lambda$setSchema$0(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:23)\n10-08 02:45:12.559  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.AppSearchManagerService$Stub$$ExternalSyntheticLambda9.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:41)\n10-08 02:45:12.559  1269  4911 W AppSearchResult: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 02:45:12.559  1269  4911 W AppSearchResult: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 02:45:12.559  1269  4911 W AppSearchResult: \tat java.lang.Thread.run(Thread.java:1571)\n10-08 02:45:12.559  1269  4918 E AppSearchAppIndxrHlp: Skipping invalid schemas for package: com.google.android.googlequicksearchbox\n10-08 02:45:12.559  1269  4918 E AppSearchAppIndxrHlp: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.googlequicksearchbox' references or inherits from itself.\n10-08 02:45:12.559  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.sync.SyncAppSearchBase.executeAppSearchResultOperation(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:50)\n10-08 02:45:12.559  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.sync.SyncAppSearchSessionImpl.setSchema(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:20)\n10-08 02:45:12.559  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppSearchHelper.setSchemasForPackages(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:588)\n10-08 02:45:12.559  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerImpl.doUpdateIncrementalPut(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:194)\n10-08 02:45:12.559  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance.doUpdate(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:129)\n10-08 02:45:12.559  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance$$ExternalSyntheticLambda2.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:9)\n10-08 02:45:12.559  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance$$ExternalSyntheticLambda0.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:12)\n10-08 02:45:12.559  1269  4918 E AppSearchAppIndxrHlp: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 02:45:12.559  1269  4918 E AppSearchAppIndxrHlp: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 02:45:12.559  1269  4918 E AppSearchAppIndxrHlp: \tat java.lang.Thread.run(Thread.java:1571)\n10-08 02:45:12.564  1269  1614 W Looper  : Slow dispatch took 211ms android.fg h=android.os.Handler c=<recycled PooledLambda@bde5725> m=0\n10-08 02:45:12.571 24262 24377 I PackageUpdatedTask: set null app progress level to 100\n10-08 02:45:12.572  1269  4911 W AppSearchIcing: status-util.h:31: Error: 3, Message: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.apps.adm' references or inherits from itself.\n10-08 02:45:12.572  1269  4911 W AppSearchResult: Converting throwable to failed result.\n10-08 02:45:12.572  1269  4911 W AppSearchResult: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.apps.adm' references or inherits from itself.\n10-08 02:45:12.572  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.checkCodeOneOf(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:22)\n10-08 02:45:12.572  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.checkSuccess(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:7)\n10-08 02:45:12.572  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.doSetSchemaNoChangeNotificationLocked(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:877)\n10-08 02:45:12.572  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.doSetSchemaWithChangeNotificationNoGetSchemaLocked(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:76)\n10-08 02:45:12.572  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.external.localstorage.AppSearchImpl.setSchema(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:100)\n10-08 02:45:12.572  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.AppSearchManagerService$Stub.lambda$setSchema$0(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:23)\n10-08 02:45:12.572  1269  4911 W AppSearchResult: \tat com.android.server.appsearch.AppSearchManagerService$Stub$$ExternalSyntheticLambda9.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:41)\n10-08 02:45:12.572  1269  4911 W AppSearchResult: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 02:45:12.572  1269  4911 W AppSearchResult: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 02:45:12.572  1269  4911 W AppSearchResult: \tat java.lang.Thread.run(Thread.java:1571)\n10-08 02:45:12.572  1269  4918 E AppSearchAppIndxrHlp: Skipping invalid schemas for package: com.google.android.apps.adm\n10-08 02:45:12.572  1269  4918 E AppSearchAppIndxrHlp: android.app.appsearch.exceptions.AppSearchException: Invalid cycle detected in type configs. 'android$apps-db/AppFunctionDataTypeMetadataDocument-com.google.android.apps.adm' references or inherits from itself.\n10-08 02:45:12.572  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.sync.SyncAppSearchBase.executeAppSearchResultOperation(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:50)\n10-08 02:45:12.572  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.sync.SyncAppSearchSessionImpl.setSchema(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:20)\n10-08 02:45:12.572  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppSearchHelper.setSchemasForPackages(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:588)\n10-08 02:45:12.572  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerImpl.doUpdateIncrementalPut(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:194)\n10-08 02:45:12.572  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance.doUpdate(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:129)\n10-08 02:45:12.572  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance$$ExternalSyntheticLambda2.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:9)\n10-08 02:45:12.572  1269  4918 E AppSearchAppIndxrHlp: \tat com.android.server.appsearch.appsindexer.AppsIndexerUserInstance$$ExternalSyntheticLambda0.run(go/retraceme a5342384fc27424b671bfb5c10e727e20a7f7aefc970d9d98f26681c4cd687a6:12)\n10-08 02:45:12.572  1269  4918 E AppSearchAppIndxrHlp: \tat java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)\n10-08 02:45:12.572  1269  4918 E AppSearchAppIndxrHlp: \tat java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)\n10-08 02:45:12.572  1269  4918 E AppSearchAppIndxrHlp: \tat java.lang.Thread.run(Thread.java:1571)\n10-08 02:45:12.579 24262 24377 I WidgetsModel: EasyModeWidget will be excluded on WidgetList.\n10-08 02:45:12.585 24262 24377 W PackageUpdatedTask: refreshSearchLayout return, operation is not matched\n10-08 02:45:12.586  1269  2307 D InputReader: Btn_touch(11): value=1 when=48262.108639\n10-08 02:45:12.586  1269  2307 I InputReader: Touch event's action is 0x0 (id=3, t=0) [pCnt=1, s=0.26596 ] when=48262.108639\n10-08 02:45:12.590  1269  1269 D PowerManagerService: [api] userActivity : event: 0 flags: 0 (uid: 1000 pid: 1269) <- handleMotionEvent() in com.android.server.accessibility.AccessibilityInputFilter:481 eventTime = 48262108 displayId = 0\n10-08 02:45:12.590  1269  1269 D InputDispatcher: Inject motion (0/0): action=0x0, time=48262108639000, f=0x0, d=0 dsdx=0.750000 dtdx=-0.000000\n10-08 02:45:12.590  1269  2306 I InputDispatcher: Delivering touch to (23718): action: 0x0, f=0x800, d=0, '72eda8 ', t=1 +(0,-2189)*(0.75)\n10-08 02:45:12.590  1269  2306 D PowerManagerService: [api] userActivityFromNative :  (event: 2 flags: 0 displayId: 0) eventTime = 48262108\n10-08 02:45:12.591 23718 23718 I ViewRootImpl@d3ce2f7[NavigationBar0]: ViewPostIme pointer 0\n10-08 02:45:12.592 23718 24013 I KeyButtonView: injectInputEvent - 187\n10-08 02:45:12.592  1269  1615 I GestureDetector: obtain mCurrentDownEvent. id: 7394607 caller: com.android.server.wm.SystemGesturesPointerEventListener.onPointerEvent:203 com.android.server.wm.PointerEventDispatcher.onInputEvent:53 android.view.InputEventReceiver.dispatchInputEvent:285 \n10-08 02:45:12.592  1269  1615 I GestureDetector: obtain mCurrentDownEvent. id: 7394607 caller: com.android.server.wm.SystemPerformancePointerEventListener.onPointerEvent:89 com.android.server.wm.PointerEventDispatcher.onInputEvent:53 android.view.InputEventReceiver.dispatchInputEvent:285 \n10-08 02:45:12.592  1269  3081 D InputDispatcher: Inject key (23718/10040): action=0, f=0x48, d=0, time=48262114000000\n10-08 02:45:12.593  1269  3081 D WindowManager: interceptKeyTq keycode=187 interactive=true keyguardActive=false policyFlags=2b000002\n10-08 02:45:12.593  1269  3081 D PhoneWindowManagerExt: interceptKeyTq code=187 down=true repeatCount=0 displayId=0 interactive=true\n10-08 02:45:12.593 23718 23718 V Vibrator: semGetSupportedVibrationType: ret=4\n10-08 02:45:12.593  1269  3081 D WindowManager: interceptKeyTq interceptKeyResult=1\n10-08 02:45:12.593  1269  3081 D PhoneWindowManagerExt: f.b. a=false id=1 he=false ksno=false uid=1000 callingPackage=android reason=Virtual Key - Press Caller=com.android.server.policy.PhoneWindowManager.performHapticFeedback:6534 com.android.server.policy.PhoneWindowManager.performHapticFeedback:6525 com.android.server.policy.PhoneWindowManager.interceptKeyBeforeQueueing:4938 com.android.server.wm.InputManagerCallback.interceptKeyBeforeQueueing:156 com.android.server.input.InputManagerService.interceptKeyBeforeQueueing:4801 \n10-08 02:45:12.593  1269  3081 D PhoneWindowManagerExt: haptic disabled by policy\n10-08 02:45:12.593  1269  2306 D PowerManagerService: UserActivityStateListenerState: 1\n10-08 02:45:12.594  1269  2306 D WindowManager: interceptKeyTi keyCode=187 down=true repeatCount=0 keyguardOn=false canceled=false\n10-08 02:45:12.594  1269  2306 D PhoneWindowManagerExt: interceptKeyTi code=187 down=true repeatCount=0 displayId=0 interactive=true\n10-08 02:45:12.594  1269  2289 D PocketModeEvent: touch action : 0\n10-08 02:45:12.594  4963  4963 I SemDvfsHyPerManager: acquire hyper - TABoost/4963@17, type = 1090523139\n10-08 02:45:12.595  1012  1043 I HYPER-HAL: [RequestManager.cpp]acquire(): Acquired ID : 12402707  [4963 / 17]    HINT :      list : [TABoost / 30] [TIMEOUT / 1500] \n10-08 02:45:12.605 24262 24262 W SuggestedAppsManager: pending predictedApps : 9\n10-08 02:45:12.606 24262 24377 I SuggestedItemsFacade: updateItems : 9\n10-08 02:45:12.606 24262 24377 I SuggestedItemsFacade: DPS items : ChatGPT, ComponentInfo{com.openai.chatgpt/com.openai.chatgpt.MainActivity}\n10-08 02:45:12.606 24262 24377 I SuggestedItemsFacade: DPS items : Chrome Beta, ComponentInfo{com.chrome.beta/com.google.android.apps.chrome.Main}\n10-08 02:45:12.606 24262 24377 I SuggestedItemsFacade: DPS items : ReelShort, ComponentInfo{com.newleaf.app.android.victor/com.newleaf.app.android.victor.MainActivity}\n10-08 02:45:12.606 24262 24377 I SuggestedItemsFacade: DPS items : Termux, ComponentInfo{com.termux/com.termux.app.TermuxActivity}\n10-08 02:45:12.606 24262 24377 I SuggestedItemsFacade: DPS items : Chrome, ComponentInfo{com.android.chrome/com.google.android.apps.chrome.Main}\n10-08 02:45:12.606 24262 24377 I SuggestedItemsFacade: DPS items : Kiwi Browser, ComponentInfo{com.kiwibrowser.browser/com.google.android.apps.chrome.Main}\n10-08 02:45:12.606 24262 24377 I SuggestedItemsFacade: DPS items : \u0645\u062f\u064a\u0631 \u0627\u0644\u0645\u0644\u0641\u0627\u062a +, ComponentInfo{com.alphainventor.filemanager/com.alphainventor.filemanager.activity.MainActivity}\n10-08 02:45:12.606 24262 24377 I SuggestedItemsFacade: DPS items : Psiphon Pro, ComponentInfo{com.psiphon3.subscription/com.psiphon3.MainActivity}\n10-08 02:45:12.606 24262 24377 I SuggestedItemsFacade: DPS items : \u0627\u0644\u0631\u0633\u0627\u0626\u0644, ComponentInfo{com.google.android.apps.messaging/com.google.android.apps.messaging.ui.ConversationListActivity}\n10-08 02:45:12.613  1269  1615 I GestureDetector: obtain mCurrentMotionEventRaw. action: 2 id: 681358870\n10-08 02:45:12.613  1269  1615 I GestureDetector: obtain mCurrentMotionEventRaw. action: 2 id: 681358870\n10-08 02:45:12.624  5408 17411 W SQLiteLog: (28) double-quoted string literal: \"com.newleaf.app.android.victor\"\n"
+      }
+    },
+    "artifact": {
+      "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-signed.apk",
+      "sha256": "69a57ded52e99d194c2f151b3d7c21c3451e7893db085c8a9b92010439e61057"
+    },
+    "evidence_class": "OBSERVED",
+    "causal_proof": false,
+    "status": "CAPTURED"
+  },
+  "gadget_observation": {
+    "schema_version": 1,
+    "status": "READY",
+    "mode": "OBSERVATION_ONLY",
+    "artifact": {
+      "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T23-43-38/instrumented-signed.apk",
+      "sha256": "69a57ded52e99d194c2f151b3d7c21c3451e7893db085c8a9b92010439e61057"
+    },
+    "package": "com.newleaf.app.android.victor",
+    "module": "libsaasCorePlayer.so",
+    "target_offset": "0x27a510",
+    "requires_gadget": true,
+    "mutates_original_apk": false,
+    "causal_proof": false,
+    "proof_class": "OBSERVED_ONLY"
+  },
+  "evidence_ledger": {
+    "status": "NOT_READY"
+  },
+  "status": "completed",
+  "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+  "critical_pointer": "0x27a510",
+  "jni_semantic_found": true,
+  "vtable_abi": {
+    "address_point": "0x717e60",
+    "slot": "0x717f68",
+    "rtti": "0x71f4d0",
+    "type_name": "N6Cicada17mediaCodecDecoderE",
+    "container_vtable": null,
+    "pointer": "0x27a510",
+    "function_symbol": null
+  },
+  "critical_function_behavior": "NO_SECURITY_OPERATION_OBSERVED",
+  "autonomous_dataflow": {
+    "status": "completed",
+    "proven": 0,
+    "candidates": 473,
+    "cxx_unresolved": 354,
+    "jni_excluded_count": 6,
+    "constructor_calls": 4
+  },
+  "runtime_probe_status": "RUNTIME_ARTIFACT_CRASH"
+}
