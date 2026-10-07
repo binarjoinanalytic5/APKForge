@@ -93,6 +93,6 @@ Then export the printed path, for example:
 
 The fetcher verifies ELF64 and the requested architecture before the file is used. The Android Gadget is a shared library intended for embedding into the target application, and Frida documents the loopback Listen mode used by this campaign. citeturn668280search1turn668280search4
 
-The official Frida release page currently lists 17.19.0 as the latest release visible to this environment, so keeping the Gadget aligned with the installed CLI is the safer reproducibility rule. citeturn119034search2
+The official Frida release page currently lists 17.22.2 as the latest release (released October 5, 2026). The fetcher intentionally follows the locally installed CLI version rather than silently changing the analysis toolchain. citeturn305384view0
 
 Keep `original.apk` unchanged.
