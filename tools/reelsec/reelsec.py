@@ -34,6 +34,7 @@ from adb_deploy import (
 from runtime_capture import capture_snapshot, bind_artifact
 from gadget_observer import plan_gadget_observation
 from proof_gate import build_evidence_ledger
+from capture_detector import run as run_capture_detection
 
 ROOT = Path(os.environ.get("REELSEC_ROOT", str(Path(__file__).resolve().parents[2]))).expanduser().resolve()
 VERSION = "3.0.0"
@@ -2474,6 +2475,31 @@ def main():
         decoded_inventory = {"status": "BLOCKED", "reason": "no usable APK analysis root is available"}
     (output / "DECODED-INPUT-INVENTORY.json").write_text(
         json.dumps(decoded_inventory, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    # Static capture/recording protection discovery. Read-only: indicators
+    # are evidence candidates, never causal proof or a bypass.
+    if decoded_inventory and decoded_inventory.get("status") in ("READY", "READY_NATIVE_ONLY"):
+        try:
+            capture_detection = run_capture_detection(decoded_inventory["root"])
+        except Exception as exc:
+            capture_detection = {
+                "schema_version": "capture-detection-1",
+                "status": "FAILED",
+                "error": str(exc),
+                "causal_proof": False,
+                "interpretation": "STATIC_INDICATORS_ONLY",
+            }
+    else:
+        capture_detection = {
+            "schema_version": "capture-detection-1",
+            "status": "BLOCKED",
+            "reason": "no usable analysis root",
+            "causal_proof": False,
+            "interpretation": "STATIC_INDICATORS_ONLY",
+        }
+    (output / "CAPTURE-DETECTION.json").write_text(
+        json.dumps(capture_detection, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
+        encoding="utf-8",
     )
     _progress_stage(
         progress, output, 5, "Input inventory",
