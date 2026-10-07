@@ -6,7 +6,6 @@ injects, or disables a protection mechanism.
 """
 import argparse, hashlib, json, re, time
 from pathlib import Path
-import xml.etree.ElementTree as ET
 
 PATTERNS = {
     "FLAG_SECURE": [r"FLAG_SECURE", r"0x00002000"],
@@ -41,7 +40,6 @@ def scan_binary(path):
     try: data=path.read_bytes()
     except OSError: return []
     # Printable strings only; avoids disassembly claims.
-    text=" ".join(re.findall(rb"[ -~]{4,}",data).decode("latin1","ignore") if False else [])
     strings=[m.decode("latin1","ignore") for m in re.findall(rb"[ -~]{4,}",data)]
     hits=[]
     for category,pats in PATTERNS.items():
@@ -99,6 +97,7 @@ def run(root):
         "hits":hits,
         "causal_proof":False,
         "interpretation":"STATIC_INDICATORS_ONLY",
+        "evidence_policy": {"strong_indicators":["FLAG_SECURE","MEDIA_PROJECTION","SCREEN_CAPTURE_CALLBACKS","SURFACE_SECURITY"],"context_indicators":["DRM_PROTECTION","NATIVE_CAPTURE"],"causal_proof_requires":["runtime observation tied to the exact artifact","provenance matching the target code path","observable security decision or capture behavior"]},
     }
 
 def main():
