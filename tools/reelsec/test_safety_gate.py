@@ -207,24 +207,20 @@ class PlatformSafetyTests(unittest.TestCase):
 
 class BaselineSafetyTests(unittest.TestCase):
     def test_baseline_round_blocked_by_blanket_flag(self):
-        import os
-        from unittest import mock
+        # Hermetic: env is injected; the operator host legitimately exports
+        # REELSEC_* vars and tests must never depend on them.
         with tempfile.TemporaryDirectory() as td:
-            with mock.patch.dict(os.environ, {
-                    "REELSEC_ALLOW_TEST_DEVICE_UNINSTALL": "1",
-                    "REELSEC_TEST_PACKAGE": "com.test.pkg"}):
-                doc = MODULE.run_baseline_runtime(td, __file__, {"tools": {}})
+            doc = MODULE.run_baseline_runtime(
+                td, __file__, {"tools": {}},
+                env={"REELSEC_ALLOW_TEST_DEVICE_UNINSTALL": "1",
+                     "REELSEC_TEST_PACKAGE": "com.test.pkg"})
         self.assertEqual(doc["status"], "SAFETY_BLOCKED")
         self.assertIn("authorization document", doc["reason"])
 
     def test_baseline_round_requires_auth_document_not_flag(self):
-        import os
-        from unittest import mock
         with tempfile.TemporaryDirectory() as td:
-            env = {k: v for k, v in os.environ.items()
-                   if k != "REELSEC_ALLOW_TEST_DEVICE_UNINSTALL"}
-            with mock.patch.dict(os.environ, env, clear=True):
-                doc = MODULE.run_baseline_runtime(td, __file__, {"tools": {}})
+            doc = MODULE.run_baseline_runtime(td, __file__, {"tools": {}},
+                                              env={})
         # without permissions/tools it must not run, and must say exactly why
         self.assertIn(doc["status"], ("BASELINE_NOT_RUN", "SAFETY_BLOCKED"))
         self.assertTrue(doc.get("reason"))

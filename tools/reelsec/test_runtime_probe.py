@@ -255,7 +255,13 @@ class RuntimeLifecycleTests(unittest.TestCase):
         self.assertEqual(stage["reason_code"], rp.PACKAGE_NOT_INSTALLED)
 
     def test_write_runtime_probe_records_stages_when_environment_unavailable(self):
-        """End-to-end: real function, no adb/frida in this sandbox."""
+        """End-to-end: environment unavailable must be reported as such.
+
+        Hermetic on any host: preflight AND client resolution are both
+        patched, because resolve_runtime_clients legitimately falls back to
+        PATH discovery (real adb/frida exist on the operator's Termux and
+        must not leak into this scenario).
+        """
         import os
         with tempfile.TemporaryDirectory() as td:
             out = Path(td) / "campaign"
@@ -268,7 +274,9 @@ class RuntimeLifecycleTests(unittest.TestCase):
             for key in ("REELSEC_USE_GADGET", "REELSEC_FRIDA_GADGET"):
                 os.environ.pop(key, None)
             with mock.patch.object(MODULE, "write_runtime_toolchain_preflight",
-                                   return_value={"status": "BLOCKED", "tooling": {}}):
+                                   return_value={"status": "BLOCKED", "tooling": {}}), \
+                 mock.patch.object(MODULE, "resolve_runtime_clients",
+                                   return_value=(None, None, None, None)):
                 result = MODULE.write_runtime_probe(out, root, None)
             self.assertEqual(result["status"], "RUNTIME_ENVIRONMENT_UNAVAILABLE")
             self.assertEqual(result["reason_code"], "ADB_UNAVAILABLE")
@@ -280,6 +288,48 @@ class RuntimeLifecycleTests(unittest.TestCase):
             # the generated probe script must not use the removed API
             js = (out / "reelsec-runtime-probe.js").read_text()
             self.assertNotIn("attachModuleObserver", js)
+
+    def test_package_absent_with_working_environment_is_not_environment_unavailable(self):
+        """The mandated distinction: environment unavailable (no adb/frida at
+        all) vs environment available but the package not installed. The
+        second case must report PACKAGE_NOT_INSTALLED and must never be
+        masked as RUNTIME_ENVIRONMENT_UNAVAILABLE."""
+        import os
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td) / "campaign"
+            out.mkdir()
+            root = Path(td) / "decoded"
+            root.mkdir()
+            (root / "AndroidManifest.xml").write_text(
+                '<manifest package="com.example.app"><application/></manifest>',
+                encoding="utf-8")
+            adb = Path(td) / "adb"
+            frida = Path(td) / "frida"
+            adb.write_text("#!/bin/sh\n")
+            frida.write_text("#!/bin/sh\n")
+            for key in ("REELSEC_USE_GADGET", "REELSEC_FRIDA_GADGET"):
+                os.environ.pop(key, None)
+
+            def fake_runner(cmd, timeout=60):
+                joined = " ".join(str(c) for c in cmd)
+                if "pm path" in joined:
+                    return 1, ""  # package not installed on a healthy device
+                return 1, ""
+            with mock.patch.object(MODULE, "write_runtime_toolchain_preflight",
+                                   return_value={"status": "READY", "tooling": {
+                                       "adb_after": str(adb),
+                                       "frida_after_proot": str(frida)}}), \
+                 mock.patch.object(MODULE, "resolve_test_device",
+                                   return_value={"serial": "s1",
+                                                 "resolution": "explicit",
+                                                 "online_devices": ["s1"]}), \
+                 mock.patch.object(MODULE, "run", fake_runner):
+                result = MODULE.write_runtime_probe(out, root, None)
+            self.assertEqual(result["status"], "PACKAGE_NOT_INSTALLED")
+            self.assertEqual(result["reason_code"], "PACKAGE_NOT_INSTALLED")
+            self.assertNotEqual(result["status"],
+                                "RUNTIME_ENVIRONMENT_UNAVAILABLE")
+            self.assertFalse(result["execution_attempted"])
 
 
 if __name__ == "__main__":

@@ -503,19 +503,22 @@ class BaselineGatingTests(unittest.TestCase):
         # Redesigned contract (2026-10-07 incident): the blanket env flag is
         # a violation that blocks the baseline round; it never authorizes it.
         with tempfile.TemporaryDirectory() as td:
-            with mock.patch.dict(os.environ, {
-                    "REELSEC_ALLOW_TEST_DEVICE_UNINSTALL": "1",
-                    "REELSEC_TEST_PACKAGE": "com.test.pkg"}):
-                doc = MODULE.run_baseline_runtime(td, __file__, {"tools": {}})
+            doc = MODULE.run_baseline_runtime(
+                td, __file__, {"tools": {}},
+                env={"REELSEC_ALLOW_TEST_DEVICE_UNINSTALL": "1",
+                     "REELSEC_TEST_PACKAGE": "com.test.pkg"})
         self.assertEqual(doc["status"], "SAFETY_BLOCKED")
         self.assertIn("authorization document", doc["reason"])
 
     def test_clean_env_without_test_package_states_specific_reason(self):
+        # Precedence contract: a missing TEST PACKAGE identity outranks
+        # missing tooling — without an identified target package the round
+        # refuses to touch any package, and the reason must name the missing
+        # package contract. Hermetic: env is injected, never inherited from
+        # the host (the operator shell legitimately exports these vars).
         with tempfile.TemporaryDirectory() as td:
-            env = {k: v for k, v in os.environ.items()
-                   if k != "REELSEC_ALLOW_TEST_DEVICE_UNINSTALL"}
-            with mock.patch.dict(os.environ, env, clear=True):
-                doc = MODULE.run_baseline_runtime(td, __file__, {"tools": {}})
+            doc = MODULE.run_baseline_runtime(td, __file__, {"tools": {}},
+                                              env={})
         self.assertEqual(doc["status"], "BASELINE_NOT_RUN")
         self.assertIn("REELSEC_TEST_PACKAGE", doc["reason"])
 

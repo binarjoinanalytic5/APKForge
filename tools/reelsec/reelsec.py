@@ -1811,17 +1811,27 @@ def _find_package_from_apk_tools(apk):
     return None, None, checked
 
 def run_baseline_runtime(output, original_apk, capabilities,
-                         manifest_decoder=None, instrumented_profile=None):
+                         manifest_decoder=None, instrumented_profile=None,
+                         env=None):
     """Baseline (original APK) startup assessment on the explicit test device.
 
-    Fully gated: requires REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1 (the round
-    installs/uninstalls the test package only), REELSEC_TEST_PACKAGE, and a
-    test keystore so a COPY of the original can be signed with the same key
-    as the instrumented artifact. original.apk itself is never modified.
+    Fully gated: destructive steps route through safety_gate (authorization
+    document required; blanket env flags are violations), and the round
+    requires REELSEC_TEST_PACKAGE plus a test keystore so a COPY of the
+    original can be signed with the same key as the instrumented artifact.
+    original.apk itself is never modified.
+
+    `env` is the configuration input (defaults to os.environ). Reason-code
+    precedence when preconditions are missing: disabled flag -> APK path ->
+    safety violation -> TEST PACKAGE IDENTITY -> tooling. The package check
+    precedes tooling deliberately: without an identified target package the
+    round refuses to touch any package, and the reason must name the missing
+    package contract, not the tools.
     """
+    env = env if env is not None else os.environ
     doc = {"schema_version": runtime_health.SCHEMA, "status": "BASELINE_NOT_RUN",
            "original_apk": str(original_apk) if original_apk else None}
-    if os.environ.get("REELSEC_BASELINE_RUNTIME", "1").strip() == "0":
+    if env.get("REELSEC_BASELINE_RUNTIME", "1").strip() == "0":
         doc["reason"] = "REELSEC_BASELINE_RUNTIME=0"
         return doc
     if not original_apk or not Path(original_apk).is_file():
@@ -1831,27 +1841,27 @@ def run_baseline_runtime(output, original_apk, capabilities,
     # are DENY by default. A legacy blanket env flag is NOT authorization
     # (2026-10-07 incident); a hash-bound authorization document processed by
     # safety_gate is the only accepted path.
-    if safety_gate.inspect_environment(os.environ):
+    if safety_gate.inspect_environment(env):
         doc.update(status="SAFETY_BLOCKED",
                    reason=("blanket destructive permission is set in the "
                            "environment; remove it and use a hash-bound "
                            "authorization document (REELSEC_DESTRUCTIVE_AUTH)"))
         return doc
-    test_package = os.environ.get("REELSEC_TEST_PACKAGE")
+    test_package = env.get("REELSEC_TEST_PACKAGE")
     if not test_package:
         doc["reason"] = "REELSEC_TEST_PACKAGE not configured; refusing to touch any package"
         return doc
     adb = (capabilities or {}).get("tools", {}).get("adb", {}).get("path")
     apksigner = ((capabilities or {}).get("tools", {}).get("apksigner", {}).get("path")
                  or shutil.which("apksigner"))
-    keystore = os.environ.get("REELSEC_TEST_KEYSTORE")
-    alias = os.environ.get("REELSEC_TEST_KEYSTORE_ALIAS", "reelsec-test")
+    keystore = env.get("REELSEC_TEST_KEYSTORE")
+    alias = env.get("REELSEC_TEST_KEYSTORE_ALIAS", "reelsec-test")
     if not adb or not apksigner or not keystore:
         doc["reason"] = ("adb/apksigner/REELSEC_TEST_KEYSTORE unavailable; cannot "
                          "sign a baseline copy with the test key")
         return doc
     try:
-        resolution = resolve_test_device(adb, os.environ.get("REELSEC_TEST_DEVICE"))
+        resolution = resolve_test_device(adb, env.get("REELSEC_TEST_DEVICE"))
         serial = resolution["serial"]
         signed_original = Path(output) / "original-testsigned.apk"
         run_checked(sign_command(apksigner, original_apk, signed_original,
@@ -1859,7 +1869,7 @@ def run_baseline_runtime(output, original_apk, capabilities,
         baseline_profile = runtime_health.static_artifact_profile(
             signed_original, manifest_decoder=manifest_decoder)
         audit_path = Path(output) / "SAFETY-AUDIT.jsonl"
-        auth_path = os.environ.get("REELSEC_DESTRUCTIVE_AUTH")
+        auth_path = env.get("REELSEC_DESTRUCTIVE_AUTH")
         try:
             audit = safety_gate.execute_destructive(
                 _default_runner, adb, serial, safety_gate.UNINSTALL,
