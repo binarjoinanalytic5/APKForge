@@ -295,6 +295,101 @@ def verify_installed_package(adb, serial, package, runner=None):
 
 
 
+def artifact_integrity_gate(apk_path, runner=None, adb=None, serial=None,
+                            package=None, expected_so=None, apksigner=None,
+                            manifest_decoder=None, preflight=None):
+    """Artifact Integrity Gate (pre-runtime). Read-only.
+
+    Verifies, without modifying anything: signing presence (META-INF blocks +
+    optional apksigner verify), package identity, expected native library
+    presence, native library compression, alignment/ABI (reuses the preflight
+    report when supplied), installed path identity via pm path, and installed
+    versionCode. Any FAIL blocks runtime; the caller must not proceed to the
+    process health gate or the probe on failure.
+    """
+    import zipfile
+    runner = runner or _default_runner
+    apk = Path(apk_path)
+    gate = {"artifact": str(apk), "checks": {}, "status": "PASS"}
+    if not apk.is_file():
+        return {"artifact": str(apk), "checks": {}, "status": "ARTIFACT_MISSING"}
+    try:
+        with zipfile.ZipFile(apk) as zf:
+            names = zf.namelist()
+            sig = [n for n in names if n.upper().startswith("META-INF/")
+                   and n.upper().endswith((".RSA", ".DSA", ".EC"))]
+            gate["checks"]["signing_present"] = {
+                "status": "PASS" if sig else "FAIL",
+                "signature_blocks": sig[:5],
+            }
+            so_entries = sorted(n for n in names
+                                if n.startswith("lib/") and n.endswith(".so"))
+            compressed = [n for n in so_entries
+                          if zf.getinfo(n).compress_type != zipfile.ZIP_STORED]
+            gate["checks"]["native_libs_uncompressed"] = {
+                "status": "FAIL" if compressed else "PASS",
+                "so_count": len(so_entries),
+                "compressed_entries": compressed[:20],
+            }
+            if expected_so is not None:
+                have = {n.rsplit("/", 1)[-1] for n in so_entries}
+                missing = sorted(set(expected_so) - have)
+                gate["checks"]["expected_native_libs"] = {
+                    "status": "FAIL" if missing else "PASS",
+                    "expected": sorted(expected_so),
+                    "missing": missing,
+                }
+            if manifest_decoder is not None and package:
+                try:
+                    decoded = manifest_decoder(zf.read("AndroidManifest.xml"))
+                except Exception as exc:
+                    decoded = None
+                    gate["checks"]["package_identity"] = {
+                        "status": "FAIL", "error": str(exc)[:200]}
+                else:
+                    gate["checks"]["package_identity"] = {
+                        "status": "PASS" if decoded == package else "FAIL",
+                        "expected_package": package,
+                        "decoded_package": decoded,
+                    }
+    except zipfile.BadZipFile as exc:
+        return {"artifact": str(apk),
+                "checks": {"zip_parse": {"status": "FAIL", "error": str(exc)}},
+                "status": "ARTIFACT_INVALID_ZIP"}
+
+    if apksigner:
+        rc, out = runner([str(apksigner), "verify", "--verbose", str(apk)],
+                         timeout=120)
+        gate["checks"]["apksigner_verify"] = {
+            "status": "PASS" if rc == 0 else "FAIL",
+            "returncode": rc,
+            "output_tail": (out or "")[-1200:],
+        }
+    else:
+        gate["checks"]["apksigner_verify"] = {
+            "status": "SKIPPED", "reason": "apksigner not provided"}
+
+    if preflight:
+        gate["checks"]["preflight_alignment_abi"] = {
+            "status": "PASS" if preflight.get("status") == "PASS" else "FAIL",
+            "preflight_status": preflight.get("status"),
+        }
+
+    if adb and serial and package:
+        installed = verify_installed_package(adb, serial, package, runner=runner)
+        gate["checks"]["installed_identity"] = {
+            "status": "PASS" if installed.get("present") else "FAIL",
+            "installed_path": installed.get("installed_path"),
+            "version_code": installed.get("version_code"),
+        }
+
+    for check in gate["checks"].values():
+        if check.get("status") == "FAIL":
+            gate["status"] = "INTEGRITY_FAILED"
+            break
+    return gate
+
+
 def write_deploy_manifest(path, data):
     p = Path(path).resolve()
     p.parent.mkdir(parents=True, exist_ok=True)

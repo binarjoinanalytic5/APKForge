@@ -32,9 +32,11 @@ from adb_deploy import (
     is_signature_mismatch_error,
     diagnose_install_failure,
     artifact_preflight_checks,
+    artifact_integrity_gate,
     verify_installed_package,
 )
 import runtime_probe
+import runtime_health
 import behavior_capture
 from runtime_capture import capture_snapshot, bind_artifact
 from gadget_observer import plan_gadget_observation
@@ -1806,6 +1808,163 @@ def _find_package_from_apk_tools(apk):
                 return m.group(1), kind, checked
     return None, None, checked
 
+def run_baseline_runtime(output, original_apk, capabilities,
+                         manifest_decoder=None, instrumented_profile=None):
+    """Baseline (original APK) startup assessment on the explicit test device.
+
+    Fully gated: requires REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1 (the round
+    installs/uninstalls the test package only), REELSEC_TEST_PACKAGE, and a
+    test keystore so a COPY of the original can be signed with the same key
+    as the instrumented artifact. original.apk itself is never modified.
+    """
+    doc = {"schema_version": runtime_health.SCHEMA, "status": "BASELINE_NOT_RUN",
+           "original_apk": str(original_apk) if original_apk else None}
+    if os.environ.get("REELSEC_BASELINE_RUNTIME", "1").strip() == "0":
+        doc["reason"] = "REELSEC_BASELINE_RUNTIME=0"
+        return doc
+    if not original_apk or not Path(original_apk).is_file():
+        doc["reason"] = "original APK path unavailable in this environment"
+        return doc
+    if os.environ.get("REELSEC_ALLOW_TEST_DEVICE_UNINSTALL", "").strip() != "1":
+        doc["reason"] = ("baseline round installs/uninstalls the test package; "
+                         "REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1 is required on "
+                         "the explicit test device")
+        return doc
+    test_package = os.environ.get("REELSEC_TEST_PACKAGE")
+    if not test_package:
+        doc["reason"] = "REELSEC_TEST_PACKAGE not configured; refusing to touch any package"
+        return doc
+    adb = (capabilities or {}).get("tools", {}).get("adb", {}).get("path")
+    apksigner = ((capabilities or {}).get("tools", {}).get("apksigner", {}).get("path")
+                 or shutil.which("apksigner"))
+    keystore = os.environ.get("REELSEC_TEST_KEYSTORE")
+    alias = os.environ.get("REELSEC_TEST_KEYSTORE_ALIAS", "reelsec-test")
+    if not adb or not apksigner or not keystore:
+        doc["reason"] = ("adb/apksigner/REELSEC_TEST_KEYSTORE unavailable; cannot "
+                         "sign a baseline copy with the test key")
+        return doc
+    try:
+        resolution = resolve_test_device(adb, os.environ.get("REELSEC_TEST_DEVICE"))
+        serial = resolution["serial"]
+        signed_original = Path(output) / "original-testsigned.apk"
+        run_checked(sign_command(apksigner, original_apk, signed_original,
+                                 keystore, alias))
+        baseline_profile = runtime_health.static_artifact_profile(
+            signed_original, manifest_decoder=manifest_decoder)
+        try:
+            run_checked(uninstall_command(adb, serial, test_package))
+            doc["pre_uninstall"] = "existing test package removed for the baseline round"
+        except Exception as exc:
+            doc["pre_uninstall"] = "no package removed (%s)" % str(exc)[:200]
+        run_checked(install_command(adb, serial, signed_original))
+        health = runtime_health.assess_startup(
+            run, adb, serial, test_package, label="original", observe_s=8)
+        try:
+            run_checked(uninstall_command(adb, serial, test_package))
+            doc["post_uninstall"] = "baseline copy removed after assessment"
+        except Exception as exc:
+            doc["post_uninstall"] = "cleanup uninstall failed: %s" % str(exc)[:300]
+        doc.update(
+            status="BASELINE_ASSESSED", serial=serial, health=health,
+            baseline_profile=baseline_profile,
+            static_comparison=runtime_health.compare_artifacts(
+                health, None, baseline_profile, instrumented_profile),
+        )
+    except Exception as exc:
+        doc.update(status="BASELINE_FAILED", error=str(exc)[:1000],
+                   diagnosis=diagnose_install_failure(str(exc)))
+    return doc
+
+
+def _instrumentation_changes(instrumentation_plan, sign_verify, adb_deploy):
+    """Assemble the auditable list of ReelSec-introduced artifact changes."""
+    changes = []
+    plan = instrumentation_plan or {}
+    for item in (plan.get("files") or plan.get("injections") or [])[:50]:
+        changes.append({
+            "change_id": "SMALI-%d" % (len(changes) + 1),
+            "type": "SMALI_INSTRUMENTATION",
+            "artifact_path": str(item) if isinstance(item, (str, Path)) else str(item),
+            "description": "SecShell loader anchor instrumentation (observation hooks)",
+            "applied_by": "plan_instrumentation/prepare_instrumented_copy",
+        })
+    if plan.get("application_class"):
+        changes.append({
+            "change_id": "MANIFEST-1", "type": "MANIFEST_MODIFICATION",
+            "artifact_path": "AndroidManifest.xml",
+            "description": "application class reference for loader anchor (%s)"
+                           % plan.get("application_class"),
+            "applied_by": "plan_instrumentation",
+        })
+    sv = sign_verify or {}
+    if sv.get("status") == "SIGNED_VERIFIED":
+        changes.append({
+            "change_id": "SIGN-1", "type": "RE_SIGNING",
+            "artifact_path": str(sv.get("signed_path")),
+            "description": "artifact re-signed with the isolated test keystore "
+                           "(test key, not the store certificate)",
+            "applied_by": "sign_verify.sign_command",
+        })
+    changes.append({
+        "change_id": "BUILD-1", "type": "REPACKAGING",
+        "artifact_path": "instrumented-unsigned.apk",
+        "description": "apktool rebuild + zipalign of the isolated instrumented tree",
+        "applied_by": "apktool build / zipalign",
+    })
+    return changes
+
+
+def write_instrumentation_impact(output, changes, crash_cause=None,
+                                 crash_library=None):
+    """INSTRUMENTATION-IMPACT.json: every ReelSec change linked to the artifact.
+
+    Attribution rule: a crash is linked to instrumentation only when the
+    identified fault library matches a ReelSec-introduced file. Unknown
+    causes are recorded as unresolved and never attributed.
+    """
+    linkage = "NOT_ASSESSED"
+    if crash_cause:
+        if crash_cause == runtime_health.CAUSE_UNKNOWN:
+            linkage = "UNRESOLVED_CAUSE_NO_ATTRIBUTION"
+        elif crash_library:
+            injected = {str(c.get("artifact_path", "")).rsplit("/", 1)[-1]
+                        for c in changes}
+            if crash_library in injected:
+                linkage = "POSSIBLY_LINKED_TO_INJECTED:%s" % crash_library
+            else:
+                linkage = "FAULT_LIBRARY_NOT_INJECTED_BY_REELSEC:%s" % crash_library
+        else:
+            linkage = "CAUSE_WITHOUT_LIBRARY_NO_ATTRIBUTION"
+    doc = {
+        "schema_version": "instrumentation-impact-1",
+        "changes": changes,
+        "crash_cause": crash_cause,
+        "fault_library": crash_library,
+        "crash_linkage": linkage,
+        "attribution_rule": ("a crash is attributed to instrumentation only when "
+                             "the identified fault library matches a "
+                             "ReelSec-introduced change; CRASH_CAUSE_UNKNOWN is "
+                             "never attributed"),
+    }
+    (Path(output) / "INSTRUMENTATION-IMPACT.json").write_text(
+        json.dumps(doc, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return doc
+
+
+def update_instrumentation_impact(output, crash_cause, crash_library):
+    """Refresh crash linkage in an existing INSTRUMENTATION-IMPACT.json."""
+    path = Path(output) / "INSTRUMENTATION-IMPACT.json"
+    if not path.is_file():
+        return None
+    try:
+        doc = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    return write_instrumentation_impact(output, doc.get("changes") or [],
+                                        crash_cause=crash_cause,
+                                        crash_library=crash_library)
+
+
 def write_runtime_probe(output, root, target, input_apk=None):
     package, manifest = _find_package_name(root)
     package_source = "analysis_root_manifest" if package else None
@@ -1907,6 +2066,7 @@ def write_runtime_probe(output, root, target, input_apk=None):
         process_stage = None
         package_present_stage = None
         launch_stage = None
+        health_blocked = False
 
         if serial and package:
             # --- Stage: PACKAGE_PRESENT (read-only pm query) ---
@@ -1921,7 +2081,102 @@ def write_runtime_probe(output, root, target, input_apk=None):
             forward_established = False
 
             if present:
-                if gadget_mode:
+                # --- Stage: PROCESS_HEALTH_GATE (artifact crash gate BEFORE Frida) ---
+                # Native Crash Gate: launch the installed artifact, observe the
+                # process bounded, and consult ApplicationExitInfo + the crash
+                # logcat buffer before any probe runs. A crash fails the stage
+                # immediately as RUNTIME_ARTIFACT_CRASH; the platform must
+                # never surface an artifact crash as a probe timeout.
+                health_window_s = max(2, _positive_int_env(
+                    "REELSEC_HEALTH_WINDOW_MS", 8000) // 1000)
+                health = runtime_health.assess_startup(
+                    run, adb, serial, package, label="instrumented",
+                    observe_s=health_window_s)
+                (output / "RUNTIME-HEALTH.json").write_text(
+                    json.dumps(health, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8")
+                result["health"] = {
+                    "startup": health["startup"],
+                    "crash_class": health["crash_class"],
+                    "crash_cause": health["crash_cause"],
+                    "crash_cause_library": health["crash_cause_library"],
+                    "crash_cause_confidence": health["crash_cause_confidence"],
+                    "crash_source": health["crash_source"],
+                    "exit_reason": health["exit_reason"],
+                    "exit_status": health["exit_status"],
+                    "process_observed": health["process_observed"],
+                    "process_alive_ms": health["process_alive_ms"],
+                }
+                result["runtime_probe_allowed"] = health["runtime_probe_allowed"]
+                result["execution_attempted"] = True
+                health_stage = runtime_probe.make_stage(
+                    "PROCESS_HEALTH_GATE",
+                    runtime_probe.PASS if health["runtime_probe_allowed"]
+                    else runtime_probe.FAIL,
+                    reason_code=None if health["runtime_probe_allowed"]
+                    else runtime_health.REASON_CODE_ARTIFACT_CRASH,
+                    source="runtime_health.assess_startup "
+                           "(launch + ps polling + exit-info + crash logcat)",
+                    startup=health["startup"],
+                    crash_class=health["crash_class"],
+                    crash_cause=health["crash_cause"],
+                    crash_cause_confidence=health["crash_cause_confidence"],
+                    process_alive_ms=health["process_alive_ms"])
+                result["stages"].append(health_stage)
+                launch_stage = runtime_probe.make_stage(
+                    "APP_LAUNCH_ATTEMPTED",
+                    runtime_probe.PASS if health["launch_returncode"] == 0
+                    else runtime_probe.FAIL,
+                    reason_code=None if health["launch_returncode"] == 0
+                    else runtime_probe.APP_NOT_STARTED,
+                    source="adb:monkey launcher (health gate)",
+                    returncode=health["launch_returncode"])
+                result["stages"].append(launch_stage)
+                if health["pids"]:
+                    process_stage = runtime_probe.make_stage(
+                        "PROCESS_OBSERVED", runtime_probe.PASS,
+                        source="derived:PROCESS_HEALTH_GATE",
+                        package=package, pids=health["pids"])
+                    result["stages"].append(process_stage)
+
+                if not health["runtime_probe_allowed"]:
+                    # Crash gate fired: fail immediately and specifically.
+                    health_blocked = True
+                    result["status"] = "RUNTIME_ARTIFACT_CRASH"
+                    result["reason"] = (
+                        "instrumented artifact failed the process health gate: "
+                        "crash_class=%s cause=%s confidence=%s source=%s" % (
+                            health["crash_class"], health["crash_cause"],
+                            health["crash_cause_confidence"],
+                            health["crash_source"]))
+                    result["reason_code"] = runtime_health.REASON_CODE_ARTIFACT_CRASH
+                    for skipped in ("PROBE_ATTACHED", "MODULE_OBSERVED",
+                                    "TARGET_RESOLUTION", "TARGET_OBSERVED"):
+                        result["stages"].append(runtime_probe.make_stage(
+                            skipped, runtime_probe.SKIP,
+                            source="skipped: PROCESS_HEALTH_GATE failed"))
+                    result["lifecycle"] = {
+                        "process_observed": health["process_observed"],
+                        "pid": (health.get("pids") or [None])[0],
+                        "crash_detected": health["startup"] == "CRASH",
+                        "crash_signal": (health["evidence"]["tombstone"] or {}).get(
+                            "fatal_signal"),
+                        "module_observed": False,
+                        "module": None,
+                        "probe_attached": False,
+                        "target_resolution": False,
+                        "target_observed": False,
+                        "runtime_matches": 0,
+                        "reason_code": runtime_health.REASON_CODE_ARTIFACT_CRASH,
+                        "window_completed": False,
+                        "frida_exit": None,
+                        "runtime_probe_allowed": False,
+                    }
+                    result["runtime_matches"] = 0
+                    frida_rc, frida_output = None, ""
+                    update_instrumentation_impact(
+                        output, health["crash_cause"], health["crash_cause_library"])
+                elif gadget_mode:
                     forward_rc, forward_output = run(
                         [adb, "-s", serial, "forward",
                          "tcp:%d" % gadget_port, "tcp:%d" % gadget_port], timeout=20)
@@ -1934,40 +2189,17 @@ def write_runtime_probe(output, root, target, input_apk=None):
                         frida_rc, frida_output = 1, forward_output or ""
                     else:
                         forward_established = True
-                        # --- Stage: APP_LAUNCH_ATTEMPTED ---
-                        launch_started = time.time()
-                        launch_rc, launch_output = run(
-                            [adb, "-s", serial, "shell", "monkey", "-p", package, "1"],
-                            timeout=15)
-                        launch_stage = runtime_probe.make_stage(
-                            "APP_LAUNCH_ATTEMPTED",
-                            runtime_probe.PASS if launch_rc == 0 else runtime_probe.FAIL,
-                            reason_code=None if launch_rc == 0 else runtime_probe.APP_NOT_STARTED,
-                            source="adb:monkey -p %s 1" % package, started=launch_started,
-                            returncode=launch_rc)
-                        result["stages"].append(launch_stage)
-                        result["execution_attempted"] = True
-                        result["gadget_launch_returncode"] = launch_rc
-                        result["gadget_launch_output"] = (launch_output or "")[-4000:]
-                        if launch_rc == 0:
-                            # --- Stage: PROCESS_OBSERVED (bounded ps polling) ---
-                            _obs, _pids, process_stage = runtime_probe.observe_process(
-                                run, adb, serial, package)
-                            result["stages"].append(process_stage)
-                            result["gadget_process_name"] = "Gadget"
-                            frida_rc, frida_output = run(
-                                [frida, "-H", "127.0.0.1:%d" % gadget_port,
-                                 "-n", "Gadget", "-l", str(script)],
-                                timeout=(probe_window_ms // 1000) + 8)
-                        else:
-                            frida_rc, frida_output = launch_rc, launch_output or ""
+                        result["gadget_process_name"] = "Gadget"
+                        frida_rc, frida_output = run(
+                            [frida, "-H", "127.0.0.1:%d" % gadget_port,
+                             "-n", "Gadget", "-l", str(script)],
+                            timeout=(probe_window_ms // 1000) + 8)
                 else:
-                    # spawn mode: frida launches the package itself
-                    result["execution_attempted"] = True
-                    launch_stage = runtime_probe.make_stage(
-                        "APP_LAUNCH_ATTEMPTED", runtime_probe.PASS,
-                        source="frida:-U -f spawn", package=package)
-                    result["stages"].append(launch_stage)
+                    # Spawn mode: the health gate already proved the artifact
+                    # launches; restart it fresh under frida so the probe
+                    # observes early module loading.
+                    run([adb, "-s", serial, "shell", "am", "force-stop", package],
+                        timeout=15)
                     frida_rc, frida_output = run(
                         [frida, "-U", "-f", package, "-l", str(script)],
                         timeout=(probe_window_ms // 1000) + 8)
@@ -1981,41 +2213,78 @@ def write_runtime_probe(output, root, target, input_apk=None):
             events = runtime_probe.parse_probe_events(frida_output)
             result["events"]=events
 
-            derived = runtime_probe.derive_lifecycle(
-                events, frida_rc=frida_rc, process_stage=process_stage,
-                package_stage=package_present_stage, launch=launch_stage)
-            result["stages"].extend(derived["stages"])
-            result["lifecycle"] = derived["lifecycle"]
-            result["reason_code"] = derived["reason_code"]
-            matches = [e for e in events
-                       if e.get("event") == "TARGET_FUNCTION_ENTER"
-                       and e.get("target_vptr_match") is True
-                       and e.get("target_slot_match") is True]
-            result["runtime_matches"]=len(matches)
+            if not health_blocked:
+                derived = runtime_probe.derive_lifecycle(
+                    events, frida_rc=frida_rc, process_stage=process_stage,
+                    package_stage=package_present_stage, launch=launch_stage)
+                result["stages"].extend(derived["stages"])
+                result["lifecycle"] = derived["lifecycle"]
+                result["reason_code"] = derived["reason_code"]
+                matches = [e for e in events
+                           if e.get("event") == "TARGET_FUNCTION_ENTER"
+                           and e.get("target_vptr_match") is True
+                           and e.get("target_slot_match") is True]
+                result["runtime_matches"]=len(matches)
 
-            if matches:
-                result["status"]="PROVEN_RUNTIME_TARGET_DISPATCH"
-                result["reason"]="target entry observed with full vptr+slot predicate"
-            elif frida_rc == 124:
-                result["status"]="RUNTIME_PROBE_TIMEOUT_NO_TARGET_OBSERVED"
-                result["reason"]=(
-                    "Frida probe exceeded the bounded execution window; "
-                    "lifecycle reason_code=%s" % derived["reason_code"])
-            elif frida_rc != 0:
-                status, reason = classify_frida_failure(frida_output)
-                result["status"] = status
-                result["reason"] = reason
-            else:
-                result["status"]="RUNTIME_TARGET_NOT_OBSERVED"
-                result["reason"]=(
-                    "Frida probe ran, but no target entry satisfied the full "
-                    "vptr+slot proof predicate; lifecycle reason_code=%s"
-                    % derived["reason_code"])
+                if matches:
+                    result["status"]="PROVEN_RUNTIME_TARGET_DISPATCH"
+                    result["reason"]="target entry observed with full vptr+slot predicate"
+                elif frida_rc == 124:
+                    result["status"]="RUNTIME_PROBE_TIMEOUT_NO_TARGET_OBSERVED"
+                    result["reason"]=(
+                        "Frida probe exceeded the bounded execution window; "
+                        "lifecycle reason_code=%s" % derived["reason_code"])
+                elif frida_rc is not None and frida_rc != 0:
+                    status, reason = classify_frida_failure(frida_output)
+                    result["status"] = status
+                    result["reason"] = reason
+                elif (package_present_stage is not None
+                        and package_present_stage["status"] != runtime_probe.PASS):
+                    result["status"] = "PACKAGE_NOT_INSTALLED"
+                    result["reason"] = ("target package not installed on the resolved "
+                                        "device; runtime probe cannot start")
+                elif frida_rc is None:
+                    result["status"] = "RUNTIME_NOT_ATTEMPTED"
+                    result["reason"] = ("no probe execution path was reached "
+                                        "(lifecycle reason_code=%s)"
+                                        % derived["reason_code"])
+                else:
+                    result["status"]="RUNTIME_TARGET_NOT_OBSERVED"
+                    result["reason"]=(
+                        "Frida probe ran, but no target entry satisfied the full "
+                        "vptr+slot proof predicate; lifecycle reason_code=%s"
+                        % derived["reason_code"])
         else:
             result["status"]="NO_ONLINE_ANDROID_DEVICE" if not serial else "PACKAGE_NAME_UNRESOLVED"
             result["reason"]="runtime preconditions not satisfied (see stages)"
             result["reason_code"] = (runtime_probe.ADB_NO_ONLINE_DEVICE if not serial
                                      else runtime_probe.PACKAGE_NAME_UNRESOLVED)
+
+    # --- Autonomous verdict: compact fields, no manual triage required ---
+    baseline_health = None
+    baseline_status = "NOT_RUN"
+    baseline_path = output / "BASELINE-RUNTIME.json"
+    if baseline_path.is_file():
+        try:
+            baseline_doc = json.loads(baseline_path.read_text(encoding="utf-8"))
+            baseline_health = baseline_doc.get("health")
+            baseline_status = baseline_doc.get("status", "NOT_RUN")
+        except Exception:
+            baseline_doc = None
+    instrumented_health = None
+    if result.get("health"):
+        instrumented_health = dict(result["health"])
+        instrumented_health["runtime_probe_allowed"] = result.get(
+            "runtime_probe_allowed")
+    comparison = runtime_health.compare_artifacts(baseline_health,
+                                                  instrumented_health)
+    verdict = runtime_health.runtime_verdict(
+        baseline_health, instrumented_health, comparison=comparison,
+        runtime_probe=result, probe_allowed=result.get("runtime_probe_allowed"))
+    verdict["BASELINE_STATUS"] = baseline_status
+    result["verdict"] = verdict
+    (output / "RUNTIME-VERDICT.json").write_text(
+        json.dumps(verdict, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     (output / "RUNTIME-PROBE.json").write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -2759,6 +3028,26 @@ def main():
         sign_verify.get("error", sign_verify.get("status", "")),
     )
 
+    # --- Baseline vs instrumented comparison + instrumentation impact ledger.
+    # Runs BEFORE the instrumented artifact is deployed: the baseline round
+    # needs the test package slot free. Fully gated; if any precondition is
+    # missing the document records the specific reason (autonomy rule: the
+    # system states exactly why it could not run, and never guesses).
+    instrumented_profile = None
+    if sign_verify.get("status") == "SIGNED_VERIFIED":
+        instrumented_profile = runtime_health.static_artifact_profile(
+            sign_verify["signed_path"],
+            manifest_decoder=_decode_binary_manifest_package)
+    baseline_runtime = run_baseline_runtime(
+        output, input_apk, capabilities,
+        manifest_decoder=_decode_binary_manifest_package,
+        instrumented_profile=instrumented_profile)
+    (output / "BASELINE-RUNTIME.json").write_text(
+        json.dumps(baseline_runtime, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8")
+    write_instrumentation_impact(
+        output, _instrumentation_changes(instrumentation_plan, sign_verify, None))
+
     _progress_stage(progress, output, 10, "ADB deploy", "RUNNING",
                     "checking the explicit test device and installing only the signed artifact")
     adb_deploy = {"status": "NOT_DEPLOYED"}
@@ -2786,6 +3075,32 @@ def main():
                 raise RuntimeError(
                     "artifact preflight failed (%s); install rejected before attempt"
                     % ",".join(failed))
+            # Artifact Integrity Gate: signing presence, package identity,
+            # expected native libs, compression, installed identity. Any FAIL
+            # blocks runtime before any install/probe is attempted.
+            expected_so = None
+            if input_apk:
+                expected_so = {
+                    Path(n).name for n in
+                    (runtime_health.static_artifact_profile(input_apk)
+                     .get("native_libs") or [])}
+            integrity_gate = artifact_integrity_gate(
+                sign_verify["signed_path"], adb=adb, serial=serial,
+                package=os.environ.get("REELSEC_TEST_PACKAGE"),
+                expected_so=expected_so,
+                apksigner=(capabilities.get("tools", {})
+                           .get("apksigner", {}).get("path")),
+                manifest_decoder=_decode_binary_manifest_package,
+                preflight=artifact_preflight)
+            (output / "ARTIFACT-INTEGRITY.json").write_text(
+                json.dumps(integrity_gate, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8")
+            if integrity_gate["status"] == "INTEGRITY_FAILED":
+                failed = [name for name, c in integrity_gate.get("checks", {}).items()
+                          if c.get("status") == "FAIL"]
+                raise RuntimeError(
+                    "artifact integrity gate failed (%s); runtime blocked "
+                    "before install" % ",".join(failed))
             install_cmd = install_command(adb, serial, sign_verify["signed_path"])
             try:
                 install_output = run_checked(install_cmd)

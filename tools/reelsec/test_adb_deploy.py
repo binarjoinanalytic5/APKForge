@@ -201,5 +201,57 @@ class InstallDiagnosticsTests(unittest.TestCase):
         self.assertFalse(result["present"])
 
 
+class ArtifactIntegrityGateTests(unittest.TestCase):
+    def _make_apk(self, td, signed=True, libs=("lib/arm64-v8a/liba.so",)):
+        import zipfile
+        apk = Path(td) / "artifact.apk"
+        with zipfile.ZipFile(apk, "w") as zf:
+            for lib in libs:
+                info = zipfile.ZipInfo(lib)
+                info.compress_type = zipfile.ZIP_STORED
+                zf.writestr(info, b"\x7fELF")
+            if signed:
+                zf.writestr("META-INF/REELSEC.RSA", b"sig")
+            zf.writestr("classes.dex", b"dex")
+        return apk
+
+    def test_healthy_artifact_passes(self):
+        from adb_deploy import artifact_integrity_gate
+        with tempfile.TemporaryDirectory() as td:
+            apk = self._make_apk(td)
+            gate = artifact_integrity_gate(
+                apk, runner=lambda cmd, timeout=120: (0, ""),
+                expected_so={"liba.so"})
+        self.assertEqual(gate["status"], "PASS")
+        self.assertEqual(gate["checks"]["signing_present"]["status"], "PASS")
+        self.assertEqual(gate["checks"]["expected_native_libs"]["status"], "PASS")
+
+    def test_missing_expected_so_fails_gate(self):
+        from adb_deploy import artifact_integrity_gate
+        with tempfile.TemporaryDirectory() as td:
+            apk = self._make_apk(td)
+            gate = artifact_integrity_gate(
+                apk, runner=lambda cmd, timeout=120: (0, ""),
+                expected_so={"liba.so", "libsaasCorePlayer.so"})
+        self.assertEqual(gate["status"], "INTEGRITY_FAILED")
+        self.assertEqual(
+            gate["checks"]["expected_native_libs"]["missing"],
+            ["libsaasCorePlayer.so"])
+
+    def test_unsigned_artifact_fails_gate(self):
+        from adb_deploy import artifact_integrity_gate
+        with tempfile.TemporaryDirectory() as td:
+            apk = self._make_apk(td, signed=False)
+            gate = artifact_integrity_gate(apk,
+                                           runner=lambda cmd, timeout=120: (0, ""))
+        self.assertEqual(gate["status"], "INTEGRITY_FAILED")
+        self.assertEqual(gate["checks"]["signing_present"]["status"], "FAIL")
+
+    def test_missing_artifact_reported(self):
+        from adb_deploy import artifact_integrity_gate
+        gate = artifact_integrity_gate("/nonexistent/x.apk")
+        self.assertEqual(gate["status"], "ARTIFACT_MISSING")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

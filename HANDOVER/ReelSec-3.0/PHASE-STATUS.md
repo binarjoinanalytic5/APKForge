@@ -304,3 +304,22 @@ post-install verification) and a guarded opt-in L4 behavioral capture
 producer were added. Evidence gate unchanged: SCREENSHOT_BLOCKING remains
 NOT_PROVEN. Suite: 128/128. Handover:
 حقيبة التسليم/REELSEC-RUNTIME-DIAGNOSTICS-2026-10-07.md.
+
+## 2026-10-07 — Native Crash Gate (artifact runtime integrity)
+
+Device evidence established repeated startup crashes of the instrumented
+test artifact (exit-info reason=5 APP CRASH(NATIVE) status=6, reason=4
+APP CRASH(EXCEPTION), process death after MainActivity). Root-fix mandate
+implemented: PROCESS_HEALTH_GATE before Frida (ApplicationExitInfo
+delta + crash logcat + bounded ps), automatic crash classification
+(NATIVE_CRASH/JAVA_EXCEPTION/PROCESS_KILLED/ANR/STARTUP_FAILURE/...),
+non-root crash-cause identification (backtrace frames / abort message /
+maps / frida pre-crash; CRASH_CAUSE_UNKNOWN never invented), gated
+baseline-vs-instrumented comparison (INSTRUMENTATION_REGRESSION_CONFIRMED
+vs BASELINE_RUNTIME_FAILURE), Artifact Integrity Gate pre-install,
+INSTRUMENTATION-IMPACT.json linkage, RUNTIME-HEALTH/BASELINE-RUNTIME/
+RUNTIME-VERDICT artifacts, and evidence-gate enforcement
+(RUNTIME_VALIDITY = BLOCKED_BY_ARTIFACT_CRASH; L3/L4 unconfirmable during
+artifact crash). 10-scenario regression matrix covered; no scenario may
+degenerate into a misleading RUNTIME_PROBE_TIMEOUT. Suite: 166/166.
+Scientific verdict unchanged: SCREENSHOT_BLOCKING = NOT_PROVEN.

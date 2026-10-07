@@ -87,7 +87,43 @@ def _campaign_facts(campaign_dir):
                 break
     facts["adb_deploy"] = _read_json(cd / "ADB-DEPLOY.json")
     facts["behavior_capture"] = _read_json(cd / "BEHAVIOR-CAPTURE.json")
+    facts["runtime_health"] = _read_json(cd / "RUNTIME-HEALTH.json")
     return facts
+
+
+def evaluate_runtime_validity(facts):
+    """Artifact-crash gate for the evidence chain.
+
+    If the instrumented artifact crashed at startup, runtime proof layers
+    (L3/L4) are structurally invalid: no valid runtime session exists to
+    observe. This gate never relaxes or infers anything else — it only
+    blocks L3/L4 confirmation and records the explicit reason
+    (RUNTIME_VALIDITY = BLOCKED_BY_ARTIFACT_CRASH).
+    """
+    health = facts.get("runtime_health") or {}
+    probe = facts.get("runtime_probe") or {}
+    crashed = (health.get("startup") == "CRASH"
+               or probe.get("status") == "RUNTIME_ARTIFACT_CRASH")
+    if not crashed:
+        return {"runtime_validity": "NOT_BLOCKED", "reason": None,
+                "crash_class": health.get("crash_class"), "crash_cause": None,
+                "detail": None}
+    crash_class = (health.get("crash_class")
+                   or (probe.get("health") or {}).get("crash_class")
+                   or "ARTIFACT_CRASH")
+    cause = (health.get("crash_cause")
+             or (probe.get("health") or {}).get("crash_cause"))
+    reason = crash_class if crash_class in ("NATIVE_CRASH", "JAVA_EXCEPTION") \
+        else crash_class
+    return {
+        "runtime_validity": "BLOCKED_BY_ARTIFACT_CRASH",
+        "reason": reason,
+        "crash_class": crash_class,
+        "crash_cause": cause,
+        "detail": ("instrumented artifact crashed at startup (class=%s cause=%s); "
+                   "no valid runtime session exists for L3/L4 proof"
+                   % (crash_class, cause)),
+    }
 
 
 def build_findings(detection, facts):
@@ -237,7 +273,13 @@ def build_causal_chain(detection, facts, findings):
     events = probe.get("events") or []
     runtime_matches = probe.get("runtime_matches", 0)
     probe_reason = probe.get("reason_code") or (probe.get("lifecycle") or {}).get("reason_code")
-    if events and runtime_matches > 0:
+    validity = evaluate_runtime_validity(facts)
+    blocked = validity["runtime_validity"] == "BLOCKED_BY_ARTIFACT_CRASH"
+    if blocked:
+        l3 = (TIER_NOT_PROVEN,
+              "BLOCKED_BY_ARTIFACT_CRASH (%s): %s" % (validity["reason"],
+                                                      validity["detail"]))
+    elif events and runtime_matches > 0:
         l3 = (TIER_CONFIRMED, "runtime probe observed %d matching event(s)" % runtime_matches)
     elif probe:
         l3 = (TIER_NOT_PROVEN,
@@ -284,9 +326,16 @@ def build_causal_chain(detection, facts, findings):
                                                              beh.get("playback_confirmed"))))
     else:
         l4 = (TIER_NOT_PROVEN, "no bounded behavioral capture-block observation recorded")
+    if blocked and l4[0] == TIER_CONFIRMED:
+        # Defense in depth: even a fully-formed behavior record cannot be
+        # confirmed when the artifact under test crashed — the session that
+        # produced it is not a valid runtime session for this artifact.
+        l4 = (TIER_NOT_PROVEN, "BLOCKED_BY_ARTIFACT_CRASH: " + l4[1])
     links.append({"id": "L4_CAPTURE_BLOCK_BEHAVIOR_OBSERVED", "status": l4[0], "detail": l4[1]})
 
     verdict = TIER_CONFIRMED if all(l["status"] == TIER_CONFIRMED for l in links) else TIER_NOT_PROVEN
+    if blocked:
+        verdict = TIER_NOT_PROVEN
     return {
         "claim": CLAIM_ID,
         "claim_statement": "The application actively blocks screenshots/screen-recording of protected content.",
@@ -294,6 +343,9 @@ def build_causal_chain(detection, facts, findings):
         "missing": [l["id"] for l in links if l["status"] != TIER_CONFIRMED],
         "verdict": verdict,
         "rule": "ALL_LINKS_MUST_BE_CONFIRMED",
+        "runtime_validity": validity["runtime_validity"],
+        "runtime_validity_reason": validity["reason"],
+        "runtime_validity_detail": validity["detail"],
     }
 
 
@@ -382,6 +434,8 @@ def build_report(detection, campaign_dir=None):
         "causal_chain": chain,
         "evidence_graph": graph,
         "causal_proof": chain["verdict"] == TIER_CONFIRMED,
+        "runtime_validity": chain.get("runtime_validity", "NOT_BLOCKED"),
+        "runtime_validity_reason": chain.get("runtime_validity_reason"),
         "interpretation": "TIERED_EVIDENCE_STATIC_PLUS_OPTIONAL_RUNTIME",
         "safety_boundary": ("This report classifies evidence only. It never patches, disables, "
                             "injects, signs, or bypasses any protection mechanism."),
@@ -398,6 +452,11 @@ def to_markdown(report):
         "**Claim:** %s" % chain["claim_statement"],
         "",
         "**Verdict: %s** (rule: %s)" % (chain["verdict"], chain["rule"]),
+        "",
+        "**RUNTIME_VALIDITY: %s**%s" % (
+            chain.get("runtime_validity", "NOT_BLOCKED"),
+            (" — reason: %s" % chain["runtime_validity_reason"])
+            if chain.get("runtime_validity_reason") else ""),
         "",
         "| Link | Status | Detail |",
         "|---|---|---|",

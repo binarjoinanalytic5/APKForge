@@ -159,6 +159,31 @@ page alignment, ABI compatibility) and post-install verification
 (`pm path` + versionCode) are recorded in `ADB-DEPLOY.json`; failures carry
 explicit reason codes (e.g. `NATIVE_LIB_EXTRACTION_FAILED`).
 
+## Native Crash Gate (artifact runtime integrity)
+
+A `PROCESS_HEALTH_GATE` stage runs BEFORE any Frida work: the installed
+artifact is launched, the process is observed bounded, and
+`ApplicationExitInfo` (`dumpsys activity exit-info`) plus the crash logcat
+buffer are consulted (delta-based, so stale crashes never trigger it). A
+crash fails the round immediately as `RUNTIME_ARTIFACT_CRASH` — never as a
+probe timeout — and downstream stages are recorded SKIP.
+
+Outputs: `RUNTIME-HEALTH.json` (startup/exit_reason/crash_class/crash_cause/
+runtime_probe_allowed, all auditable), `BASELINE-RUNTIME.json` (gated
+original-vs-instrumented comparison: `INSTRUMENTATION_REGRESSION_CONFIRMED`
+vs `BASELINE_RUNTIME_FAILURE`), `ARTIFACT-INTEGRITY.json` (signing/package/
+expected-.so/compression/installed identity gate), `INSTRUMENTATION-IMPACT.json`
+(change-to-artifact linkage with strict attribution rules), and
+`RUNTIME-VERDICT.json` (ORIGINAL_RUNTIME / INSTRUMENTED_RUNTIME / CRASH_CLASS /
+CRASH_CAUSE / REGRESSION_STATUS / RUNTIME_PROOF_STATUS / NEXT_ACTION).
+
+The evidence gate enforces `RUNTIME_VALIDITY = BLOCKED_BY_ARTIFACT_CRASH`:
+L3/L4 can never be CONFIRMED while the artifact under test crashes.
+Unknown crash causes stay `CRASH_CAUSE_UNKNOWN` and are never attributed.
+Environment knobs: `REELSEC_HEALTH_WINDOW_MS` (health observation window,
+default 8000), `REELSEC_BASELINE_RUNTIME` (0 disables the gated baseline
+round). SCREENSHOT_BLOCKING remains NOT_PROVEN.
+
 ## Guarded behavioral capture (L4 producer, opt-in)
 
 `REELSEC_BEHAVIOR_CAPTURE=1` enables one bounded user-level `screencap`

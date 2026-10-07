@@ -183,3 +183,80 @@ SCREENSHOT_BLOCKING = NOT_PROVEN
 - السلسلة: L1 CONFIRMED / L2 INDICATOR / L3 NOT_PROVEN / L4 NOT_PROVEN /
   `SCREENSHOT_BLOCKING = NOT_PROVEN`.
 - جولة الجهاز الحقيقية ما زالت مطلوبة على Termux (استثناء الجهاز الفعلي).
+
+---
+
+## ملحق 2026-10-07 (ب): Native Crash Gate — إصلاح جذري بعد ثبوت انهيار الـartifact
+
+### الحالة المثبتة من الجهاز (دفع هذا التكليف)
+- `dumpsys activity exit-info` سجل للحزمة الاختبارية: `reason=5 (APP CRASH(NATIVE))`
+  مع `status=6`، انهيارات Native متعددة في User 0 وUser 95، وحالتَي
+  `reason=4 (APP CRASH(EXCEPTION))` مع `trace=null`.
+- العملية تموت بعد تشغيل `MainActivity`. لا stack trace موثوق في logcat.
+
+### ما تغيّر رسميًا في المنصة
+1. **Native Crash أصبح blocker رسميًا**: مرحلة `PROCESS_HEALTH_GATE` تسبق Frida.
+   إذا انهار الـartifact يفشل التشغيل فورًا بحالة `RUNTIME_ARTIFACT_CRASH` —
+   ولا يُنتَج أبدًا `READY → CAPTURED → RUNTIME_PROBE_TIMEOUT` وكأن الـprobe هو
+   المشكلة. الفصول اللاحقة (module/probe/target) تُسجَّل SKIP صراحةً.
+2. **timeout القديم كان يخفي مشكلة أعمق**: نافذة الـprobe كانت تبتلع موت
+   العملية. الآن موت العملية يُشخَّص قبل أي probe عبر ApplicationExitInfo.
+3. **ApplicationExitInfo مصدر أساسي**: `dumpsys activity exit-info <pkg>` يُقرأ
+   قبل الإطلاق وبعده؛ **الفروق فقط** (delta) تُحتسب، فالانهيارات القديمة من
+   جلسات سابقة لا تُشغّل البوابة أبدًا (محصّن ضد انحراف ساعة الجهاز).
+4. **artifact health شرط مسبق لإثبات runtime**: `runtime_probe_allowed=false`
+   عند أي crash؛ وبوابة Evidence ترفض L3/L4 وتعلن
+   `RUNTIME_VALIDITY = BLOCKED_BY_ARTIFACT_CRASH` (السبب NATIVE_CRASH أو
+   JAVA_EXCEPTION) حتى لو وُجدت أحداث مطابقة مزروعة.
+5. **الفرق بين artifact failure وapplication failure**: مقارنة Baseline آلية —
+   توقيع نسخة من original.apk بمفتاح الاختبار (الأصل لا يُمس)، تشغيلها،
+   ومقارنتها بالـinstrumented:
+   - original يعمل + instrumented ينهار ⇒ `INSTRUMENTATION_REGRESSION_CONFIRMED`
+   - الاثنان ينهاران ⇒ `BASELINE_RUNTIME_FAILURE` (**لا يُنسب إلى ReelSec**)
+   الجولة محكومة بـ`REELSEC_ALLOW_TEST_DEVICE_UNINSTALL=1` و`REELSEC_TEST_PACKAGE`
+   وkeystore الاختبار؛ وبدونها تُسجَّل `BASELINE_NOT_RUN` **بسبب محدد**.
+6. **تصنيف آلي للانهيار** (timestamp/pid/user/package/stage/source/reason/confidence):
+   NATIVE_CRASH, JAVA_EXCEPTION, PROCESS_KILLED, ANR, STARTUP_FAILURE,
+   PACKAGE_NOT_PRESENT, PROCESS_NOT_OBSERVED, MODULE_NOT_OBSERVED,
+   PROBE_ATTACH_FAILED, TARGET_NOT_EXECUTED, HEALTHY.
+7. **تحديد المكتبة المسؤولة دون root**: من logcat backtrace frames
+   (`#00 pc ... /lib/arm64/libX.so`)، Abort message، حقل trace في exit-info
+   (يُسجَّل مساره دون قراءة)، `/proc/<pid>/maps` أثناء الحياة (best-effort)،
+   ومراقبة Frida إن سبقت الانهيار. عند التعذر: `CRASH_CAUSE_UNKNOWN` —
+   **لا يُخترع سبب أبدًا**. ملاحظة مدققة: سطر `Fatal signal` يحمل اسم العملية
+   مبتورًا إلى 15 حرفًا؛ الربط يقبل الاسم المبتور/الكامل وكل الأسطر تُسجَّل.
+8. **Artifact Integrity Gate قبل التثبيت**: توقيع (META-INF + apksigner إن وجد)،
+   هوية الحزمة من الـmanifest، وجود `.so` المتوقعة مقابل الأصل، ضغط/محاذاة/ABI،
+   `pm path` وversionCode المثبَّت. أي فشل ⇒ `INTEGRITY_FAILED` يمنع runtime.
+9. **INSTRUMENTATION-IMPACT.json**: كل تعديل تضيفه ReelSec (smali/manifest/
+   إعادة توقيع/repackaging) مرتبط بالـartifact، وقاعدة الإسناد: يُربط الانهيار
+   بالـinstrumentation **فقط** إذا كانت مكتبة السبب مطابقة لملف حقنته ReelSec؛
+   `CRASH_CAUSE_UNKNOWN` لا يُنسب أبدًا.
+10. **مخرجات قابلة للتدقيق**: `RUNTIME-HEALTH.json` (الحقول المطلوبة حرفيًا:
+    startup/process_observed/process_alive_ms/exit_reason/exit_status/crash_class/
+    crash_source/crash_cause_confidence/instrumentation_regression/
+    baseline_comparison/runtime_probe_allowed)، `BASELINE-RUNTIME.json`,
+    `ARTIFACT-INTEGRITY.json`, `RUNTIME-VERDICT.json` (ORIGINAL_RUNTIME /
+    INSTRUMENTED_RUNTIME / CRASH_CLASS / CRASH_CAUSE / REGRESSION_STATUS /
+    RUNTIME_PROOF_STATUS / NEXT_ACTION).
+11. **الممنوعات ملتزمة**: لا زيادة timeout كعلاج، لا تجاهل لموت العملية، لا
+    اعتبار CAPTURED نجاحًا، لا إعادة تشغيل بلا حدود، لا suppress/bypass،
+    original.apk لا يُمس، ولا يُدّعى أن Frida رأى الهدف إذا لم يره.
+
+### مصفوفة الانحدار (10 سيناريوهات — كلها مغطاة باختبارات آلية)
+original/instrumented يعملان ⇒ BOTH_START_OK · instrumented native-crash ⇒
+REGRESSION_CONFIRMED · exception-crash ⇒ REGRESSION+JAVA_EXCEPTION · original
+ينهار ⇒ BASELINE_RUNTIME_FAILURE · عملية لا تبدأ ⇒ PROCESS_NOT_OBSERVED ·
+تبدأ ثم تموت ⇒ تصنيف من exit-info · module لا يُحمَّل ⇒ C · attach يفشل ⇒ D ·
+target لا يُنفَّذ ⇒ E · target يُنفَّذ ⇒ F. **لا سيناريو يتحول إلى
+RUNTIME_PROBE_TIMEOUT مضلل** (اختبار صريح).
+
+### حالة الأدلة العلمية (بلا تغيير)
+L1 CONFIRMED / L2 INDICATOR / L3 NOT_PROVEN / L4 NOT_PROVEN /
+`SCREENSHOT_BLOCKING = NOT_PROVEN`. الانهيار الحالي يمنع أي إثبات runtime حتى
+إصلاح الـartifact أو إثبات أن الأصل نفسه ينهار (BASELINE_RUNTIME_FAILURE).
+
+### ما على الجهاز فعله في الجولة القادمة
+`git fetch origin main && git merge --ff-only origin/main` ثم bootstrap كالمعتاد.
+النظام سيجيب تلقائيًا: هل original يعمل؟ هل instrumented يعمل؟ نوع الانهيار؟
+سببه؟ regression أم baseline؟ هل probe مسموح؟ ولماذا؟ — بدون تحقيق يدوي.
