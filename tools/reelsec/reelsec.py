@@ -16,7 +16,12 @@ from apktool_backend import ApktoolBackendError, select_apktool_backend, decode_
 from instrumentation_backend import plan_secshell_injection, find_secshell_application
 from instrumented_copy import prepare_instrumented_copy, apply_text_probe
 from gadget_embed import embed_frida_gadget
-from build_verify import apktool_build_command, verify_artifact
+from build_verify import (
+    apktool_build_command,
+    verify_artifact,
+    zipalign_command,
+    zipalign_verify_command,
+)
 from sign_verify import artifact_identity, sign_command, verify_command, run_checked
 from adb_deploy import (
     install_command,
@@ -2545,18 +2550,60 @@ def main():
     build_verify = {"status": "NOT_BUILT"}
     if instrumented_copy.get("status") in ("COPIED", "MUTATED"):
         try:
-            built_apk = output / "instrumented-unsigned.apk"
-            build_cmd = apktool_build_command(apktool_backend, instrumented_copy_root, built_apk)
+            raw_built_apk = output / "instrumented-unsigned.apk"
+            built_apk = raw_built_apk
+            build_cmd = apktool_build_command(apktool_backend, instrumented_copy_root, raw_built_apk)
             build_rc, build_log = run(build_cmd, cwd=ROOT, timeout=300)
             if build_rc != 0:
                 raise RuntimeError(
                     "Apktool build failed (rc=%s): %s" %
                     (build_rc, (build_log or "")[-4000:])
                 )
+
+            align_cmd = None
+            align_verify_cmd = None
+            align_rc = None
+            align_log = ""
+            if instrumented_copy.get("gadget_enabled"):
+                zipalign = capabilities.get("tools", {}).get("zipalign", {}).get("path")
+                if not zipalign:
+                    raise RuntimeError("zipalign unavailable; Gadget APK requires native-library alignment")
+                aligned_apk = output / "instrumented-unsigned-aligned.apk"
+                align_cmd = zipalign_command(
+                    zipalign, raw_built_apk, aligned_apk, page_size_kb=16
+                )
+                align_rc, align_log = run(align_cmd, cwd=ROOT, timeout=300)
+                if align_rc != 0:
+                    raise RuntimeError(
+                        "zipalign failed (rc=%s): %s" %
+                        (align_rc, (align_log or "")[-4000:])
+                    )
+                align_verify_cmd = zipalign_verify_command(
+                    zipalign, aligned_apk, page_size_kb=16
+                )
+                align_verify_rc, align_verify_log = run(
+                    align_verify_cmd, cwd=ROOT, timeout=120
+                )
+                if align_verify_rc != 0:
+                    raise RuntimeError(
+                        "zipalign verification failed (rc=%s): %s" %
+                        (align_verify_rc, (align_verify_log or "")[-4000:])
+                    )
+                built_apk = aligned_apk
+
             build_verify = verify_artifact(built_apk)
             build_verify["command"] = build_cmd
             build_verify["returncode"] = build_rc
             build_verify["output_tail"] = (build_log or "")[-4000:]
+            if align_cmd:
+                build_verify.update({
+                    "raw_built_path": str(raw_built_apk.resolve()),
+                    "alignment_command": align_cmd,
+                    "alignment_returncode": align_rc,
+                    "alignment_output_tail": (align_log or "")[-4000:],
+                    "alignment_verify_command": align_verify_cmd,
+                    "alignment_page_size_kb": 16,
+                })
         except Exception as exc:
             build_verify = {"status": "FAILED", "error": str(exc)}
         (output / "BUILD-VERIFY.json").write_text(
