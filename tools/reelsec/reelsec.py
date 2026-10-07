@@ -2856,6 +2856,30 @@ def main():
         runtime_capture.get("error", runtime_capture.get("status", "")),
     )
 
+    # Tiered evidence report + evidence graph linking static, native and
+    # runtime findings. Read-only classification; the causal chain gate
+    # emits a causal proof only when every link is CONFIRMED.
+    try:
+        import evidence_report as _evidence_report
+        _detection = capture_detection
+        if isinstance(_detection, dict) and _detection.get("hits") is not None:
+            if input_apk_sha256 and not _detection.get("input_sha256"):
+                _detection = dict(_detection)
+                _detection["input_sha256"] = input_apk_sha256
+            _evidence = _evidence_report.build_report(_detection, campaign_dir=output)
+            (output / "EVIDENCE-REPORT.json").write_text(
+                json.dumps(_evidence, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
+                encoding="utf-8",
+            )
+            (output / "EVIDENCE-REPORT.md").write_text(
+                _evidence_report.to_markdown(_evidence), encoding="utf-8")
+    except Exception as exc:
+        (output / "EVIDENCE-REPORT.json").write_text(
+            json.dumps({"schema_version": "evidence-report-1", "status": "FAILED",
+                        "error": str(exc), "read_only": True}, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
     allowed_inventory = {"READY", "READY_NATIVE_ONLY"}
     if args.command == "campaign" and (not decoded_inventory or decoded_inventory.get("status") not in allowed_inventory):
         blocker = {
