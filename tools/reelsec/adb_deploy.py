@@ -21,7 +21,7 @@ def install_command(adb_path, serial, signed_apk):
     apk = Path(signed_apk).resolve()
     if not apk.is_file():
         raise AdbDeployError("signed APK is missing")
-    return adb_command(adb_path, serial, "install", "-r", str(apk))
+    return adb_command(adb_path, serial, "install", "-r", "--no-incremental", str(apk))
 
 
 def uninstall_command(adb_path, serial, package_name):
