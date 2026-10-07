@@ -16,16 +16,16 @@ class GadgetEmbedTests(unittest.TestCase):
             root = Path(tmp) / "tree"
             target = root / "smali" / "Application.smali"
             target.parent.mkdir(parents=True)
-            target.write_text(
+            original_smali = (
                 ".class public LApplication;\n"
                 ".method public onCreate()V\n"
                 "    .locals 1\n"
                 "    const-string v0, \"SecShell\"\n"
                 "    invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V\n"
                 "    return-void\n"
-                ".end method\n",
-                encoding="utf-8",
+                ".end method\n"
             )
+            target.write_text(original_smali, encoding="utf-8")
             (root / "INSTRUMENTED-COPY-MANIFEST.json").write_text(
                 json.dumps({"status":"MUTATED","mutations":[]}) + "\n", encoding="utf-8"
             )
@@ -33,7 +33,11 @@ class GadgetEmbedTests(unittest.TestCase):
             gadget.write_bytes(b"fake-gadget")
             manifest = embed_frida_gadget(root, target, gadget)
             self.assertTrue((root / "lib" / "arm64-v8a" / "libfrida-gadget.so").is_file())
-            self.assertTrue((root / "lib" / "arm64-v8a" / "libfrida-gadget.config.so").is_file())
+            config_path = root / "lib" / "arm64-v8a" / "libfrida-gadget.config.so"
+            self.assertTrue(config_path.is_file())
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            self.assertEqual(config["interaction"]["address"], "127.0.0.1")
+            self.assertEqual(config["interaction"]["port"], 27042)
             text = target.read_text(encoding="utf-8")
             self.assertIn('loadLibrary(Ljava/lang/String;)V', text)
             self.assertIn('.locals 3', text)
@@ -43,6 +47,7 @@ class GadgetEmbedTests(unittest.TestCase):
             self.assertIn('invoke-static {v1, v2}, Landroid/util/Log;->i(Ljava/lang/String;Ljava/lang/String;)I', text)
             self.assertIn("ReelSec-Gadget-Load", text)
             self.assertTrue(any(m["type"] == "FRIDA_GADGET_EMBED" for m in manifest["mutations"]))
+            self.assertNotEqual(text, original_smali)
 
 
 if __name__ == "__main__":
