@@ -32,13 +32,13 @@ def _reserve_registers(text, anchor, count=2):
     m = re.search(r"(?m)^(?P<p>[ \t]*)\.locals[ \t]+(?P<n>\d+)[ \t]*$", block)
     if m:
         base = int(m.group("n"))
-        block = block[:m.start()] + m.group("p") + ".locals " + str(base + 1) + block[m.end():]
+        block = block[:m.start()] + m.group("p") + ".locals " + str(base + count) + block[m.end():]
     else:
         m = re.search(r"(?m)^(?P<p>[ \t]*)\.registers[ \t]+(?P<n>\d+)[ \t]*$", block)
         if not m:
             raise GadgetEmbedError("method register declaration not found")
         base = int(m.group("n"))
-        block = block[:m.start()] + m.group("p") + ".registers " + str(base + 1) + block[m.end():]
+        block = block[:m.start()] + m.group("p") + ".registers " + str(base + count) + block[m.end():]
     return text[:start] + block + text[method_end:], base
 
 
