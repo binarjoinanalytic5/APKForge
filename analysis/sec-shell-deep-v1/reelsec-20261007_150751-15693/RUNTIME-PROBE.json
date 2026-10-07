@@ -1,0 +1,53 @@
+{
+  "events": [],
+  "execution_attempted": true,
+  "frida_exit": 124,
+  "frida_output": "     ____\n    / _  |   Frida 17.2.14 - A world-class dynamic instrumentation toolkit\n   | (_| |\n    > _  |   Commands:\n   /_/ |_|       help      -> Displays the help system\n   . . . .       object?   -> Display information about 'object'\n   . . . .       exit/quit -> Exit\n   . . . .\n   . . . .   More info at https://frida.re/docs/home/\nWaiting for USB device to appear...\n\n[timeout=18s]\n",
+  "gadget_mode": false,
+  "gadget_port": 27042,
+  "gadget_source": null,
+  "manifest": null,
+  "missing_requirements": [],
+  "module": "libsaasCorePlayer.so",
+  "package": "com.newleaf.app.android.victor",
+  "package_source": "input_apk_tool:aapt2",
+  "package_tool_checks": [
+    {
+      "output_tail": "ICTED_RESIZABILITY' value='-1' \nuses-library-not-required:'androidx.window.extensions'\nuses-library-not-required:'androidx.window.sidecar'\nuses-permission: name='android.permission.ACCESS_NETWORK_STATE'\nuses-permission: name='android.permission.ACCESS_WIFI_STATE'\nfeature-group: label=''\n  uses-feature: name='android.hardware.bluetooth'\n  uses-implied-feature: name='android.hardware.bluetooth' reason='requested android.permission.BLUETOOTH permission, and targetSdkVersion > 4'\n  uses-feature: name='android.hardware.faketouch'\n  uses-implied-feature: name='android.hardware.faketouch' reason='default feature for all apps'\n  uses-feature: name='android.hardware.location'\n  uses-implied-feature: name='android.hardware.location' reason='requested android.permission.ACCESS_COARSE_LOCATION permission, and requested android.permission.ACCESS_FINE_LOCATION permission'\n  uses-feature: name='android.hardware.screen.portrait'\n  uses-implied-feature: name='android.hardware.screen.portrait' reason='one or more activities have specified a portrait orientation'\n  uses-feature: name='android.hardware.wifi'\n  uses-implied-feature: name='android.hardware.wifi' reason='requested android.permission.ACCESS_WIFI_STATE permission'\nmain\nother-activities\nother-receivers\nother-services\nsupports-screens: 'small' 'normal' 'large' 'xlarge'\nsupports-any-density: 'true'\nlocales: '--_--' 'af' 'am' 'ar' 'as' 'az' 'be' 'bg' 'bn' 'bs' 'ca' 'cs' 'da' 'de' 'de-DE' 'el' 'en' 'en-AU' 'en-CA' 'en-GB' 'en-IN' 'en-XC' 'es' 'es-419' 'es-ES' 'es-US' 'et' 'eu' 'fa' 'fi' 'fr' 'fr-CA' 'gl' 'gu' 'hi' 'hr' 'hu' 'hy' 'id' 'in' 'is' 'it' 'iw' 'ja' 'ja-JP' 'ka' 'kk' 'km' 'kn' 'ko' 'ky' 'lo' 'lt' 'lv' 'mk' 'ml' 'mn' 'mr' 'ms' 'my' 'nb' 'ne' 'nl' 'or' 'pa' 'pl' 'pt' 'pt-BR' 'pt-PT' 'ro' 'ru' 'si' 'sk' 'sl' 'sq' 'sr' 'sr-Latn' 'sv' 'sw' 'ta' 'te' 'th' 'tl' 'tr' 'tw' 'uk' 'ur' 'uz' 'vi' 'zh' 'zh-CN' 'zh-HK' 'zh-MO' 'zh-TW' 'zu'\ndensities: '160' '240' '320' '480' '640' '65534' '65535'\nnative-code: 'arm64-v8a' 'armeabi-v7a'\n",
+      "path": "/data/data/com.termux/files/usr/bin/aapt2",
+      "returncode": 0,
+      "tool": "aapt2"
+    }
+  ],
+  "preflight_status": "CLIENTS_READY",
+  "reason": "Frida probe exceeded the bounded 18s execution window",
+  "runtime_matches": 0,
+  "status": "RUNTIME_PROBE_TIMEOUT_NO_TARGET_OBSERVED",
+  "tooling": {
+    "adb": "/data/data/com.termux/files/usr/bin/adb",
+    "adb_device_records": [
+      {
+        "attributes": {
+          "device": "c2q",
+          "model": "SM_N986U",
+          "product": "c2qsqw",
+          "transport_id": "1"
+        },
+        "raw": "192.168.8.8:45441      device product:c2qsqw model:SM_N986U device:c2q transport_id:1",
+        "serial": "192.168.8.8:45441",
+        "state": "device"
+      }
+    ],
+    "adb_devices": [
+      "192.168.8.8:45441      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+    ],
+    "adb_output_tail": "List of devices attached\n192.168.8.8:45441      device product:c2qsqw model:SM_N986U device:c2q transport_id:1\n\n",
+    "adb_returncode": 0,
+    "adb_source": "preflight.adb",
+    "frida": "/data/data/com.termux/files/usr/bin/frida",
+    "frida_source": "preflight.frida",
+    "pkg": "/data/data/com.termux/files/usr/bin/pkg",
+    "proot_distro": "/data/data/com.termux/files/usr/bin/proot-distro",
+    "python": "/data/data/com.termux/files/usr/bin/python"
+  }
+}

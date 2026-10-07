@@ -1,0 +1,923 @@
+{
+  "category_counts": {
+    "DRM_PROTECTION": 61,
+    "NATIVE_CAPTURE": 63,
+    "SCREEN_CAPTURE_CALLBACKS": 5,
+    "SURFACE_SECURITY": 40
+  },
+  "causal_proof": false,
+  "files_scanned": 2741,
+  "files_with_hits": 9,
+  "generated_at_epoch": 1791374888.7181118,
+  "hits": [
+    {
+      "file": "lib/arm64-v8a/libalivcffmpeg.so",
+      "hits": [
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "https protocol not found, recompile FFmpeg with openssl, gnutls or securetransport enabled."
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "screen.?capture",
+          "string": "Movie/video screen capture"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "recording",
+          "string": "Recording Location"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "recording",
+          "string": "During recording"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "av_spherical_projection_name"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "Missing projection private properties"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "Unsupported projection %d. sv3d not written."
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "Missing projection box"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "Missing projection header box"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "Unknown projection type: %s"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "<GSpherical:ProjectionType>"
+        }
+      ],
+      "sha256": "73b3527f39e93c463f648514b25bdd9d239ddf856ed9ed51d849e5ba29b9ba98"
+    },
+    {
+      "file": "lib/arm64-v8a/libmmkv.so",
+      "hits": [
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "recording",
+          "string": "turn on recording expire date for all keys inside [%s] from now %u"
+        }
+      ],
+      "sha256": "e597ae5eea881ec74980601105b49733b606850a356d38da63880d51fd4841c7"
+    },
+    {
+      "file": "lib/arm64-v8a/libprotect.so",
+      "hits": [
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_getPropertyByteArray"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_createByUUID"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_release"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_getPropertyString"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "_Z17drmByteArrayToHex18AMediaDrmByteArray"
+        }
+      ],
+      "sha256": "1725ce0c5528d65eae8e337d6b0878dcdc3565f35314840ace0c5d680b14526b"
+    },
+    {
+      "file": "lib/arm64-v8a/libsaasCorePlayer.so",
+      "hits": [
+        {
+          "category": "SCREEN_CAPTURE_CALLBACKS",
+          "pattern": "onCaptureScreen",
+          "string": "onCaptureScreen"
+        },
+        {
+          "category": "SCREEN_CAPTURE_CALLBACKS",
+          "pattern": "onCaptureScreen",
+          "string": "nativeOnCaptureScreen"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "queueSecureInputBuffer or queueInputBuffer error(%d) codecType = %d"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "setForceInsecureDecoder"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "queueSecureInputBuffer"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "jBuffer is null, queueSecureInputBuffer may mem lack"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "isForceInsecureDecoder"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "upgrade-insecure-request"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "upgrade-insecure-requests"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "secure memory buffer"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "Secure Electronic Transactions"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "setext-pinSecure"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "secure device signature"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "secureShellClient"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "secureShellServer"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "__Secure-"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "secure"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "Ant Secure Compiler build211110 (based on LLVM 4.0.1)"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "DrmSession",
+          "string": "com/cicada/player/utils/media/DrmSessionManager"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "widevine"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "Widevine"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "Widevine-FairPlay"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "stream is WideVine and occur decode error."
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "force switch to hardware decoder, as tunnelRender || isWideVine"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "The device does not support Widevine L1 or L3"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "Widevine is not available on the device (e.g., uncertified device)"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "Check the device's Widevine certification level"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "Attempting to play Widevine-encrypted content with an HLS URL (Widevine is typically used with DASH)"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "Ensure the DRM scheme matches the media format (Widevine + DASH, FairPlay + HLS)"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "WideVineDrmHandler"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "This device/system doesn't support Widevine. You can try other device."
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "DRM provision failed, your device/system doesn't pass Google's Widevine provision."
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "NSt6__ndk110__function6__funcIZN7AVPSaas24requestWideVineProvisionEPPcPiRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPKciS5_PSB_E3$_8NS9_ISH_EEFvS3_lEEE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "ZN7AVPSaas24requestWideVineProvisionEPPcPiRKNSt6__ndk112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEEPKciS2_PS9_E3$_8"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "NSt6__ndk110__function6__funcIZN7AVPSaas24requestWideVineProvisionEPPcPiRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPKciS5_PSB_E3$_9NS9_ISH_EEFviSB_EEE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "ZN7AVPSaas24requestWideVineProvisionEPPcPiRKNSt6__ndk112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEEPKciS2_PS9_E3$_9"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "N6Cicada18WideVineDrmHandlerE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "NSt6__ndk123enable_shared_from_thisIN6Cicada18WideVineDrmHandlerEEE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "NSt6__ndk120__shared_ptr_emplaceIN6Cicada18WideVineDrmHandlerENS_9allocatorIS2_EEEE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "ContentProtection",
+          "string": "parseContentProtection"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "ContentProtection",
+          "string": "ContentProtection"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "setForceInsecureDecoder",
+          "string": "setForceInsecureDecoder"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "nativeOnCaptureScreen",
+          "string": "nativeOnCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "onCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "AliyunCorePlayer callback --> CaptureScreen(%ld,%ld)"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "CaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "nativeOnCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "apsaraCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "captureScreen exception, frameWidth or frameHeight is 0"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "NSt6__ndk110__function6__funcIZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2NS_9allocatorIS4_EEFvPhiiEEE"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "ZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "recording",
+          "string": "RECORDING"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "recording",
+          "string": "SCHEDULED_EVENT_SENDER_AND_RECORDING_FOR_PLAYER"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "mEnableProjection"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "enableProjection"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "\", \"projectionLicenseEnable\":\""
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "u_projection"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "        uniform mat4 u_projection;"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "            gl_Position = u_projection * vec4(a_position, 0.0, 1.0);"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "        uniform mat4 u_projection;"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "            gl_Position = u_projection * vec4(a_position, 0.0, 1.0);"
+        }
+      ],
+      "sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4"
+    },
+    {
+      "file": "lib/armeabi-v7a/libalivcffmpeg.so",
+      "hits": [
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "https protocol not found, recompile FFmpeg with openssl, gnutls or securetransport enabled."
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "screen.?capture",
+          "string": "Movie/video screen capture"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "recording",
+          "string": "Recording Location"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "recording",
+          "string": "During recording"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "av_spherical_projection_name"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "Missing projection private properties"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "Unsupported projection %d. sv3d not written."
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "Missing projection box"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "Missing projection header box"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "Unknown projection type: %s"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "<GSpherical:ProjectionType>"
+        }
+      ],
+      "sha256": "526a26047992adedaed6e8854f42ee8ce296f3b92c399f7196410e15efb7c2bd"
+    },
+    {
+      "file": "lib/armeabi-v7a/libmmkv.so",
+      "hits": [
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "recording",
+          "string": "turn on recording expire date for all keys inside [%s] from now %u"
+        }
+      ],
+      "sha256": "18072a125eb3e78e3954099d506249d36f3e96401f3c7e139d3d2544d0c28131"
+    },
+    {
+      "file": "lib/armeabi-v7a/libprotect.so",
+      "hits": [
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_getPropertyByteArray"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_createByUUID"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_release"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "AMediaDrm_getPropertyString"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "MediaDrm",
+          "string": "_Z17drmByteArrayToHex18AMediaDrmByteArray"
+        }
+      ],
+      "sha256": "94786c5616331de6f43b68faaa4ad6e6746390a31cbe46dada9d03e644ac7232"
+    },
+    {
+      "file": "lib/armeabi-v7a/libsaasCorePlayer.so",
+      "hits": [
+        {
+          "category": "SCREEN_CAPTURE_CALLBACKS",
+          "pattern": "onCaptureScreen",
+          "string": "gj_NativePlayer_onCaptureScreen"
+        },
+        {
+          "category": "SCREEN_CAPTURE_CALLBACKS",
+          "pattern": "onCaptureScreen",
+          "string": "onCaptureScreen"
+        },
+        {
+          "category": "SCREEN_CAPTURE_CALLBACKS",
+          "pattern": "onCaptureScreen",
+          "string": "nativeOnCaptureScreen"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "queueSecureInputBuffer or queueInputBuffer error(%d) codecType = %d"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "setForceInsecureDecoder"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "queueSecureInputBuffer"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "jBuffer is null, queueSecureInputBuffer may mem lack"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "isForceInsecureDecoder"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "upgrade-insecure-request"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "upgrade-insecure-requests"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "secure memory buffer"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "Secure Electronic Transactions"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "setext-pinSecure"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "secure device signature"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "secureShellClient"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "secureShellServer"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "__Secure-"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "secure"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "pattern": "SECURE",
+          "string": "Ant Secure Compiler build211110 (based on LLVM 4.0.1)"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "DrmSession",
+          "string": "com/cicada/player/utils/media/DrmSessionManager"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "_ZN6Cicada18WideVineDrmHandler10sObjectMapE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "_ZN6Cicada18WideVineDrmHandler15sObjectMapMutexE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "widevine"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "Widevine"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "Unsupported DRM type, only WideVine and FairPlay are supported"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "Widevine-FairPlay"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "stream is WideVine and occur decode error."
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "force switch to hardware decoder, as tunnelRender || isWideVine"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "The device does not support Widevine L1 or L3"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "Widevine is not available on the device (e.g., uncertified device)"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "Check the device's Widevine certification level"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "Attempting to play Widevine-encrypted content with an HLS URL (Widevine is typically used with DASH)"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "Ensure the DRM scheme matches the media format (Widevine + DASH, FairPlay + HLS)"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "WideVineDrmHandler"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "This device/system doesn't support Widevine. You can try other device."
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "DRM provision failed, your device/system doesn't pass Google's Widevine provision."
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "NSt6__ndk110__function6__funcIZN7AVPSaas24requestWideVineProvisionEPPcPiRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPKciS5_PSB_E3$_8NS9_ISH_EEFvS3_xEEE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "ZN7AVPSaas24requestWideVineProvisionEPPcPiRKNSt6__ndk112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEEPKciS2_PS9_E3$_8"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "NSt6__ndk110__function6__funcIZN7AVPSaas24requestWideVineProvisionEPPcPiRKNS_12basic_stringIcNS_11char_traitsIcEENS_9allocatorIcEEEEPKciS5_PSB_E3$_9NS9_ISH_EEFviSB_EEE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "ZN7AVPSaas24requestWideVineProvisionEPPcPiRKNSt6__ndk112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEEPKciS2_PS9_E3$_9"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "N6Cicada18WideVineDrmHandlerE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "NSt6__ndk123enable_shared_from_thisIN6Cicada18WideVineDrmHandlerEEE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "Widevine",
+          "string": "NSt6__ndk120__shared_ptr_emplaceIN6Cicada18WideVineDrmHandlerENS_9allocatorIS2_EEEE"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "ContentProtection",
+          "string": "parseContentProtection"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "ContentProtection",
+          "string": "ContentProtection"
+        },
+        {
+          "category": "DRM_PROTECTION",
+          "pattern": "setForceInsecureDecoder",
+          "string": "setForceInsecureDecoder"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "nativeOnCaptureScreen",
+          "string": "nativeOnCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "gj_NativePlayer_onCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "onCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "AliyunCorePlayer callback --> CaptureScreen(%lld,%lld)"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "CaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "nativeOnCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "apsaraCaptureScreen"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "captureScreen exception, frameWidth or frameHeight is 0"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "NSt6__ndk110__function6__funcIZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2NS_9allocatorIS4_EEFvPhiiEEE"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "captureScreen",
+          "string": "ZN6Cicada16SuperMediaPlayer13CaptureScreenEvE3$_2"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "recording",
+          "string": "RECORDING"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "recording",
+          "string": "SCHEDULED_EVENT_SENDER_AND_RECORDING_FOR_PLAYER"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "gj_playerconfig_EnableProjection"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "mEnableProjection"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "\", \"projectionLicenseEnable\":\""
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "enableProjection"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "u_projection"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "enableProjection"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "        uniform mat4 u_projection;"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "            gl_Position = u_projection * vec4(a_position, 0.0, 1.0);"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "        uniform mat4 u_projection;"
+        },
+        {
+          "category": "NATIVE_CAPTURE",
+          "pattern": "projection",
+          "string": "            gl_Position = u_projection * vec4(a_position, 0.0, 1.0);"
+        }
+      ],
+      "sha256": "ea99002d1c35783250616c381e04953bf7cbfbfd30054510f408a23a7f753054"
+    },
+    {
+      "file": "unknown/mozilla/public-suffix-list.txt",
+      "hits": [
+        {
+          "category": "SURFACE_SECURITY",
+          "line": 9692,
+          "pattern": "SECURE",
+          "sample": "// secure : 2015-08-27 Amazon Registry Services, Inc."
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "line": 9693,
+          "pattern": "SECURE",
+          "sample": "secure"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "line": 11066,
+          "pattern": "SECURE",
+          "sample": "ssl.origin.cdn77-secure.org"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "line": 12931,
+          "pattern": "SECURE",
+          "sample": "// Securepoint GmbH : https://www.securepoint.de"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "line": 12931,
+          "pattern": "SECURE",
+          "sample": "// Securepoint GmbH : https://www.securepoint.de"
+        },
+        {
+          "category": "SURFACE_SECURITY",
+          "line": 12932,
+          "pattern": "SECURE",
+          "sample": "// Submitted by Erik Anders <erik.anders@securepoint.de>"
+        }
+      ],
+      "sha256": "45479362abb0eb02ddfb2e40726d06eaeff59f41154b05815339a1f2b78d5099"
+    }
+  ],
+  "interpretation": "STATIC_INDICATORS_ONLY",
+  "read_only": true,
+  "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_150751-15693/decoded-apk-no-res",
+  "schema_version": "capture-detection-1"
+}
