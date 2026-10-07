@@ -52,10 +52,11 @@ path, arch = sys.argv[1:3]
 data = open(path, "rb").read(64)
 if data[:4] != b"\x7fELF":
     raise SystemExit("Downloaded file is not an ELF shared library")
-if data[4] != 2:
-    raise SystemExit("Downloaded Gadget is not ELF64")
 machine = struct.unpack_from("<H", data, 18)[0]
+expected_class = {"arm64": 2, "arm": 1, "x86": 1, "x86_64": 2}[arch]
 expected = {"arm64": 183, "arm": 40, "x86": 3, "x86_64": 62}[arch]
+if data[4] != expected_class:
+    raise SystemExit("Gadget ELF class mismatch: got %s expected %s" % (data[4], expected_class))
 if machine != expected:
     raise SystemExit("Gadget machine mismatch: got %s expected %s" % (machine, expected))
 print("ELF_OK arch=%s machine=%s" % (arch, machine))
