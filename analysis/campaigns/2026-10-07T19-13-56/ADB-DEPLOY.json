@@ -1,0 +1,9 @@
+{
+  "error": "artifact integrity gate failed (package_identity,installed_identity); runtime blocked before install",
+  "install_failure_diagnosis": {
+    "hint": "message did not match a known failure class; see raw output",
+    "matches": [],
+    "reason_code": "INSTALL_FAILED_UNCLASSIFIED"
+  },
+  "status": "BLOCKED_OR_FAILED"
+}

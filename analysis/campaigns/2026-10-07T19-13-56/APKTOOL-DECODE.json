@@ -1,0 +1,22 @@
+{
+  "buildable_with_apktool": true,
+  "command": [
+    "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+    "-cp",
+    "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+    "brut.apktool.Main",
+    "d",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+    "-o",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-13-56/decoded-apk-no-res",
+    "-r"
+  ],
+  "instrumentable_smali": true,
+  "log": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-13-56/decoded-apk-no-res/reelsec-apktool-recovery.log",
+  "mode": "APKTOOL_NO_RES",
+  "output_dir": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-07T19-13-56/decoded-apk-no-res",
+  "resources_decoded": false,
+  "returncode": 0,
+  "selection_strategy": "NO_RES_FIRST",
+  "status": "DECODED_NO_RES"
+}

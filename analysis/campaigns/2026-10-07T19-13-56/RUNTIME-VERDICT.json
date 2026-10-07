@@ -1,0 +1,13 @@
+{
+  "BASELINE_STATUS": "SAFETY_BLOCKED",
+  "CRASH_CAUSE": null,
+  "CRASH_CAUSE_CONFIDENCE": null,
+  "CRASH_CLASS": null,
+  "INSTRUMENTED_RUNTIME": "NOT_RUN",
+  "NEXT_ACTION": "Runtime proof recorded; evaluate evidence gate.",
+  "ORIGINAL_RUNTIME": "NOT_RUN",
+  "REGRESSION_STATUS": "NOT_COMPARABLE",
+  "RUNTIME_PROOF_STATUS": "PACKAGE_NOT_INSTALLED",
+  "runtime_probe_allowed": false,
+  "schema_version": "runtime-health-1"
+}
