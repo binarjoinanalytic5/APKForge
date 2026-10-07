@@ -83,12 +83,16 @@ Latest implementation commits:
 
 ## Next operator gate
 
-Do not run another campaign with the placeholder path. First place a real Android arm64 Gadget ELF on Termux, then verify:
+Do not run another campaign with the placeholder path. Use the repository fetcher so the Gadget version follows the installed Frida CLI:
 
-`test -f "$REELSEC_FRIDA_GADGET"`
+`bash tools/reelsec/fetch_frida_gadget.sh`
 
-and:
+Then export the printed path, for example:
 
-`file "$REELSEC_FRIDA_GADGET"`
+`export REELSEC_FRIDA_GADGET="$HOME/apk-lab/reelsec-gadget/frida-gadget-<version>-android-arm64.so"`
 
-The binary must be the arm64 Android Gadget matching the Frida client/toolchain used by the campaign. Keep `original.apk` unchanged.
+The fetcher verifies ELF64 and the requested architecture before the file is used. The Android Gadget is a shared library intended for embedding into the target application, and Frida documents the loopback Listen mode used by this campaign. citeturn668280search1turn668280search4
+
+The official Frida release page currently lists 17.19.0 as the latest release visible to this environment, so keeping the Gadget aligned with the installed CLI is the safer reproducibility rule. citeturn119034search2
+
+Keep `original.apk` unchanged.
