@@ -25,13 +25,35 @@ mkdir -p "$OUT_DIR"
 TMP="$(mktemp "$OUT_DIR/.gadget.XXXXXX.xz")"
 trap 'rm -f "$TMP"' EXIT
 
-BASE="https://github.com/frida/frida/releases/download/$VERSION"
 ASSET="frida-gadget-${VERSION}-android-${ARCH}.so.xz"
+BASE="https://github.com/frida/frida/releases/download/$VERSION"
 URL="$BASE/$ASSET"
 SO="$OUT_DIR/frida-gadget-${VERSION}-android-${ARCH}.so"
 
+API="https://api.github.com/repos/frida/frida/releases/tags/$VERSION"
+EXPECTED_SHA256="$(curl -fsSL -H 'Accept: application/vnd.github+json' -H 'User-Agent: ReelSec-Gadget-Fetcher' "$API" | python - "$ASSET" <<'PY'
+import json, sys
+name = sys.argv[1]
+obj = json.load(sys.stdin)
+for asset in obj.get("assets", []):
+    if asset.get("name") == name:
+        digest = asset.get("digest") or ""
+        if digest.startswith("sha256:"):
+            print(digest.split(":", 1)[1])
+            break
+raise SystemExit("GitHub release asset digest not found for " + name)
+PY
+)"
+
 echo "Fetching $URL"
 curl -fL --retry 3 --retry-delay 1 -o "$TMP" "$URL"
+DOWNLOADED_SHA256="$(sha256sum "$TMP" | awk '{print $1}')"
+[ "$DOWNLOADED_SHA256" = "$EXPECTED_SHA256" ] || {
+  echo "SHA-256 mismatch for $ASSET" >&2
+  echo "expected=$EXPECTED_SHA256" >&2
+  echo "actual=$DOWNLOADED_SHA256" >&2
+  exit 3
+}
 unxz -f "$TMP"
 mv "${TMP%.xz}" "$SO"
 chmod 0644 "$SO"
