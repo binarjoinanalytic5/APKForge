@@ -19,6 +19,33 @@ def sha256_file(path):
     return h.hexdigest()
 
 
+def validate_gadget_elf(path, abi):
+    expected = {
+        "arm64-v8a": (2, 183),
+        "armeabi-v7a": (1, 40),
+        "armeabi": (1, 40),
+        "x86": (1, 3),
+        "x86_64": (2, 62),
+    }
+    if abi not in expected:
+        raise GadgetEmbedError("unsupported Gadget ABI: %s" % abi)
+    expected_class, expected_machine = expected[abi]
+    with open(path, "rb") as fh:
+        header = fh.read(64)
+    if len(header) < 20 or header[:4] != b"\x7fELF":
+        raise GadgetEmbedError("REELSEC_FRIDA_GADGET is not an ELF shared library: %s" % path)
+    elf_class = header[4]
+    elf_data = header[5]
+    machine = int.from_bytes(header[18:20], "little")
+    if elf_data != 1:
+        raise GadgetEmbedError("unsupported Gadget endianness for %s" % abi)
+    if elf_class != expected_class or machine != expected_machine:
+        raise GadgetEmbedError(
+            "Gadget ABI mismatch: file_class=%d machine=%d expected_class=%d expected_machine=%d for %s"
+            % (elf_class, machine, expected_class, expected_machine, abi)
+        )
+
+
 def _reserve_registers(text, anchor, count=2):
     starts = list(re.finditer(r"(?m)^[ \t]*\.method\b", text[:anchor.start()]))
     if not starts:
@@ -48,6 +75,7 @@ def embed_frida_gadget(work_dir, target_smali, gadget_path, abi="arm64-v8a", por
     gadget = Path(gadget_path).expanduser().resolve()
     if not gadget.is_file():
         raise GadgetEmbedError("REELSEC_FRIDA_GADGET not found: %s" % gadget)
+    validate_gadget_elf(gadget, abi)
     try:
         target.relative_to(work)
     except ValueError:
