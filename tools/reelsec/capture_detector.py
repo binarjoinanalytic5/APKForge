@@ -1,23 +1,33 @@
 #!/usr/bin/env python3
-"""Read-only screenshot/recording protection detector for decoded APK trees.
+"""Read-only screenshot/recording protection detector for APKs and decoded trees.
 
 This module only discovers and classifies indicators. It never patches, signs,
 injects, or disables a protection mechanism.
 
-Schema: capture-detection-2
+Schema: capture-detection-3
 
-New in v2:
-- Smali data-flow heuristic for WindowManager FLAG_SECURE (0x2000 register
-  load followed by addFlags/setFlags/or-int in a bounded line window).
-- Packer / app-hardening shell detection (SecShell, Bangcle/SecNeo, Qihoo
-  Jiagu, Tencent Legu, Ali Mobisec, Ijiami, KiwiSec) from the manifest,
-  native library names, and asset names.
-- Hidden (packed) DEX payload discovery inside assets/lib/unknown containers.
-- Protected-content buffer and DRM security-level string classes.
-- Structured per-layer mechanism summary with an overall verdict.
-- Hit deduplication and sampling caps so reports stay bounded.
+Input modes:
+- decoded APK directory (apktool tree) — smali/manifest/native analysis
+- APK/ZIP file — in-memory container scan; nothing is extracted to disk
+
+New in v3:
+- APK/ZIP input mode: entry inventory, per-entry native string scan, packed
+  DEX detection inside container entries, packer detection from entry names
+  and from the binary AndroidManifest string pool (ASCII + UTF-16LE).
+- ELF dynamic symbol table (.dynsym) extraction: exported symbols are
+  classified against the same indicator table (NATIVE_SYMBOLS category).
+- Noise classification: hits inside well-known third-party SDK paths are
+  flagged noise=true (tiered UNRELATED downstream) with a reason.
+- Anti-tamper family tagging (frida/xposed/magisk/ptrace/root).
+
+New in v2 (retained):
+- Smali FLAG_SECURE data-flow heuristic (0x2000 + addFlags/setFlags window).
+- Packer / hardening shell detection from manifest, native lib and asset names.
+- Hidden (packed) DEX payload discovery.
+- Protected-content and DRM security-level string classes.
+- Per-layer mechanism summary with verdict; evidence_policy contract.
 """
-import argparse, hashlib, json, re, time
+import argparse, hashlib, json, re, struct, time, zipfile
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
@@ -50,11 +60,38 @@ PATTERNS = {
     "TAMPER_RESISTANCE": [r"\bfrida\b", r"xposed", r"magisk", r"TracerPid", r"\bptrace\b"],
 }
 
+TAMPER_FAMILIES = {
+    "frida": r"\bfrida\b",
+    "xposed": r"xposed",
+    "magisk": r"magisk",
+    "ptrace": r"\bptrace\b|TracerPid",
+    "root": r"\bsu\b|supolicy|superuser",
+}
+
+# Well-known third-party SDK paths. Hits here are usually unrelated to the
+# app's own screen-protection logic and are flagged as noise (UNRELATED
+# downstream). The flag never deletes evidence; it classifies relevance.
+NOISE_PATH_PREFIXES = (
+    "smali/com/google/firebase/", "smali/com/google/android/gms/",
+    "smali/com/google/protobuf/", "smali/okhttp3/", "smali/okio/",
+    "smali/kotlin/", "smali/kotlinx/", "smali/androidx/",
+    "smali/com/facebook/", "smali/com/appsflyer/", "smali/com/adjust/",
+    "smali/com/bumptech/", "smali/com/squareup/", "smali/com/airbnb/",
+    "com/google/firebase/", "com/google/android/gms/", "com/google/protobuf/",
+    "okhttp3/", "okio/", "kotlin/", "kotlinx/", "androidx/",
+    "com/facebook/", "com/appsflyer/", "com/adjust/",
+)
+NOISE_REASON = "third-party SDK path; indicator context presumed unrelated to app screen protection"
+NOISE_TEXT_EXTS = {".txt"}  # bundled data lists (e.g. public-suffix-list)
+
 TEXT_EXTS = {".smali", ".xml", ".txt", ".java", ".kt", ".c", ".cc", ".cpp", ".h", ".hpp"}
 SO_EXT = ".so"
 
 MAX_TEXT_HITS_PER_FILE = 200
 MAX_STRINGS_PER_PATTERN = 20
+MAX_SYMBOLS_PER_FILE = 60
+APK_ENTRY_READ_CAP = 24 * 1024 * 1024
+APK_STRINGS_SCAN_CAP = 12 * 1024 * 1024
 
 # --- Smali FLAG_SECURE data-flow heuristic ---------------------------------
 
@@ -63,18 +100,13 @@ SMALI_FLAG_USE = re.compile(r"->addFlags\(I\)V|->setFlags\(II\)V|or-int\b")
 SMALI_LOAD_WINDOW_BEFORE = 6
 SMALI_LOAD_WINDOW_AFTER = 8
 
-def scan_smali_flag_secure(path):
+def scan_smali_flag_secure_text(text):
     """Detect FLAG_SECURE even when the obfuscated Smali never names it.
 
-    Obfuscated builds load the literal 0x2000 into a register and OR it into
-    WindowManager.LayoutParams flags. A bare 0x2000 constant is common noise
-    (buffer sizes, bitmasks), so a hit requires a flag-application call in the
-    bounded window around the load.
+    A bare 0x2000 constant is common noise (buffer sizes, bitmasks), so a hit
+    requires a flag-application call in the bounded window around the load.
     """
-    try:
-        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError:
-        return []
+    lines = text.splitlines()
     hits = []
     for i, line in enumerate(lines):
         if not SMALI_FLAG_LOAD.search(line):
@@ -92,6 +124,13 @@ def scan_smali_flag_secure(path):
                 "use_sample": use.strip()[:240],
             })
     return hits
+
+def scan_smali_flag_secure(path):
+    try:
+        text = path.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return []
+    return scan_smali_flag_secure_text(text)
 
 # --- Packer / hardening shell detection -------------------------------------
 
@@ -192,6 +231,32 @@ def detect_packers(root, ctx):
             findings.append({"packer": packer, "evidence": sorted(set(evidence))})
     return findings
 
+def detect_packers_from_container(manifest_bytes, entry_names):
+    """Packer detection for APK/ZIP input: entry names + binary manifest pool."""
+    findings = []
+    manifest_lower_ascii = manifest_bytes.decode("latin1", "ignore").lower() if manifest_bytes else ""
+    manifest_lower_u16 = manifest_bytes.decode("utf-16-le", "ignore").lower() if manifest_bytes else ""
+    libs = {n.rsplit("/", 1)[-1].lower() for n in entry_names if n.startswith("lib/") and n.endswith(".so")}
+    assets = {n[len("assets/"):].lower() for n in entry_names if n.startswith("assets/")}
+    for packer, sig in PACKERS.items():
+        evidence = []
+        for prefix in sig["manifest"]:
+            if prefix in manifest_lower_ascii or prefix in manifest_lower_u16:
+                evidence.append("binary_manifest:" + prefix)
+        for lib in sig["libs"]:
+            for name in sorted(libs):
+                if lib in name:
+                    evidence.append("native_lib:" + name)
+                    break
+        for asset in sig["assets"]:
+            for name in sorted(assets):
+                if asset in name:
+                    evidence.append("asset:" + name)
+                    break
+        if evidence:
+            findings.append({"packer": packer, "evidence": sorted(set(evidence))})
+    return findings
+
 def scan_hidden_dex(root):
     found = []
     for p in sorted(root.rglob("*")):
@@ -222,7 +287,96 @@ def scan_hidden_dex(root):
             })
     return found
 
-# --- Generic scanners --------------------------------------------------------
+# --- ELF dynamic symbol extraction ------------------------------------------
+
+SHT_DYNSYM = 11
+
+def elf_dynamic_symbols(data):
+    """Parse .dynsym/.dynstr of a little/big-endian ELF32/64. Read-only.
+
+    Returns a list of {name, bind, type, defined}. Malformed input yields [].
+    """
+    try:
+        if len(data) < 64 or data[:4] != b"\x7fELF":
+            return []
+        is64 = data[4] == 2
+        en = "<" if data[5] == 1 else ">"
+        if is64:
+            e_shoff, = struct.unpack_from(en + "Q", data, 0x28)
+            e_shentsize, = struct.unpack_from(en + "H", data, 0x3A)
+            e_shnum, = struct.unpack_from(en + "H", data, 0x3C)
+        else:
+            e_shoff, = struct.unpack_from(en + "I", data, 0x20)
+            e_shentsize, = struct.unpack_from(en + "H", data, 0x2E)
+            e_shnum, = struct.unpack_from(en + "H", data, 0x30)
+        if e_shnum == 0 or e_shentsize == 0 or e_shoff + e_shnum * e_shentsize > len(data):
+            return []
+        sections = []
+        for i in range(e_shnum):
+            off = e_shoff + i * e_shentsize
+            sh_type, = struct.unpack_from(en + "I", data, off + 4)
+            if is64:
+                sh_offset, = struct.unpack_from(en + "Q", data, off + 0x18)
+                sh_size, = struct.unpack_from(en + "Q", data, off + 0x20)
+                sh_link, = struct.unpack_from(en + "I", data, off + 0x28)
+                sh_entsize, = struct.unpack_from(en + "Q", data, off + 0x38)
+            else:
+                sh_offset, = struct.unpack_from(en + "I", data, off + 0x10)
+                sh_size, = struct.unpack_from(en + "I", data, off + 0x14)
+                sh_link, = struct.unpack_from(en + "I", data, off + 0x18)
+                sh_entsize, = struct.unpack_from(en + "I", data, off + 0x24)
+            sections.append((sh_type, sh_offset, sh_size, sh_link, sh_entsize))
+        syms = []
+        for sh_type, sh_offset, sh_size, sh_link, sh_entsize in sections:
+            if sh_type != SHT_DYNSYM:
+                continue
+            if sh_link >= len(sections):
+                continue
+            str_off, str_size = sections[sh_link][1], sections[sh_link][2]
+            if str_off + str_size > len(data):
+                continue
+            entsize = sh_entsize or (24 if is64 else 16)
+            for so in range(sh_offset, sh_offset + sh_size, entsize):
+                if so + entsize > len(data):
+                    break
+                st_name, = struct.unpack_from(en + "I", data, so)
+                st_info = data[so + 4] if is64 else data[so + 12]
+                st_shndx, = struct.unpack_from(en + "H", data, so + 6 if is64 else so + 0xE)
+                if st_name == 0 or str_off + st_name >= len(data):
+                    continue
+                end = data.find(b"\0", str_off + st_name)
+                if end == -1:
+                    end = min(str_off + str_size, len(data))
+                name = data[str_off + st_name:end].decode("latin1", "ignore")
+                if name:
+                    syms.append({
+                        "name": name[:200],
+                        "bind": st_info >> 4,
+                        "type": st_info & 0xF,
+                        "defined": st_shndx != 0,
+                    })
+        return syms[:MAX_SYMBOLS_PER_FILE * 10]
+    except (struct.error, IndexError, ValueError):
+        return []
+
+def classify_symbols(symbols):
+    hits = []
+    seen = set()
+    for sym in symbols:
+        for category, pats in PATTERNS.items():
+            for pat in pats:
+                if re.search(pat, sym["name"], re.I) and sym["name"] not in seen:
+                    seen.add(sym["name"])
+                    hits.append({
+                        "category": "NATIVE_SYMBOLS",
+                        "pattern": pat,
+                        "string": sym["name"],
+                        "symbol_defined": sym["defined"],
+                        "match_category": category,
+                    })
+    return hits[:MAX_SYMBOLS_PER_FILE]
+
+# --- Generic scanners ---------------------------------------------------------
 
 def sha256(path):
     h = hashlib.sha256()
@@ -230,6 +384,23 @@ def sha256(path):
         for b in iter(lambda: f.read(1024 * 1024), b""):
             h.update(b)
     return h.hexdigest()
+
+def sha256_bytes(data):
+    return hashlib.sha256(data).hexdigest()
+
+def is_noise_path(rel_posix):
+    low = rel_posix.replace("\\", "/").lower()
+    for prefix in NOISE_PATH_PREFIXES:
+        if ("/" + prefix) in ("/" + low) or low.startswith(prefix):
+            return True
+    # smali_classesN/ variants
+    m = re.match(r"smali_classes\d+/(.+)", low)
+    if m:
+        tail = m.group(1)
+        for prefix in NOISE_PATH_PREFIXES:
+            if tail.startswith(prefix):
+                return True
+    return False
 
 def scan_text(path):
     try:
@@ -245,14 +416,16 @@ def scan_text(path):
                 line = text.count("\n", 0, m.start()) + 1
                 lines = text.splitlines()
                 sample = lines[line - 1].strip()[:240] if lines else ""
-                hits.append({"category": category, "pattern": pat, "line": line, "sample": sample})
+                hit = {"category": category, "pattern": pat, "line": line, "sample": sample}
+                if category == "TAMPER_RESISTANCE":
+                    for fam, fpat in TAMPER_FAMILIES.items():
+                        if re.search(fpat, sample, re.I):
+                            hit["family"] = fam
+                            break
+                hits.append(hit)
     return hits
 
-def scan_binary(path):
-    try:
-        data = path.read_bytes()
-    except OSError:
-        return []
+def scan_binary_bytes(data):
     # Printable strings only; avoids disassembly claims.
     strings = [m.decode("latin1", "ignore") for m in re.findall(rb"[ -~]{4,}", data)]
     hits = []
@@ -264,10 +437,142 @@ def scan_binary(path):
                 if rx.search(s):
                     seen[s[:240]] = seen.get(s[:240], 0) + 1
             for s, count in list(seen.items())[:MAX_STRINGS_PER_PATTERN]:
-                hits.append({"category": category, "pattern": pat, "string": s, "count": count})
+                hit = {"category": category, "pattern": pat, "string": s, "count": count}
+                if category == "TAMPER_RESISTANCE":
+                    for fam, fpat in TAMPER_FAMILIES.items():
+                        if re.search(fpat, s, re.I):
+                            hit["family"] = fam
+                            break
+                hits.append(hit)
     return hits
 
-# --- Summary -----------------------------------------------------------------
+def scan_binary(path):
+    try:
+        data = path.read_bytes()
+    except OSError:
+        return []
+    return scan_binary_bytes(data)
+
+def scan_so_file(path):
+    """String hits + dynamic symbol hits for a native library."""
+    try:
+        data = path.read_bytes()
+    except OSError:
+        return []
+    hits = scan_binary_bytes(data)
+    syms = elf_dynamic_symbols(data)
+    hits.extend(classify_symbols(syms))
+    return hits, len(syms)
+
+# --- APK / ZIP container mode -------------------------------------------------
+
+def scan_apk_container(path):
+    """In-memory read-only scan of an APK/ZIP. Nothing is written to disk."""
+    path = Path(path)
+    data_sha = sha256(path)
+    hits, hidden_dex, entry_inventory = [], [], {
+        "entry_count": 0, "dex_entries": [], "lib_entries": [], "asset_count": 0,
+    }
+    manifest_bytes = b""
+    entry_names = []
+    with zipfile.ZipFile(path) as zf:
+        infos = [i for i in zf.infolist() if not i.is_dir()]
+        entry_inventory["entry_count"] = len(infos)
+        entry_names = [i.filename for i in infos]
+        for info in infos:
+            name = info.filename
+            low = name.lower()
+            if low == "androidmanifest.xml":
+                try:
+                    manifest_bytes = zf.read(info)[:1024 * 1024]
+                except Exception:
+                    manifest_bytes = b""
+                continue
+            if low.endswith(".dex"):
+                entry_inventory["dex_entries"].append(name)
+                if not re.match(r"classes\d*\.dex$", name.rsplit("/", 1)[-1]):
+                    try:
+                        head = zf.read(info)[:16]
+                    except Exception:
+                        continue
+                    if HIDDEN_DEX_RE.match(head):
+                        hidden_dex.append({
+                            "file": name, "offset": 0,
+                            "magic": head[:8].decode("latin1", "ignore"),
+                            "size": info.file_size,
+                        })
+                continue
+            if low.startswith("lib/") and low.endswith(".so"):
+                entry_inventory["lib_entries"].append(name)
+                if info.file_size > APK_ENTRY_READ_CAP:
+                    continue
+                try:
+                    data = zf.read(info)
+                except Exception:
+                    continue
+                entry_hits = scan_binary_bytes(data[:APK_STRINGS_SCAN_CAP])
+                entry_hits.extend(classify_symbols(elf_dynamic_symbols(data)))
+                if entry_hits:
+                    hits.append({
+                        "file": name, "sha256": sha256_bytes(data), "hits": entry_hits,
+                    })
+                m = HIDDEN_DEX_RE.search(data[:4096])
+                if m and m.start() != 0:
+                    hidden_dex.append({
+                        "file": name, "offset": m.start(),
+                        "magic": data[m.start():m.start() + 8].decode("latin1", "ignore"),
+                        "size": info.file_size,
+                    })
+                continue
+            if low.startswith("assets/"):
+                entry_inventory["asset_count"] += 1
+                if info.file_size > APK_ENTRY_READ_CAP:
+                    continue
+                try:
+                    data = zf.read(info)
+                except Exception:
+                    continue
+                m = HIDDEN_DEX_RE.search(data)
+                if m:
+                    hidden_dex.append({
+                        "file": name, "offset": m.start(),
+                        "magic": data[m.start():m.start() + 8].decode("latin1", "ignore"),
+                        "size": info.file_size,
+                    })
+    packers = detect_packers_from_container(manifest_bytes, entry_names)
+    ctx = {"present": bool(manifest_bytes), "mode": "binary-string-pool"}
+    summary = build_summary(aggregate_categories(hits), packers, hidden_dex, 0)
+    return {
+        "schema_version": "capture-detection-3",
+        "generated_at_epoch": time.time(),
+        "root": str(path.resolve()),
+        "input_mode": "apk_container",
+        "input_sha256": data_sha,
+        "read_only": True,
+        "files_scanned": entry_inventory["entry_count"],
+        "files_with_hits": len(hits),
+        "category_counts": aggregate_categories(hits),
+        "manifest": ctx,
+        "entry_inventory": entry_inventory,
+        "packers": packers,
+        "hidden_dex": hidden_dex[:HIDDEN_DEX_MAX_REPORT],
+        "summary": summary,
+        "hits": hits,
+        "causal_proof": False,
+        "interpretation": "STATIC_INDICATORS_ONLY",
+        "evidence_policy": {"strong_indicators":["FLAG_SECURE","MEDIA_PROJECTION","SCREEN_CAPTURE_CALLBACKS","SURFACE_SECURITY"],"context_indicators":["DRM_PROTECTION","NATIVE_CAPTURE"],"causal_proof_requires":["runtime observation tied to the exact artifact","provenance matching the target code path","observable security decision or capture behavior"]},
+    }
+
+# --- Summary -------------------------------------------------------------------
+
+def aggregate_categories(hits):
+    categories = {}
+    for item in hits:
+        for h in item["hits"]:
+            if h.get("noise"):
+                continue
+            categories[h["category"]] = categories.get(h["category"], 0) + 1
+    return categories
 
 def build_summary(categories, packers, hidden_dex, heuristic_count):
     mechanisms = []
@@ -292,6 +597,7 @@ def build_summary(categories, packers, hidden_dex, heuristic_count):
     add("DRM", "DRM_PROTECTION_STRINGS", "MEDIUM", drm)
     add("NATIVE_BUFFERS", "PROTECTED_CONTENT_BUFFERS", "MEDIUM", categories.get("PROTECTED_CONTENT", 0))
     add("NATIVE_STRINGS", "CAPTURE_RELATED_STRINGS", "LOW_INDICATOR", categories.get("NATIVE_CAPTURE", 0))
+    add("NATIVE_SYMBOLS", "CAPTURE_RELATED_EXPORTED_SYMBOLS", "MEDIUM", categories.get("NATIVE_SYMBOLS", 0))
     add("TAMPER", "ANTI_INSTRUMENTATION_STRINGS", "LOW_INDICATOR", categories.get("TAMPER_RESISTANCE", 0))
     add("PACKER", "APP_HARDENING_SHELL", "HIGH_STRUCTURAL", sum(len(p["evidence"]) for p in packers))
     add("PACKER", "HIDDEN_DEX_PAYLOAD", "HIGH_STRUCTURAL", len(hidden_dex))
@@ -314,43 +620,56 @@ def build_summary(categories, packers, hidden_dex, heuristic_count):
     return {"mechanisms": mechanisms, "verdict": verdict, "note": note}
 
 def run(root):
-    root = Path(root).resolve()
+    root_p = Path(root)
+    if root_p.is_file():
+        if root_p.suffix.lower() in (".apk", ".zip"):
+            return scan_apk_container(root_p)
+        raise SystemExit("file input must be an .apk or .zip container")
+    root = root_p.expanduser().resolve()
     if not root.is_dir():
         raise SystemExit("analysis root does not exist")
     hits = []
     files_scanned = 0
     heuristic_count = 0
+    noise_hits = 0
     for p in sorted(root.rglob("*")):
         if not p.is_file():
             continue
+        rel = p.relative_to(root).as_posix()
         if p.name.startswith("REELSEC-") or p.suffix in TEXT_EXTS:
+            noise = is_noise_path(rel) or (p.suffix in NOISE_TEXT_EXTS and "unknown/" in rel)
             h = scan_text(p)
             if p.suffix == ".smali":
                 sh = scan_smali_flag_secure(p)
-                heuristic_count += len(sh)
+                if not noise:
+                    heuristic_count += len(sh)
                 h = sh + h
+            if noise:
+                for x in h:
+                    x["noise"] = True
+                    x["noise_reason"] = NOISE_REASON
+                noise_hits += len(h)
         elif p.suffix == SO_EXT:
-            h = scan_binary(p)
+            h, _symcount = scan_so_file(p)
         else:
             continue
         if h:
-            hits.append({"file": str(p.relative_to(root)), "sha256": sha256(p), "hits": h})
+            hits.append({"file": rel, "sha256": sha256(p), "hits": h})
         files_scanned += 1
-    categories = {}
-    for item in hits:
-        for h in item["hits"]:
-            categories[h["category"]] = categories.get(h["category"], 0) + 1
+    categories = aggregate_categories(hits)
     ctx = manifest_context(root)
     packers = detect_packers(root, ctx)
     hidden_dex = scan_hidden_dex(root)
     summary = build_summary(categories, packers, hidden_dex, heuristic_count)
     return {
-        "schema_version": "capture-detection-2",
+        "schema_version": "capture-detection-3",
         "generated_at_epoch": time.time(),
         "root": str(root),
+        "input_mode": "decoded_tree",
         "read_only": True,
         "files_scanned": files_scanned,
         "files_with_hits": len(hits),
+        "noise_hits": noise_hits,
         "category_counts": categories,
         "manifest": ctx,
         "packers": packers,
@@ -393,7 +712,7 @@ def to_markdown(report):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("root")
+    ap.add_argument("root", help="decoded APK directory, or an .apk/.zip file (read-only container scan)")
     ap.add_argument("-o", "--output")
     ap.add_argument("-m", "--markdown", help="also write a Markdown summary to this path")
     a = ap.parse_args()
