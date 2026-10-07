@@ -31,19 +31,7 @@ URL="$BASE/$ASSET"
 SO="$OUT_DIR/frida-gadget-${VERSION}-android-${ARCH}.so"
 
 API="https://api.github.com/repos/frida/frida/releases/tags/$VERSION"
-EXPECTED_SHA256="$(curl -fsSL -H 'Accept: application/vnd.github+json' -H 'User-Agent: ReelSec-Gadget-Fetcher' "$API" | python - "$ASSET" <<'PY'
-import json, sys
-name = sys.argv[1]
-obj = json.load(sys.stdin)
-for asset in obj.get("assets", []):
-    if asset.get("name") == name:
-        digest = asset.get("digest") or ""
-        if digest.startswith("sha256:"):
-            print(digest.split(":", 1)[1])
-            break
-raise SystemExit("GitHub release asset digest not found for " + name)
-PY
-)"
+EXPECTED_SHA256="$(ASSET="$ASSET" curl -fsSL -H 'Accept: application/vnd.github+json' -H 'User-Agent: ReelSec-Gadget-Fetcher' "$API" | python -c 'import json, os, sys; name=os.environ["ASSET"]; obj=json.load(sys.stdin); digests=[a.get("digest","") for a in obj.get("assets",[]) if a.get("name")==name]; d=digests[0] if digests else ""; print(d.split(":",1)[1] if d.startswith("sha256:") else ""); sys.exit(0 if d.startswith("sha256:") else 1)')"
 
 echo "Fetching $URL"
 curl -fL --retry 3 --retry-delay 1 -o "$TMP" "$URL"
