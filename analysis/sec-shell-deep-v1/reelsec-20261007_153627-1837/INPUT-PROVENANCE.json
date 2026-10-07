@@ -1,0 +1,13 @@
+{
+  "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_153627-1837/decoded-apk-no-res",
+  "analysis_root_kind": "repository_or_external_root",
+  "causality_proven": false,
+  "evidence_scope": "static-analysis-input-provenance",
+  "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+  "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+  "schema_version": "1.1",
+  "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_153627-1837/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so",
+  "target_relation": "WITHIN_ANALYSIS_ROOT",
+  "target_relative_path": "lib/arm64-v8a/libsaasCorePlayer.so",
+  "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4"
+}

@@ -1,0 +1,4 @@
+{
+  "error": "apksigner or REELSEC_TEST_KEYSTORE unavailable",
+  "status": "BLOCKED_OR_FAILED"
+}
