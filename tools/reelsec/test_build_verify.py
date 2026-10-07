@@ -9,6 +9,7 @@ from build_verify import (
     BuildVerifyError,
     apktool_build_command,
     verify_artifact,
+    verify_native_library_packaging,
     zipalign_command,
     zipalign_verify_command,
 )
@@ -51,6 +52,24 @@ class BuildVerifyTests(unittest.TestCase):
                 ["/usr/bin/zipalign", "-c", "-P", "16", "-v", "4",
                  str(apk.resolve())],
             )
+
+    def test_native_library_packaging_rejects_compressed_so(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            apk = Path(tmp) / "test.apk"
+            import zipfile
+            with zipfile.ZipFile(apk, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+                zf.writestr("lib/arm64-v8a/libfrida-gadget.so", b"ELF")
+            with self.assertRaises(BuildVerifyError):
+                verify_native_library_packaging(apk)
+
+    def test_native_library_packaging_accepts_stored_so(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            apk = Path(tmp) / "test.apk"
+            import zipfile
+            with zipfile.ZipFile(apk, "w", compression=zipfile.ZIP_STORED) as zf:
+                zf.writestr("lib/arm64-v8a/libfrida-gadget.so", b"ELF")
+            result = verify_native_library_packaging(apk)
+            self.assertEqual(result["status"], "NATIVE_LIBRARIES_UNCOMPRESSED")
 
     def test_verify_artifact(self):
         with tempfile.TemporaryDirectory() as tmp:
