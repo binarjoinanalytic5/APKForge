@@ -21,6 +21,7 @@ from build_verify import (
     verify_artifact,
     zipalign_command,
     zipalign_verify_command,
+    verify_native_library_packaging,
 )
 from sign_verify import artifact_identity, sign_command, verify_command, run_checked
 from adb_deploy import (
@@ -2589,6 +2590,7 @@ def main():
                         "zipalign verification failed (rc=%s): %s" %
                         (align_verify_rc, (align_verify_log or "")[-4000:])
                     )
+                native_packaging = verify_native_library_packaging(aligned_apk)
                 built_apk = aligned_apk
 
             build_verify = verify_artifact(built_apk)
@@ -2603,6 +2605,7 @@ def main():
                     "alignment_output_tail": (align_log or "")[-4000:],
                     "alignment_verify_command": align_verify_cmd,
                     "alignment_page_size_kb": 16,
+                    "native_library_packaging": native_packaging,
                 })
         except Exception as exc:
             build_verify = {"status": "FAILED", "error": str(exc)}
