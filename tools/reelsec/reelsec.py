@@ -1810,6 +1810,34 @@ def _find_package_from_apk_tools(apk):
                 return m.group(1), kind, checked
     return None, None, checked
 
+def _write_crash_comparison(output):
+    """Write CRASH-COMPARISON.json from whichever crash artifacts exist.
+
+    Read-only over the campaign outputs: loads CRASH-ARTIFACT.json
+    (instrumented side) and BASELINE-CRASH-ARTIFACT.json (original side)
+    when present and writes the independent original-vs-instrumented
+    comparison. When BOTH sides crashed the document explicitly reports
+    BOTH_CRASH and forbids attributing the crash to instrumentation.
+    Returns the comparison dict, or None when no crash evidence exists.
+    """
+    output = Path(output)
+
+    def _load(name):
+        try:
+            return json.loads((output / name).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+
+    comparison = runtime_health.build_crash_comparison(
+        _load("CRASH-ARTIFACT.json"), _load("BASELINE-CRASH-ARTIFACT.json"))
+    if comparison is None:
+        return None
+    (output / "CRASH-COMPARISON.json").write_text(
+        json.dumps(comparison, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8")
+    return comparison
+
+
 def run_baseline_runtime(output, original_apk, capabilities,
                          manifest_decoder=None, instrumented_profile=None,
                          env=None):
@@ -1891,6 +1919,7 @@ def run_baseline_runtime(output, original_apk, capabilities,
             (Path(output) / "BASELINE-CRASH-ARTIFACT.json").write_text(
                 json.dumps(health["crash_artifact"], indent=2,
                            sort_keys=True) + "\n", encoding="utf-8")
+        doc["crash_comparison"] = _write_crash_comparison(output)
         try:
             audit = safety_gate.execute_destructive(
                 _default_runner, adb, serial, safety_gate.UNINSTALL,
@@ -2148,6 +2177,10 @@ def write_runtime_probe(output, root, target, input_apk=None):
                     (output / "CRASH-ARTIFACT.json").write_text(
                         json.dumps(health["crash_artifact"], indent=2,
                                    sort_keys=True) + "\n", encoding="utf-8")
+                # Independent original-vs-instrumented comparison: explicit
+                # BOTH_CRASH when both sides have crash evidence; the crash
+                # is never attributed to instrumentation by default.
+                result["crash_comparison"] = _write_crash_comparison(output)
                 result["health"] = {
                     "startup": health["startup"],
                     "crash_class": health["crash_class"],
@@ -2333,7 +2366,8 @@ def write_runtime_probe(output, root, target, input_apk=None):
                                                   instrumented_health)
     verdict = runtime_health.runtime_verdict(
         baseline_health, instrumented_health, comparison=comparison,
-        runtime_probe=result, probe_allowed=result.get("runtime_probe_allowed"))
+        runtime_probe=result, probe_allowed=result.get("runtime_probe_allowed"),
+        crash_comparison=result.get("crash_comparison"))
     verdict["BASELINE_STATUS"] = baseline_status
     result["verdict"] = verdict
     (output / "RUNTIME-VERDICT.json").write_text(

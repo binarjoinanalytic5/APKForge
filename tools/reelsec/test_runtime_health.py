@@ -523,6 +523,132 @@ class RegressionMatrixTests(unittest.TestCase):
         self.assertNotIn("TIMEOUT", v["RUNTIME_PROOF_STATUS"])
 
 
+def _simulated_crash_artifact(label, sha, apk=None, abort_captured=False,
+                              process_seen=True):
+    """Build a crash-artifact-1 record from the device fixtures."""
+    log = SIGABRT_BASE_APK_LOG.replace(
+        "com.newleaf.app.android.victor", "com.x")
+    tomb = rh.parse_tombstone_logcat(log)
+    if abort_captured:
+        tomb["abort_message"] = "Abort message: 'simulated check failed'"
+    entries = rh.parse_exit_info(
+        EXIT_INFO_NATIVE.replace("com.newleaf.app.android.victor", "com.x"))
+    return rh.build_crash_artifact(
+        "com.x", label, entries, tomb,
+        installed_path="/data/app/~~x/com.x/base.apk",
+        artifact_apk=str(apk) if apk else None,
+        artifact_sha256=sha,
+        session={
+            "started_at_epoch": 100.0, "observe_s": 2, "launch_returncode": 0,
+            "first_process_seen_epoch": 100.4 if process_seen else None,
+            "last_process_seen_epoch": 100.9 if process_seen else None,
+            "observed_process_lifetime_ms": 500 if process_seen else 0,
+            "process_alive_at_exit": False,
+        })
+
+
+class CrashComparisonTests(unittest.TestCase):
+    """Original vs instrumented crash comparison: independent sides,
+    explicit BOTH_CRASH, never attributed to instrumentation by default."""
+
+    def test_both_crash_explicit_status_and_attribution_guard(self):
+        with tempfile.TemporaryDirectory() as td:
+            apk = _craft_apk_with_offset(Path(td) / "a.apk")
+            ins = _simulated_crash_artifact("instrumented", "f" * 64, apk)
+            orig = _simulated_crash_artifact("original", "e" * 64, apk)
+        cmp = rh.build_crash_comparison(ins, orig)
+        self.assertEqual(cmp["status"], "BOTH_CRASH")
+        self.assertEqual(cmp["schema_version"], "crash-comparison-1")
+        self.assertEqual(cmp["attribution"]["instrumentation_regression"],
+                         "NOT_ESTABLISHED")
+        self.assertIn("MUST NOT be attributed to instrumentation",
+                      cmp["attribution"]["guard"])
+        q = cmp["questions"]
+        self.assertTrue(q["both_sigabrt"])
+        self.assertTrue(q["fatal_signals"]["match"])
+        self.assertTrue(q["fault_location"]["match"])
+        self.assertEqual(q["fault_location"]["instrumented"],
+                         "base.apk+00031e10")
+        self.assertFalse(q["abort_message"]["captured_either"])
+        self.assertTrue(
+            any("MUST NOT be labeled anti-tamper" in n
+                for n in cmp["integrity_notes"]))
+        # per-side bindings stay independent (never merged)
+        self.assertEqual(cmp["instrumented"]["artifact_sha256"], "f" * 64)
+        self.assertEqual(cmp["original"]["artifact_sha256"], "e" * 64)
+        self.assertEqual(cmp["instrumented"]["uids"], [10285, 9510285])
+        self.assertEqual(cmp["instrumented"]["users"], [0, 95])
+        self.assertEqual(ins["crash_instances"][0]["package"], "com.x")
+        self.assertEqual(cmp["source_documents"]["instrumented"],
+                         "CRASH-ARTIFACT.json")
+        self.assertEqual(cmp["source_documents"]["original"],
+                         "BASELINE-CRASH-ARTIFACT.json")
+
+    def test_instrumented_only_crash_is_candidate_not_proven(self):
+        ins = _simulated_crash_artifact("instrumented", "f" * 64)
+        cmp = rh.build_crash_comparison(ins, None)
+        self.assertEqual(cmp["status"], "INSTRUMENTED_ONLY_CRASH")
+        self.assertEqual(cmp["attribution"]["instrumentation_regression"],
+                         "SUSPECTED_NOT_PROVEN")
+        self.assertIsNone(cmp["original"])
+
+    def test_original_only_crash_not_caused_by_instrumentation(self):
+        orig = _simulated_crash_artifact("original", "e" * 64)
+        cmp = rh.build_crash_comparison(None, orig)
+        self.assertEqual(cmp["status"], "ORIGINAL_ONLY_CRASH")
+        self.assertIn("not caused by instrumentation",
+                      cmp["attribution"]["guard"])
+        self.assertIsNone(cmp["instrumented"])
+
+    def test_no_crash_evidence_returns_none(self):
+        self.assertIsNone(rh.build_crash_comparison(None, None))
+
+    def test_offsets_resolved_independently_per_artifact(self):
+        """Same pc may map into DIFFERENT entries of two different builds;
+        resolution is per-artifact and identity is never assumed."""
+        with tempfile.TemporaryDirectory() as td:
+            apk_a = _craft_apk_with_offset(Path(td) / "a.apk")
+            apk_b = _craft_apk_with_offset(
+                Path(td) / "b.apk", name="lib/arm64-v8a/libother.so")
+            ins = _simulated_crash_artifact("instrumented", "f" * 64, apk_a)
+            orig = _simulated_crash_artifact("original", "e" * 64, apk_b)
+        cmp = rh.build_crash_comparison(ins, orig)
+        off = cmp["questions"]["apk_offset_resolution"]
+        self.assertEqual(off["instrumented"]["entry"], PACKED_ENTRY)
+        self.assertEqual(off["original"]["entry"],
+                         "lib/arm64-v8a/libother.so")
+        self.assertFalse(off["resolved_identically"])
+        # same pc string, but independently resolved files
+        self.assertTrue(cmp["questions"]["fault_location"]["match"])
+
+    def test_abort_message_captured_on_one_side_only(self):
+        ins = _simulated_crash_artifact("instrumented", "f" * 64)
+        orig = _simulated_crash_artifact("original", "e" * 64,
+                                         abort_captured=True)
+        cmp = rh.build_crash_comparison(ins, orig)
+        am = cmp["questions"]["abort_message"]
+        self.assertFalse(am["instrumented_captured"])
+        self.assertTrue(am["original_captured"])
+        self.assertTrue(am["captured_either"])
+        # labeling guard only applies when NO side captured a message
+        self.assertFalse(
+            any("MUST NOT be labeled anti-tamper" in n
+                for n in cmp["integrity_notes"]))
+
+    def test_startup_stage_compared_not_assumed(self):
+        ins = _simulated_crash_artifact("instrumented", "f" * 64,
+                                        process_seen=True)
+        orig = _simulated_crash_artifact("original", "e" * 64,
+                                         process_seen=False)
+        cmp = rh.build_crash_comparison(ins, orig)
+        stage = cmp["questions"]["startup_stage"]
+        self.assertEqual(stage["instrumented"],
+                         "CRASHED_AFTER_PROCESS_OBSERVED")
+        self.assertEqual(stage["original"],
+                         "CRASHED_BEFORE_PROCESS_OBSERVED")
+        self.assertFalse(stage["match"])
+
+
 class _ProbeHarness(unittest.TestCase):
     """Integration: write_runtime_probe with a faked device."""
 
@@ -668,6 +794,35 @@ class _ProbeHarness(unittest.TestCase):
                             for n in art["integrity_notes"]))
         self.assertIn("started_at_epoch", art["session"])
 
+    def test_probe_writes_crash_comparison_when_both_sides_crash(self):
+        """Campaign path: baseline artifact already on disk + instrumented
+        crash => CRASH-COMPARISON.json explicitly reports BOTH_CRASH and the
+        verdict surfaces it."""
+        apk = _craft_apk_with_offset(self.out / "instrumented-signed.apk")
+        (self.out / "ADB-DEPLOY.json").write_text(json.dumps({
+            "artifact": str(apk), "artifact_sha256": "f" * 64}),
+            encoding="utf-8")
+        (self.out / "BASELINE-CRASH-ARTIFACT.json").write_text(
+            json.dumps(_simulated_crash_artifact("original", "e" * 64,
+                                                 apk)),
+            encoding="utf-8")
+        exit_info = EXIT_INFO_NATIVE.replace(
+            "com.newleaf.app.android.victor", "com.x")
+        log = SIGABRT_BASE_APK_LOG.replace(
+            "com.newleaf.app.android.victor", "com.x")
+        result = self._run_probe(self._runner(exit_post=exit_info,
+                                              crash_log=log))
+        self.assertEqual(result["status"], "RUNTIME_ARTIFACT_CRASH")
+        cmp_doc = json.loads((self.out / "CRASH-COMPARISON.json").read_text())
+        self.assertEqual(cmp_doc["status"], "BOTH_CRASH")
+        self.assertTrue(cmp_doc["questions"]["both_sigabrt"])
+        self.assertEqual(cmp_doc["source_documents"]["instrumented"],
+                         "CRASH-ARTIFACT.json")
+        self.assertEqual(cmp_doc["source_documents"]["original"],
+                         "BASELINE-CRASH-ARTIFACT.json")
+        verdict = json.loads((self.out / "RUNTIME-VERDICT.json").read_text())
+        self.assertEqual(verdict["CRASH_COMPARISON"], "BOTH_CRASH")
+
 
 class BaselineCrashArtifactTests(unittest.TestCase):
     """BASELINE-CRASH-ARTIFACT.json must be produced by the gated baseline
@@ -784,6 +939,14 @@ class BaselineCrashArtifactTests(unittest.TestCase):
             for c in assess_cmds:
                 self.assertNotIn("uninstall", c)
                 self.assertNotIn("pm clear", c)
+            # baseline round also emits the independent comparison document
+            self.assertEqual(doc["crash_comparison"]["status"],
+                             "ORIGINAL_ONLY_CRASH")
+            cmp_doc = json.loads(
+                (out / "CRASH-COMPARISON.json").read_text())
+            self.assertEqual(cmp_doc["status"], "ORIGINAL_ONLY_CRASH")
+            self.assertIn("not caused by instrumentation",
+                          cmp_doc["attribution"]["guard"])
 
 
 class EvidenceGateTests(unittest.TestCase):
