@@ -1,0 +1,4 @@
+{
+  "error": "REELSEC_FRIDA_GADGET not found: /data/data/com.termux/files/home/path/to/frida-gadget-android-arm64.so",
+  "status": "FAILED"
+}

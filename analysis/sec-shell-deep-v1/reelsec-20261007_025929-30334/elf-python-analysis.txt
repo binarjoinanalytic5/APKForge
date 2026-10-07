@@ -1,0 +1,7 @@
+ReelSec raw ELF analysis
+ELF=/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/sec-shell-deep-v1/reelsec-20261007_025929-30334/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so
+SHA256=a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4
+0x717e60 file offset=7421536
+0x717f68 file offset=7421800
+0x717f68 RAW_BYTES=10 a5 27 00 00 00 00 00
+0x717f68 FUNCTION_POINTER=0x27a510
