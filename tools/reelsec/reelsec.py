@@ -16,6 +16,7 @@ from apktool_backend import ApktoolBackendError, select_apktool_backend, decode_
 from instrumentation_backend import plan_secshell_injection, find_secshell_application
 from instrumented_copy import (
     finalize_no_gadget_manifest,
+    finalize_repack_only_manifest,
     prepare_instrumented_copy,
     apply_text_probe,
     resolve_instrumentation_mode,
@@ -62,6 +63,7 @@ from adb_deploy import (
 )
 import runtime_probe
 import runtime_health
+import isolation
 import safety_gate
 import behavior_capture
 from runtime_capture import capture_snapshot, bind_artifact
@@ -1950,6 +1952,10 @@ def classify_campaign_exit(output, final_status):
                             "CONTROL_HEALTHY_INSTRUMENTED_CRASH",
                             "CONTROL_ONLY_CRASH",
                             "CONTROL_HEALTHY_NO_INSTRUMENTED_EVIDENCE",
+                            "CONTROL_UNVERIFIED_INSTRUMENTED_CRASH",
+                            "CONTROL_UNVERIFIED_BOTH_CRASH",
+                            "CONTROL_UNVERIFIED_ONLY_CRASH",
+                            "CONTROL_UNVERIFIED_NO_INSTRUMENTED_EVIDENCE",
                             "BOTH_CRASH", "INSTRUMENTED_ONLY_CRASH",
                             "ORIGINAL_ONLY_CRASH")
     comparison_done = (common_cause.get("status") in complete_comparisons
@@ -1972,18 +1978,26 @@ def classify_campaign_exit(output, final_status):
 def _baseline_skip_reason(working_control):
     """Reason to skip the install-based baseline round, or None.
 
-    When the currently installed original was observed IN PLACE as the
-    working control, the comparison already has its original side and
-    re-installing a signed copy over the installed control is neither
-    needed nor performed (no-reinstall mandate).
+    The round is skipped ONLY when the currently installed build was
+    observed in place as the working control AND its bytes were
+    hash-bound to the local original reference: only then does the
+    comparison already have a valid original side. An observed-but-
+    unverified control (a leftover instrumented build of the same
+    package, typically) is NOT a baseline — the install-based baseline
+    round must run to establish the original side with a test-signed
+    original via install -r.
     """
     status = (working_control or {}).get("status")
     if status in (runtime_health.CONTROL_ASSESSED,
                   runtime_health.CONTROL_CRASHED):
-        return ("the currently installed original was observed in place as "
-                "the working control (WORKING-CONTROL.json, status=%s); "
-                "re-installing a signed copy over it is neither needed nor "
-                "performed" % status)
+        if runtime_health.control_identity_verified(
+                working_control) is not True:
+            return None
+        return ("the installed original was observed in place as the "
+                "working control (WORKING-CONTROL.json, status=%s) with "
+                "its bytes hash-bound to the local original reference "
+                "(identity VERIFIED); re-installing a signed copy over "
+                "it is neither needed nor performed" % status)
     return None
 
 
@@ -2134,7 +2148,8 @@ def run_baseline_runtime(output, original_apk, capabilities,
     apksigner = ((capabilities or {}).get("tools", {}).get("apksigner", {}).get("path")
                  or shutil.which("apksigner"))
     keystore = env.get("REELSEC_TEST_KEYSTORE")
-    alias = env.get("REELSEC_TEST_KEYSTORE_ALIAS", "reelsec-test")
+    alias = (env.get("REELSEC_TEST_KEY_ALIAS")
+             or env.get("REELSEC_TEST_KEYSTORE_ALIAS", "reelsec-test"))
     if not adb or not apksigner or not keystore:
         doc["reason"] = ("adb/apksigner/REELSEC_TEST_KEYSTORE unavailable; cannot "
                          "sign a baseline copy with the test key")
@@ -3135,10 +3150,473 @@ def _progress_run(state, output, index, name, fn):
         raise
 
 
+# --- A/B/C differential-isolation matrix --------------------------------------
+#
+# The matrix separates the remaining crash deltas after Gadget was excluded:
+# arm A (test-signed original, no rebuild), arm B (rebuild + re-sign, zero
+# mutations), arm C (rebuild + LOG_I_PROBE, no Gadget). Every arm installs
+# with `adb install -r` only — the matrix NEVER uninstalls, NEVER
+# clears data, and NEVER consults destructive authorization: an
+# incompatible package slot blocks that arm instead. Arms that fail to
+# install or to verify post-install identity are recorded BLOCKED and
+# never assessed; the decision degrades to INCONCLUSIVE, never a guess.
+
+
+def _isolation_build_tree(apktool_backend, work_tree, unsigned_apk,
+                          capabilities):
+    """Apktool build + align for one isolation arm (B/C)."""
+    build_cmd = apktool_build_command(apktool_backend, work_tree,
+                                      unsigned_apk)
+    build_rc, build_log = run(build_cmd, cwd=ROOT, timeout=300)
+    if build_rc != 0:
+        raise RuntimeError(
+            "Apktool build failed (rc=%s): %s"
+            % (build_rc, (build_log or "")[-2000:]))
+    built_apk = Path(unsigned_apk)
+    zipalign = capabilities.get("tools", {}).get("zipalign", {}).get("path")
+    align_plan = plan_artifact_alignment(
+        gadget_enabled=False, zipalign_available=bool(zipalign))
+    align_cmd = None
+    if align_plan["align"]:
+        aligned_apk = Path(unsigned_apk).parent / (
+            Path(unsigned_apk).stem + "-aligned.apk")
+        align_cmd = zipalign_command(zipalign, built_apk, aligned_apk,
+                                     page_size_kb=16)
+        align_rc, align_log = run(align_cmd, cwd=ROOT, timeout=300)
+        if align_rc != 0:
+            raise RuntimeError(
+                "zipalign failed (rc=%s): %s"
+                % (align_rc, (align_log or "")[-2000:]))
+        verify_rc, verify_log = run(
+            zipalign_verify_command(zipalign, aligned_apk, page_size_kb=16),
+            cwd=ROOT, timeout=120)
+        if verify_rc != 0:
+            raise RuntimeError(
+                "zipalign verification failed (rc=%s): %s"
+                % (verify_rc, (verify_log or "")[-2000:]))
+        verify_native_library_packaging(aligned_apk)
+        built_apk = aligned_apk
+    built = verify_artifact(built_apk)
+    return {"path": built["path"], "sha256": built["sha256"],
+            "size": built["size"], "build_command": build_cmd,
+            "align_command": align_cmd, "alignment_plan": align_plan,
+            "build_output_tail": (build_log or "")[-2000:]}
+
+
+def _isolation_sign_artifact(unsigned_apk, signed_apk, *, apksigner,
+                             keystore, alias, openssl, env):
+    """Preflight + sign + verify + certificate extraction for one arm."""
+    preflight = signing_preflight(
+        apksigner=apksigner, keystore=keystore, alias=alias,
+        openssl=openssl, runner=run, env=env)
+    if preflight["status"] != "READY":
+        raise RuntimeError(
+            "signing preflight not ready (%s)"
+            % ",".join(preflight["failed"]))
+    cmd = sign_command(apksigner, unsigned_apk, signed_apk, keystore,
+                       alias)
+    run_checked(cmd)
+    run_checked(verify_command(apksigner, signed_apk))
+    certs_output = run_checked(
+        verify_certs_command(apksigner, signed_apk))
+    certs = parse_apksigner_certificates(certs_output)
+    if not certs:
+        raise RuntimeError(
+            "signed artifact has no recorded signer certificate")
+    identity = artifact_identity(unsigned_apk, signed_apk)
+    return {"signed_sha256": identity["signed_sha256"],
+            "certificate_sha256": certs[0],
+            "signed_path": identity["signed_path"],
+            "sign_command": cmd, "preflight": preflight}
+
+
+def _isolation_install_and_assess(*, arm, signed_apk, signed_sha256,
+                                  certificate_sha256, adb, serial,
+                                  package, apksigner, version_code,
+                                  observe_s):
+    """One arm's device phase: compat gate, install -r, identity, assess.
+
+    Returns (install, identity, health, compatibility). An incompatible
+    package slot blocks the arm — uninstall is deny-by-default and the
+    matrix never attempts it. A non-MATCH identity is never assessed.
+    """
+    install = {"success": False, "stage": "install", "mode": "INSTALL_R",
+               "output_tail": ""}
+    compat = check_install_compatibility(
+        adb=adb, serial=serial, package=package,
+        artifact_cert_sha256=certificate_sha256,
+        artifact_version_code=version_code, apksigner=apksigner,
+        runner=_default_runner)
+    if not compat["compatible"]:
+        install["output_tail"] = (
+            "install compatibility gate (%s): %s; uninstall is "
+            "deny-by-default and was NOT attempted"
+            % (compat["reason_code"], compat["reason"]))
+        return (install,
+                {"identity": "UNVERIFIED",
+                 "reason": "install refused before attempt"},
+                None, compat)
+    rc, out = run(install_command(adb, serial, signed_apk), timeout=300)
+    install["output_tail"] = (out or "")[-2000:]
+    if not (rc == 0 and "Success" in (out or "")):
+        install["output_tail"] = "install failed: %s" % (
+            (out or "")[-1000:] or "rc=%s" % rc)
+        return (install,
+                {"identity": "UNVERIFIED", "reason": "install failed"},
+                None, compat)
+    install["success"] = True
+    identity = verify_installed_artifact_identity(
+        adb=adb, serial=serial, package=package,
+        expected_cert_sha256=certificate_sha256,
+        expected_sha256=signed_sha256, apksigner=apksigner,
+        runner=_default_runner)
+    if identity["identity"] != "MATCH":
+        return install, identity, None, compat
+    health = runtime_health.assess_startup(
+        run, adb, serial, package, label="isolation_arm_%s" % arm.lower(),
+        observe_s=observe_s, artifact_apk=str(signed_apk),
+        artifact_sha256=signed_sha256)
+    return install, identity, health, compat
+
+
+def run_isolation_matrix(output, input_apk, capabilities,
+                         decoded_inventory, instrumentation_plan,
+                         apktool_backend, env=None):
+    """Run the A/B/C differential-isolation matrix.
+
+    Arms run in plan order (default A, B, C), each replacing the previous
+    via install -r under the same isolated test key. Every arm writes
+    ISOLATION-ARM-<X>.json (plus ISOLATION-ARM-<X>-HEALTH.json when
+    assessed); ISOLATION-DECISION.json carries the causal decision.
+    Returns {"plan", "arms", "decision"}.
+    """
+    env = env if env is not None else os.environ
+    output = Path(output)
+    # Fail closed BEFORE touching anything: unknown arms or Gadget refuse
+    # the whole matrix.
+    plan = isolation.plan_matrix(env)
+    progress = _progress_start(output)
+    _progress_stage(progress, output, 1, "Isolation bootstrap", "RUNNING",
+                    "keystore, device, and arm plan")
+    plan_doc = {"schema_version": "isolation-plan-1", "plan": plan,
+                "input_apk": str(input_apk), "keystore": None,
+                "device": None, "package": None, "error": None}
+    (output / "ISOLATION-PLAN.json").write_text(
+        json.dumps(plan_doc, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8")
+
+    def _blocked_arms(reason, stage):
+        blocked = {}
+        for letter in plan["arms"]:
+            record = isolation.build_arm_record(
+                arm=letter, artifact_sha256=None,
+                certificate_sha256=None,
+                install={"success": False, "stage": stage,
+                         "output_tail": reason},
+                identity={"identity": "UNVERIFIED",
+                          "reason": "arm never installed"},
+                assess=None)
+            (output / ("ISOLATION-ARM-%s.json" % letter)).write_text(
+                json.dumps({"record": record, "error": reason}, indent=2,
+                           sort_keys=True) + "\n", encoding="utf-8")
+            blocked[letter] = record
+        return blocked
+
+    def _finish(arms):
+        decision = isolation.decide_isolation(arms)
+        decision["matrix"] = {
+            "arms": plan["arms"], "package": plan_doc["package"],
+            "serial": (plan_doc["device"] or {}).get("serial"),
+            "observe_s": plan_doc.get("observe_s"),
+        }
+        (output / "ISOLATION-DECISION.json").write_text(
+            json.dumps(decision, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8")
+        _progress_stage(progress, output, 5, "Isolation decision", "PASS",
+                        decision["status"])
+        return {"plan": plan, "arms": arms, "decision": decision}
+
+    try:
+        keystore_plan = plan_test_keystore(env, repo_root=ROOT)
+        if keystore_plan["action"] == "BOOTSTRAP":
+            keystore_record = bootstrap_test_keystore(
+                keystore_plan["keystore"], alias=keystore_plan["alias"],
+                openssl=(capabilities.get("tools", {}).get(
+                    "openssl", {}).get("path")),
+                runner=run, env=env)
+        else:
+            keystore_record = dict(keystore_plan)
+            keystore_record["reused"] = False
+        keystore = keystore_record["keystore"]
+        alias = keystore_record["alias"]
+        env.setdefault("REELSEC_TEST_KEYSTORE", keystore)
+        env.setdefault("REELSEC_TEST_KEY_ALIAS", alias)
+        plan_doc["keystore"] = {
+            "path": keystore, "alias": alias,
+            "bootstrapped": bool(keystore_record.get("bootstrapped")),
+            "reused": bool(keystore_record.get("reused")),
+            "backend": keystore_record.get("backend"),
+        }
+    except Exception as exc:
+        plan_doc["error"] = "keystore bootstrap failed: %s" % exc
+        (output / "ISOLATION-PLAN.json").write_text(
+            json.dumps(plan_doc, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8")
+        return _finish(_blocked_arms(plan_doc["error"], "keystore"))
+
+    adb = capabilities.get("tools", {}).get("adb", {}).get("path")
+    apksigner = capabilities.get("tools", {}).get(
+        "apksigner", {}).get("path")
+    openssl = capabilities.get("tools", {}).get(
+        "openssl", {}).get("path")
+    package = env.get("REELSEC_TEST_PACKAGE")
+    serial = None
+    try:
+        if not adb or not apksigner or not keystore:
+            raise RuntimeError(
+                "adb/apksigner/REELSEC_TEST_KEYSTORE unavailable; "
+                "the matrix cannot sign or install any arm")
+        if not package:
+            raise RuntimeError(
+                "REELSEC_TEST_PACKAGE unresolved; refusing to touch "
+                "any package")
+        resolution = resolve_test_device(
+            adb, env.get("REELSEC_TEST_DEVICE"))
+        serial = resolution["serial"]
+        _rc, state_out = run(device_check_command(adb, serial),
+                             timeout=30)
+        if (_rc != 0) or (state_out or "").strip() != "device":
+            raise RuntimeError(
+                "resolved test device is not in adb device state")
+        plan_doc["device"] = {
+            "serial": serial,
+            "requested_serial": resolution.get("requested_serial"),
+            "resolution": resolution.get("resolution"),
+            "online_devices": resolution.get("online_devices", []),
+        }
+        plan_doc["package"] = package
+    except Exception as exc:
+        plan_doc["error"] = str(exc)
+        (output / "ISOLATION-PLAN.json").write_text(
+            json.dumps(plan_doc, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8")
+        return _finish(_blocked_arms(plan_doc["error"], "device"))
+    (output / "ISOLATION-PLAN.json").write_text(
+        json.dumps(plan_doc, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8")
+    _progress_stage(progress, output, 1, "Isolation bootstrap", "PASS",
+                    "arms=%s package=%s serial=%s"
+                    % (",".join(plan["arms"]), package, serial))
+
+    decoded_ready = (decoded_inventory or {}).get("status") == "READY"
+    decoded_root = (decoded_inventory or {}).get("root")
+    plan_ready = (instrumentation_plan or {}).get("status") == "READY"
+    version_code = _decoded_manifest_version_code(decoded_root)
+    observe_s = max(
+        2, _positive_int_env("REELSEC_HEALTH_WINDOW_MS", 8000) // 1000)
+    plan_doc["observe_s"] = observe_s
+    arms = {}
+    for index, arm in enumerate(plan["arms"]):
+        stage_no = 2 + index
+        _progress_stage(progress, output, stage_no,
+                        "Isolation arm %s" % arm, "RUNNING",
+                        isolation.ARM_DESCRIPTIONS[arm])
+        try:
+            if arm == isolation.ARM_A:
+                if not input_apk or not Path(input_apk).is_file():
+                    raise RuntimeError(
+                        "arm A requires the untouched original APK")
+                signed_apk = output / "isolation-A-signed.apk"
+                sign = _isolation_sign_artifact(
+                    Path(input_apk), signed_apk, apksigner=apksigner,
+                    keystore=keystore, alias=alias, openssl=openssl,
+                    env=env)
+                manifest = {"arm": "A", "mutations": [],
+                            "note": "original APK signed directly; no "
+                                    "rebuild, no decoded tree involved"}
+            else:
+                if not decoded_ready:
+                    raise RuntimeError(
+                        "arm %s requires a READY decoded tree (status=%s)"
+                        % (arm, (decoded_inventory or {}).get("status")))
+                tree = output / ("isolation-arm-%s" % arm.lower())
+                copy_manifest = prepare_instrumented_copy(
+                    decoded_root, tree)
+                if arm == isolation.ARM_B:
+                    manifest = finalize_repack_only_manifest(tree)
+                else:
+                    if not plan_ready:
+                        raise RuntimeError(
+                            "arm C requires a READY instrumentation "
+                            "plan (probe anchor unavailable)")
+                    source_root = Path(decoded_root).resolve()
+                    source_target = Path(
+                        instrumentation_plan["target"]).resolve()
+                    copied_target = (
+                        tree / source_target.relative_to(source_root))
+                    apply_text_probe(tree, copied_target)
+                    manifest = finalize_no_gadget_manifest(tree)
+                manifest = dict(manifest)
+                manifest["instrumentation_target"] = (
+                    str(copied_target)
+                    if arm == isolation.ARM_C else None)
+                built = _isolation_build_tree(
+                    apktool_backend, tree,
+                    output / ("isolation-%s-unsigned.apk" % arm),
+                    capabilities)
+                signed_apk = output / ("isolation-%s-signed.apk" % arm)
+                sign = _isolation_sign_artifact(
+                    Path(built["path"]), signed_apk, apksigner=apksigner,
+                    keystore=keystore, alias=alias, openssl=openssl,
+                    env=env)
+            install, identity, health, compat = \
+                _isolation_install_and_assess(
+                    arm=arm, signed_apk=Path(sign["signed_path"]),
+                    signed_sha256=sign["signed_sha256"],
+                    certificate_sha256=sign["certificate_sha256"],
+                    adb=adb, serial=serial, package=package,
+                    apksigner=apksigner, version_code=version_code,
+                    observe_s=observe_s)
+            record = isolation.build_arm_record(
+                arm=arm, artifact_sha256=sign["signed_sha256"],
+                certificate_sha256=sign["certificate_sha256"],
+                install=install, identity=identity, assess=health)
+            doc = {"record": record, "arm": arm, "sign": {
+                       "certificate_sha256": sign["certificate_sha256"],
+                       "signed_sha256": sign["signed_sha256"],
+                       "signed_path": sign["signed_path"],
+                       "sign_command": sign["sign_command"],
+                       "preflight": sign["preflight"]},
+                   "compatibility": compat, "manifest": manifest,
+                   "observe_s": observe_s}
+            if health is not None:
+                (output / ("ISOLATION-ARM-%s-HEALTH.json" % arm)
+                 ).write_text(
+                    json.dumps(health, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8")
+        except Exception as exc:
+            record = isolation.build_arm_record(
+                arm=arm, artifact_sha256=None, certificate_sha256=None,
+                install={"success": False, "stage": "setup",
+                         "output_tail": "%s: %s"
+                         % (type(exc).__name__, str(exc)[:1000])},
+                identity={"identity": "UNVERIFIED",
+                          "reason": "arm never installed"},
+                assess=None)
+            doc = {"record": record, "arm": arm,
+                   "error": str(exc)[:1000]}
+        (output / ("ISOLATION-ARM-%s.json" % arm)).write_text(
+            json.dumps(doc, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8")
+        arms[arm] = record
+        _progress_stage(
+            progress, output, stage_no, "Isolation arm %s" % arm,
+            "PASS" if record["status"] in ("HEALTHY", "CRASHED")
+            else "BLOCKED", record["status"])
+    return _finish(arms)
+
+
+def cmd_isolate(args):
+    """Standalone entry for the A/B/C isolation matrix."""
+    input_apk = Path(args.apk).expanduser().resolve()
+    if not input_apk.is_file():
+        raise SystemExit("APK not found: %s" % input_apk)
+    input_apk_sha256 = sha256_file(input_apk)
+    if args.output:
+        output = Path(args.output).expanduser()
+    else:
+        output = (ROOT / "analysis" / "isolation" /
+                  ("isolation-" + time.strftime("%Y%m%d_%H%M%S") + "-"
+                   + str(os.getpid())))
+    output.mkdir(parents=True, exist_ok=True)
+    capabilities = write_capability_matrix(output, ROOT)
+    try:
+        apktool_backend = select_apktool_backend(capabilities)
+    except ApktoolBackendError as exc:
+        apktool_backend = {
+            "name": None, "backend": None, "path": None,
+            "version": None, "status": "BLOCKED", "reason": str(exc),
+        }
+    (output / "APKTOOL-BACKEND.json").write_text(
+        json.dumps(apktool_backend, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8")
+    decode_result = None
+    if apktool_backend.get("status") == "SELECTED":
+        decoded_dir = output / "decoded-apk"
+        decode_result = run_apktool_decode(
+            apktool_backend, input_apk, decoded_dir,
+            timeout=APKTOOL_FULL_DECODE_TIMEOUT)
+        if decode_result.get("status") in ("FAILED", "FAILED_VALIDATION",
+                                           "FAILED_OUTPUT_EXISTS"):
+            raw_dir = output / "raw-apk"
+            raw_result = run_raw_apk_extract(input_apk, raw_dir)
+            decode_result["raw_fallback"] = raw_result
+            if raw_result.get("status") == "RAW_EXTRACTED":
+                decode_result["status"] = "DECODE_FAILED_RAW_FALLBACK"
+    else:
+        decode_result = {
+            "status": "BLOCKED",
+            "reason": apktool_backend.get("reason", "No usable Apktool backend")}
+    (output / "APKTOOL-DECODE.json").write_text(
+        json.dumps(decode_result, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8")
+    decoded_inventory = None
+    if decode_result and decode_result.get("status") in ("DECODED",
+                                                         "DECODED_NO_RES"):
+        decoded_inventory = inventory_decoded_apk(
+            decode_result["output_dir"])
+        if decoded_inventory and decode_result.get("status") == \
+                "DECODED_NO_RES":
+            decoded_inventory["decode_mode"] = "APKTOOL_NO_RES"
+            decoded_inventory["resources_decoded"] = False
+    elif decode_result and decode_result.get("status") == \
+            "DECODE_FAILED_RAW_FALLBACK":
+        decoded_inventory = inventory_decoded_apk(
+            decode_result["raw_fallback"]["output_dir"])
+    else:
+        decoded_inventory = {"status": "BLOCKED",
+                             "reason": "no usable APK analysis root"}
+    (output / "DECODED-INPUT-INVENTORY.json").write_text(
+        json.dumps(decoded_inventory, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8")
+    package_resolution = resolve_test_package(
+        os.environ,
+        decoded_root=(decoded_inventory or {}).get("root"),
+        input_apk=str(input_apk))
+    if package_resolution["package"] and not os.environ.get(
+            "REELSEC_TEST_PACKAGE"):
+        os.environ["REELSEC_TEST_PACKAGE"] = package_resolution["package"]
+        package_resolution["env_filled"] = True
+    (output / "PACKAGE-RESOLUTION.json").write_text(
+        json.dumps(package_resolution, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8")
+    instrumentation_plan = plan_instrumentation(decoded_inventory, output)
+    result = run_isolation_matrix(
+        output, input_apk, capabilities, decoded_inventory,
+        instrumentation_plan, apktool_backend)
+    decision = result["decision"]
+    print(json.dumps({
+        "ISOLATION_STATUS": decision["status"],
+        "ISOLATION_REASON": decision["reason"],
+        "ISOLATION_REGRESSION": decision["regression"],
+        "ISOLATION_ARMS": decision["arm_states"],
+        "ISOLATION_DECISION": str(output / "ISOLATION-DECISION.json"),
+    }, indent=2, sort_keys=True))
+    print("ISOLATION_STATUS=" + decision["status"])
+    print("ISOLATION_DECISION=" + str(output / "ISOLATION-DECISION.json"))
+    print("INPUT_APK_SHA256=" + input_apk_sha256)
+    if decision["status"] == isolation.INCONCLUSIVE:
+        print("FINAL_STATUS=INCOMPLETE")
+        return 3
+    print("FINAL_STATUS=DECIDED")
+    return 0
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("command", nargs="?", choices=("campaign", "doctor",
-                                                       "platform"))
+                                                       "platform",
+                                                       "isolate"))
     parser.add_argument("apk", nargs="?")
     parser.add_argument("--elf")
     parser.add_argument("--output")
@@ -3169,7 +3647,13 @@ def main():
         apk = Path(args.apk).expanduser().resolve()
         if not apk.is_file():
             parser.error("APK not found: %s" % apk)
-        result = orchestrator.run_platform(apk, ROOT)
+        # Presence of REELSEC_ISOLATION_MATRIX switches the platform
+        # pipeline from a full campaign to the A/B/C differential-
+        # isolation matrix (the value selects the arms, default ABC).
+        if (os.environ.get("REELSEC_ISOLATION_MATRIX") or "").strip():
+            result = orchestrator.run_isolation(apk, ROOT)
+        else:
+            result = orchestrator.run_platform(apk, ROOT)
         print(json.dumps({
             "status": result["status"],
             "campaign_status": result.get("campaign_status"),
@@ -3180,6 +3664,10 @@ def main():
             "PUBLISH_COMMIT": (result.get("publish") or {}).get("commit"),
         }, indent=2, sort_keys=True))
         return 0 if result["status"] != "SAFETY_BLOCKED" else 2
+    if args.command == "isolate":
+        if not args.apk:
+            parser.error("isolate mode requires an APK path")
+        return cmd_isolate(args)
     if args.command == "campaign":
         if not args.apk:
             parser.error("campaign mode requires an APK path")
@@ -3384,6 +3872,9 @@ def main():
     instrumented_copy = {"status": "NOT_PREPARED"}
     if instrumentation_plan.get("status") == "READY":
         try:
+            instrument_mode = resolve_instrumentation_mode(os.environ)
+            gadget_requested = os.environ.get("REELSEC_USE_GADGET", "").strip().lower() in ("1", "true", "yes")
+            gadget_path = os.environ.get("REELSEC_FRIDA_GADGET", "").strip()
             instrumented_copy = prepare_instrumented_copy(
                 decoded_inventory["root"], instrumented_copy_root
             )
@@ -3391,45 +3882,57 @@ def main():
             source_target = Path(instrumentation_plan["target"]).resolve()
             relative_target = source_target.relative_to(source_root)
             copied_target = instrumented_copy_root / relative_target
-            instrumented_copy = apply_text_probe(
-                instrumented_copy_root, copied_target
-            )
-            gadget_requested = os.environ.get("REELSEC_USE_GADGET", "").strip().lower() in ("1", "true", "yes")
-            gadget_path = os.environ.get("REELSEC_FRIDA_GADGET", "").strip()
-            instrument_mode = resolve_instrumentation_mode(os.environ)
-            if instrument_mode == "no-gadget":
-                # Causal-isolation experiment: the instrumented tree keeps
-                # every standard mutation (notably LOG_I_PROBE) but Gadget
-                # embedding is refused even when explicitly requested. The
-                # finalizer verifies Gadget absence and stamps the proof.
-                ignored = str(Path(gadget_path).expanduser().resolve()) if gadget_path else None
-                instrumented_copy = finalize_no_gadget_manifest(
-                    instrumented_copy_root,
-                    gadget_requested=gadget_requested,
-                    gadget_source_ignored=ignored,
-                )
-            elif gadget_requested:
-                if not gadget_path:
+            if instrument_mode == "repack-only":
+                # Differential-isolation arm B: the copied tree is rebuilt
+                # with ZERO mutations — no probe is applied, and Gadget is
+                # refused even when explicitly requested. The finalizer
+                # verifies the absence of every mutation and Gadget trace.
+                if gadget_requested:
                     raise RuntimeError(
-                        "REELSEC_USE_GADGET=1 requires REELSEC_FRIDA_GADGET to point to an existing Frida Gadget binary"
+                        "REELSEC_INSTRUMENT_MODE=repack-only refuses Gadget "
+                        "(REELSEC_USE_GADGET is set); unset it for the "
+                        "rebuild-vs-probe differential"
                     )
-                gadget_abi = os.environ.get("REELSEC_FRIDA_GADGET_ABI", "arm64-v8a").strip()
-                gadget_port = _positive_int_env("REELSEC_FRIDA_GADGET_PORT", 27042)
-                instrumented_copy = embed_frida_gadget(
-                    instrumented_copy_root,
-                    copied_target,
-                    gadget_path,
-                    abi=gadget_abi,
-                    port=gadget_port,
+                instrumented_copy = finalize_repack_only_manifest(
+                    instrumented_copy_root
                 )
-                instrumented_copy["gadget_enabled"] = True
-                instrumented_copy["gadget_source"] = str(Path(gadget_path).expanduser().resolve())
-                instrumented_copy["gadget_abi"] = gadget_abi
-                instrumented_copy["gadget_port"] = gadget_port
             else:
-                instrumented_copy["gadget_enabled"] = False
-                if gadget_path:
-                    instrumented_copy["gadget_source_ignored"] = str(Path(gadget_path).expanduser().resolve())
+                instrumented_copy = apply_text_probe(
+                    instrumented_copy_root, copied_target
+                )
+                if instrument_mode == "no-gadget":
+                    # Causal-isolation experiment: the instrumented tree keeps
+                    # every standard mutation (notably LOG_I_PROBE) but Gadget
+                    # embedding is refused even when explicitly requested. The
+                    # finalizer verifies Gadget absence and stamps the proof.
+                    ignored = str(Path(gadget_path).expanduser().resolve()) if gadget_path else None
+                    instrumented_copy = finalize_no_gadget_manifest(
+                        instrumented_copy_root,
+                        gadget_requested=gadget_requested,
+                        gadget_source_ignored=ignored,
+                    )
+                elif gadget_requested:
+                    if not gadget_path:
+                        raise RuntimeError(
+                            "REELSEC_USE_GADGET=1 requires REELSEC_FRIDA_GADGET to point to an existing Frida Gadget binary"
+                        )
+                    gadget_abi = os.environ.get("REELSEC_FRIDA_GADGET_ABI", "arm64-v8a").strip()
+                    gadget_port = _positive_int_env("REELSEC_FRIDA_GADGET_PORT", 27042)
+                    instrumented_copy = embed_frida_gadget(
+                        instrumented_copy_root,
+                        copied_target,
+                        gadget_path,
+                        abi=gadget_abi,
+                        port=gadget_port,
+                    )
+                    instrumented_copy["gadget_enabled"] = True
+                    instrumented_copy["gadget_source"] = str(Path(gadget_path).expanduser().resolve())
+                    instrumented_copy["gadget_abi"] = gadget_abi
+                    instrumented_copy["gadget_port"] = gadget_port
+                else:
+                    instrumented_copy["gadget_enabled"] = False
+                    if gadget_path:
+                        instrumented_copy["gadget_source_ignored"] = str(Path(gadget_path).expanduser().resolve())
             instrumented_copy["instrumentation_mode"] = instrument_mode
             instrumented_copy["instrumentation_target"] = str(copied_target)
         except Exception as exc:
@@ -3552,6 +4055,7 @@ def main():
             keystore = keystore_record["keystore"]
             alias = keystore_record["alias"]
             os.environ.setdefault("REELSEC_TEST_KEYSTORE", keystore)
+            os.environ.setdefault("REELSEC_TEST_KEY_ALIAS", alias)
             preflight = signing_preflight(
                 apksigner=apksigner, keystore=keystore, alias=alias,
                 openssl=openssl, runner=run, env=os.environ)

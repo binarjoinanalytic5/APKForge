@@ -21,18 +21,26 @@ class InstrumentedCopyError(RuntimeError):
 # other mutation (notably the LOG_I_PROBE telemetry marker) identical. The
 # mode is selected with REELSEC_INSTRUMENT_MODE=no-gadget and is verified by
 # finalize_no_gadget_manifest, which fails closed on ANY Gadget trace.
-INSTRUMENT_MODES = ("standard", "no-gadget")
+#
+# Differential-isolation experiment (2026-10-08): REELSEC_INSTRUMENT_MODE=
+# repack-only rebuilds the decoded tree with ZERO mutations — no Gadget, no
+# telemetry probe — so the A/B/C isolation matrix can separate the apktool
+# rebuild + re-signing delta (arm B) from the LOG_I_PROBE delta (arm C).
+# finalize_repack_only_manifest fails closed on ANY mutation or Gadget trace.
+INSTRUMENT_MODES = ("standard", "no-gadget", "repack-only")
 NO_GADGET_EXPERIMENT = "INSTRUMENTED_NO_GADGET"
+REPACK_ONLY_EXPERIMENT = "REPACK_ONLY"
 GADGET_LIBRARY_NAMES = ("libfrida-gadget.so", "libfrida-gadget.config.so")
 GADGET_SMALI_MARKERS = ("frida-gadget", "ReelSec-Gadget-Load")
+PROBE_SMALI_MARKERS = ("ReelSec-Instrumentation",)
 
 
 def resolve_instrumentation_mode(env=None):
     """Resolve the instrumentation mode from the environment.
 
-    Returns "standard" (default) or "no-gadget". Unknown values raise
-    InstrumentedCopyError: a misconfigured isolation experiment must never
-    run silently as something else.
+    Returns "standard" (default), "no-gadget", or "repack-only". Unknown
+    values raise InstrumentedCopyError: a misconfigured isolation
+    experiment must never run silently as something else.
     """
     values = env if env is not None else os.environ
     mode = str(values.get("REELSEC_INSTRUMENT_MODE", "standard")).strip().lower()
@@ -76,6 +84,89 @@ def find_gadget_artifacts(work_dir):
                 violations.append("mutation:FRIDA_GADGET_EMBED")
                 break
     return sorted(set(violations))
+
+
+def find_probe_artifacts(work_dir):
+    """Return a sorted list of telemetry-probe traces inside the work tree.
+
+    An empty list means the tree carries no probe mutation. Checks cover
+    the Smali probe markers and the recorded mutations (a repack-only
+    tree must record ZERO mutations of any kind).
+    """
+    work = Path(work_dir).expanduser().resolve()
+    violations = []
+    if work.is_dir():
+        for smali in sorted(work.rglob("*.smali")):
+            try:
+                text = smali.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            for marker in PROBE_SMALI_MARKERS:
+                if marker in text:
+                    violations.append("smali:%s:marker:%s"
+                                      % (smali.relative_to(work), marker))
+    manifest_path = work / "INSTRUMENTED-COPY-MANIFEST.json"
+    if manifest_path.is_file():
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except ValueError:
+            manifest = {}
+        for mutation in manifest.get("mutations", []) or []:
+            if isinstance(mutation, dict):
+                violations.append("mutation:%s"
+                                  % mutation.get("type", "UNKNOWN"))
+            else:
+                violations.append("mutation:UNKNOWN")
+    return sorted(set(violations))
+
+
+def finalize_repack_only_manifest(work_dir):
+    """Verify and stamp a zero-mutation rebuild tree (isolation arm B).
+
+    Fails closed: raises InstrumentedCopyError when ANY Gadget artifact,
+    probe marker, or recorded mutation is present. On success the
+    manifest carries the machine-readable isolation proof:
+    GADGET_PRESENT=false, PROBE_PRESENT=false, mutations_verified_empty=
+    true, original_apk_untouched=true. The stamp records that causal
+    attribution REQUIRES_ISOLATION_MATRIX: a repack-only crash alone is
+    only meaningful inside the A/B/C differential.
+    """
+    work = Path(work_dir).expanduser().resolve()
+    violations = find_gadget_artifacts(work)
+    if violations:
+        raise InstrumentedCopyError(
+            "repack-only experiment refused: Gadget traces present: %s"
+            % ", ".join(violations)
+        )
+    probe_hits = find_probe_artifacts(work)
+    if probe_hits:
+        raise InstrumentedCopyError(
+            "repack-only experiment refused: probe/mutation traces "
+            "present: %s" % ", ".join(probe_hits)
+        )
+    manifest_path = work / "INSTRUMENTED-COPY-MANIFEST.json"
+    if not manifest_path.is_file():
+        raise InstrumentedCopyError("instrumented copy manifest missing")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["instrumentation_mode"] = "repack-only"
+    manifest["experiment"] = REPACK_ONLY_EXPERIMENT
+    manifest["gadget_enabled"] = False
+    manifest["GADGET_PRESENT"] = False
+    manifest["GADGET_SOURCE_ABSENT"] = True
+    manifest["PROBE_PRESENT"] = False
+    manifest["mutations_verified_empty"] = True
+    manifest["original_apk_untouched"] = True
+    manifest["causal_attribution"] = "REQUIRES_ISOLATION_MATRIX"
+    manifest["causal_attribution_note"] = (
+        "This tree rebuilds the decoded APK with zero mutations: any crash "
+        "difference against arm A isolates the apktool rebuild + re-signing "
+        "delta. Attribution requires the session-bound A/B/C isolation "
+        "matrix, never this arm alone."
+    )
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return manifest
 
 
 def finalize_no_gadget_manifest(work_dir, gadget_requested=False,

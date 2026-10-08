@@ -1355,10 +1355,31 @@ class CommonCauseComparisonTests(unittest.TestCase):
 class WorkingControlVerdictTests(unittest.TestCase):
     """Platform wiring: skip logic + verdict surfaces the new documents."""
 
-    def test_baseline_skipped_only_when_control_observed(self):
-        self.assertIsNotNone(MODULE._baseline_skip_reason(
+    def test_baseline_skipped_only_when_control_verified(self):
+        verified = {"status": "CONTROL_ASSESSED", "identity": {
+            "original_verification": {"verified": True,
+                                      "installed_sha256": "e" * 64,
+                                      "reference_sha256": "e" * 64}}}
+        crashed = {"status": "CONTROL_CRASHED", "identity": {
+            "original_verification": {"verified": True,
+                                      "installed_sha256": "e" * 64,
+                                      "reference_sha256": "e" * 64}}}
+        self.assertIsNotNone(MODULE._baseline_skip_reason(verified))
+        self.assertIsNotNone(MODULE._baseline_skip_reason(crashed))
+        self.assertIn("VERIFIED", MODULE._baseline_skip_reason(verified))
+
+    def test_baseline_runs_when_control_unverified(self):
+        """An observed-but-unverified control is NOT a baseline: the
+        install-based baseline round must run to establish the original
+        side (2026-10-08T15-11-17 incident)."""
+        unverified = {"status": "CONTROL_ASSESSED", "identity": {
+            "original_verification": {"verified": False,
+                                      "installed_sha256": "f" * 64,
+                                      "reference_sha256": "e" * 64}}}
+        self.assertIsNone(MODULE._baseline_skip_reason(unverified))
+        self.assertIsNone(MODULE._baseline_skip_reason(
             {"status": "CONTROL_ASSESSED"}))
-        self.assertIsNotNone(MODULE._baseline_skip_reason(
+        self.assertIsNone(MODULE._baseline_skip_reason(
             {"status": "CONTROL_CRASHED"}))
         self.assertIsNone(MODULE._baseline_skip_reason(
             {"status": "CONTROL_NOT_INSTALLED"}))
@@ -2162,6 +2183,156 @@ class DeployBindingVerdictTests(unittest.TestCase):
                                runtime_probe={"status": "NOT_RUN"},
                                deploy_status="INSTALLED")
         self.assertTrue(v["INSTRUMENTED_INSTALLED"])
+
+
+class ControlIdentityTests(unittest.TestCase):
+    """An observed-but-unverified control is never a valid baseline."""
+
+    def _control(self, status, verified=None):
+        doc = {
+            "schema_version": "working-control-1",
+            "status": status,
+            "package": "com.x",
+            "installed_path": "/data/app/~~x/com.x/base.apk",
+            "identity": {"apk_sha256": "e" * 64},
+            "process": {"pids": [14210], "observed": True,
+                        "alive_ms": 900},
+            "health": {"startup":
+                       "CRASH" if status == "CONTROL_CRASHED" else "PASS"},
+            "crash_artifact": (
+                _simulated_crash_artifact("working_control", "e" * 64)
+                if status == "CONTROL_CRASHED" else None),
+        }
+        if verified is not None:
+            doc["identity"]["original_verification"] = {
+                "verified": verified,
+                "installed_sha256": "e" * 64,
+                "reference_sha256": ("e" if verified else "f") * 64}
+        return doc
+
+    def test_verified_helper_tristate(self):
+        self.assertTrue(rh.control_identity_verified(
+            self._control("CONTROL_ASSESSED", True)))
+        self.assertFalse(rh.control_identity_verified(
+            self._control("CONTROL_ASSESSED", False)))
+        self.assertIsNone(rh.control_identity_verified(
+            self._control("CONTROL_ASSESSED")))
+        self.assertIsNone(rh.control_identity_verified(None))
+
+    def test_unverified_control_crash_never_control_healthy(self):
+        ins = _simulated_crash_artifact("instrumented", "f" * 64)
+        cmp = rh.build_common_cause_comparison(
+            self._control("CONTROL_ASSESSED", False), ins)
+        self.assertEqual(
+            cmp["status"], "CONTROL_UNVERIFIED_INSTRUMENTED_CRASH")
+        self.assertNotIn("CONTROL_HEALTHY", cmp["status"])
+        self.assertEqual(cmp["attribution"]["instrumentation_regression"],
+                         "NOT_ESTABLISHED")
+        self.assertIn("no valid", cmp["attribution"]["guard"].lower())
+        self.assertIn("baseline", cmp["attribution"]["guard"].lower())
+
+    def test_unverified_both_crash_makes_no_common_claim(self):
+        ins = _simulated_crash_artifact("instrumented", "f" * 64)
+        cmp = rh.build_common_cause_comparison(
+            self._control("CONTROL_CRASHED", False), ins)
+        self.assertEqual(cmp["status"], "CONTROL_UNVERIFIED_BOTH_CRASH")
+        self.assertEqual(cmp["attribution"]["instrumentation_regression"],
+                         "NOT_ESTABLISHED")
+
+    def test_unverified_only_crashes(self):
+        cmp = rh.build_common_cause_comparison(
+            self._control("CONTROL_CRASHED", False), None)
+        self.assertEqual(cmp["status"], "CONTROL_UNVERIFIED_ONLY_CRASH")
+        cmp = rh.build_common_cause_comparison(
+            self._control("CONTROL_ASSESSED", False), None)
+        self.assertEqual(
+            cmp["status"],
+            "CONTROL_UNVERIFIED_NO_INSTRUMENTED_EVIDENCE")
+
+    def test_verified_control_keeps_healthy_with_matrix_pointer(self):
+        ins = _simulated_crash_artifact("instrumented", "f" * 64)
+        cmp = rh.build_common_cause_comparison(
+            self._control("CONTROL_ASSESSED", True), ins)
+        self.assertEqual(cmp["status"],
+                         "CONTROL_HEALTHY_INSTRUMENTED_CRASH")
+        self.assertEqual(cmp["attribution"]["instrumentation_regression"],
+                         "SUSPECTED_NOT_PROVEN")
+        self.assertIn("undifferentiated", cmp["attribution"]["guard"])
+        self.assertIn("isolate", cmp["attribution"]["guard"])
+
+    def test_legacy_unrecorded_identity_keeps_behavior(self):
+        ins = _simulated_crash_artifact("instrumented", "f" * 64)
+        cmp = rh.build_common_cause_comparison(
+            self._control("CONTROL_ASSESSED"), ins)
+        self.assertEqual(cmp["status"],
+                         "CONTROL_HEALTHY_INSTRUMENTED_CRASH")
+
+
+class UnverifiedVerdictTests(unittest.TestCase):
+    """Verdict surfaces the unverified state; nothing is attributed."""
+
+    def _docs(self):
+        control = {
+            "status": "CONTROL_ASSESSED", "package": "com.x",
+            "identity": {"apk_sha256": "f" * 64, "original_verification": {
+                "verified": False, "installed_sha256": "f" * 64,
+                "reference_sha256": "e" * 64}},
+            "health": {"startup": "PASS"},
+            "process": {"pids": [1], "observed": True, "alive_ms": 5}}
+        crashed = {"startup": "CRASH", "crash_class": rh.NATIVE_CRASH,
+                   "crash_cause": "NATIVE_LIBRARY:libc.so",
+                   "crash_session_binding": {"bound": True,
+                                             "method": "BUFFER_DIFF"}}
+        return control, crashed
+
+    def test_unverified_status_flows_to_runtime_status(self):
+        control, crashed = self._docs()
+        v = rh.runtime_verdict(
+            None, crashed,
+            runtime_probe={"status": "RUNTIME_ARTIFACT_CRASH"},
+            working_control=control,
+            common_cause={
+                "status": "CONTROL_UNVERIFIED_INSTRUMENTED_CRASH"},
+            deploy_status="INSTALLED")
+        self.assertEqual(v["RUNTIME_STATUS"],
+                         "CONTROL_UNVERIFIED_INSTRUMENTED_CRASH")
+        self.assertEqual(v["REGRESSION_STATUS"], "NOT_ESTABLISHED")
+        self.assertEqual(v["ORIGINAL_RUNTIME"], "IDENTITY_UNVERIFIED")
+        self.assertIn("NOT established", v["NEXT_ACTION"])
+        self.assertIn("isolate", v["NEXT_ACTION"])
+        self.assertNotIn("CANDIDATE cause", v["NEXT_ACTION"])
+
+    def test_verified_healthy_names_no_generic_instrumentation(self):
+        control, crashed = self._docs()
+        control["identity"]["original_verification"]["verified"] = True
+        control["identity"]["original_verification"][
+            "reference_sha256"] = "f" * 64
+        v = rh.runtime_verdict(
+            None, crashed,
+            runtime_probe={"status": "RUNTIME_ARTIFACT_CRASH"},
+            working_control=control,
+            common_cause={"status":
+                          "CONTROL_HEALTHY_INSTRUMENTED_CRASH"},
+            deploy_status="INSTALLED")
+        self.assertEqual(v["RUNTIME_STATUS"],
+                         "CONTROL_HEALTHY_INSTRUMENTED_CRASH")
+        self.assertEqual(v["REGRESSION_STATUS"], "SUSPECTED_NOT_PROVEN")
+        self.assertIn("undifferentiated", v["NEXT_ACTION"])
+        self.assertIn("isolate", v["NEXT_ACTION"])
+        self.assertNotIn("instrumentation is a CANDIDATE",
+                         v["NEXT_ACTION"])
+
+    def test_state_machine_marks_unverified_incomplete(self):
+        _control, crashed = self._docs()
+        state = rh.campaign_state_machine(
+            working_control=_control,
+            instrumented_health=crashed,
+            common_cause={"status":
+                          "CONTROL_UNVERIFIED_INSTRUMENTED_CRASH"})
+        moves = [t for t in state["transitions"]
+                 if t["to"] == "COMPARISON_INCOMPLETE"]
+        self.assertTrue(moves)
+        self.assertIn("unverified", moves[0]["reason"])
 
 
 if __name__ == "__main__":
