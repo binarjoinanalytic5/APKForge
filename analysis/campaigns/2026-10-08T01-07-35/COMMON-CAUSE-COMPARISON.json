@@ -1,0 +1,70 @@
+{
+  "attribution": {
+    "guard": "instrumented crash evidence exists but no working control was collected: no common-cause claim may be made until the control round runs",
+    "instrumentation_regression": "NOT_ESTABLISHED"
+  },
+  "instrumented": {
+    "abort_message_present": false,
+    "apk_offset_resolution": null,
+    "artifact_sha256": "cb4d6a01b63f3b95be3a986157a2a88623bd1156c53a17bcf6d80e4946ca586e",
+    "artifact_type": "INSTRUMENTED_TEST_ARTIFACT",
+    "exit_reason": null,
+    "fatal_signal": "SIGABRT",
+    "fault_library": "libc.so",
+    "fault_location": {
+      "library": "libc.so",
+      "pc": "00000000000537d4",
+      "symbol": "abort+168"
+    },
+    "fault_pc": "00000000000537d4",
+    "installed_path": "/data/app/~~-TO_K1JYUYGwIq6wErFiDQ==/com.newleaf.app.android.victor-MdtiYLwxqSTIbElakgzcsA==/base.apk",
+    "instance_count": 1,
+    "instances_completeness": "EVIDENCE_PRESENT_BUT_INSTANCE_INCOMPLETE",
+    "lifetime_ms": 0,
+    "local_artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T01-07-35/instrumented-signed.apk",
+    "logcat_evidence_lines": 5,
+    "package": "com.newleaf.app.android.victor",
+    "pids": [
+      19291
+    ],
+    "primary_cpu_abi": "arm64-v8a",
+    "role": "instrumented",
+    "signing_certificate_sha256": null,
+    "startup": "CRASH",
+    "startup_stage": "CRASHED_AFTER_PROCESS_OBSERVED",
+    "uid": "10814",
+    "uids": [],
+    "users": [],
+    "version_code": "4200",
+    "version_name": "4.2.00"
+  },
+  "integrity_notes": [
+    "this comparison MUST NOT upgrade SCREENSHOT_BLOCKING; that verdict remains NOT_PROVEN until the full causal chain is evidenced",
+    "no textual abort() message captured on either side; the cause MUST NOT be labeled anti-tamper or screenshot protection on this evidence"
+  ],
+  "questions": {
+    "abort_message": {
+      "captured_either": false,
+      "instrumented_captured": false,
+      "working_control_captured": false
+    },
+    "apk_identity": {
+      "instrumented_sha256": "cb4d6a01b63f3b95be3a986157a2a88623bd1156c53a17bcf6d80e4946ca586e",
+      "note": "different artifacts by construction: the control is the installed original APK, the instrumented side is the re-signed test build",
+      "working_control_sha256": null
+    },
+    "both_sigabrt": false,
+    "fault_location": {
+      "instrumented": "libc.so+00000000000537d4",
+      "match": false,
+      "working_control": null
+    }
+  },
+  "schema_version": "common-cause-comparison-1",
+  "source_documents": {
+    "instrumented": "CRASH-ARTIFACT.json",
+    "working_control": null
+  },
+  "status": "COMMON_CAUSE_INCOMPLETE",
+  "working_control": null
+}

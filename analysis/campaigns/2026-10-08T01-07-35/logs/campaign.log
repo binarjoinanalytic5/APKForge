@@ -1,0 +1,70 @@
+
+ReelSec Campaign
+===============
+Report: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T01-07-35
+Progress: 0%
+
+[##--------------------------]   7%  01/14  Input / provenance        PASS      APK SHA-256=e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278
+
+[##--------------------------]   7%  02/14  Environment / capabilities  RUNNING   discovering installed tools and device capabilities
+
+[####------------------------]  14%  02/14  Environment / capabilities  PASS      capability matrix written
+
+[####------------------------]  14%  03/14  Apktool backend           RUNNING   selecting a usable decode/build backend
+
+[######----------------------]  21%  03/14  Apktool backend           PASS      apktool-standalone
+
+[######----------------------]  21%  04/14  APK decode                RUNNING   decoding original.apk into isolated campaign workspace
+      [apktool-recovery] mode=no-res timeout=180s heartbeat=10s
+
+[########--------------------]  28%  04/14  APK decode                PASS      decoded with resources disabled (instrumentable Smali)
+
+[########--------------------]  28%  05/14  Input inventory           RUNNING   inventorying manifest, Smali, DEX and native libraries
+
+[##########------------------]  35%  05/14  Input inventory           PASS      READY
+
+[##########------------------]  35%  06/14  SecShell instrumentation plan  RUNNING   locating the SecShell Application loadLibrary anchor
+
+[############----------------]  42%  06/14  SecShell instrumentation plan  PASS      READY
+
+[############----------------]  42%  07/14  Instrumented copy         RUNNING   preparing an isolated copy; original.apk remains untouched
+
+[##############--------------]  50%  07/14  Instrumented copy         PASS      telemetry probe applied
+
+[##############--------------]  50%  08/14  Build instrumented APK    RUNNING   building only the isolated instrumented tree
+
+[################------------]  57%  08/14  Build instrumented APK    PASS      BUILT
+
+[################------------]  57%  09/14  Sign / verify artifact    RUNNING   signing and verifying the isolated APK artifact
+
+[##################----------]  64%  09/14  Sign / verify artifact    PASS      SIGNED_VERIFIED
+
+[##################----------]  64%  10/14  ADB deploy                RUNNING   checking the explicit test device and installing only the signed artifact
+
+[####################--------]  71%  10/14  ADB deploy                PASS      INSTALLED
+
+[####################--------]  71%  11/14  Gadget observation        RUNNING   preparing guarded Frida Gadget observation metadata
+
+[######################------]  78%  11/14  Gadget observation        PASS      READY
+
+[######################------]  78%  12/14  Runtime evidence          RUNNING   capturing bounded ADB runtime evidence for the signed artifact
+
+[########################----]  85%  12/14  Runtime evidence          PASS      CAPTURED
+
+[########################----]  85%  13/14  Native / proof analysis   RUNNING   ELF, vtable, dispatch, dataflow, runtime readiness
+
+[##########################--]  92%  13/14  Native / proof analysis   PASS      dataflow_proven=False runtime=RUNTIME_ARTIFACT_CRASH
+
+[############################] 100%  14/14  Report publication        SKIP      publication disabled or failed
+REPORT=/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T01-07-35
+FUNCTION_POINTER=0x27a510
+SYMBOL=NOT_RESOLVED_BY_SYMBOL_TABLE
+TARGET_PROVENANCE_STATUS=DIFFERENT_ADDRESS_POINT
+AUTONOMOUS_DATAFLOW_PROVEN=False
+
+ReelSec Campaign COMPLETED
+Final report: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T01-07-35
+STAGE_SUMMARY=PASS:13 FAIL:0 BLOCKED:0 SKIP:1
+FINAL_STATUS=COMPLETED
+RUNTIME_PROOF_STATUS=RUNTIME_ARTIFACT_CRASH
+EXIT_CLASSIFICATION=COMPLETED
