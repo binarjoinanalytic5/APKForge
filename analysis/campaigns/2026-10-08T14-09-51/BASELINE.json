@@ -1,0 +1,13 @@
+{
+  "collected_at_epoch": 1791468663.1372602,
+  "collector": "BASELINE",
+  "data": {
+    "original_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+    "reason": "REELSEC_TEST_PACKAGE not configured; refusing to touch any package",
+    "schema_version": "runtime-health-1",
+    "status": "BASELINE_NOT_RUN"
+  },
+  "errors": [],
+  "schema_version": "collector-1",
+  "status": "FAILED"
+}

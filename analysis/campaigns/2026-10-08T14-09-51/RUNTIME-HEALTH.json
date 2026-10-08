@@ -1,0 +1,10 @@
+{
+  "collected_at_epoch": 1791468663.1368818,
+  "collector": "RUNTIME-HEALTH",
+  "data": {},
+  "errors": [
+    "RUNTIME-HEALTH.json not produced (health gate never ran)"
+  ],
+  "schema_version": "collector-1",
+  "status": "FAILED"
+}
