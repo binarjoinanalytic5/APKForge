@@ -176,6 +176,35 @@ class InstallDiagnosticsTests(unittest.TestCase):
             self.assertEqual(report["status"], "PASS")
             self.assertTrue(report["checks"]["abi_compatibility"]["compatible"])
 
+    def test_preflight_rejects_unaligned_artifact(self):
+        # Deploy-side half of the first no-gadget failure: an unaligned APK
+        # fails `zipalign -c` on hosts where the binary exists, so preflight
+        # must report PREFLIGHT_FAILED instead of letting a bad artifact
+        # reach `adb install`.
+        import io
+        import zipfile
+        from adb_deploy import artifact_preflight_checks
+        with tempfile.TemporaryDirectory() as td:
+            apk = Path(td) / "instrumented.apk"
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w") as zf:
+                zf.writestr("classes.dex", b"dex\n035\x00fake")
+                zf.writestr("lib/arm64-v8a/libgood.so", b"\x7fELFstored",
+                            compress_type=zipfile.ZIP_STORED)
+            apk.write_bytes(buf.getvalue())
+
+            def fake_runner(cmd, timeout=120):
+                if "getprop" in cmd:
+                    return 0, "arm64-v8a,armeabi-v7a\n"
+                return 1, "unaligned"
+
+            report = artifact_preflight_checks(
+                apk, runner=fake_runner, zipalign="/usr/bin/zipalign",
+                adb="/usr/bin/adb", serial="192.168.8.8:1")
+            self.assertEqual(report["status"], "PREFLIGHT_FAILED")
+            self.assertEqual(
+                report["checks"]["zipalign_page_alignment"]["status"], "FAIL")
+
     def test_verify_installed_package_success(self):
         from adb_deploy import verify_installed_package
 
