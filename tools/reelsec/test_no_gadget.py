@@ -11,7 +11,9 @@ from instrumented_copy import (
     InstrumentedCopyError,
     apply_text_probe,
     finalize_no_gadget_manifest,
+    finalize_repack_only_manifest,
     find_gadget_artifacts,
+    find_probe_artifacts,
     prepare_instrumented_copy,
     resolve_instrumentation_mode,
 )
@@ -165,6 +167,65 @@ class NoGadgetModeTests(unittest.TestCase):
                 "/tmp/reelsec-gadget/frida-gadget.so",
             )
             self.assertIs(manifest["GADGET_PRESENT"], False)
+
+
+class RepackOnlyModeTests(unittest.TestCase):
+    """Isolation arm B: rebuild with zero mutations (no probe, no Gadget)."""
+
+    def test_mode_accepts_repack_only(self):
+        self.assertEqual(
+            resolve_instrumentation_mode(
+                {"REELSEC_INSTRUMENT_MODE": "repack-only"}),
+            "repack-only")
+
+    def test_finalize_clean_tree(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            source, _rel = _fixture_source(base)
+            work = base / "work"
+            before = _tree_hash(source)
+            prepare_instrumented_copy(source, work)
+            manifest = finalize_repack_only_manifest(work)
+            self.assertEqual(manifest["instrumentation_mode"],
+                             "repack-only")
+            self.assertEqual(manifest["experiment"], "REPACK_ONLY")
+            self.assertIs(manifest["GADGET_PRESENT"], False)
+            self.assertIs(manifest["PROBE_PRESENT"], False)
+            self.assertIs(manifest["mutations_verified_empty"], True)
+            self.assertEqual(manifest["mutations"], [])
+            self.assertEqual(manifest["causal_attribution"],
+                             "REQUIRES_ISOLATION_MATRIX")
+            self.assertEqual(_tree_hash(source), before)
+
+    def test_finalize_refuses_probe_mutation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            source, rel = _fixture_source(base)
+            work = base / "work"
+            prepare_instrumented_copy(source, work)
+            apply_text_probe(work, work / rel)
+            with self.assertRaises(InstrumentedCopyError):
+                finalize_repack_only_manifest(work)
+
+    def test_finalize_refuses_gadget_library(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            source, _rel = _fixture_source(base)
+            work = base / "work"
+            prepare_instrumented_copy(source, work)
+            lib = work / "lib" / "arm64-v8a" / "libfrida-gadget.so"
+            lib.parent.mkdir(parents=True)
+            lib.write_bytes(b"gadget")
+            with self.assertRaises(InstrumentedCopyError):
+                finalize_repack_only_manifest(work)
+
+    def test_find_probe_artifacts_empty_on_clean_tree(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            source, _rel = _fixture_source(base)
+            work = base / "work"
+            prepare_instrumented_copy(source, work)
+            self.assertEqual(find_probe_artifacts(work), [])
 
 
 if __name__ == "__main__":

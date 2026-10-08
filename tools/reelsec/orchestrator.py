@@ -116,6 +116,47 @@ def _final_verdict_logic(campaign_dir, campaign_status=None):
         health = health["data"]  # collector envelope (device campaigns)
     working_control = _read_json(cd / "WORKING-CONTROL.json") or {}
     common_cause = _read_json(cd / "COMMON-CAUSE-COMPARISON.json") or {}
+    isolation_doc = _read_json(cd / "ISOLATION-DECISION.json") or {}
+    if isolation_doc.get("status"):
+        # Isolation-matrix run: the A/B/C decision is the verdict. It is
+        # read FIRST and alone — matrix runs produce per-arm documents,
+        # not campaign comparison documents.
+        return {
+            "schema_version": SCHEMA_VERDICT,
+            "generated_at_epoch": time.time(),
+            "campaign_dir": str(cd),
+            "campaign_status": campaign_status,
+            "final_verdict": "NOT_PROVEN",
+            "reason": isolation_doc.get("detail"),
+            "safety": safety.get("safety"),
+            "safety_reason": safety.get("reason"),
+            "campaign_state": isolation_doc.get("status"),
+            "campaign_state_reason": isolation_doc.get("reason"),
+            "campaign_state_transitions": [],
+            "runtime": {
+                "ISOLATION_STATUS": isolation_doc.get("status"),
+                "ISOLATION_REASON": isolation_doc.get("reason"),
+                "ISOLATION_REGRESSION": isolation_doc.get("regression"),
+                "ISOLATION_ARMS": isolation_doc.get("arm_states"),
+                "ISOLATION_CANDIDATES":
+                    isolation_doc.get("candidates"),
+                "ISOLATION_EXCLUDED": isolation_doc.get("excluded"),
+                "CRASH_SIGNATURES_EQUAL":
+                    isolation_doc.get("crash_signatures_equal"),
+                "ORIGINAL_RUNTIME": None,
+                "INSTRUMENTED_RUNTIME": None,
+                "REGRESSION_STATUS": isolation_doc.get("regression"),
+                "RUNTIME_STATUS": isolation_doc.get("status"),
+                "NEXT_ACTION": isolation_doc.get("next_action"),
+            },
+            "scientific_status": {
+                "L1": "NOT_EVALUATED", "L2": "NOT_EVALUATED",
+                "L3": "NOT_EVALUATED", "L4": "NOT_EVALUATED",
+                "SCREENSHOT_BLOCKING": "NOT_PROVEN",
+            },
+            "evidence_report_verdict": None,
+            "runtime_validity": None,
+        }
     baseline_doc = _read_json(cd / "BASELINE-RUNTIME.json") or {}
     baseline_health = baseline_doc.get("health")
     deploy = _read_json(cd / "ADB-DEPLOY.json") or {}
@@ -511,6 +552,89 @@ def run_platform(apk, root, runner=None, git_runner=None, env=None,
             # INFRASTRUCTURE-only issue. It is recorded as PUBLISH_FAILURE
             # and must never alter the scientific or runtime verdicts —
             # every verdict field above was computed before publishing.
+            publish_result["classification"] = (
+                "PUBLISH_FAILURE (infrastructure only; scientific and "
+                "runtime verdicts unaffected)")
+        verdict["publish"] = publish_result
+
+    (campaign_dir / "FINAL-VERDICT.json").write_text(
+        json.dumps(verdict, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    (campaign_dir / "FINAL-REPORT.md").write_text(
+        _final_report_md(verdict, manifest, publish=publish_result),
+        encoding="utf-8")
+
+    return {"status": verdict["final_verdict"],
+            "campaign_status": campaign_status,
+            "campaign_dir": str(campaign_dir),
+            "verdict": verdict, "publish": publish_result}
+
+
+def run_isolation(apk, root, runner=None, git_runner=None, env=None,
+                  publish=True, adb=None, serial=None, now=None):
+    """The isolation pipeline: safety gate -> matrix -> aggregate -> publish.
+
+    Mirrors run_platform, but executes the A/B/C differential-isolation
+    matrix (reelsec.py isolate) instead of a full campaign. The matrix
+    never uninstalls and never clears data; arms that cannot install or
+    verify identity degrade the decision to INCONCLUSIVE.
+    """
+    runner = runner or _default_runner
+    env = env if env is not None else os.environ
+    campaign_dir = create_campaign_dir(root, now=now)
+
+    safety = doctor(env=env, adb=adb, serial=serial, runner=runner)
+    (campaign_dir / "SAFETY-GATE.json").write_text(
+        json.dumps(safety, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    if safety["safety"] != "OK":
+        verdict = _final_verdict_logic(campaign_dir,
+                                       campaign_status="NOT_RUN")
+        (campaign_dir / "FINAL-VERDICT.json").write_text(
+            json.dumps(verdict, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8")
+        report = (
+            "# ReelSec Isolation Matrix\n\n"
+            "SAFETY: BLOCKED\n"
+            "REASON: %s\n\n"
+            "No package was modified.\n"
+            "No isolation matrix executed.\n" % safety["reason"]
+        )
+        (campaign_dir / "FINAL-REPORT.md").write_text(report,
+                                                      encoding="utf-8")
+        return {"status": "SAFETY_BLOCKED", "reason": safety["reason"],
+                "campaign_dir": str(campaign_dir), "verdict": verdict,
+                "publish": None}
+
+    campaign_status = "COMPLETED"
+    logs = campaign_dir / "logs" / "campaign.log"
+    try:
+        rc, out = runner([sys.executable, str(HERE / "reelsec.py"),
+                          "isolate", str(apk),
+                          "--output", str(campaign_dir), "--no-publish"],
+                         timeout=5400)
+        logs.parent.mkdir(parents=True, exist_ok=True)
+        logs.write_text((out or "")[-200000:], encoding="utf-8")
+        if rc == 3:
+            campaign_status = "SCIENTIFIC_INCOMPLETE"
+        elif rc == 2:
+            campaign_status = "INFRASTRUCTURE_FAILURE"
+        elif rc != 0:
+            campaign_status = "CAMPAIGN_EXIT_%d" % rc
+    except Exception as exc:
+        campaign_status = "CAMPAIGN_EXCEPTION"
+        logs.parent.mkdir(parents=True, exist_ok=True)
+        logs.write_text(str(exc)[:20000], encoding="utf-8")
+
+    manifest, verdict = aggregate(campaign_dir,
+                                  campaign_status=campaign_status)
+    (campaign_dir / "MANIFEST.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    publish_result = None
+    if publish:
+        publish_result = git_publish_campaign(
+            root, campaign_dir, runner=git_runner or _default_git_runner)
+        if publish_result.get("status") in ("PUSH_FAILED", "PUBLISH_FAILED"):
             publish_result["classification"] = (
                 "PUBLISH_FAILURE (infrastructure only; scientific and "
                 "runtime verdicts unaffected)")

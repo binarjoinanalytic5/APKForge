@@ -83,6 +83,18 @@ CONTROL_NOT_INSTALLED = "CONTROL_NOT_INSTALLED"
 COMMON_CAUSE_BOTH_CRASH = "COMMON_CAUSE_BOTH_CRASH"
 CONTROL_HEALTHY_INSTRUMENTED_CRASH = "CONTROL_HEALTHY_INSTRUMENTED_CRASH"
 CONTROL_ONLY_CRASH = "CONTROL_ONLY_CRASH"
+CONTROL_UNVERIFIED_INSTRUMENTED_CRASH = \
+    "CONTROL_UNVERIFIED_INSTRUMENTED_CRASH"
+CONTROL_UNVERIFIED_BOTH_CRASH = "CONTROL_UNVERIFIED_BOTH_CRASH"
+CONTROL_UNVERIFIED_ONLY_CRASH = "CONTROL_UNVERIFIED_ONLY_CRASH"
+CONTROL_UNVERIFIED_NO_INSTRUMENTED_EVIDENCE = \
+    "CONTROL_UNVERIFIED_NO_INSTRUMENTED_EVIDENCE"
+UNVERIFIED_CC_STATUSES = (
+    CONTROL_UNVERIFIED_INSTRUMENTED_CRASH,
+    CONTROL_UNVERIFIED_BOTH_CRASH,
+    CONTROL_UNVERIFIED_ONLY_CRASH,
+    CONTROL_UNVERIFIED_NO_INSTRUMENTED_EVIDENCE,
+)
 CONTROL_HEALTHY_NO_INSTRUMENTED_EVIDENCE = \
     "CONTROL_HEALTHY_NO_INSTRUMENTED_EVIDENCE"
 COMMON_CAUSE_INCOMPLETE = "COMMON_CAUSE_INCOMPLETE"
@@ -403,6 +415,21 @@ def audit_startup_classification(health):
             "exit-info entries; the tombstone predates this session — "
             "evidence preserved, attribution excluded" % (tp, pids))
     return result
+
+
+def control_identity_verified(control_doc):
+    """Original-identity binding of a working-control observation.
+
+    Returns True when the observed build was hash-bound to the local
+    original reference, False when it positively mismatched (a leftover
+    instrumented build of the same package, typically), and None when no
+    verification was recorded (legacy documents: binding unknown).
+    """
+    verif = ((control_doc or {}).get("identity") or {}).get(
+        "original_verification")
+    if not isinstance(verif, dict) or "verified" not in verif:
+        return None
+    return True if verif.get("verified") else False
 
 
 def audited_original_side(working_control, baseline_health=None):
@@ -1108,6 +1135,11 @@ def build_common_cause_comparison(control_doc, instrumented_artifact):
       cause, NOT proven.
     * CONTROL_ONLY_CRASH / CONTROL_HEALTHY_NO_INSTRUMENTED_EVIDENCE /
       COMMON_CAUSE_INCOMPLETE — explicit, never guessed.
+    When the control was observed but its bytes are NOT hash-bound to the
+    local original reference (a leftover instrumented build of the same
+    package, typically), it is NOT a valid baseline and no CONTROL_HEALTHY
+    claim is made: the CONTROL_UNVERIFIED_* verdicts record that the
+    original side was never established, with no attribution at all.
     This comparison NEVER upgrades SCREENSHOT_BLOCKING: that verdict
     stays NOT_PROVEN until the full causal chain is evidenced.
     Returns None when neither side has usable evidence.
@@ -1116,9 +1148,23 @@ def build_common_cause_comparison(control_doc, instrumented_artifact):
     ins = _crash_side_summary(instrumented_artifact)
     if ctrl is None and ins is None:
         return None
+    unverified = (ctrl is not None
+                  and control_identity_verified(control_doc) is False)
 
     if ctrl is not None and ins is not None:
-        if ctrl["status"] == CONTROL_CRASHED:
+        if ctrl["status"] == CONTROL_CRASHED and unverified:
+            status = CONTROL_UNVERIFIED_BOTH_CRASH
+            attribution = {
+                "instrumentation_regression": "NOT_ESTABLISHED",
+                "guard": ("both observed builds crashed, but the control "
+                          "side is NOT proven to be the original (identity "
+                          "unverified): its crash is not original-side "
+                          "evidence, no common-cause claim may be made, and "
+                          "nothing is attributed. Establish the original "
+                          "side with a valid baseline round or the "
+                          "isolation matrix"),
+            }
+        elif ctrl["status"] == CONTROL_CRASHED:
             status = COMMON_CAUSE_BOTH_CRASH
             attribution = {
                 "instrumentation_regression": "NOT_ESTABLISHED",
@@ -1129,24 +1175,57 @@ def build_common_cause_comparison(control_doc, instrumented_artifact):
                           "must be investigated and only differential "
                           "evidence may isolate instrumentation"),
             }
+        elif unverified:
+            status = CONTROL_UNVERIFIED_INSTRUMENTED_CRASH
+            attribution = {
+                "instrumentation_regression": "NOT_ESTABLISHED",
+                "guard": ("the instrumented artifact crashed, but the "
+                          "control side is NOT proven to be the original "
+                          "(identity unverified): there is no valid "
+                          "baseline, the original-side runtime was never "
+                          "established, and nothing is attributed. Run a "
+                          "valid baseline round or the isolation matrix "
+                          "before any causal claim"),
+            }
         else:
             status = CONTROL_HEALTHY_INSTRUMENTED_CRASH
             attribution = {
                 "instrumentation_regression": "SUSPECTED_NOT_PROVEN",
                 "guard": ("the working control starts cleanly while the "
-                          "instrumented artifact crashes: instrumentation "
-                          "is a candidate cause, not a proven one, until "
-                          "the differential is confirmed on the same "
-                          "device/session"),
+                          "instrumented artifact crashes: the ReelSec "
+                          "artifact changes (apktool rebuild + telemetry "
+                          "probe + re-signing) are an undifferentiated "
+                          "CANDIDATE cause, not a proven one — repackaging "
+                          "is not yet separated from the probe. Run the "
+                          "isolation matrix (reelsec.py isolate) to "
+                          "separate them on the same device/session"),
             }
     elif ctrl is not None:
-        if ctrl["status"] == CONTROL_CRASHED:
+        if ctrl["status"] == CONTROL_CRASHED and unverified:
+            status = CONTROL_UNVERIFIED_ONLY_CRASH
+            attribution = {
+                "instrumentation_regression": "NOT_ESTABLISHED",
+                "guard": ("the observed build crashed, but it is NOT "
+                          "proven to be the original (identity unverified; "
+                          "it may be a leftover instrumented artifact): no "
+                          "original-side claim may be made"),
+            }
+        elif ctrl["status"] == CONTROL_CRASHED:
             status = CONTROL_ONLY_CRASH
             attribution = {
                 "instrumentation_regression": "NOT_ESTABLISHED",
                 "guard": ("the working control crashed with no instrumented "
                           "crash evidence on record: this crash is not "
                           "caused by instrumentation"),
+            }
+        elif unverified:
+            status = CONTROL_UNVERIFIED_NO_INSTRUMENTED_EVIDENCE
+            attribution = {
+                "instrumentation_regression": "NOT_APPLICABLE",
+                "guard": ("the observed build is healthy, but it is NOT "
+                          "proven to be the original (identity unverified), "
+                          "and no instrumented crash evidence exists to "
+                          "compare: no baseline, no comparison"),
             }
         else:
             status = CONTROL_HEALTHY_NO_INSTRUMENTED_EVIDENCE
@@ -1883,6 +1962,10 @@ def campaign_state_machine(safety=None, device_ok=None, working_control=None,
         move("ORIGINAL_ONLY_CRASH",
              "only the installed original crashed; no instrumented crash "
              "evidence in this session")
+    elif cc_status in UNVERIFIED_CC_STATUSES:
+        move("COMPARISON_INCOMPLETE",
+             "working-control identity unverified: no valid original-side "
+             "baseline in this session (%s)" % cc_status)
     elif cc_status == "COMMON_CAUSE_INCOMPLETE":
         move("COMPARISON_INCOMPLETE",
              "common-cause comparison incomplete: %s"
@@ -2135,6 +2218,10 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
     regression = comparison["regression_status"]
     if effective_cc == "COMMON_CAUSE_BOTH_CRASH":
         regression = "NOT_ESTABLISHED"
+    elif effective_cc in (CONTROL_UNVERIFIED_BOTH_CRASH,
+                          CONTROL_UNVERIFIED_INSTRUMENTED_CRASH,
+                          CONTROL_UNVERIFIED_ONLY_CRASH):
+        regression = "NOT_ESTABLISHED"
     elif effective_cc == "CONTROL_HEALTHY_INSTRUMENTED_CRASH" and \
             regression == "NOT_COMPARABLE":
         regression = "SUSPECTED_NOT_PROVEN"
@@ -2145,6 +2232,8 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
         runtime_status = "CONTROL_ONLY_CRASH"
     elif effective_cc == "CONTROL_HEALTHY_INSTRUMENTED_CRASH":
         runtime_status = "CONTROL_HEALTHY_INSTRUMENTED_CRASH"
+    elif effective_cc in UNVERIFIED_CC_STATUSES:
+        runtime_status = effective_cc
     elif ih.get("startup") == "CRASH":
         runtime_status = "BLOCKED_BY_ARTIFACT_CRASH"
     else:
@@ -2194,6 +2283,16 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
             "common cause (device/OS/ROM or the app itself) with the "
             "working control left installed; no destructive operation is "
             "required or permitted.")
+    elif effective_cc in UNVERIFIED_CC_STATUSES:
+        next_action = (
+            "Original-side runtime NOT established: the observed control "
+            "build is not hash-bound to the original reference "
+            "(%s), so there is no valid baseline and nothing is "
+            "attributed. Run a valid baseline round (test-signed "
+            "original, install -r only) or the isolation matrix "
+            "(reelsec.py isolate) before any causal claim. No "
+            "destructive operation is required or permitted."
+            % effective_cc)
     elif ih.get("startup") == "CRASH":
         if regression == REGRESSION_CONFIRMED:
             next_action = (
@@ -2213,10 +2312,13 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
         elif effective_cc == "CONTROL_HEALTHY_INSTRUMENTED_CRASH":
             next_action = (
                 "Control starts cleanly while the instrumented artifact "
-                "crashes: instrumentation is a CANDIDATE cause "
-                "(SUSPECTED_NOT_PROVEN); review INSTRUMENTATION-IMPACT.json "
-                "change linkage before any further round. No destructive "
-                "operation is required.")
+                "crashes: the ReelSec artifact changes (apktool rebuild + "
+                "telemetry probe + re-signing) are an undifferentiated "
+                "CANDIDATE cause (SUSPECTED_NOT_PROVEN) — repackaging is "
+                "not yet separated from the probe. Run the isolation "
+                "matrix (reelsec.py isolate) to separate them; review "
+                "INSTRUMENTATION-IMPACT.json change linkage meanwhile. No "
+                "destructive operation is required.")
         else:
             next_action = (
                 "Artifact crash without original-side comparison: run the "
