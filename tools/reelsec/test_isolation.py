@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for the A/B/C differential-isolation matrix (pure logic).
+"""Tests for the A/B/B1/B2/C differential-isolation matrix (pure logic).
 
 Arm A (test-signed original) vs arm B (rebuild + re-sign, zero mutations)
 vs arm C (rebuild + LOG_I_PROBE, no Gadget): the decision rules must name
@@ -230,6 +230,138 @@ class DecideIsolationTests(unittest.TestCase):
             decide_isolation({})
         with self.assertRaises(IsolationError):
             decide_isolation({"D": _record("A", "HEALTHY")})
+
+
+class PlanNarrowingTests(unittest.TestCase):
+    def test_ab1b2_scope(self):
+        plan = plan_matrix({"REELSEC_ISOLATION_MATRIX": "AB1B2"})
+        self.assertEqual(plan["arms"], ["A", "B1", "B2"])
+
+    def test_narrowing_order_and_dedup(self):
+        plan = plan_matrix({"REELSEC_ISOLATION_MATRIX": "B2B1B2A"})
+        self.assertEqual(plan["arms"], ["B2", "B1", "A"])
+
+    def test_bare_digit_refused(self):
+        with self.assertRaises(IsolationError):
+            plan_matrix({"REELSEC_ISOLATION_MATRIX": "AB12"})
+
+    def test_b_and_narrowing_mix(self):
+        plan = plan_matrix({"REELSEC_ISOLATION_MATRIX": "ABB1"})
+        self.assertEqual(plan["arms"], ["A", "B", "B1"])
+
+
+class DecideNarrowingTests(unittest.TestCase):
+    def test_unaligned_rebuild_crash_suffices(self):
+        decision = decide_isolation({
+            "A": _record("A", "HEALTHY"),
+            "B1": _record("B1", "CRASHED"),
+            "B2": _record("B2", "CRASHED")},
+            planned=["A", "B1", "B2"])
+        self.assertEqual(decision["status"], "REBUILD_SUFFICES")
+        self.assertEqual(decision["reason"], "UNALIGNED_REBUILD_CRASHES")
+        self.assertEqual(decision["regression"], "SUSPECTED_NOT_PROVEN")
+        self.assertIn("apktool rebuild",
+                      " ".join(decision["candidates"]))
+        self.assertIn("LOG_I_PROBE telemetry probe",
+                      decision["excluded"])
+        self.assertIn("Frida Gadget", decision["excluded"])
+        self.assertTrue(decision["crash_signatures_equal"])
+
+    def test_b1_crash_claims_without_b2(self):
+        decision = decide_isolation({
+            "A": _record("A", "HEALTHY"),
+            "B1": _record("B1", "CRASHED")},
+            planned=["A", "B1"])
+        self.assertEqual(decision["status"], "REBUILD_SUFFICES")
+
+    def test_aligned_only_crash_points_at_alignment(self):
+        decision = decide_isolation({
+            "A": _record("A", "HEALTHY"),
+            "B1": _record("B1", "HEALTHY"),
+            "B2": _record("B2", "CRASHED")},
+            planned=["A", "B1", "B2"])
+        self.assertEqual(decision["status"], "ALIGNMENT_CANDIDATE")
+        self.assertEqual(decision["reason"], "ALIGNED_REBUILD_CRASHES")
+        self.assertIn("zipalign", " ".join(decision["candidates"]))
+        self.assertIn("LOG_I_PROBE telemetry probe",
+                      decision["excluded"])
+
+    def test_b1_crash_b2_healthy_is_anomaly(self):
+        decision = decide_isolation({
+            "A": _record("A", "HEALTHY"),
+            "B1": _record("B1", "CRASHED"),
+            "B2": _record("B2", "HEALTHY")},
+            planned=["A", "B1", "B2"])
+        self.assertEqual(decision["status"], "INCONCLUSIVE")
+        self.assertEqual(decision["reason"],
+                         "ALIGNMENT_ORDER_ANOMALY")
+
+    def test_missing_b2_inconclusive(self):
+        decision = decide_isolation({
+            "A": _record("A", "HEALTHY"),
+            "B1": _record("B1", "HEALTHY")},
+            planned=["A", "B1", "B2"])
+        self.assertEqual(decision["status"], "INCONCLUSIVE")
+        self.assertEqual(decision["reason"], "INCONCLUSIVE_B2_MISSING")
+
+    def test_missing_b1_inconclusive(self):
+        decision = decide_isolation({
+            "A": _record("A", "HEALTHY"),
+            "B2": _record("B2", "HEALTHY")},
+            planned=["A", "B1", "B2"])
+        self.assertEqual(decision["status"], "INCONCLUSIVE")
+        self.assertEqual(decision["reason"], "INCONCLUSIVE_B1_MISSING")
+
+    def test_b2_substitutes_b(self):
+        decision = decide_isolation({
+            "A": _record("A", "HEALTHY"),
+            "B2": _record("B2", "CRASHED")},
+            planned=["A", "B2"])
+        self.assertEqual(decision["status"],
+                         "REPACKAGING_SIGNING_CANDIDATE")
+        self.assertIn("arm B2", decision["detail"])
+
+    def test_b2_substitutes_b_for_probe_rule(self):
+        decision = decide_isolation({
+            "A": _record("A", "HEALTHY"),
+            "B2": _record("B2", "HEALTHY"),
+            "C": _record("C", "CRASHED")},
+            planned=["A", "B2", "C"])
+        self.assertEqual(decision["status"],
+                         "TELEMETRY_PROBE_CANDIDATE")
+
+    def test_narrowing_all_healthy_reproduces_nothing(self):
+        decision = decide_isolation({
+            "A": _record("A", "HEALTHY"),
+            "B1": _record("B1", "HEALTHY"),
+            "B2": _record("B2", "HEALTHY")},
+            planned=["A", "B1", "B2"])
+        self.assertEqual(decision["status"], "NO_CRASH_REPRODUCED")
+
+    def test_partial_scope_all_healthy_stays_inconclusive(self):
+        decision = decide_isolation({
+            "A": _record("A", "HEALTHY"),
+            "B1": _record("B1", "HEALTHY")},
+            planned=["A", "B1"])
+        self.assertEqual(decision["status"], "INCONCLUSIVE")
+        self.assertEqual(decision["reason"],
+                         "INCONCLUSIVE_SCOPE_PARTIAL")
+
+    def test_unknown_planned_arm_rejected(self):
+        with self.assertRaises(IsolationError):
+            decide_isolation({"A": _record("A", "HEALTHY")},
+                             planned=["A", "D"])
+
+    def test_narrowing_arm_records(self):
+        for arm in ("B1", "B2"):
+            record = _record(arm, "HEALTHY")
+            self.assertEqual(record["status"], "HEALTHY")
+            self.assertIn("zero mutations", record["description"])
+        with self.assertRaises(IsolationError):
+            build_arm_record(arm="B3", artifact_sha256="a",
+                             certificate_sha256="b",
+                             install={"success": True}, identity={},
+                             assess=None)
 
 
 if __name__ == "__main__":

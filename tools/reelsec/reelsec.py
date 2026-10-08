@@ -64,6 +64,7 @@ from adb_deploy import (
 import runtime_probe
 import runtime_health
 import isolation
+import artifact_diff
 import safety_gate
 import behavior_capture
 from runtime_capture import capture_snapshot, bind_artifact
@@ -3163,8 +3164,16 @@ def _progress_run(state, output, index, name, fn):
 
 
 def _isolation_build_tree(apktool_backend, work_tree, unsigned_apk,
-                          capabilities):
-    """Apktool build + align for one isolation arm (B/C)."""
+                          capabilities, *, align=None):
+    """Apktool build + optional align for one isolation arm (B/B1/B2/C).
+
+    `align` selects page alignment: None follows the artifact plan
+    (arm B/C behavior), True forces 16 KiB alignment (arm B2; a missing
+    zipalign blocks the arm instead of silently substituting unaligned
+    bytes), False skips alignment entirely (arm B1) behind a safety
+    gate — the unaligned artifact must still be a valid, non-empty ZIP
+    or the arm is blocked rather than assessed on corrupt bytes.
+    """
     build_cmd = apktool_build_command(apktool_backend, work_tree,
                                       unsigned_apk)
     build_rc, build_log = run(build_cmd, cwd=ROOT, timeout=300)
@@ -3176,8 +3185,13 @@ def _isolation_build_tree(apktool_backend, work_tree, unsigned_apk,
     zipalign = capabilities.get("tools", {}).get("zipalign", {}).get("path")
     align_plan = plan_artifact_alignment(
         gadget_enabled=False, zipalign_available=bool(zipalign))
+    do_align = align_plan["align"] if align is None else bool(align)
     align_cmd = None
-    if align_plan["align"]:
+    if do_align:
+        if not zipalign:
+            raise RuntimeError(
+                "arm requires 16 KiB page alignment but zipalign is "
+                "unavailable; refusing to substitute unaligned bytes")
         aligned_apk = Path(unsigned_apk).parent / (
             Path(unsigned_apk).stem + "-aligned.apk")
         align_cmd = zipalign_command(zipalign, built_apk, aligned_apk,
@@ -3196,10 +3210,24 @@ def _isolation_build_tree(apktool_backend, work_tree, unsigned_apk,
                 % (verify_rc, (verify_log or "")[-2000:]))
         verify_native_library_packaging(aligned_apk)
         built_apk = aligned_apk
+    elif align is False:
+        # B1 safety gate: an unaligned rebuild is only assessable when
+        # the raw apktool output is itself a valid installable ZIP.
+        import zipfile as _zipfile
+        try:
+            with _zipfile.ZipFile(built_apk, "r") as archive:
+                if archive.testzip() is not None:
+                    raise _zipfile.BadZipFile("corrupt entry")
+        except _zipfile.BadZipFile as exc:
+            raise RuntimeError(
+                "unaligned rebuild is not a valid ZIP (%s); refusing to "
+                "assess corrupt bytes — the narrowing arm is blocked"
+                % exc)
     built = verify_artifact(built_apk)
     return {"path": built["path"], "sha256": built["sha256"],
             "size": built["size"], "build_command": build_cmd,
             "align_command": align_cmd, "alignment_plan": align_plan,
+            "alignment_applied": do_align,
             "build_output_tail": (build_log or "")[-2000:]}
 
 
@@ -3282,13 +3310,16 @@ def _isolation_install_and_assess(*, arm, signed_apk, signed_sha256,
 def run_isolation_matrix(output, input_apk, capabilities,
                          decoded_inventory, instrumentation_plan,
                          apktool_backend, env=None):
-    """Run the A/B/C differential-isolation matrix.
+    """Run the A/B/B1/B2/C differential-isolation matrix.
 
-    Arms run in plan order (default A, B, C), each replacing the previous
-    via install -r under the same isolated test key. Every arm writes
-    ISOLATION-ARM-<X>.json (plus ISOLATION-ARM-<X>-HEALTH.json when
-    assessed); ISOLATION-DECISION.json carries the causal decision.
-    Returns {"plan", "arms", "decision"}.
+    Arms run in plan order (default A, B, C; "AB1B2" narrows the rebuild
+    delta), each replacing the previous via install -r under the same
+    isolated test key. Every arm writes ISOLATION-ARM-<X>.json (plus
+    ISOLATION-ARM-<X>-HEALTH.json when assessed);
+    ISOLATION-DECISION.json carries the causal decision and
+    ISOLATION-ARTIFACT-DIFF.json carries the byte-level anatomy
+    between the arms' signed artifacts. Returns {"plan", "arms",
+    "decision"}.
     """
     env = env if env is not None else os.environ
     output = Path(output)
@@ -3322,8 +3353,42 @@ def run_isolation_matrix(output, input_apk, capabilities,
             blocked[letter] = record
         return blocked
 
+    # Signed-artifact inventories for the byte-level anatomy. Arms that
+    # never produced a signable artifact leave a gap instead of an
+    # inventory — pairs touching them are reported missing, never
+    # invented.
+    inventories = {}
+    inventory_gaps = []
+
     def _finish(arms):
-        decision = isolation.decide_isolation(arms)
+        diff_pairs = []
+        for first_arm, second_arm in (
+                ("A", "B1"), ("A", "B2"), ("B1", "B2"), ("A", "B"),
+                ("B", "C"), ("A", "C")):
+            pair = "%s\u2192%s" % (first_arm, second_arm)
+            if first_arm in inventories and second_arm in inventories:
+                try:
+                    diff_pairs.append((pair, artifact_diff.diff_inventories(
+                        inventories[first_arm], inventories[second_arm],
+                        pair=pair)))
+                except artifact_diff.ArtifactDiffError as exc:
+                    inventory_gaps.append(
+                        {"pair": pair, "reason": str(exc)[:500]})
+            elif first_arm in plan["arms"] and second_arm in plan["arms"]:
+                inventory_gaps.append(
+                    {"pair": pair,
+                     "reason": "missing inventory for %s"
+                     % ", ".join(arm for arm in (first_arm, second_arm)
+                                 if arm not in inventories)})
+        diff_doc = {"schema_version": "isolation-artifact-diff-1",
+                    "planned_arms": plan["arms"],
+                    "pairs": {pair: doc for pair, doc in diff_pairs},
+                    "gaps": inventory_gaps,
+                    "inventories": inventories}
+        (output / "ISOLATION-ARTIFACT-DIFF.json").write_text(
+            json.dumps(diff_doc, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8")
+        decision = isolation.decide_isolation(arms, planned=plan["arms"])
         decision["matrix"] = {
             "arms": plan["arms"], "package": plan_doc["package"],
             "serial": (plan_doc["device"] or {}).get("serial"),
@@ -3442,9 +3507,10 @@ def run_isolation_matrix(output, input_apk, capabilities,
                 tree = output / ("isolation-arm-%s" % arm.lower())
                 copy_manifest = prepare_instrumented_copy(
                     decoded_root, tree)
-                if arm == isolation.ARM_B:
+                if arm in (isolation.ARM_B, isolation.ARM_B1,
+                           isolation.ARM_B2):
                     manifest = finalize_repack_only_manifest(tree)
-                else:
+                elif arm == isolation.ARM_C:
                     if not plan_ready:
                         raise RuntimeError(
                             "arm C requires a READY instrumentation "
@@ -3456,19 +3522,35 @@ def run_isolation_matrix(output, input_apk, capabilities,
                         tree / source_target.relative_to(source_root))
                     apply_text_probe(tree, copied_target)
                     manifest = finalize_no_gadget_manifest(tree)
+                else:
+                    raise RuntimeError(
+                        "unknown isolation arm %r" % (arm,))
                 manifest = dict(manifest)
                 manifest["instrumentation_target"] = (
                     str(copied_target)
                     if arm == isolation.ARM_C else None)
+                if arm == isolation.ARM_B1:
+                    align = False
+                elif arm == isolation.ARM_B2:
+                    align = True
+                else:
+                    align = None
                 built = _isolation_build_tree(
                     apktool_backend, tree,
                     output / ("isolation-%s-unsigned.apk" % arm),
-                    capabilities)
+                    capabilities, align=align)
+                manifest["alignment_applied"] = built["alignment_applied"]
                 signed_apk = output / ("isolation-%s-signed.apk" % arm)
                 sign = _isolation_sign_artifact(
                     Path(built["path"]), signed_apk, apksigner=apksigner,
                     keystore=keystore, alias=alias, openssl=openssl,
                     env=env)
+            try:
+                inventories[arm] = artifact_diff.inventory_artifact(
+                    sign["signed_path"])
+            except artifact_diff.ArtifactDiffError as exc:
+                inventory_gaps.append(
+                    {"arm": arm, "reason": str(exc)[:500]})
             install, identity, health, compat = \
                 _isolation_install_and_assess(
                     arm=arm, signed_apk=Path(sign["signed_path"]),
@@ -3517,7 +3599,7 @@ def run_isolation_matrix(output, input_apk, capabilities,
 
 
 def cmd_isolate(args):
-    """Standalone entry for the A/B/C isolation matrix."""
+    """Standalone entry for the A/B/B1/B2/C isolation matrix."""
     input_apk = Path(args.apk).expanduser().resolve()
     if not input_apk.is_file():
         raise SystemExit("APK not found: %s" % input_apk)
