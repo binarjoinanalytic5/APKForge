@@ -1,0 +1,69 @@
+
+/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T14-39-03/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so:	file format elf64-littleaarch64
+
+Disassembly of section .text:
+
+00000000002783f4 <_ZN18codecPluginManager13dummyFunctionEv>:
+  2785bc: d10143ff     	sub	sp, sp, #0x50
+  2785c0: f9000bf7     	str	x23, [sp, #0x10]
+  2785c4: a90257f6     	stp	x22, x21, [sp, #0x20]
+  2785c8: a9034ff4     	stp	x20, x19, [sp, #0x30]
+  2785cc: a9047bfd     	stp	x29, x30, [sp, #0x40]
+  2785d0: 910103fd     	add	x29, sp, #0x40
+  2785d4: d53bd057     	mrs	x23, TPIDR_EL0
+  2785d8: f94016e8     	ldr	x8, [x23, #0x28]
+  2785dc: aa0003f3     	mov	x19, x0
+  2785e0: f00024e9     	adrp	x9, 0x717000 <_ZTVN6Cicada12avAESEncryptE+0x730>
+  2785e4: 91394129     	add	x9, x9, #0xe50
+  2785e8: f90007e8     	str	x8, [sp, #0x8]
+  2785ec: f9414c00     	ldr	x0, [x0, #0x298]
+  2785f0: 91004128     	add	x8, x9, #0x10
+  2785f4: f9000268     	str	x8, [x19]
+  2785f8: 91052128     	add	x8, x9, #0x148
+  2785fc: f9012668     	str	x8, [x19, #0x248]
+  278600: 97f981f8     	bl	0xd8de0 <free@plt>
+  278604: 910a0274     	add	x20, x19, #0x280
+  278608: aa1403e0     	mov	x0, x20
+  27860c: 94000884     	bl	0x27a81c <_ZN18codecPluginManager13dummyFunctionEv+0x2428>
+  278610: 9111a275     	add	x21, x19, #0x468
+  278614: aa1503e0     	mov	x0, x21
+  278618: 97feae3c     	bl	0x223f08 <_ZN6Cicada21CicadaPlayerPrototype6createEPKNS_7optionsE+0x2021c>
+  27861c: f9415676     	ldr	x22, [x19, #0x2a8]
+  278620: b40000b6     	cbz	x22, 0x278634 <_ZN18codecPluginManager13dummyFunctionEv+0x240>
+  278624: aa1603e0     	mov	x0, x22
+  278628: 94000b5d     	bl	0x27b39c <_ZN18codecPluginManager13dummyFunctionEv+0x2fa8>
+  27862c: aa1603e0     	mov	x0, x22
+  278630: 97f98144     	bl	0xd8b40 <_ZdlPv@plt>
+  278634: 91120260     	add	x0, x19, #0x480
+  278638: 97f9fff7     	bl	0xf8614 <.text+0x17d54>
+  27863c: aa1503e0     	mov	x0, x21
+  278640: 97feae32     	bl	0x223f08 <_ZN6Cicada21CicadaPlayerPrototype6createEPKNS_7optionsE+0x2021c>
+  278644: 91116260     	add	x0, x19, #0x458
+  278648: 94000018     	bl	0x2786a8 <_ZN18codecPluginManager13dummyFunctionEv+0x2b4>
+  27864c: 910c6260     	add	x0, x19, #0x318
+  278650: 94000844     	bl	0x27a760 <_ZN18codecPluginManager13dummyFunctionEv+0x236c>
+  278654: 910ba260     	add	x0, x19, #0x2e8
+  278658: 97f98186     	bl	0xd8c70 <_ZNSt6__ndk15mutexD1Ev@plt>
+  27865c: 910ac260     	add	x0, x19, #0x2b0
+  278660: 97f9823c     	bl	0xd8f50 <_ZNSt6__ndk115recursive_mutexD1Ev@plt>
+  278664: aa1403e0     	mov	x0, x20
+  278668: 9400086d     	bl	0x27a81c <_ZN18codecPluginManager13dummyFunctionEv+0x2428>
+  27866c: 9109a260     	add	x0, x19, #0x268
+  278670: 97f9ffe9     	bl	0xf8614 <.text+0x17d54>
+  278674: aa1303e0     	mov	x0, x19
+  278678: 97f9956a     	bl	0xddc20 <_ZN13ActiveDecoderD2Ev@plt>
+  27867c: f94016e8     	ldr	x8, [x23, #0x28]
+  278680: f94007e9     	ldr	x9, [sp, #0x8]
+  278684: eb09011f     	cmp	x8, x9
+  278688: 540000e1     	b.ne	0x2786a4 <_ZN18codecPluginManager13dummyFunctionEv+0x2b0>
+  27868c: a9447bfd     	ldp	x29, x30, [sp, #0x40]
+  278690: a9434ff4     	ldp	x20, x19, [sp, #0x30]
+  278694: a94257f6     	ldp	x22, x21, [sp, #0x20]
+  278698: f9400bf7     	ldr	x23, [sp, #0x10]
+  27869c: 910143ff     	add	sp, sp, #0x50
+  2786a0: d65f03c0     	ret
+  2786a4: 97f98117     	bl	0xd8b00 <__stack_chk_fail@plt>
+  2786a8: d100c3ff     	sub	sp, sp, #0x30
+  2786ac: a9014ff4     	stp	x20, x19, [sp, #0x10]
+
+[exit=0]

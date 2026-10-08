@@ -1,0 +1,5 @@
+{
+  "reason": "sign stage did not verify an artifact",
+  "sign_status": "BLOCKED_OR_FAILED",
+  "status": "NOT_DEPLOYED"
+}

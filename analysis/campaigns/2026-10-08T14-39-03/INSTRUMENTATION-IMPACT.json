@@ -1,0 +1,16 @@
+{
+  "attribution_rule": "a crash is attributed to instrumentation only when the identified fault library matches a ReelSec-introduced change; CRASH_CAUSE_UNKNOWN is never attributed",
+  "changes": [
+    {
+      "applied_by": "apktool build / zipalign",
+      "artifact_path": "instrumented-unsigned.apk",
+      "change_id": "BUILD-1",
+      "description": "apktool rebuild + zipalign of the isolated instrumented tree",
+      "type": "REPACKAGING"
+    }
+  ],
+  "crash_cause": null,
+  "crash_linkage": "NOT_ASSESSED",
+  "fault_library": null,
+  "schema_version": "instrumentation-impact-1"
+}

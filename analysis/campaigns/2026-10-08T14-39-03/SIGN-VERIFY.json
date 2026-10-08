@@ -1,0 +1,4 @@
+{
+  "error": "signing preflight not ready (pkcs12_password_valid,pkcs12_alias_present)",
+  "status": "BLOCKED_OR_FAILED"
+}

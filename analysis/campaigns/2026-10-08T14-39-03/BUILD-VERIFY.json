@@ -1,0 +1,50 @@
+{
+  "alignment_command": [
+    "/data/data/com.termux/files/usr/bin/zipalign",
+    "-P",
+    "16",
+    "-f",
+    "-v",
+    "4",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T14-39-03/instrumented-unsigned.apk",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T14-39-03/instrumented-unsigned-aligned.apk"
+  ],
+  "alignment_output_tail": "n_rules_english.txt (OK - compressed)\n50446499 org/apache/commons/codec/language/bm/gen_approx_russian.txt (OK - compressed)\n50447291 org/apache/commons/codec/language/bm/sep_exact_portuguese.txt (OK - compressed)\n50447854 org/apache/commons/codec/language/bm/sep_exact_any.txt (OK - compressed)\n50448423 org/apache/commons/codec/language/bm/ash_approx_spanish.txt (OK - compressed)\n50449005 org/apache/commons/codec/language/bm/gen_approx_cyrillic.txt (OK - compressed)\n50449591 org/apache/commons/codec/language/bm/ash_approx_hungarian.txt (OK - compressed)\n50450172 org/apache/commons/codec/language/bm/sep_approx_italian.txt (OK - compressed)\n50450744 org/apache/commons/codec/language/bm/sep_lang.txt (OK - compressed)\n50451796 org/apache/commons/codec/language/bm/gen_approx_greeklatin.txt (OK - compressed)\n50452384 org/apache/commons/codec/language/bm/gen_rules_polish.txt (OK - compressed)\n50453923 org/apache/commons/codec/language/bm/gen_exact_english.txt (OK - compressed)\n50454505 org/apache/commons/codec/language/bm/ash_rules_polish.txt (OK - compressed)\n50456054 org/apache/commons/codec/language/bm/ash_rules_cyrillic.txt (OK - compressed)\n50457123 org/apache/commons/codec/language/bm/gen_exact_cyrillic.txt (OK - compressed)\n50457709 org/apache/commons/codec/language/bm/sep_rules_portuguese.txt (OK - compressed)\n50458903 org/apache/commons/codec/language/bm/ash_approx_common.txt (OK - compressed)\n50460439 org/apache/commons/codec/language/bm/sep_approx_spanish.txt (OK - compressed)\n50461022 org/apache/commons/codec/language/bm/gen_rules_romanian.txt (OK - compressed)\n50461847 org/apache/commons/codec/language/bm/ash_exact_romanian.txt (OK - compressed)\n50462426 org/apache/commons/codec/language/bm/ash_rules_hebrew.txt (OK - compressed)\n50463210 org/apache/commons/codec/language/bm/sep_hebrew_common.txt (OK - compressed)\n50464221 org/apache/commons/codec/language/bm/gen_rules_hebrew.txt (OK - compressed)\n50465008 org/apache/commons/codec/language/bm/gen_rules_czech.txt (OK - compressed)\n50465848 org/apache/commons/codec/language/bm/ash_lang.txt (OK - compressed)\n50467479 org/apache/http/version.properties (OK - compressed)\n50468083 org/apache/http/client/version.properties (OK - compressed)\n50468772 google/protobuf/timestamp.proto (OK - compressed)\n50471671 google/protobuf/field_mask.proto (OK - compressed)\n50474865 google/protobuf/api.proto (OK - compressed)\n50477855 google/protobuf/duration.proto (OK - compressed)\n50479987 google/protobuf/struct.proto (OK - compressed)\n50481733 google/protobuf/wrappers.proto (OK - compressed)\n50483361 google/protobuf/source_context.proto (OK - compressed)\n50484626 google/protobuf/any.proto (OK - compressed)\n50487319 google/protobuf/type.proto (OK - compressed)\n50489769 google/protobuf/empty.proto (OK - compressed)\n50491068 okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n50532528 okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n50532792 com/applovin/shadow/okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n50574272 com/applovin/shadow/okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n50574524 com/google/api/client/http/google-http-client.properties (OK)\n50574632 com/google/api/client/googleapis/google.p12 (OK)\n50651181 com/google/api/client/googleapis/google.jks (OK - compressed)\n50694532 com/google/api/client/googleapis/google-api-client.properties (OK)\n50694630 src/google/protobuf/timestamp.proto (OK - compressed)\n50697533 src/google/protobuf/field_mask.proto (OK - compressed)\n50700731 src/google/protobuf/api.proto (OK - compressed)\n50703725 src/google/protobuf/duration.proto (OK - compressed)\n50705861 src/google/protobuf/struct.proto (OK - compressed)\n50707611 src/google/protobuf/wrappers.proto (OK - compressed)\n50709243 src/google/protobuf/source_context.proto (OK - compressed)\n50710512 src/google/protobuf/any.proto (OK - compressed)\n50713209 src/google/protobuf/type.proto (OK - compressed)\n50715663 src/google/protobuf/empty.proto (OK - compressed)\nVerification successful\n",
+  "alignment_page_size_kb": 16,
+  "alignment_plan": {
+    "align": true,
+    "reason": "zipalign available: every instrumented artifact is page-aligned before signing, with or without Gadget"
+  },
+  "alignment_returncode": 0,
+  "alignment_verify_command": [
+    "/data/data/com.termux/files/usr/bin/zipalign",
+    "-c",
+    "-P",
+    "16",
+    "-v",
+    "4",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T14-39-03/instrumented-unsigned-aligned.apk"
+  ],
+  "command": [
+    "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+    "-cp",
+    "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+    "brut.apktool.Main",
+    "b",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T14-39-03/instrumented-apk",
+    "-o",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T14-39-03/instrumented-unsigned.apk"
+  ],
+  "native_library_packaging": {
+    "compressed_native_libraries": [],
+    "native_library_count": 50,
+    "status": "NATIVE_LIBRARIES_UNCOMPRESSED"
+  },
+  "output_tail": "I: Using Apktool 2.7.0-dirty\nI: Checking whether sources has changed...\nI: Smaling smali folder into classes.dex...\nI: Checking whether resources has changed...\nI: Copying raw resources...\nI: Copying libs... (/lib)\nI: Copying libs... (/kotlin)\nI: Copying libs... (/META-INF/services)\nI: Building apk file...\nI: Copying unknown files/dir...\nI: Built apk into: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T14-39-03/instrumented-unsigned.apk\n",
+  "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T14-39-03/instrumented-unsigned-aligned.apk",
+  "raw_built_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T14-39-03/instrumented-unsigned.apk",
+  "returncode": 0,
+  "sha256": "e994b46d68066cd2e1af6472cd79b7a7a551604170e54b7481775bbbc1db1c5e",
+  "size": 51049230,
+  "status": "BUILT"
+}

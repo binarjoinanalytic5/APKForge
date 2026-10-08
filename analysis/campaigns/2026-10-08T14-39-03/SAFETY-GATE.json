@@ -1,0 +1,20 @@
+{
+  "authorization_document": null,
+  "capabilities": {},
+  "checked_at_epoch": 1791470343.6325452,
+  "destructive_policy": {
+    "CLEAR_DATA": "DENY",
+    "FACTORY_RESET": "DENY",
+    "REMOVE_PACKAGE": "DENY",
+    "UNINSTALL": "DENY"
+  },
+  "device": {
+    "adb": null,
+    "reachable": null,
+    "serial": null
+  },
+  "reason": null,
+  "safety": "OK",
+  "schema_version": "doctor-1",
+  "violations": []
+}

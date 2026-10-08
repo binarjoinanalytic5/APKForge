@@ -1,0 +1,368 @@
+{
+  "collected_at_epoch": 1791470511.4903648,
+  "collector": "BASELINE",
+  "data": {
+    "baseline_profile": {
+      "abis": [
+        "arm64-v8a",
+        "armeabi-v7a"
+      ],
+      "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T14-39-03/original-testsigned.apk",
+      "exists": true,
+      "native_libs": [
+        "lib/arm64-v8a/libSecShell-x86.so",
+        "lib/arm64-v8a/libSecShell.so",
+        "lib/arm64-v8a/libalinetworkdiagnosis.so",
+        "lib/arm64-v8a/libalivcffmpeg.so",
+        "lib/arm64-v8a/libapplovin-native-crash-reporter.so",
+        "lib/arm64-v8a/libbuffer_pgl.so",
+        "lib/arm64-v8a/libc++_shared.so",
+        "lib/arm64-v8a/libcrashlytics-common.so",
+        "lib/arm64-v8a/libcrashlytics-handler.so",
+        "lib/arm64-v8a/libcrashlytics-trampoline.so",
+        "lib/arm64-v8a/libcrashlytics.so",
+        "lib/arm64-v8a/libdatastore_shared_counter.so",
+        "lib/arm64-v8a/libfile_lock_pgl.so",
+        "lib/arm64-v8a/libmarsxlog.so",
+        "lib/arm64-v8a/libmku_aaab.so",
+        "lib/arm64-v8a/libmmkv.so",
+        "lib/arm64-v8a/libnms.so",
+        "lib/arm64-v8a/libpglarmor.so",
+        "lib/arm64-v8a/libprotect.so",
+        "lib/arm64-v8a/libsaasCorePlayer.so",
+        "lib/arm64-v8a/libsaasDownloader.so",
+        "lib/arm64-v8a/libsls_producer.so",
+        "lib/arm64-v8a/libstupid.so",
+        "lib/arm64-v8a/libtapjoy.so",
+        "lib/arm64-v8a/libtt_ugen_layout.so",
+        "lib/armeabi-v7a/libSecShell-x86.so",
+        "lib/armeabi-v7a/libSecShell.so",
+        "lib/armeabi-v7a/libalinetworkdiagnosis.so",
+        "lib/armeabi-v7a/libalivcffmpeg.so",
+        "lib/armeabi-v7a/libapplovin-native-crash-reporter.so",
+        "lib/armeabi-v7a/libbuffer_pgl.so",
+        "lib/armeabi-v7a/libc++_shared.so",
+        "lib/armeabi-v7a/libcrashlytics-common.so",
+        "lib/armeabi-v7a/libcrashlytics-handler.so",
+        "lib/armeabi-v7a/libcrashlytics-trampoline.so",
+        "lib/armeabi-v7a/libcrashlytics.so",
+        "lib/armeabi-v7a/libdatastore_shared_counter.so",
+        "lib/armeabi-v7a/libfile_lock_pgl.so",
+        "lib/armeabi-v7a/libmarsxlog.so",
+        "lib/armeabi-v7a/libmku_aaab.so",
+        "lib/armeabi-v7a/libmmkv.so",
+        "lib/armeabi-v7a/libnms.so",
+        "lib/armeabi-v7a/libpglarmor.so",
+        "lib/armeabi-v7a/libprotect.so",
+        "lib/armeabi-v7a/libsaasCorePlayer.so",
+        "lib/armeabi-v7a/libsaasDownloader.so",
+        "lib/armeabi-v7a/libsls_producer.so",
+        "lib/armeabi-v7a/libstupid.so",
+        "lib/armeabi-v7a/libtapjoy.so",
+        "lib/armeabi-v7a/libtt_ugen_layout.so"
+      ],
+      "package": null,
+      "sha256": "3a3650633fbddfc16e081eaff146dfc884220998b65dcdede973e0c608f9c000",
+      "signature_blocks": true,
+      "size_bytes": 79716921
+    },
+    "crash_comparison": null,
+    "health": {
+      "artifact_type": "ORIGINAL_APK",
+      "cause_analysis": {
+        "cause": "CRASH_CAUSE_UNKNOWN",
+        "confidence": "NONE",
+        "evidence": [],
+        "fault_library": null,
+        "searched_sources": [
+          "/proc/<pid>/maps (unavailable without privilege)"
+        ]
+      },
+      "classification": {
+        "confidence": "MEDIUM",
+        "crash_class": "HEALTHY",
+        "evidence_source": "adb:ps polling + exit-info + logcat",
+        "exit_reason_code": null,
+        "exit_reason_name": null,
+        "exit_status": null,
+        "package": "com.newleaf.app.android.victor",
+        "pid": 29870,
+        "reason": "process observed alive; no new crash exit-info entry and no package-associated fatal signal",
+        "stage": "PROCESS_HEALTH_GATE",
+        "timestamp": null,
+        "user": null
+      },
+      "crash_artifact": null,
+      "crash_cause": "CRASH_CAUSE_UNKNOWN",
+      "crash_cause_confidence": "NONE",
+      "crash_cause_library": null,
+      "crash_class": "HEALTHY",
+      "crash_session_binding": {
+        "bound": false,
+        "method": "BUFFER_DIFF",
+        "reason": "no new package-associated fatal line after launch; stale tombstone (pid=26223) predates this session: excluded from attribution, evidence preserved"
+      },
+      "crash_source": "adb:ps polling + exit-info + logcat",
+      "elapsed_ms": 14790,
+      "evidence": {
+        "crash_buffer_binding": {
+          "bound": false,
+          "method": "BUFFER_DIFF",
+          "reason": "no new package-associated fatal line after launch; stale tombstone (pid=26223) predates this session: excluded from attribution, evidence preserved"
+        },
+        "exit_info_new_entries": [],
+        "exit_info_pre_count": 0,
+        "exit_info_source": "adb:dumpsys activity exit-info com.newleaf.app.android.victor",
+        "maps_captured": false,
+        "session_tombstone": {
+          "abort_message": null,
+          "abort_message_present": false,
+          "backtrace_frames": [],
+          "fatal_lines": [],
+          "fatal_signal": null,
+          "fatal_status": null,
+          "fault_addr": null,
+          "package_associated": null,
+          "package_matched_lines": [],
+          "pid": null,
+          "thread_name": null,
+          "tid": null
+        },
+        "tombstone": {
+          "abort_message": null,
+          "abort_message_present": false,
+          "backtrace_frames": [
+            {
+              "library": "libc.so",
+              "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+              "pc": "00000000000537d4",
+              "symbol": "abort+168"
+            },
+            {
+              "library": "base.apk",
+              "library_path": "/data/app/~~Qog5c_NTa7vFLrvKWxREqA==/com.newleaf.app.android.victor-SQSVeF-6OnBIjMXDvrXlJg==/base.apk",
+              "pc": "0000000000031e10",
+              "symbol": null
+            },
+            {
+              "library": "libc.so",
+              "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+              "pc": "00000000000537d4",
+              "symbol": "abort+168"
+            },
+            {
+              "library": "base.apk",
+              "library_path": "/data/app/~~Qog5c_NTa7vFLrvKWxREqA==/com.newleaf.app.android.victor-SQSVeF-6OnBIjMXDvrXlJg==/base.apk",
+              "pc": "0000000000031e10",
+              "symbol": null
+            },
+            {
+              "library": "libc.so",
+              "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+              "pc": "00000000000537d4",
+              "symbol": "abort+168"
+            },
+            {
+              "library": "base.apk",
+              "library_path": "/data/app/~~Qog5c_NTa7vFLrvKWxREqA==/com.newleaf.app.android.victor-SQSVeF-6OnBIjMXDvrXlJg==/base.apk",
+              "pc": "0000000000031e10",
+              "symbol": null
+            },
+            {
+              "library": "libc.so",
+              "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+              "pc": "00000000000537d4",
+              "symbol": "abort+168"
+            },
+            {
+              "library": "base.apk",
+              "library_path": "/data/app/~~Qog5c_NTa7vFLrvKWxREqA==/com.newleaf.app.android.victor-SQSVeF-6OnBIjMXDvrXlJg==/base.apk",
+              "pc": "0000000000031e10",
+              "symbol": null
+            },
+            {
+              "library": "libc.so",
+              "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+              "pc": "00000000000537d4",
+              "symbol": "abort+168"
+            },
+            {
+              "library": "base.apk",
+              "library_path": "/data/app/~~Qog5c_NTa7vFLrvKWxREqA==/com.newleaf.app.android.victor-SQSVeF-6OnBIjMXDvrXlJg==/base.apk",
+              "pc": "0000000000031e10",
+              "symbol": null
+            },
+            {
+              "library": "libc.so",
+              "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+              "pc": "00000000000537d4",
+              "symbol": "abort+168"
+            },
+            {
+              "library": "base.apk",
+              "library_path": "/data/app/~~Qog5c_NTa7vFLrvKWxREqA==/com.newleaf.app.android.victor-SQSVeF-6OnBIjMXDvrXlJg==/base.apk",
+              "pc": "0000000000031e10",
+              "symbol": null
+            },
+            {
+              "library": "libc.so",
+              "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+              "pc": "00000000000537d4",
+              "symbol": "abort+168"
+            },
+            {
+              "library": "base.apk",
+              "library_path": "/data/app/~~Qog5c_NTa7vFLrvKWxREqA==/com.newleaf.app.android.victor-SQSVeF-6OnBIjMXDvrXlJg==/base.apk",
+              "pc": "0000000000031e10",
+              "symbol": null
+            },
+            {
+              "library": "libc.so",
+              "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+              "pc": "00000000000537d4",
+              "symbol": "abort+168"
+            },
+            {
+              "library": "base.apk",
+              "library_path": "/data/app/~~-TO_K1JYUYGwIq6wErFiDQ==/com.newleaf.app.android.victor-MdtiYLwxqSTIbElakgzcsA==/base.apk",
+              "pc": "0000000000031e10",
+              "symbol": null
+            },
+            {
+              "library": "libc.so",
+              "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+              "pc": "00000000000537d4",
+              "symbol": "abort+168"
+            },
+            {
+              "library": "base.apk",
+              "library_path": "/data/app/~~-TO_K1JYUYGwIq6wErFiDQ==/com.newleaf.app.android.victor-MdtiYLwxqSTIbElakgzcsA==/base.apk",
+              "pc": "0000000000031e10",
+              "symbol": null
+            },
+            {
+              "library": "libc.so",
+              "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+              "pc": "00000000000537d4",
+              "symbol": "abort+168"
+            },
+            {
+              "library": "base.apk",
+              "library_path": "/data/app/~~-TO_K1JYUYGwIq6wErFiDQ==/com.newleaf.app.android.victor-MdtiYLwxqSTIbElakgzcsA==/base.apk",
+              "pc": "0000000000031e10",
+              "symbol": null
+            },
+            {
+              "library": "libc.so",
+              "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+              "pc": "00000000000537d4",
+              "symbol": "abort+168"
+            },
+            {
+              "library": "base.apk",
+              "library_path": "/data/app/~~-TO_K1JYUYGwIq6wErFiDQ==/com.newleaf.app.android.victor-MdtiYLwxqSTIbElakgzcsA==/base.apk",
+              "pc": "0000000000031e10",
+              "symbol": null
+            }
+          ],
+          "fatal_lines": [
+            "10-08 02:45:49.413 18792 18792 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 18792 (.android.victor), pid 18792 (.android.victor)",
+            "10-08 02:45:56.391 19021 19021 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 19021 (.android.victor), pid 19021 (.android.victor)",
+            "10-08 02:45:57.462 19117 19117 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 19117 (.android.victor), pid 19117 (.android.victor)",
+            "10-08 02:46:44.431 19924 19924 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 19924 (.android.victor), pid 19924 (.android.victor)",
+            "10-08 02:46:45.452 19994 19994 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 19994 (.android.victor), pid 19994 (.android.victor)"
+          ],
+          "fatal_signal": "SIGABRT",
+          "fatal_status": "6",
+          "fault_addr": null,
+          "package_associated": true,
+          "package_matched_lines": [
+            "10-08 02:45:43.040 18679 18679 F DEBUG   :       #01 pc 0000000000031e10  /data/app/~~Qog5c_NTa7vFLrvKWxREqA==/com.newleaf.app.android.victor-SQSVeF-6OnBIjMXDvrXlJg==/base.apk",
+            "10-08 02:45:49.413 18792 18792 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 18792 (.android.victor), pid 18792 (.android.victor)",
+            "10-08 02:45:49.618 18819 18819 F DEBUG   : Cmdline: com.newleaf.app.android.victor",
+            "10-08 02:45:49.618 18819 18819 F DEBUG   : pid: 18792, tid: 18792, name: .android.victor  >>> com.newleaf.app.android.victor <<<",
+            "10-08 02:45:49.619 18819 18819 F DEBUG   :       #01 pc 0000000000031e10  /data/app/~~Qog5c_NTa7vFLrvKWxREqA==/com.newleaf.app.android.victor-SQSVeF-6OnBIjMXDvrXlJg==/base.apk",
+            "10-08 02:45:56.391 19021 19021 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 19021 (.android.victor), pid 19021 (.android.victor)",
+            "10-08 02:45:56.624 19053 19053 F DEBUG   : Cmdline: com.newleaf.app.android.victor",
+            "10-08 02:45:56.624 19053 19053 F DEBUG   : pid: 19021, tid: 19021, name: .android.victor  >>> com.newleaf.app.android.victor <<<",
+            "10-08 02:45:56.624 19053 19053 F DEBUG   :       #01 pc 0000000000031e10  /data/app/~~Qog5c_NTa7vFLrvKWxREqA==/com.newleaf.app.android.victor-SQSVeF-6OnBIjMXDvrXlJg==/base.apk",
+            "10-08 02:45:57.462 19117 19117 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 19117 (.android.victor), pid 19117 (.android.victor)"
+          ],
+          "pid": 26223,
+          "source": "adb:logcat -b crash -d -t 400",
+          "thread_name": ".android.victor",
+          "tid": 26223
+        }
+      },
+      "exit_reason": null,
+      "exit_status": null,
+      "installed_apk_path": "/data/app/~~bggEg_Ctnthfft8HU_r1Kw==/com.newleaf.app.android.victor-D3_B1Dp7l6zCVRkpX2BNDw==/base.apk",
+      "installed_identity": {
+        "apk_sha256": "3a3650633fbddfc16e081eaff146dfc884220998b65dcdede973e0c608f9c000",
+        "code_path": "/data/app/~~bggEg_Ctnthfft8HU_r1Kw==/com.newleaf.app.android.victor-D3_B1Dp7l6zCVRkpX2BNDw==",
+        "primary_cpu_abi": "arm64-v8a",
+        "signing_certificate_raw_prefix": "signatures=PackageSignatures{c411615 version:3, signatures:[6df869f4], past signatures:[]}",
+        "signing_certificate_sha256": null,
+        "uid": "10816",
+        "users_installed": [
+          0,
+          95
+        ],
+        "version_code": "4200",
+        "version_name": "4.2.00"
+      },
+      "launch_returncode": 0,
+      "package": "com.newleaf.app.android.victor",
+      "pids": [
+        29870
+      ],
+      "process_alive_at_exit": true,
+      "process_alive_ms": 7109,
+      "process_observed": true,
+      "runtime_probe_allowed": true,
+      "schema_version": "runtime-health-1",
+      "session_timing": {
+        "first_process_seen_epoch": 1791470427.5420423,
+        "last_process_seen_epoch": 1791470434.651736,
+        "started_at_epoch": 1791470423.0007217
+      },
+      "startup": "PASS"
+    },
+    "install": {
+      "mode": "NON_DESTRUCTIVE_INSTALL_R",
+      "output_tail": "Performing Streamed Install\nSuccess\n",
+      "uninstall_attempted": false
+    },
+    "original_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+    "post_round": {
+      "action": "NONE_NON_DESTRUCTIVE",
+      "note": "the baseline original is intentionally left installed; the deploy stage replaces it non-destructively via 'adb install -r' with the instrumented artifact (same isolated test key)"
+    },
+    "schema_version": "runtime-health-1",
+    "serial": "192.168.8.8:33257",
+    "static_comparison": {
+      "attribution_note": "missing health record: instrumented",
+      "baseline": {
+        "crash_cause": "CRASH_CAUSE_UNKNOWN",
+        "crash_class": "HEALTHY",
+        "exit_reason": null,
+        "process_alive_ms": 7109,
+        "startup": "PASS"
+      },
+      "instrumented": {
+        "crash_cause": null,
+        "crash_class": null,
+        "exit_reason": null,
+        "process_alive_ms": null,
+        "startup": null
+      },
+      "profile_diff": {},
+      "regression_status": "NOT_COMPARABLE",
+      "schema_version": "runtime-health-1"
+    },
+    "status": "BASELINE_ASSESSED"
+  },
+  "errors": [],
+  "schema_version": "collector-1",
+  "status": "OK"
+}
