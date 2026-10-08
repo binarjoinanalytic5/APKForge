@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -49,13 +50,18 @@ from .api import jobs as job_routes  # noqa: E402
 from .api import projects as project_routes  # noqa: E402
 from .api import ws as ws_routes  # noqa: E402
 from .api import setup as setup_routes  # noqa: E402
+from .api import admin as admin_routes  # noqa: E402
+from .api import notifications as notification_routes  # noqa: E402
+from .api import updates as update_routes  # noqa: E402
 from .core.security import resolve_key  # noqa: E402
 from .core.store import SqliteStore  # noqa: E402
 from .services.auth import AuthService  # noqa: E402
 from .services.jobs import JobService  # noqa: E402
 from .services.projects import ProjectService  # noqa: E402
+from .services.notify import NotificationService  # noqa: E402
+from .services.updates import UpdateService  # noqa: E402
 from .storage import LocalBlobStore  # noqa: E402
-from .version import API_VERSION  # noqa: E402
+from .version import API_VERSION, APP_VERSION, APP_VERSION_CODE  # noqa: E402
 
 KIND_DEFAULT_PLUGIN = {
     "decompile": "apktool",
@@ -87,10 +93,13 @@ def build_services():
     runner = Runner()
     auth = AuthService(store, key)
     projects = ProjectService(store)
+    updates = UpdateService(store, APP_VERSION, APP_VERSION_CODE)
+    notify = NotificationService(store)
     jobs = JobService(store, blobs, runner, registry,
                       KIND_DEFAULT_PLUGIN, work)
     services = {"auth": auth, "projects": projects, "jobs": jobs,
-                "blobs": blobs, "store": store, "registry": registry}
+                "blobs": blobs, "store": store, "registry": registry,
+                "updates": updates, "notify": notify}
     return services, jobs
 
 
@@ -106,6 +115,32 @@ def create_app():
         allow_credentials=True, allow_methods=["*"],
         allow_headers=["*"])
 
+    @app.middleware("http")
+    async def maintenance_gate(request, call_next):
+        path = request.url.path
+        allowed = (path == "/api/v1/health"
+                   or path.startswith("/api/v1/setup/")
+                   or path in ("/api/v1/updates/manifest",
+                               "/api/v1/updates/check",
+                               "/api/v1/updates/current",
+                               "/api/v1/admin/maintenance")
+                   or request.method == "OPTIONS")
+        if not allowed and services["store"].get_config(
+                "maintenance", "false") == "true":
+            message = services["store"].get_config(
+                "maintenance_message", "")
+            return JSONResponse(
+                status_code=503,
+                content={"code": "MAINTENANCE",
+                         "message": message or "system under maintenance",
+                         "retry_after": 60},
+                headers={"Retry-After": "60"})
+        response = await call_next(request)
+        if services["store"].get_config("update_required",
+                                        "false") == "true":
+            response.headers["X-Update-Required"] = "1"
+        return response
+
     @app.get("/api/v1/health")
     def health():
         return {"status": "ok", "api_version": API_VERSION}
@@ -115,6 +150,9 @@ def create_app():
     app.include_router(job_routes.router)
     app.include_router(ws_routes.router)
     app.include_router(setup_routes.router)
+    app.include_router(update_routes.router)
+    app.include_router(notification_routes.router)
+    app.include_router(admin_routes.router)
     return app
 
 

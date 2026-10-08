@@ -3,6 +3,7 @@
 #   ./apkforge            full pipeline: provision → serve → verify
 #   ./apkforge --check    audit only · --status · --logs · --stop
 #   ./apkforge --repair   retry · --reset-dev --yes (guarded dev reset)
+#   ./apkforge update     full update (or: update --check/--status/--rollback)
 set -eu
 HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 if [ -f "$HERE/.governance/path.sh" ]; then

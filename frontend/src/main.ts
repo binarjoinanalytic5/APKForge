@@ -10,6 +10,10 @@ import Column from 'primevue/column'
 import ProgressBar from 'primevue/progressbar'
 import Message from 'primevue/message'
 import Dropdown from 'primevue/dropdown'
+import Badge from 'primevue/badge'
+import Textarea from 'primevue/textarea'
+import Checkbox from 'primevue/checkbox'
+import Tag from 'primevue/tag'
 import 'primevue/resources/themes/lara-light-blue/theme.css'
 import 'primeicons/primeicons.css'
 import App from './App.vue'
@@ -27,4 +31,8 @@ app.component('Column', Column)
 app.component('ProgressBar', ProgressBar)
 app.component('Message', Message)
 app.component('Dropdown', Dropdown)
+app.component('Badge', Badge)
+app.component('Textarea', Textarea)
+app.component('Checkbox', Checkbox)
+app.component('Tag', Tag)
 app.mount('#app')

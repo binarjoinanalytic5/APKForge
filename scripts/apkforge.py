@@ -1226,6 +1226,15 @@ def run_pipeline(args):
         report["database"] = "ok"
         ctx.step("MIGRATIONS_READY")
         report["migrations"] = "ok"
+        try:
+            from update import boot_update_notice
+            notice = boot_update_notice(ROOT)
+            report["update_required"] = notice["update_required"]
+            report["update_status"] = notice["status"]
+            for line in notice["lines"]:
+                ctx.warn(line)
+        except Exception as exc:
+            ctx.warn("update notice skipped: %s" % exc)
         ctx.step("SEED_READY")
         report["seed"] = "ok"
 
@@ -1462,12 +1471,27 @@ def build_parser():
                         help="also fetch the optional apktool binary")
     parser.add_argument("--json", action="store_true",
                         help="machine-readable final report")
+    parser.add_argument("command", nargs="?",
+                        help="subcommand (update)")
+    parser.add_argument("command_args", nargs=argparse.REMAINDER,
+                        help="arguments for the subcommand")
     return parser
 
 
 def main(argv=None):
     args = build_parser().parse_args(argv)
     load_local_path()
+    if args.command == "update":
+        import importlib.util as _ilu
+        _spec = _ilu.spec_from_file_location(
+            "apkforge_update",
+            Path(__file__).resolve().parent / "update.py")
+        _mod = _ilu.module_from_spec(_spec)
+        _spec.loader.exec_module(_mod)
+        return _mod.main(args.command_args)
+    if args.command is not None:
+        build_parser().error(
+            "unknown command %r (try: update)" % args.command)
     if args.check:
         return cmd_check(args)
     if args.status:

@@ -12,6 +12,8 @@ from app.core.migrations import (MIGRATIONS_DIR, MigrationError,  # noqa: E402
                                  applied_versions, discover,
                                  migrate, status)
 
+ALL_VERSIONS = ["001", "002", "003", "004"]
+
 
 def _tables(db):
     return {row[0] for row in db.execute(
@@ -21,7 +23,7 @@ def _tables(db):
 def test_discover_finds_ordered_versions():
     found = discover()
     versions = [version for version, _, _ in found]
-    assert versions == ["001", "002", "003"]
+    assert versions == ALL_VERSIONS
     assert all(path.is_file() for _, _, path in found)
     assert MIGRATIONS_DIR.is_dir()
 
@@ -30,15 +32,18 @@ def test_fresh_db_applies_everything(tmp_path):
     db = sqlite3.connect(str(tmp_path / "fresh.db"))
     try:
         report = migrate(db)
-        assert report == {"baselined": [], "applied": ["001", "002", "003"]}
+        assert report == {"baselined": [], "applied": ALL_VERSIONS}
         tables = _tables(db)
         for name in ("users", "projects", "jobs", "artifacts",
-                     "audit", "system_config", "schema_migrations"):
+                     "audit", "system_config", "schema_migrations",
+                     "releases", "notifications", "notification_reads",
+                     "notification_prefs"):
             assert name in tables, name
         indexes = {row[0] for row in db.execute(
             "SELECT name FROM sqlite_master WHERE type='index'")}
         assert "idx_jobs_project" in indexes
-        assert applied_versions(db) == {"001", "002", "003"}
+        assert "idx_releases_version" in indexes
+        assert applied_versions(db) == set(ALL_VERSIONS)
     finally:
         db.close()
 
@@ -46,7 +51,7 @@ def test_fresh_db_applies_everything(tmp_path):
 def test_migrate_is_idempotent(tmp_path):
     db = sqlite3.connect(str(tmp_path / "idem.db"))
     try:
-        assert migrate(db)["applied"] == ["001", "002", "003"]
+        assert migrate(db)["applied"] == ALL_VERSIONS
         assert migrate(db) == {"baselined": [], "applied": []}
         assert migrate(db) == {"baselined": [], "applied": []}
     finally:
@@ -70,11 +75,12 @@ def test_legacy_db_baselined_without_data_loss(tmp_path):
     try:
         report = migrate(db)
         assert report["baselined"] == ["001"]
-        assert report["applied"] == ["002", "003"]
+        assert report["applied"] == ["002", "003", "004"]
         row = db.execute(
             "SELECT * FROM users WHERE username='old-admin'").fetchone()
         assert row is not None
         assert "system_config" in _tables(db)
+        assert "releases" in _tables(db)
         assert migrate(db) == {"baselined": [], "applied": []}
     finally:
         db.close()
@@ -82,15 +88,13 @@ def test_legacy_db_baselined_without_data_loss(tmp_path):
 
 def test_status_reports_without_changing(tmp_path):
     path = str(tmp_path / "status.db")
-    assert status(path) == {"applied": [],
-                            "pending": ["001", "002", "003"]}
+    assert status(path) == {"applied": [], "pending": ALL_VERSIONS}
     db = sqlite3.connect(path)
     try:
         migrate(db)
     finally:
         db.close()
-    assert status(path) == {"applied": ["001", "002", "003"],
-                            "pending": []}
+    assert status(path) == {"applied": ALL_VERSIONS, "pending": []}
 
 
 def test_duplicate_versions_rejected(tmp_path):
@@ -121,4 +125,4 @@ def test_store_boots_through_migrations(tmp_path):
     assert store.get_config("initialized") == "true"
     versions = {row[0] for row in store.db.execute(
         "SELECT version FROM schema_migrations")}
-    assert versions == {"001", "002", "003"}
+    assert versions == set(ALL_VERSIONS)

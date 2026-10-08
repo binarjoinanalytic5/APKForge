@@ -159,3 +159,168 @@ class SqliteStore:
             "INSERT OR REPLACE INTO system_config VALUES (?,?,?)",
             (key, value, _now()))
         self.db.commit()
+
+    # -- releases ---------------------------------------------------
+    def create_release(self, release):
+        release = dict(release)
+        release["id"] = "rel-" + uuid.uuid4().hex[:12]
+        now = _now()
+        release.setdefault("created_at", now)
+        release.setdefault("updated_at", now)
+        self.db.execute(
+            "INSERT INTO releases (id, version, version_code,"
+            " release_type, channel, status, minimum_supported_version,"
+            " mandatory, security_update, artifact_kind, download_url,"
+            " artifact_ref, checksum, signature, size_bytes,"
+            " release_notes, breaking_changes, security_notes,"
+            " migration_required, restart_required, release_date,"
+            " published_at, created_by, created_at, updated_at)"
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (release["id"], release["version"], release["version_code"],
+             release["release_type"], release["channel"],
+             release.get("status", "draft"),
+             release["minimum_supported_version"],
+             int(bool(release.get("mandatory", False))),
+             int(bool(release.get("security_update", False))),
+             release["artifact_kind"], release.get("download_url"),
+             release.get("artifact_ref"), release.get("checksum"),
+             release.get("signature"), release.get("size_bytes", 0),
+             json.dumps(release.get("release_notes", [])),
+             json.dumps(release.get("breaking_changes", [])),
+             release.get("security_notes", ""),
+             int(bool(release.get("migration_required", False))),
+             int(bool(release.get("restart_required", True))),
+             release.get("release_date"), release.get("published_at"),
+             release["created_by"], release["created_at"],
+             release["updated_at"]))
+        self.db.commit()
+        return self.get_release(release["id"])
+
+    def _release_row(self, row):
+        release = dict(row)
+        release["mandatory"] = bool(release["mandatory"])
+        release["security_update"] = bool(release["security_update"])
+        release["migration_required"] = bool(
+            release["migration_required"])
+        release["restart_required"] = bool(release["restart_required"])
+        release["release_notes"] = json.loads(
+            release["release_notes"] or "[]")
+        release["breaking_changes"] = json.loads(
+            release["breaking_changes"] or "[]")
+        return release
+
+    def get_release(self, release_id):
+        row = self.db.execute(
+            "SELECT * FROM releases WHERE id=?", (release_id,)).fetchone()
+        return self._release_row(row) if row else None
+
+    def get_release_by_version(self, version):
+        row = self.db.execute(
+            "SELECT * FROM releases WHERE version=?",
+            (version,)).fetchone()
+        return self._release_row(row) if row else None
+
+    def list_releases(self, channel=None, status=None):
+        query = "SELECT * FROM releases"
+        clauses, params = [], []
+        if channel:
+            clauses.append("channel=?")
+            params.append(channel)
+        if status:
+            clauses.append("status=?")
+            params.append(status)
+        if clauses:
+            query += " WHERE " + " AND ".join(clauses)
+        query += " ORDER BY version_code DESC"
+        return [self._release_row(row) for row in
+                self.db.execute(query, params)]
+
+    def set_release(self, release_id, **fields):
+        fields["updated_at"] = _now()
+        for key in ("release_notes", "breaking_changes"):
+            if key in fields:
+                fields[key] = json.dumps(fields[key])
+        for key in ("mandatory", "security_update",
+                    "migration_required", "restart_required"):
+            if key in fields:
+                fields[key] = int(bool(fields[key]))
+        columns = ", ".join("%s=?" % key for key in fields)
+        self.db.execute("UPDATE releases SET %s WHERE id=?" % columns,
+                        (*fields.values(), release_id))
+        self.db.commit()
+        return self.get_release(release_id)
+
+    # -- notifications ----------------------------------------------
+    def create_notification(self, note):
+        note = dict(note)
+        note["id"] = "notif-" + uuid.uuid4().hex[:12]
+        note.setdefault("created_at", _now())
+        self.db.execute(
+            "INSERT INTO notifications (id, ntype, severity, priority,"
+            " title, message, action, target, created_at, expires_at)"
+            " VALUES (?,?,?,?,?,?,?,?,?,?)",
+            (note["id"], note["ntype"], note.get("severity", "info"),
+             note.get("priority", 1), note["title"], note["message"],
+             json.dumps(note.get("action", {})), note.get("target", "all"),
+             note["created_at"], note.get("expires_at")))
+        self.db.commit()
+        row = self.db.execute(
+            "SELECT * FROM notifications WHERE id=?",
+            (note["id"],)).fetchone()
+        result = dict(row)
+        result["action"] = json.loads(result["action"] or "{}")
+        return result
+
+    def list_notifications(self):
+        notes = []
+        for row in self.db.execute(
+                "SELECT * FROM notifications ORDER BY priority DESC,"
+                " created_at DESC"):
+            note = dict(row)
+            note["action"] = json.loads(note["action"] or "{}")
+            notes.append(note)
+        return notes
+
+    def delete_notification(self, notification_id):
+        self.db.execute("DELETE FROM notification_reads"
+                        " WHERE notification_id=?", (notification_id,))
+        self.db.execute("DELETE FROM notifications WHERE id=?",
+                        (notification_id,))
+        self.db.commit()
+
+    def mark_notification(self, notification_id, username, read=True):
+        if read:
+            self.db.execute(
+                "INSERT OR IGNORE INTO notification_reads VALUES (?,?,?)",
+                (notification_id, username, _now()))
+        else:
+            self.db.execute(
+                "DELETE FROM notification_reads"
+                " WHERE notification_id=? AND username=?",
+                (notification_id, username))
+        self.db.commit()
+
+    def read_ids(self, username):
+        return {row[0] for row in self.db.execute(
+            "SELECT notification_id FROM notification_reads"
+            " WHERE username=?", (username,))}
+
+    # -- notification prefs -----------------------------------------
+    def get_prefs(self, username):
+        row = self.db.execute(
+            "SELECT prefs FROM notification_prefs WHERE username=?",
+            (username,)).fetchone()
+        if not row:
+            return {}
+        try:
+            prefs = json.loads(row[0] or "{}")
+        except ValueError:
+            return {}
+        return prefs if isinstance(prefs, dict) else {}
+
+    def set_prefs(self, username, prefs):
+        self.db.execute(
+            "INSERT OR REPLACE INTO notification_prefs VALUES (?,?,?)",
+            (username, json.dumps(prefs), _now()))
+        self.db.commit()
+        return self.get_prefs(username)

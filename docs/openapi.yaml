@@ -311,6 +311,368 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /updates/current:
+    get:
+      operationId: updateCurrent
+      tags: [updates]
+      summary: نسخة المنصة الحالية والقناة (عام)
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateCurrent'
+  /updates/manifest:
+    get:
+      operationId: updateManifest
+      tags: [updates]
+      summary: بيان التحديث للقناة (ETag + 304)
+      parameters:
+        - name: channel
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateManifest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /updates/check:
+    post:
+      operationId: updateCheck
+      tags: [updates]
+      summary: فحص حالة التحديث لعميل (عام)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckRequest'
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckResult'
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: إشعارات المستخدم مع المقروئية
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+  /notifications/{id}/read:
+    post:
+      operationId: markNotification
+      tags: [notifications]
+      summary: تمييز مقروء/غير مقروء
+      security: [{bearerAuth: []}]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReadRequest'
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadResult'
+  /notifications/prefs:
+    get:
+      operationId: getNotificationPrefs
+      tags: [notifications]
+      summary: تفضيلات الإشعارات
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prefs'
+    put:
+      operationId: setNotificationPrefs
+      tags: [notifications]
+      summary: تحديث التفضيلات (الحرجة لا تُكتم)
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrefsIn'
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prefs'
+  /notifications/broadcast:
+    post:
+      operationId: broadcastNotification
+      tags: [notifications]
+      summary: بث إداري (مدير فقط)
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BroadcastRequest'
+      responses:
+        '201':
+          description: أُنشئ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+  /notifications/{id}:
+    delete:
+      operationId: deleteNotification
+      tags: [notifications]
+      summary: حذف إشعار (مدير فقط)
+      security: [{bearerAuth: []}]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: حُذف
+  /admin/releases:
+    post:
+      operationId: createRelease
+      tags: [admin]
+      summary: إنشاء إصدار (مسودة)
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReleaseCreate'
+      responses:
+        '201':
+          description: أُنشئ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Release'
+    get:
+      operationId: listReleases
+      tags: [admin]
+      summary: قائمة الإصدارات
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Release'
+  /admin/updates/apply:
+    post:
+      summary: Trigger a detached local update run
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyRequest'
+      responses:
+        '202':
+          description: Update run started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplyResult'
+        '400': {description: Already updated, busy, or unknown release}
+        '403': {description: Admin required}
+  /admin/updates/local-status:
+    get:
+      summary: Latest local update run state
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: Run state (IDLE when none)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalStatus'
+        '403': {description: Admin required}
+  /admin/releases/history:
+    get:
+      operationId: releaseHistory
+      tags: [admin]
+      summary: سجل الإصدارات المنشورة
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Release'
+  /admin/releases/{id}/validate:
+    post:
+      operationId: validateRelease
+      tags: [admin]
+      summary: اعتماد مسودة
+      security: [{bearerAuth: []}]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Release'
+  /admin/releases/{id}/publish:
+    post:
+      operationId: publishRelease
+      tags: [admin]
+      summary: نشر إصدار (مع بث إشعار)
+      security: [{bearerAuth: []}]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Release'
+  /admin/releases/{id}/unpublish:
+    post:
+      operationId: unpublishRelease
+      tags: [admin]
+      summary: سحب إصدار
+      security: [{bearerAuth: []}]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Release'
+  /admin/maintenance:
+    get:
+      operationId: getMaintenance
+      tags: [admin]
+      summary: حالة الصيانة
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Maintenance'
+    put:
+      operationId: setMaintenance
+      tags: [admin]
+      summary: تبديل الصيانة
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceIn'
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Maintenance'
+  /admin/channel:
+    get:
+      operationId: getChannel
+      tags: [admin]
+      summary: قناة التحديث
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Channel'
+    put:
+      operationId: setChannel
+      tags: [admin]
+      summary: تغيير القناة
+      security: [{bearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChannelIn'
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Channel'
+  /admin/backups:
+    get:
+      operationId: listBackups
+      tags: [admin]
+      summary: النسخ الاحتياطية وأوامر الاسترجاع
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackupList'
 components:
   securitySchemes:
     bearerAuth:
@@ -496,5 +858,332 @@ components:
         token_type:
           type: string
           enum: [bearer]
+    UpdateCurrent:
+      type: object
+      required: [version, version_code, channel]
+      properties:
+        version:
+          type: string
+        version_code:
+          type: integer
+        channel:
+          type: string
+    UpdateManifest:
+      type: object
+      required: [latest_version, version_code, minimum_supported_version]
+      properties:
+        latest_version:
+          type: string
+        version_code:
+          type: integer
+        minimum_supported_version:
+          type: string
+        release_type:
+          type: string
+        channel:
+          type: string
+        mandatory:
+          type: boolean
+        security_update:
+          type: boolean
+        release_date:
+          type: string
+        artifact_kind:
+          type: string
+        download_url:
+          type: string
+        artifact_ref:
+          type: string
+        checksum:
+          type: string
+        signature:
+          type: string
+        size_bytes:
+          type: integer
+        release_notes:
+          type: array
+          items:
+            type: string
+        breaking_changes:
+          type: array
+          items:
+            type: string
+        migration_required:
+          type: boolean
+        restart_required:
+          type: boolean
+    CheckRequest:
+      type: object
+      required: [current_version]
+      properties:
+        current_version:
+          type: string
+        channel:
+          type: string
+    CheckResult:
+      type: object
+      required: [status, current_version, channel]
+      properties:
+        status:
+          type: string
+          enum: [NO_UPDATE, UPDATE_AVAILABLE, MANDATORY_UPDATE]
+        current_version:
+          type: string
+        channel:
+          type: string
+        latest_version:
+          type: string
+        mandatory:
+          type: boolean
+        security_update:
+          type: boolean
+        release_notes:
+          type: array
+          items:
+            type: string
+        maintenance:
+          $ref: '#/components/schemas/Maintenance'
+    Notification:
+      type: object
+      required: [id, ntype, title, message, created_at]
+      properties:
+        id:
+          type: string
+        ntype:
+          type: string
+        severity:
+          type: string
+        priority:
+          type: integer
+        title:
+          type: string
+        message:
+          type: string
+        action:
+          type: object
+        target:
+          type: string
+        created_at:
+          type: string
+        expires_at:
+          type: string
+        read:
+          type: boolean
+    NotificationList:
+      type: object
+      required: [notifications, unread]
+      properties:
+        notifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+        unread:
+          type: integer
+    ReadRequest:
+      type: object
+      properties:
+        read:
+          type: boolean
+    ReadResult:
+      type: object
+      required: [id, read]
+      properties:
+        id:
+          type: string
+        read:
+          type: boolean
+    Prefs:
+      type: object
+      required: [prefs]
+      properties:
+        prefs:
+          type: object
+    PrefsIn:
+      type: object
+      required: [prefs]
+      properties:
+        prefs:
+          type: object
+    BroadcastRequest:
+      type: object
+      required: [ntype, title, message]
+      properties:
+        ntype:
+          type: string
+        title:
+          type: string
+        message:
+          type: string
+        severity:
+          type: string
+        action:
+          type: object
+        expires_at:
+          type: string
+    Release:
+      type: object
+      required: [id, version, version_code, status]
+      properties:
+        id:
+          type: string
+        version:
+          type: string
+        version_code:
+          type: integer
+        release_type:
+          type: string
+        channel:
+          type: string
+        status:
+          type: string
+        minimum_supported_version:
+          type: string
+        mandatory:
+          type: boolean
+        security_update:
+          type: boolean
+        artifact_kind:
+          type: string
+        download_url:
+          type: string
+        artifact_ref:
+          type: string
+        checksum:
+          type: string
+        signature:
+          type: string
+        size_bytes:
+          type: integer
+        release_notes:
+          type: array
+          items:
+            type: string
+        breaking_changes:
+          type: array
+          items:
+            type: string
+        migration_required:
+          type: boolean
+        restart_required:
+          type: boolean
+        release_date:
+          type: string
+        published_at:
+          type: string
+    ReleaseCreate:
+      type: object
+      required: [version, release_type, channel, minimum_supported_version,
+        artifact_kind]
+      properties:
+        version:
+          type: string
+        version_code:
+          type: integer
+        release_type:
+          type: string
+        channel:
+          type: string
+        minimum_supported_version:
+          type: string
+        mandatory:
+          type: boolean
+        security_update:
+          type: boolean
+        artifact_kind:
+          type: string
+        download_url:
+          type: string
+        artifact_ref:
+          type: string
+        checksum:
+          type: string
+        signature:
+          type: string
+        size_bytes:
+          type: integer
+        release_notes:
+          type: array
+          items:
+            type: string
+        breaking_changes:
+          type: array
+          items:
+            type: string
+        migration_required:
+          type: boolean
+        restart_required:
+          type: boolean
+        release_date:
+          type: string
+    Maintenance:
+      type: object
+      required: [active, message]
+      properties:
+        active:
+          type: boolean
+        message:
+          type: string
+    MaintenanceIn:
+      type: object
+      required: [active]
+      properties:
+        active:
+          type: boolean
+        message:
+          type: string
+    Channel:
+      type: object
+      required: [channel]
+      properties:
+        channel:
+          type: string
+    ChannelIn:
+      type: object
+      required: [channel]
+      properties:
+        channel:
+          type: string
+    ApplyRequest:
+      type: object
+      properties:
+        version: {type: string, nullable: true}
+    ApplyResult:
+      type: object
+      properties:
+        state: {type: string}
+        run_id: {type: string}
+        version_from: {type: string}
+        version_to: {type: string}
+        started_at: {type: string}
+        log: {type: string}
+    LocalStatus:
+      type: object
+      properties:
+        state: {type: string}
+        run_id: {type: string, nullable: true}
+        version_from: {type: string, nullable: true}
+        version_to: {type: string, nullable: true}
+        locked: {type: boolean}
+    Backup:
+      type: object
+      properties:
+        id:
+          type: string
+        created_at:
+          type: string
+        version_from:
+          type: string
+        version_to:
+          type: string
+        rollback_command:
+          type: string
+    BackupList:
+      type: object
+      required: [backups]
+      properties:
+        backups:
+          type: array
+          items:
+            $ref: '#/components/schemas/Backup'
 x-frozen: true
 x-contract-version: 1.0.0

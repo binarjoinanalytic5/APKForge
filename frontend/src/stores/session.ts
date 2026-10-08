@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { setToken } from '../api/client'
 
 export const useSession = defineStore('session', () => {
@@ -22,6 +22,16 @@ export const useSession = defineStore('session', () => {
     setToken('')
   }
 
+  const role = computed(() => {
+    try {
+      const payload = token.value.split('.')[1]
+      const body = JSON.parse(window.atob(payload))
+      return (body.role as string) || 'viewer'
+    } catch {
+      return 'viewer'
+    }
+  })
+
   setToken(token.value)
-  return { token, username, login, logout }
+  return { token, username, role, login, logout }
 })
