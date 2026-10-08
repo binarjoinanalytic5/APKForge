@@ -1909,5 +1909,48 @@ class TimelineVerdictTests(unittest.TestCase):
         self.assertIsNone(v["STARTUP_AUDIT"])
 
 
+class BlockedByTests(unittest.TestCase):
+    def test_sign_block_names_sign_not_package(self):
+        v = rh.runtime_verdict(
+            None, None,
+            runtime_probe={"status": "PACKAGE_NOT_INSTALLED"},
+            deploy={"status": "NOT_DEPLOYED",
+                    "reason": "sign stage did not verify an artifact"},
+            sign={"status": "BLOCKED_OR_FAILED",
+                  "error": "apksigner or REELSEC_TEST_KEYSTORE unavailable"})
+        self.assertEqual(v["RUNTIME_PROOF_STATUS"], "PACKAGE_NOT_INSTALLED")
+        self.assertEqual(v["BLOCKED_BY"]["stage"], "SIGN")
+        self.assertIn("REELSEC_TEST_KEYSTORE", v["BLOCKED_BY"]["reason"])
+        self.assertIn("SIGN", v["NEXT_ACTION"])
+        self.assertIn("no device-side debugging", v["NEXT_ACTION"].lower())
+
+    def test_deploy_block_names_deploy(self):
+        v = rh.runtime_verdict(
+            None, None,
+            runtime_probe={"status": "PACKAGE_NOT_INSTALLED"},
+            deploy={"status": "BLOCKED_OR_FAILED",
+                    "error": "install compatibility gate (SIGNATURE_MISMATCH)"},
+            sign={"status": "SIGNED_VERIFIED"})
+        self.assertEqual(v["BLOCKED_BY"]["stage"], "DEPLOY")
+        self.assertIn("SIGNATURE_MISMATCH", v["BLOCKED_BY"]["reason"])
+        self.assertIn("DEPLOY", v["NEXT_ACTION"])
+
+    def test_genuine_package_absence_has_no_blocked_by(self):
+        v = rh.runtime_verdict(
+            None, None,
+            runtime_probe={"status": "PACKAGE_NOT_INSTALLED"},
+            deploy={"status": "INSTALLED"},
+            sign={"status": "SIGNED_VERIFIED"})
+        self.assertEqual(v["RUNTIME_PROOF_STATUS"], "PACKAGE_NOT_INSTALLED")
+        self.assertIsNone(v["BLOCKED_BY"])
+
+    def test_missing_documents_keep_legacy_behavior(self):
+        v = rh.runtime_verdict(None, None,
+                               runtime_probe={"status": "NOT_RUN"})
+        self.assertEqual(v["RUNTIME_PROOF_STATUS"], "NOT_RUN")
+        self.assertIsNone(v["BLOCKED_BY"])
+        self.assertIn("probe is permitted", v["NEXT_ACTION"])
+
+
 if __name__ == "__main__":
     unittest.main()

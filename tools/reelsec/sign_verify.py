@@ -11,7 +11,11 @@ are never embedded in commands or manifests.
 import hashlib
 import json
 import os
+import re
+import secrets
+import shutil
 import subprocess
+import time
 from pathlib import Path
 
 
@@ -21,6 +25,14 @@ class SignVerifyError(RuntimeError):
 
 KEYSTORE_PASSWORD_ENV = "REELSEC_TEST_KEYSTORE_PASSWORD"
 KEY_PASSWORD_ENV = "REELSEC_TEST_KEY_PASSWORD"
+KEYSTORE_ENV = "REELSEC_TEST_KEYSTORE"
+KEYSTORE_DIR_ENV = "REELSEC_TEST_KEYSTORE_DIR"
+KEY_ALIAS_ENV = "REELSEC_TEST_KEY_ALIAS"
+DEFAULT_KEY_ALIAS = "reelsec-test"
+BOOTSTRAP_KEYSTORE_NAME = "reelsec-test.p12"
+BOOTSTRAP_PASSWORD_NAME = ".password"
+BOOTSTRAP_META_NAME = "keystore-meta.json"
+DEFAULT_KEYSTORE_DIRNAME = ".reelsec/keystores"
 
 
 def sha256_file(path):
@@ -108,3 +120,294 @@ def write_sign_manifest(path, data):
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return p
+
+
+# --- Self-contained test-keystore bootstrap ----------------------------------
+#
+# The platform must never stall on a missing REELSEC_TEST_KEYSTORE. When no
+# explicit keystore is configured, the bootstrap creates a LOCAL test-only
+# PKCS#12 keystore OUTSIDE the git checkout (never inside the campaign
+# output, which is published). Passwords travel via environment references
+# only: they never appear in command arguments, artifacts, or logs.
+# The original APK is never signed and never modified by this module.
+
+def scrub_secrets(text, secrets_values):
+    """Replace known secret values with a placeholder (log hygiene)."""
+    redacted = text or ""
+    for secret in secrets_values or []:
+        if secret:
+            redacted = redacted.replace(secret, "***REDACTED***")
+    return redacted
+
+
+def default_keystore_dir(env=None):
+    values = env if env is not None else os.environ
+    override = (values.get(KEYSTORE_DIR_ENV) or "").strip()
+    if override:
+        return Path(override).expanduser()
+    return Path.home() / DEFAULT_KEYSTORE_DIRNAME
+
+
+def refuse_inside_repo(path, repo_root):
+    """Fail closed when a keystore path would land inside the checkout."""
+    candidate = Path(path).expanduser().resolve()
+    root = Path(repo_root).expanduser().resolve() if repo_root else None
+    if root is not None:
+        try:
+            candidate.relative_to(root)
+        except ValueError:
+            return candidate
+        raise SignVerifyError(
+            "test keystore must live outside the git checkout (refused %s)"
+            % candidate)
+    return candidate
+
+
+def plan_test_keystore(env=None, repo_root=None):
+    """Decide how the campaign obtains its test keystore (no subprocesses).
+
+    Returns {"action": "USE_EXPLICIT" | "BOOTSTRAP", ...}. An explicit but
+    missing keystore is a hard error, never a silent bootstrap.
+    """
+    values = env if env is not None else os.environ
+    explicit = (values.get(KEYSTORE_ENV) or "").strip()
+    alias = (values.get(KEY_ALIAS_ENV) or "").strip() or DEFAULT_KEY_ALIAS
+    if explicit:
+        candidate = Path(explicit).expanduser()
+        if not candidate.is_file():
+            raise SignVerifyError(
+                "explicit %s is missing: %s" % (KEYSTORE_ENV, candidate))
+        return {"action": "USE_EXPLICIT", "keystore": str(candidate),
+                "alias": alias, "bootstrapped": False,
+                "backend": "user-provided"}
+    target = refuse_inside_repo(default_keystore_dir(values) / BOOTSTRAP_KEYSTORE_NAME,
+                                repo_root)
+    return {"action": "BOOTSTRAP", "keystore": str(target), "alias": alias,
+            "bootstrapped": True, "backend": "openssl-pkcs12",
+            "keystore_dir": str(target.parent)}
+
+
+def _default_runner(command, timeout=120):
+    proc = subprocess.run(
+        command, text=True, stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT, timeout=timeout, check=False,
+    )
+    return proc.returncode, (proc.stdout or "")
+
+
+def bootstrap_test_keystore(keystore_path, *, alias=DEFAULT_KEY_ALIAS,
+                            openssl=None, runner=None, env=None):
+    """Create (or validate an existing) local test PKCS#12 keystore.
+
+    Generation uses openssl only, with `-passout env:...`, so no password
+    ever enters a command argument. The password is generated randomly,
+    stored 0600 beside the keystore, and placed into the process
+    environment for the apksigner `env:` references. Returns a record
+    WITHOUT password values.
+    """
+    values = env if env is not None else os.environ
+    runner = runner or _default_runner
+    openssl = openssl or shutil.which("openssl")
+    if not openssl:
+        raise SignVerifyError(
+            "openssl unavailable; cannot bootstrap a test keystore "
+            "without putting passwords in command arguments")
+    target = Path(keystore_path).expanduser().resolve()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        os.chmod(target.parent, 0o700)
+    except OSError:
+        pass
+    password_file = target.parent / BOOTSTRAP_PASSWORD_NAME
+    password = (values.get(KEYSTORE_PASSWORD_ENV) or "").strip()
+    if target.is_file():
+        if not password and password_file.is_file():
+            password = password_file.read_text(encoding="utf-8").strip()
+        if not password:
+            raise SignVerifyError(
+                "bootstrapped keystore exists but no password is available "
+                "(%s unset and password file missing)" % KEYSTORE_PASSWORD_ENV)
+        values[KEYSTORE_PASSWORD_ENV] = password
+        values[KEY_PASSWORD_ENV] = values.get(KEY_PASSWORD_ENV) or password
+        valid = validate_pkcs12(target, alias=alias, openssl=openssl,
+                                runner=runner, env=values)
+        if not valid.get("valid"):
+            raise SignVerifyError(
+                "existing bootstrapped keystore failed validation: %s"
+                % valid.get("reason"))
+        return {"keystore": str(target), "alias": alias,
+                "bootstrapped": False, "reused": True,
+                "backend": "openssl-pkcs12",
+                "certificate_sha256": valid.get("certificate_sha256")}
+    if not password:
+        password = secrets.token_urlsafe(32)
+    values[KEYSTORE_PASSWORD_ENV] = password
+    values[KEY_PASSWORD_ENV] = values.get(KEY_PASSWORD_ENV) or password
+    key_pem = target.parent / ".bootstrap-key.pem"
+    cert_pem = target.parent / ".bootstrap-cert.pem"
+    try:
+        steps = [
+            ([str(openssl), "genrsa", "-out", str(key_pem), "2048"],
+             "openssl genrsa failed"),
+            ([str(openssl), "req", "-new", "-x509", "-key", str(key_pem),
+              "-out", str(cert_pem), "-days", "10950", "-subj",
+              "/CN=ReelSec Test Key/OU=ReelSec Test/O=ReelSec"],
+             "openssl req failed"),
+            ([str(openssl), "pkcs12", "-export", "-inkey", str(key_pem),
+              "-in", str(cert_pem), "-out", str(target), "-name", alias,
+              "-passout", "env:" + KEYSTORE_PASSWORD_ENV],
+             "openssl pkcs12 export failed"),
+        ]
+        for command, failure in steps:
+            rc, out = runner(command, timeout=120)
+            if rc != 0:
+                raise SignVerifyError(
+                    "%s (rc=%s): %s" % (
+                        failure, rc,
+                        scrub_secrets((out or "")[-2000:], [password])))
+        cert_sha256 = None
+        rc, out = runner([str(openssl), "x509", "-in", str(cert_pem),
+                          "-noout", "-fingerprint", "-sha256"], timeout=30)
+        if rc == 0:
+            match = re.search(r"SHA256 Fingerprint=([0-9A-Fa-f:]+)", out or "")
+            if match:
+                cert_sha256 = match.group(1).replace(":", "").lower()
+        os.chmod(target, 0o600)
+        password_file.write_text(password, encoding="utf-8")
+        os.chmod(password_file, 0o600)
+        (target.parent / BOOTSTRAP_META_NAME).write_text(
+            json.dumps({"alias": alias, "backend": "openssl-pkcs12",
+                        "test_only": True, "created_at_epoch": time.time(),
+                        "certificate_sha256": cert_sha256,
+                        "note": ("local test key; never used for store "
+                                 "releases; never committed to git")},
+                       indent=2, sort_keys=True) + "\n",
+            encoding="utf-8")
+    except Exception:
+        for partial in (target, key_pem, cert_pem):
+            try:
+                if partial.is_file():
+                    partial.unlink()
+            except OSError:
+                pass
+        raise
+    finally:
+        for temp in (key_pem, cert_pem):
+            try:
+                if temp.is_file():
+                    temp.unlink()
+            except OSError:
+                pass
+    return {"keystore": str(target), "alias": alias,
+            "bootstrapped": True, "reused": False,
+            "backend": "openssl-pkcs12",
+            "certificate_sha256": cert_sha256}
+
+
+def validate_pkcs12(keystore_path, *, alias=None, openssl=None,
+                    runner=None, env=None):
+    """Validate a PKCS#12 keystore password (and alias) without argv secrets."""
+    values = env if env is not None else os.environ
+    runner = runner or _default_runner
+    openssl = openssl or shutil.which("openssl")
+    target = Path(keystore_path).expanduser()
+    if not target.is_file():
+        return {"valid": False, "reason": "keystore file missing"}
+    password = (values.get(KEYSTORE_PASSWORD_ENV) or "").strip()
+    if not password:
+        return {"valid": False,
+                "reason": "%s unset" % KEYSTORE_PASSWORD_ENV}
+    if not openssl:
+        return {"valid": False, "reason": "openssl unavailable"}
+    rc, out = runner([str(openssl), "pkcs12", "-in", str(target),
+                      "-noout", "-passin", "env:" + KEYSTORE_PASSWORD_ENV],
+                     timeout=60)
+    if rc != 0:
+        return {"valid": False,
+                "reason": "pkcs12 password rejected (rc=%s)" % rc}
+    record = {"valid": True, "password": "VALID"}
+    if alias:
+        rc, out = runner([str(openssl), "pkcs12", "-in", str(target),
+                          "-info", "-noout", "-passin",
+                          "env:" + KEYSTORE_PASSWORD_ENV], timeout=60)
+        names = set(re.findall(r"friendlyName:\s*(\S+)", out or ""))
+        record["aliases"] = sorted(names)
+        if alias not in names:
+            record["valid"] = False
+            record["reason"] = ("alias %r not present in keystore "
+                                "(found: %s)" % (alias, sorted(names) or "none"))
+    return record
+
+
+def signing_preflight(*, apksigner, keystore, alias, openssl=None,
+                      runner=None, env=None):
+    """Real preflight before any sign attempt (passwords stay in env)."""
+    values = env if env is not None else os.environ
+    runner = runner or _default_runner
+    checks = {}
+    checks["apksigner_present"] = {
+        "status": "PASS" if apksigner else "FAIL",
+        "path": str(apksigner) if apksigner else None}
+    if apksigner:
+        rc, out = runner([str(apksigner), "--version"], timeout=30)
+        checks["apksigner_works"] = {
+            "status": "PASS" if rc == 0 else "FAIL",
+            "returncode": rc,
+            "version": ((out or "").strip().splitlines() or [None])[0]}
+    else:
+        checks["apksigner_works"] = {"status": "FAIL",
+                                     "reason": "apksigner missing"}
+    target = Path(str(keystore)).expanduser() if keystore else None
+    checks["keystore_present"] = {
+        "status": ("PASS" if target and target.is_file() else "FAIL"),
+        "path": str(target) if target else None}
+    checks["keystore_nonempty"] = {
+        "status": ("PASS" if target and target.is_file()
+                   and target.stat().st_size > 0 else "FAIL")}
+    checks["password_envs_set"] = {
+        "status": ("PASS" if (values.get(KEYSTORE_PASSWORD_ENV)
+                              and values.get(KEY_PASSWORD_ENV)) else "FAIL"),
+        "keystore_password_env": KEYSTORE_PASSWORD_ENV,
+        "key_password_env": KEY_PASSWORD_ENV}
+    suffix = (target.suffix.lower() if target else "")
+    if suffix in (".p12", ".pfx") and target and target.is_file():
+        if openssl or shutil.which("openssl"):
+            valid = validate_pkcs12(target, alias=alias,
+                                    openssl=openssl or shutil.which("openssl"),
+                                    runner=runner, env=values)
+            checks["pkcs12_password_valid"] = {
+                "status": "PASS" if valid.get("valid") else "FAIL",
+                "reason": None if valid.get("valid") else valid.get("reason")}
+            if valid.get("aliases") is not None:
+                checks["pkcs12_alias_present"] = {
+                    "status": ("PASS" if alias in (valid.get("aliases") or [])
+                               else "FAIL"),
+                    "alias": alias, "aliases": valid.get("aliases")}
+        else:
+            checks["pkcs12_password_valid"] = {
+                "status": "SKIPPED", "reason": "openssl unavailable"}
+    else:
+        checks["pkcs12_password_valid"] = {
+            "status": "SKIPPED",
+            "reason": "non-PKCS12 keystore; apksigner sign is the validator"}
+    failed = [name for name, check in checks.items()
+              if check.get("status") == "FAIL"]
+    return {"checks": checks,
+            "status": "READY" if not failed else "NOT_READY",
+            "failed": failed}
+
+
+def verify_certs_command(apksigner, signed_apk):
+    """apksigner verify that also prints signer certificates (no password)."""
+    if not apksigner or not signed_apk:
+        raise SignVerifyError("apksigner and signed APK are required")
+    return [str(apksigner), "verify", "--print-certs", str(signed_apk)]
+
+
+def parse_apksigner_certificates(output):
+    """Extract signer certificate SHA-256 digests from apksigner output."""
+    digests = []
+    for match in re.finditer(
+            r"certificate SHA-256 digest:\s*([0-9A-Fa-f:]+)", output or ""):
+        digests.append(match.group(1).replace(":", "").lower())
+    return digests

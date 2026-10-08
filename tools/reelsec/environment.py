@@ -126,7 +126,7 @@ def _probe_adb():
 
 def _probe_signing():
     tools = {}
-    for name in ("zipalign", "apksigner", "jarsigner"):
+    for name in ("zipalign", "apksigner", "jarsigner", "openssl"):
         p = _tool(name)
         tools[name] = _probe(name, [p])
     return tools
@@ -153,6 +153,7 @@ def discover_environment(root=None):
             "zipalign": signing.get("zipalign"),
             "apksigner": signing.get("apksigner"),
             "jarsigner": signing.get("jarsigner"),
+            "openssl": signing.get("openssl"),
         },
         "device": {},
         "policy": {

@@ -376,5 +376,149 @@ class ArtifactIntegrityGateTests(unittest.TestCase):
         self.assertEqual(gate["status"], "PASS")
 
 
+class DeployGateTests(unittest.TestCase):
+    def test_readiness_ready(self):
+        from adb_deploy import deploy_readiness
+        with tempfile.TemporaryDirectory() as tmp:
+            apk = Path(tmp) / "s.apk"
+            apk.write_bytes(b"signed")
+            ks = Path(tmp) / "test.p12"
+            ks.write_bytes(b"ks")
+            report = deploy_readiness(
+                sign_status="SIGNED_VERIFIED", artifact_path=str(apk),
+                artifact_sha256="a" * 64, certificate_sha256="b" * 64,
+                apksigner_path="/usr/bin/apksigner",
+                keystore_path=str(ks), test_package="com.x")
+            self.assertTrue(report["ready"])
+            self.assertEqual(report["status"], "READY")
+            self.assertEqual(report["failed"], [])
+
+    def test_readiness_blocks_missing_facts(self):
+        from adb_deploy import deploy_readiness
+        report = deploy_readiness(
+            sign_status="BLOCKED_OR_FAILED", artifact_path="/no/apk",
+            artifact_sha256=None, certificate_sha256=None,
+            apksigner_path=None, keystore_path="/no/ks",
+            test_package=None)
+        self.assertFalse(report["ready"])
+        self.assertEqual(report["status"], "NOT_READY")
+        for name in ("signed_verified", "artifact_present",
+                     "certificate_recorded", "apksigner_available",
+                     "keystore_present", "test_package_resolved"):
+            self.assertIn(name, report["failed"])
+
+    def _device(self, installed=True, installed_cert="aa",
+                installed_version="4200", pull_ok=True, certs_ok=True):
+        adb, serial = "/adb", "S1"
+        calls = []
+
+        def fake(cmd, timeout=120):
+            calls.append(cmd)
+            if cmd[:2] == [adb, "-s"] and cmd[3] == "shell":
+                rest = cmd[4:]
+                if rest[:2] == ["pm", "path"]:
+                    if installed:
+                        return 0, "package:/data/app/x/base.apk\n"
+                    return 0, ""
+                if rest[:2] == ["dumpsys", "package"]:
+                    return 0, "versionCode=%s versionName=1\n" % installed_version
+            if cmd[:2] == [adb, "-s"] and cmd[3] == "pull":
+                if not pull_ok:
+                    return 1, "pull failed"
+                Path(cmd[-1]).write_bytes(b"installed-apk")
+                return 0, "pulled"
+            if "--print-certs" in cmd:
+                if not certs_ok:
+                    return 1, "verify failed"
+                return 0, ("Signer #1 certificate SHA-256 digest: %s\n"
+                           % installed_cert)
+            return 1, "unexpected: %s" % (cmd,)
+        return adb, serial, fake, calls
+
+    def test_compatibility_fresh_install(self):
+        from adb_deploy import check_install_compatibility
+        adb, serial, fake, calls = self._device(installed=False)
+        with tempfile.TemporaryDirectory() as tmp:
+            record = check_install_compatibility(
+                adb=adb, serial=serial, package="com.x",
+                artifact_cert_sha256="aa", apksigner="/usr/bin/apksigner",
+                runner=fake, tmp_dir=tmp)
+        self.assertTrue(record["compatible"])
+        self.assertEqual(record["mode"], "FRESH_INSTALL")
+        self.assertFalse(any("pull" in c for c in calls))
+
+    def test_compatibility_signature_match(self):
+        from adb_deploy import check_install_compatibility
+        adb, serial, fake, _ = self._device(installed_cert="AA:BB")
+        with tempfile.TemporaryDirectory() as tmp:
+            record = check_install_compatibility(
+                adb=adb, serial=serial, package="com.x",
+                artifact_cert_sha256="aabb", artifact_version_code=4200,
+                apksigner="/usr/bin/apksigner", runner=fake, tmp_dir=tmp)
+            leftovers = list(Path(tmp).iterdir())
+        self.assertTrue(record["compatible"])
+        self.assertEqual(record["mode"], "REPLACE_INSTALL")
+        self.assertEqual(record["reason_code"], "SIGNATURE_MATCH")
+        self.assertEqual(leftovers, [])
+
+    def test_compatibility_signature_mismatch(self):
+        from adb_deploy import check_install_compatibility
+        adb, serial, fake, _ = self._device(installed_cert="BB:CC")
+        with tempfile.TemporaryDirectory() as tmp:
+            record = check_install_compatibility(
+                adb=adb, serial=serial, package="com.x",
+                artifact_cert_sha256="aabb",
+                apksigner="/usr/bin/apksigner", runner=fake, tmp_dir=tmp)
+            leftovers = list(Path(tmp).iterdir())
+        self.assertFalse(record["compatible"])
+        self.assertEqual(record["reason_code"], "SIGNATURE_MISMATCH")
+        self.assertIn("authorization", record["reason"].lower())
+        self.assertEqual(leftovers, [])
+
+    def test_compatibility_downgrade(self):
+        from adb_deploy import check_install_compatibility
+        adb, serial, fake, _ = self._device(installed_cert="AA:BB",
+                                            installed_version="4200")
+        with tempfile.TemporaryDirectory() as tmp:
+            record = check_install_compatibility(
+                adb=adb, serial=serial, package="com.x",
+                artifact_cert_sha256="aabb", artifact_version_code=4100,
+                apksigner="/usr/bin/apksigner", runner=fake, tmp_dir=tmp)
+        self.assertFalse(record["compatible"])
+        self.assertEqual(record["reason_code"], "VERSION_DOWNGRADE")
+
+    def test_compatibility_unverified_on_pull_failure(self):
+        from adb_deploy import check_install_compatibility
+        adb, serial, fake, _ = self._device(pull_ok=False)
+        with tempfile.TemporaryDirectory() as tmp:
+            record = check_install_compatibility(
+                adb=adb, serial=serial, package="com.x",
+                artifact_cert_sha256="aabb",
+                apksigner="/usr/bin/apksigner", runner=fake, tmp_dir=tmp)
+        self.assertFalse(record["compatible"])
+        self.assertEqual(record["reason_code"], "COMPATIBILITY_UNVERIFIED")
+
+    def test_post_install_identity_match(self):
+        from adb_deploy import verify_installed_artifact_identity
+        adb, serial, fake, _ = self._device(installed_cert="AA:BB")
+        with tempfile.TemporaryDirectory() as tmp:
+            record = verify_installed_artifact_identity(
+                adb=adb, serial=serial, package="com.x",
+                expected_cert_sha256="aabb",
+                apksigner="/usr/bin/apksigner", runner=fake, tmp_dir=tmp)
+        self.assertEqual(record["identity"], "MATCH")
+
+    def test_post_install_identity_mismatch(self):
+        from adb_deploy import verify_installed_artifact_identity
+        adb, serial, fake, _ = self._device(installed_cert="CC:DD")
+        with tempfile.TemporaryDirectory() as tmp:
+            record = verify_installed_artifact_identity(
+                adb=adb, serial=serial, package="com.x",
+                expected_cert_sha256="aabb",
+                apksigner="/usr/bin/apksigner", runner=fake, tmp_dir=tmp)
+        self.assertEqual(record["identity"], "MISMATCH")
+        self.assertIn("runtime blocked", record["reason"].lower())
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

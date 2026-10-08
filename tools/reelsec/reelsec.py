@@ -29,7 +29,20 @@ from build_verify import (
     zipalign_verify_command,
     verify_native_library_packaging,
 )
-from sign_verify import artifact_identity, sign_command, verify_command, run_checked
+from sign_verify import (
+    KEYSTORE_PASSWORD_ENV,
+    KEY_PASSWORD_ENV,
+    artifact_identity,
+    bootstrap_test_keystore,
+    parse_apksigner_certificates,
+    plan_test_keystore,
+    scrub_secrets,
+    sign_command,
+    signing_preflight,
+    verify_certs_command,
+    verify_command,
+    run_checked,
+)
 from adb_deploy import (
     install_command,
     uninstall_command,
@@ -39,9 +52,12 @@ from adb_deploy import (
     diagnose_install_failure,
     artifact_preflight_checks,
     artifact_integrity_gate,
+    check_install_compatibility,
+    deploy_readiness,
     package_state_snapshot,
     build_install_semantics,
     verify_installed_package,
+    verify_installed_artifact_identity,
     _default_runner,
 )
 import runtime_probe
@@ -1673,6 +1689,60 @@ def _find_package_name(root):
     return None, None
 
 
+def _decoded_manifest_version_code(decoded_root):
+    """Read versionCode from an apktool-decoded (text XML) manifest.
+
+    Returns an int, or None when unreadable. A missing value degrades the
+    downgrade check to UNKNOWN (non-blocking); the install itself still
+    surfaces a real downgrade with a classified reason.
+    """
+    try:
+        text = (Path(decoded_root) / "AndroidManifest.xml").read_text(
+            encoding="utf-8", errors="replace")
+    except (OSError, TypeError):
+        return None
+    match = re.search(r'versionCode\s*=\s*"(\d+)"', text)
+    if not match:
+        return None
+    try:
+        return int(match.group(1))
+    except ValueError:
+        return None
+
+
+def resolve_test_package(env=None, decoded_root=None, input_apk=None):
+    """Resolve the test package without requiring manual configuration.
+
+    Explicit REELSEC_TEST_PACKAGE always wins. Otherwise the package is
+    derived read-only from the decoded manifest, then from the input APK
+    via tool checks. Returns {"package", "source", "manifest", "reason"}.
+    """
+    values = env if env is not None else os.environ
+    explicit = (values.get("REELSEC_TEST_PACKAGE") or "").strip()
+    if explicit:
+        return {"package": explicit, "source": "EXPLICIT_ENV",
+                "manifest": None, "reason": None}
+    if decoded_root:
+        try:
+            package, manifest = _find_package_name(Path(decoded_root))
+        except (OSError, ValueError):
+            package, manifest = None, None
+        if package:
+            return {"package": package, "source": "DECODED_MANIFEST",
+                    "manifest": manifest, "reason": None}
+    if input_apk:
+        try:
+            package, tool, _ = _find_package_from_apk_tools(input_apk)
+        except Exception:
+            package, tool = None, None
+        if package:
+            return {"package": package, "source": "INPUT_APK_TOOL:" + str(tool),
+                    "manifest": None, "reason": None}
+    return {"package": None, "source": None, "manifest": None,
+            "reason": ("REELSEC_TEST_PACKAGE not configured and no package "
+                       "derivable from manifests; refusing to touch any package")}
+
+
 def write_runtime_toolchain_preflight(output):
     """Bounded best-effort preparation of ADB + Frida clients.
     
@@ -3223,6 +3293,20 @@ def main():
         (decoded_inventory or {}).get("status", "NOT_READY"),
     )
 
+    # Self-contained package resolution: explicit configuration always wins;
+    # otherwise derive read-only from manifests so later stages never stall
+    # on a missing REELSEC_TEST_PACKAGE. The resolution is recorded.
+    package_resolution = resolve_test_package(
+        os.environ,
+        decoded_root=(decoded_inventory or {}).get("root"),
+        input_apk=str(input_apk) if input_apk else None)
+    if package_resolution["package"] and not os.environ.get("REELSEC_TEST_PACKAGE"):
+        os.environ["REELSEC_TEST_PACKAGE"] = package_resolution["package"]
+        package_resolution["env_filled"] = True
+    (output / "PACKAGE-RESOLUTION.json").write_text(
+        json.dumps(package_resolution, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8")
+
     _progress_stage(progress, output, 6, "SecShell instrumentation plan", "RUNNING",
                     "locating the SecShell Application loadLibrary anchor")
     instrumentation_plan = plan_instrumentation(decoded_inventory, output)
@@ -3392,23 +3476,61 @@ def main():
     if build_verify.get("status") == "BUILT":
         try:
             apksigner = capabilities.get("tools", {}).get("apksigner", {}).get("path")
-            keystore = os.environ.get("REELSEC_TEST_KEYSTORE")
-            alias = os.environ.get("REELSEC_TEST_KEY_ALIAS", "reelsec-test")
-            if not apksigner or not keystore:
-                raise RuntimeError("apksigner or REELSEC_TEST_KEYSTORE unavailable")
+            openssl = capabilities.get("tools", {}).get("openssl", {}).get("path")
+            # Self-contained keystore: explicit configuration wins, otherwise
+            # bootstrap a local test-only keystore outside the checkout.
+            keystore_plan = plan_test_keystore(os.environ, repo_root=ROOT)
+            if keystore_plan["action"] == "BOOTSTRAP":
+                keystore_record = bootstrap_test_keystore(
+                    keystore_plan["keystore"], alias=keystore_plan["alias"],
+                    openssl=openssl, runner=run, env=os.environ)
+            else:
+                keystore_record = dict(keystore_plan)
+                keystore_record["reused"] = False
+            keystore = keystore_record["keystore"]
+            alias = keystore_record["alias"]
+            os.environ.setdefault("REELSEC_TEST_KEYSTORE", keystore)
+            preflight = signing_preflight(
+                apksigner=apksigner, keystore=keystore, alias=alias,
+                openssl=openssl, runner=run, env=os.environ)
+            if preflight["status"] != "READY":
+                raise RuntimeError(
+                    "signing preflight not ready (%s)"
+                    % ",".join(preflight["failed"]))
             unsigned_apk = Path(build_verify["path"]).resolve()
+            if input_apk and unsigned_apk == Path(str(input_apk)).resolve():
+                raise RuntimeError("refusing to sign the original APK")
             signed_apk = output / "instrumented-signed.apk"
             cmd = sign_command(apksigner, unsigned_apk, signed_apk, keystore, alias)
             sign_output = run_checked(cmd)
             verify_cmd = verify_command(apksigner, signed_apk)
             verify_output = run_checked(verify_cmd)
+            certs_cmd = verify_certs_command(apksigner, signed_apk)
+            certs_output = run_checked(certs_cmd)
+            certs = parse_apksigner_certificates(certs_output)
+            if not certs:
+                raise RuntimeError(
+                    "signed artifact has no recorded signer certificate")
+            secret_values = [os.environ.get(KEYSTORE_PASSWORD_ENV),
+                             os.environ.get(KEY_PASSWORD_ENV)]
             sign_verify = artifact_identity(unsigned_apk, signed_apk)
             sign_verify.update({
                 "status": "SIGNED_VERIFIED",
+                "keystore": {
+                    "path": keystore,
+                    "alias": alias,
+                    "bootstrapped": bool(keystore_record.get("bootstrapped")),
+                    "reused": bool(keystore_record.get("reused")),
+                    "backend": keystore_record.get("backend"),
+                },
+                "certificate_sha256": certs[0],
+                "signing_preflight": preflight,
                 "sign_command": cmd,
                 "verify_command": verify_cmd,
-                "sign_output_tail": sign_output[-2000:],
-                "verify_output_tail": verify_output[-2000:],
+                "certs_command": certs_cmd,
+                "sign_output_tail": scrub_secrets(sign_output[-2000:], secret_values),
+                "verify_output_tail": scrub_secrets(verify_output[-2000:], secret_values),
+                "certs_output_tail": scrub_secrets(certs_output[-2000:], secret_values),
             })
         except Exception as exc:
             sign_verify = {"status": "BLOCKED_OR_FAILED", "error": str(exc)}
@@ -3466,10 +3588,21 @@ def main():
 
     _progress_stage(progress, output, 10, "ADB deploy", "RUNNING",
                     "checking the explicit test device and installing only the signed artifact")
-    adb_deploy = {"status": "NOT_DEPLOYED"}
+    # The deploy document is ALWAYS written: a skipped deploy records its
+    # upstream cause instead of vanishing (that gap hid the sign failure
+    # behind a bare PACKAGE_NOT_INSTALLED verdict on 2026-10-08).
+    adb_deploy = {"status": "NOT_DEPLOYED",
+                  "reason": "sign stage did not verify an artifact",
+                  "sign_status": sign_verify.get("status")}
     if sign_verify.get("status") == "SIGNED_VERIFIED":
+        readiness = None
+        artifact_preflight = None
+        integrity_gate = None
+        compatibility = None
+        identity = None
         try:
             adb = capabilities.get("tools", {}).get("adb", {}).get("path")
+            apksigner_path = capabilities.get("tools", {}).get("apksigner", {}).get("path")
             configured_serial = os.environ.get("REELSEC_TEST_DEVICE")
             if not adb:
                 raise RuntimeError("ADB unavailable")
@@ -3479,8 +3612,22 @@ def main():
             state_output = run_checked(state_cmd)
             if state_output.strip() != "device":
                 raise RuntimeError("resolved test device is not in adb device state")
-            # Read-only artifact preflight: alignment, uncompressed native
-            # libs, ABI compatibility. Never modifies the APK.
+            test_package = os.environ.get("REELSEC_TEST_PACKAGE")
+            # Gate 1: install readiness — every upstream fact must exist.
+            readiness = deploy_readiness(
+                sign_status=sign_verify.get("status"),
+                artifact_path=sign_verify.get("signed_path"),
+                artifact_sha256=sign_verify.get("signed_sha256"),
+                certificate_sha256=sign_verify.get("certificate_sha256"),
+                apksigner_path=apksigner_path,
+                keystore_path=os.environ.get("REELSEC_TEST_KEYSTORE"),
+                test_package=test_package)
+            if not readiness["ready"]:
+                raise RuntimeError(
+                    "deploy not ready (%s); install rejected before attempt"
+                    % ",".join(readiness["failed"]))
+            # Gate 2: read-only artifact preflight — alignment, uncompressed
+            # native libs, ABI compatibility. Never modifies the APK.
             zipalign_path = os.environ.get("REELSEC_ZIPALIGN") or shutil.which("zipalign")
             artifact_preflight = artifact_preflight_checks(
                 sign_verify["signed_path"], zipalign=zipalign_path,
@@ -3491,9 +3638,9 @@ def main():
                 raise RuntimeError(
                     "artifact preflight failed (%s); install rejected before attempt"
                     % ",".join(failed))
-            # Artifact Integrity Gate: signing presence, package identity,
-            # expected native libs, compression, installed identity. Any FAIL
-            # blocks runtime before any install/probe is attempted.
+            # Gate 3: Artifact Integrity Gate — signing presence, package
+            # identity, expected native libs, compression, installed
+            # identity. Any FAIL blocks runtime before any install/probe.
             expected_so = None
             if input_apk:
                 expected_so = {
@@ -3502,10 +3649,9 @@ def main():
                      .get("native_libs") or [])}
             integrity_gate = artifact_integrity_gate(
                 sign_verify["signed_path"], adb=adb, serial=serial,
-                package=os.environ.get("REELSEC_TEST_PACKAGE"),
+                package=test_package,
                 expected_so=expected_so,
-                apksigner=(capabilities.get("tools", {})
-                           .get("apksigner", {}).get("path")),
+                apksigner=apksigner_path,
                 manifest_decoder=_decode_binary_manifest_package,
                 preflight=artifact_preflight)
             (output / "ARTIFACT-INTEGRITY.json").write_text(
@@ -3517,12 +3663,35 @@ def main():
                 raise RuntimeError(
                     "artifact integrity gate failed (%s); runtime blocked "
                     "before install" % ",".join(failed))
+            # Gate 4: install compatibility — can this artifact replace the
+            # on-device build WITHOUT uninstall? A mismatch blocks here with
+            # an explicit reason unless an explicit hash-bound destructive
+            # authorization document is configured (then the existing gated
+            # replace path below validates and executes it).
+            compatibility = check_install_compatibility(
+                adb=adb, serial=serial, package=test_package,
+                artifact_cert_sha256=sign_verify.get("certificate_sha256"),
+                artifact_version_code=_decoded_manifest_version_code(
+                    instrumented_copy_root),
+                apksigner=apksigner_path, runner=_default_runner)
+            if not compatibility["compatible"]:
+                if compatibility["reason_code"] == "SIGNATURE_MISMATCH" \
+                        and os.environ.get("REELSEC_DESTRUCTIVE_AUTH"):
+                    compatibility["authorized_override"] = True
+                    compatibility["override_note"] = (
+                        "signature mismatch acknowledged; an explicit "
+                        "hash-bound destructive authorization document is "
+                        "configured, so the gated replace path below may "
+                        "proceed (it validates the document itself)")
+                else:
+                    raise RuntimeError(
+                        "install compatibility gate (%s): %s"
+                        % (compatibility["reason_code"],
+                           compatibility["reason"]))
             install_cmd = install_command(adb, serial, sign_verify["signed_path"])
             # Package-state snapshot BEFORE the install (read-only): proves
             # what existed and for which users before the replacement.
-            pkg_before = (package_state_snapshot(adb, serial, os.environ.get(
-                              "REELSEC_TEST_PACKAGE") or "")
-                          if os.environ.get("REELSEC_TEST_PACKAGE") else None)
+            pkg_before = package_state_snapshot(adb, serial, test_package)
             try:
                 install_output = run_checked(install_cmd)
                 reinstall_mode = "UPDATE"
@@ -3531,33 +3700,36 @@ def main():
             except Exception as install_exc:
                 if not is_signature_mismatch_error(str(install_exc)):
                     raise
-                package_name = os.environ.get("REELSEC_TEST_PACKAGE")
-                if not package_name:
-                    raise RuntimeError("REELSEC_TEST_PACKAGE unavailable; refusing package uninstall")
                 # Safety-by-design: replacing a differently-signed package is a
                 # destructive UNINSTALL. The legacy blanket env flag is not an
                 # authorization (2026-10-07 incident); only a hash-bound
                 # authorization document processed by the safety gate is.
                 uninstall_audit = safety_gate.execute_destructive(
                     _default_runner, adb, serial, safety_gate.UNINSTALL,
-                    package_name,
+                    test_package,
                     authorization_path=os.environ.get("REELSEC_DESTRUCTIVE_AUTH"),
                     audit_path=output / "SAFETY-AUDIT.jsonl")
                 uninstall_cmd = uninstall_audit["command"]
                 uninstall_output = (uninstall_audit.get("output_tail") or "")
                 install_output = run_checked(install_cmd)
                 reinstall_mode = "UNINSTALL_THEN_INSTALL"
-            test_package = os.environ.get("REELSEC_TEST_PACKAGE")
-            installed_check = (
-                verify_installed_package(adb, serial, test_package)
-                if test_package else
-                {"status": "SKIPPED", "reason": "REELSEC_TEST_PACKAGE not configured"})
+            installed_check = verify_installed_package(adb, serial, test_package)
             # Package-state snapshot AFTER the install + explicit
             # replacement semantics (shared-APK model, users 0/95).
-            pkg_after = (package_state_snapshot(adb, serial, test_package)
-                         if test_package else None)
-            install_semantics = (build_install_semantics(pkg_before, pkg_after)
-                                 if test_package else None)
+            pkg_after = package_state_snapshot(adb, serial, test_package)
+            install_semantics = build_install_semantics(pkg_before, pkg_after)
+            # Gate 5: post-install identity — the on-device build MUST be
+            # our signed artifact (signer certificate match). Anything else
+            # blocks runtime: evidence about the wrong build is worse than
+            # no evidence.
+            identity = verify_installed_artifact_identity(
+                adb=adb, serial=serial, package=test_package,
+                expected_cert_sha256=sign_verify.get("certificate_sha256"),
+                apksigner=apksigner_path, runner=_default_runner)
+            if identity["identity"] != "MATCH":
+                raise RuntimeError(
+                    "post-install identity %s: %s"
+                    % (identity["identity"], identity["reason"]))
             adb_deploy = {
                 "status": "INSTALLED" if installed_check.get("present", True)
                           else "INSTALLED_NOT_VERIFIED",
@@ -3567,10 +3739,14 @@ def main():
                 "online_devices": resolution.get("online_devices", []),
                 "artifact": sign_verify["signed_path"],
                 "artifact_sha256": sign_verify["signed_sha256"],
+                "certificate_sha256": sign_verify.get("certificate_sha256"),
                 "artifact_kind": "INSTRUMENTED_TEST_ARTIFACT",
                 "device_inventory_command": resolution.get("inventory_command"),
                 "device_check_command": state_cmd,
+                "deploy_readiness": readiness,
                 "artifact_preflight": artifact_preflight,
+                "install_compatibility": compatibility,
+                "post_install_identity": identity,
                 "install_command": install_cmd,
                 "install_mode": reinstall_mode,
                 "uninstall_command": uninstall_cmd,
@@ -3583,10 +3759,22 @@ def main():
             }
         except Exception as exc:
             adb_deploy = {
-                "status": "BLOCKED_OR_FAILED",
+                "status": ("INSTALLED_IDENTITY_MISMATCH"
+                           if str(exc).startswith("post-install identity")
+                           else "BLOCKED_OR_FAILED"),
                 "error": str(exc),
                 "install_failure_diagnosis": diagnose_install_failure(str(exc)),
+                "deploy_readiness": readiness,
+                "artifact_preflight": artifact_preflight,
+                "integrity_gate": integrity_gate,
+                "install_compatibility": compatibility,
+                "post_install_identity": identity,
             }
+        (output / "ADB-DEPLOY.json").write_text(
+            json.dumps(adb_deploy, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+    else:
         (output / "ADB-DEPLOY.json").write_text(
             json.dumps(adb_deploy, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
@@ -3594,9 +3782,11 @@ def main():
     _progress_stage(
         progress, output, 10, "ADB deploy",
         "PASS" if adb_deploy.get("status") == "INSTALLED"
-        else "FAIL" if adb_deploy.get("status") == "BLOCKED_OR_FAILED"
+        else "FAIL" if adb_deploy.get("status") in ("BLOCKED_OR_FAILED",
+                                                   "INSTALLED_IDENTITY_MISMATCH",
+                                                   "INSTALLED_NOT_VERIFIED")
         else "SKIP",
-        adb_deploy.get("error", adb_deploy.get("status", "")),
+        adb_deploy.get("error", adb_deploy.get("reason", adb_deploy.get("status", ""))),
     )
 
     _progress_stage(progress, output, 11, "Gadget observation", "RUNNING",

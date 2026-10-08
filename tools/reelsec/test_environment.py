@@ -38,6 +38,22 @@ class EnvironmentResolverTests(unittest.TestCase):
                 result = write_capability_matrix(td, Path.cwd())
                 self.assertTrue(result["policy"]["resolver_does_not_install"])
                 self.assertTrue((Path(td) / "CAPABILITY-MATRIX.json").is_file())
+
+    def test_matrix_probes_openssl(self):
+        with tempfile.TemporaryDirectory() as td:
+            tool = Path(td) / "openssl"
+            tool.write_text("#!/bin/sh\nprintf 'OpenSSL 3.0.0\\n'\\n", encoding="utf-8")
+            tool.chmod(0o755)
+
+            def only_openssl(name):
+                return str(tool) if name == "openssl" else None
+
+            with patch("environment._tool", side_effect=only_openssl):
+                result = write_capability_matrix(td, Path.cwd())
+                self.assertEqual(
+                    result["tools"]["signing"]["openssl"]["status"], "USABLE")
+                self.assertEqual(
+                    result["tools"]["openssl"]["status"], "USABLE")
                 self.assertTrue((Path(td) / "CAPABILITY-MATRIX.md").is_file())
 
 
