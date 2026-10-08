@@ -532,3 +532,68 @@ crash-instance synthesis, offset SHA binding, verdict aggregation for
 both-crash/control-only/no-comparison, destructive-NEXT_ACTION purge,
 exit-code classification, platform exit mapping, publisher failure
 classification). No campaign was run in this round.
+
+## 2026-10-08 — timeline-truth-1: session-bound crash attribution + real-timeline state machine
+
+Field correction (user-verified) for campaign 2026-10-07T23-43-38: the
+original ran NORMALLY after the platform installed it; crashes appeared
+only after the instrumented install/run. Artifact forensics confirmed the
+user and exposed the defect:
+
+* BASELINE round 23:44:44–55 UTC: original (53e49f50…, uid 10813) process
+  15683 alive at window exit, ZERO new exit-info entries — yet the health
+  gate classified CRASH by attributing tombstone pid 30953 whose fatal
+  line is timestamped 21:31 UTC (an EARLIER campaign's instrumented
+  crash, hours old). `assess_startup` read the crash ring buffer once
+  AFTER the window with no session binding.
+* The SAME stale tombstone (pid 30953) had also fabricated
+  CONTROL_CRASHED in campaigns 22-06-53 (pid 10332 alive at exit) and
+  23-17-31 (pid 22058 alive at exit) — so COMMON_CAUSE_BOTH_CRASH in
+  22-06-53 was built on a misattributed original-side crash.
+* Instrumented round 23:45:42 UTC: genuine fresh crash (pid 18792,
+  SIGABRT libc abort+168) after `install -r` UPDATE replaced the
+  original (same package/uid/users [0,95] — replacement, never a dual
+  instance; after replacement every launch runs the instrumented build).
+* Crashes 23:45:23–29 UTC (pids 17891/18119/18238) fall BETWEEN the two
+  observation windows: preserved in evidence, attributed to neither side.
+
+Fixes (runtime_health.py / reelsec.py / orchestrator.py):
+
+1) SESSION-BOUND ATTRIBUTION at collection: pre-launch crash-buffer
+   snapshot + post-window diff — only lines that APPEARED after launch
+   classify the session (BUFFER_DIFF). Fallbacks when the snapshot is
+   unusable: PID_MATCH (tombstone pid observed this session),
+   IN_WINDOW_DEATH, NO_PROCESS_OBSERVED. A process alive at window exit
+   with zero new exit-info is NEVER crashed by a different pid's
+   tombstone. Stale tombstones are preserved in evidence
+   (crash_session_binding + raw parse), never deleted.
+2) audit_startup_classification / audited_original_side: post-hoc audit
+   of RECORDED documents — only an explicit contradiction (logcat-only
+   CRASH + alive-at-exit + pid mismatch + no exit-info) is corrected to
+   PASS, with annotations; documents are never rewritten.
+3) State machine: new real-timeline states ORIGINAL_HEALTHY,
+   ORIGINAL_CRASHED, INSTRUMENTED_INSTALLED (CAMPAIGN_STATES 15→18);
+   CONTROL_NOT_INSTALLED reason now states it does NOT mean the original
+   never ran; audited evidence outranks pre-audit BOTH_CRASH comparison
+   documents (INSTRUMENTATION_ONLY_CRASH with audit reason).
+4) runtime_verdict: audited views drive ORIGINAL_RUNTIME (+SOURCE),
+   comparison recomputed on correction, BOTH_CRASH common-cause
+   downgraded to CONTROL_HEALTHY_INSTRUMENTED_CRASH when the
+   original-side crash was stale; STARTUP_AUDIT + recorded-status fields.
+5) Aggregator: unwraps the device RUNTIME-HEALTH collector envelope
+   (latent bug: enveloped startup read as None), corrects legacy
+   ORIGINAL_RUNTIME=CRASH from the baseline audit, feeds baseline/deploy
+   into the state machine; evidence files untouched.
+
+Verified read-only against the real 23-43-38 artifacts: timeline =
+CONTROL_NOT_INSTALLED → ORIGINAL_HEALTHY → INSTRUMENTED_INSTALLED →
+INSTRUMENTED_CRASHED → INSTRUMENTATION_ONLY_CRASH;
+ORIGINAL_RUNTIME=PASS, REGRESSION_STATUS=INSTRUMENTATION_REGRESSION_
+CONFIRMED, runtime proof remains BLOCKED_BY_ARTIFACT_CRASH;
+SCREENSHOT_BLOCKING stays NOT_PROVEN. Campaign dir git-clean afterwards.
+
+No uninstall/reinstall anywhere; no evidence deleted; no campaign or
+platform run executed this round. Suite: 277/277 (19 new hermetic tests:
+stale-tombstone exclusion, BUFFER_DIFF/PID_MATCH binding, audit override
+guards, ORIGINAL_HEALTHY→INSTRUMENTED_INSTALLED→INSTRUMENTED_CRASHED
+sequence, legacy BOTH_CRASH correction, genuine both-crash preserved).

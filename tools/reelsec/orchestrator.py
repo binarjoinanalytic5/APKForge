@@ -112,13 +112,39 @@ def _final_verdict_logic(campaign_dir, campaign_status=None):
     runtime_verdict = _read_json(cd / "RUNTIME-VERDICT.json") or {}
     evidence = _read_json(cd / "EVIDENCE-REPORT.json") or {}
     health = _read_json(cd / "RUNTIME-HEALTH.json") or {}
+    if isinstance(health.get("data"), dict) and "startup" not in health:
+        health = health["data"]  # collector envelope (device campaigns)
     working_control = _read_json(cd / "WORKING-CONTROL.json") or {}
     common_cause = _read_json(cd / "COMMON-CAUSE-COMPARISON.json") or {}
+    baseline_doc = _read_json(cd / "BASELINE-RUNTIME.json") or {}
+    baseline_health = baseline_doc.get("health")
+    deploy = _read_json(cd / "ADB-DEPLOY.json") or {}
     cc_status = common_cause.get("status")
+
+    # Timeline-truth audit: recorded documents are never rewritten, but the
+    # aggregation corrects startups that stale crash-buffer tombstones
+    # fabricated, and annotates every correction.
+    audit_notes = []
+    i_audit = rh_mod.audit_startup_classification(health) if health else None
+    health_startup = health.get("startup")
+    if i_audit and i_audit["contradictions"]:
+        health_startup = i_audit["audited_startup"]
+        audit_notes.append("INSTRUMENTED: " + i_audit["reason"])
+    original_side, original_note = rh_mod.audited_original_side(
+        working_control or None, baseline_health=baseline_health)
+    if original_note:
+        audit_notes.append("ORIGINAL_SIDE: " + original_note)
+    effective_cc = cc_status
+    if cc_status == "COMMON_CAUSE_BOTH_CRASH" and original_side == "PASS" \
+            and health_startup == "CRASH":
+        effective_cc = "CONTROL_HEALTHY_INSTRUMENTED_CRASH"
+        audit_notes.append(
+            "COMMON_CAUSE: recorded COMMON_CAUSE_BOTH_CRASH downgraded — the "
+            "original-side crash was contradicted by the session-bound audit")
 
     if safety.get("safety") == "BLOCKED":
         final, reason = "SAFETY_BLOCKED", safety.get("reason")
-    elif cc_status == "COMMON_CAUSE_BOTH_CRASH":
+    elif effective_cc == "COMMON_CAUSE_BOTH_CRASH":
         # Requirement 12: a completed both-crash comparison is a valid
         # investigation — the scientific verdict is simply NOT_PROVEN.
         final = "NOT_PROVEN"
@@ -126,7 +152,7 @@ def _final_verdict_logic(campaign_dir, campaign_status=None):
                   "instrumented artifact crash with a common cause; "
                   "instrumentation regression NOT_ESTABLISHED; runtime "
                   "proof remains blocked")
-    elif health.get("startup") == "CRASH":
+    elif health_startup == "CRASH":
         final = "BLOCKED_BY_ARTIFACT_CRASH"
         reason = health.get("crash_class")
     elif evidence:
@@ -144,7 +170,8 @@ def _final_verdict_logic(campaign_dir, campaign_status=None):
 
     # Runtime fields — sourced from RUNTIME-VERDICT, then reconciled
     # against the working-control / common-cause documents (requirement
-    # 17: FINAL == RUNTIME == COMMON-CAUSE on runtime/regression status).
+    # 17: FINAL == RUNTIME == COMMON-CAUSE on runtime/regression status)
+    # and against the session-bound startup audit (timeline truth).
     regression = runtime_verdict.get("REGRESSION_STATUS")
     runtime_status = runtime_verdict.get("RUNTIME_STATUS")
     next_action = runtime_verdict.get("NEXT_ACTION")
@@ -155,7 +182,29 @@ def _final_verdict_logic(campaign_dir, campaign_status=None):
             "CONTROL_CRASHED": "CRASH",
             "CONTROL_NOT_INSTALLED": "NOT_INSTALLED",
         }.get(working_control.get("status"), original_runtime)
-    if cc_status == "COMMON_CAUSE_BOTH_CRASH":
+    b_audit = (rh_mod.audit_startup_classification(baseline_health)
+               if baseline_health else None)
+    if b_audit and b_audit["contradictions"]:
+        audit_notes.append("BASELINE: " + b_audit["reason"])
+    if original_side == "PASS" and original_runtime == "CRASH":
+        # The recorded original-side CRASH was fabricated by stale
+        # crash-buffer evidence: correct the verdict, keep the documents.
+        original_runtime = "PASS"
+        if health_startup == "CRASH":
+            regression = rh_mod.REGRESSION_CONFIRMED
+            runtime_status = "BLOCKED_BY_ARTIFACT_CRASH"
+            next_action = (
+                "Instrumentation regression confirmed: the original ran "
+                "healthy within its observation window while the "
+                "instrumented artifact crashed after installation; review "
+                "INSTRUMENTATION-IMPACT.json change linkage before any "
+                "further round.")
+    elif original_side == "PASS" and original_runtime in (None, "NOT_RUN",
+                                                          "NOT_INSTALLED"):
+        # CONTROL_NOT_INSTALLED never means the original never ran: the
+        # audited baseline round established the original-side runtime.
+        original_runtime = "PASS"
+    if effective_cc == "COMMON_CAUSE_BOTH_CRASH":
         regression = "NOT_ESTABLISHED"
         runtime_status = "COMMON_CAUSE_BOTH_CRASH"
         next_action = (
@@ -164,9 +213,20 @@ def _final_verdict_logic(campaign_dir, campaign_status=None):
             "regression is NOT_ESTABLISHED and the crash MUST NOT be "
             "attributed to instrumentation. No destructive operation is "
             "required or permitted.")
+    elif effective_cc == "CONTROL_HEALTHY_INSTRUMENTED_CRASH" and \
+            cc_status == "COMMON_CAUSE_BOTH_CRASH" and health_startup == "CRASH":
+        regression = regression if regression == rh_mod.REGRESSION_CONFIRMED \
+            else "SUSPECTED_NOT_PROVEN"
+        runtime_status = "CONTROL_HEALTHY_INSTRUMENTED_CRASH"
+        next_action = (
+            "The recorded BOTH_CRASH common cause was contradicted by the "
+            "session-bound audit: the original ran healthy in its window "
+            "while only the instrumented artifact crashed; instrumentation "
+            "is a CANDIDATE cause — review INSTRUMENTATION-IMPACT.json "
+            "change linkage. No destructive operation is required.")
     if runtime_status is None:
         runtime_status = ("BLOCKED_BY_ARTIFACT_CRASH"
-                          if health.get("startup") == "CRASH"
+                          if health_startup == "CRASH"
                           else runtime_verdict.get("RUNTIME_PROOF_STATUS"))
     # Defense in depth: a destructive-baseline recommendation must never
     # surface as NEXT_ACTION, whatever produced the legacy document.
@@ -181,6 +241,8 @@ def _final_verdict_logic(campaign_dir, campaign_status=None):
     state = rh_mod.campaign_state_machine(
         safety=safety,
         working_control=working_control or None,
+        baseline_health=baseline_health or None,
+        deploy_status=deploy.get("status"),
         instrumented_health=health or None,
         common_cause=common_cause or None,
         evidence=({"causal_proof": evidence.get("causal_proof"),
@@ -211,9 +273,11 @@ def _final_verdict_logic(campaign_dir, campaign_status=None):
             "RUNTIME_STATUS": runtime_status,
             "WORKING_CONTROL": (working_control.get("status")
                                 or runtime_verdict.get("WORKING_CONTROL")),
-            "COMMON_CAUSE_COMPARISON": (cc_status or runtime_verdict.get(
+            "COMMON_CAUSE_COMPARISON": (effective_cc or runtime_verdict.get(
                 "COMMON_CAUSE_COMPARISON")),
+            "COMMON_CAUSE_COMPARISON_RECORDED": cc_status,
             "RUNTIME_PROOF_STATUS": runtime_verdict.get("RUNTIME_PROOF_STATUS"),
+            "STARTUP_AUDIT": ("; ".join(audit_notes) if audit_notes else None),
             "NEXT_ACTION": next_action,
         },
         "scientific_status": {

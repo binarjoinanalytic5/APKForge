@@ -2600,12 +2600,21 @@ def write_runtime_probe(output, root, target, input_apk=None):
                 wc_path.read_text(encoding="utf-8"))
         except Exception:
             working_control_doc = None
+    deploy_status = None
+    deploy_path = output / "ADB-DEPLOY.json"
+    if deploy_path.is_file():
+        try:
+            deploy_status = json.loads(
+                deploy_path.read_text(encoding="utf-8")).get("status")
+        except Exception:
+            deploy_status = None
     verdict = runtime_health.runtime_verdict(
         baseline_health, instrumented_health, comparison=comparison,
         runtime_probe=result, probe_allowed=result.get("runtime_probe_allowed"),
         crash_comparison=result.get("crash_comparison"),
         working_control=working_control_doc,
-        common_cause=result.get("common_cause_comparison"))
+        common_cause=result.get("common_cause_comparison"),
+        deploy_status=deploy_status)
     verdict["BASELINE_STATUS"] = baseline_status
     result["verdict"] = verdict
     (output / "RUNTIME-VERDICT.json").write_text(
