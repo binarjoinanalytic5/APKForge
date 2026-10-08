@@ -1,0 +1,10 @@
+{
+  "collected_at_epoch": 1791467598.7716055,
+  "collector": "ARTIFACT-INTEGRITY",
+  "data": {},
+  "errors": [
+    "ARTIFACT-INTEGRITY.json not produced by the campaign"
+  ],
+  "schema_version": "collector-1",
+  "status": "FAILED"
+}

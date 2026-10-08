@@ -1,0 +1,10 @@
+{
+  "collected_at_epoch": 1791467598.770442,
+  "collector": "DEVICE-SNAPSHOT",
+  "data": {},
+  "errors": [
+    "no adb endpoint in context"
+  ],
+  "schema_version": "collector-1",
+  "status": "SKIPPED"
+}
