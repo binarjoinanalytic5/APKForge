@@ -1,0 +1,20 @@
+# JADX plugin: dex -> java sources.
+name: jadx
+version: 1.0.0
+sdk_version: 1.0.0
+description: Wraps JADX decompilation behind the Plugin SDK v1 protocol.
+license: Apache-2.0
+tool:
+  name: jadx
+  version: 1.5.6
+runtime:
+  command: ["python3", "run.py"]
+  timeout_s: 600
+  memory_mb: 2048
+  cpu: 2.0
+  network: none
+inputs:
+  type: object
+outputs:
+  type: object
+capabilities: ["decompile"]

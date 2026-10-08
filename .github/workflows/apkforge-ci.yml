@@ -1,4 +1,4 @@
-# APKForge CI (Phase 0: contract gates + descriptor validation).
+# APKForge CI (Phase 1: full tests + frontend build + compose check).
 name: apkforge-ci
 on:
   push:
@@ -8,6 +8,7 @@ on:
       - "workers/**"
       - "plugins/**"
       - "frontend/**"
+      - "cli/**"
       - "infra/**"
       - "docs/**"
       - ".github/workflows/apkforge-ci.yml"
@@ -17,18 +18,21 @@ on:
       - "workers/**"
       - "plugins/**"
       - "frontend/**"
+      - "cli/**"
       - "infra/**"
       - "docs/**"
+env:
+  APKFORGE_KEY: ci-test-key-0123456789abcdefghij-XYZ!
 jobs:
-  contracts:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pytest pyyaml
-      - run: pytest backend/tests workers -q
+      - run: pip install -r backend/requirements-test.txt
+      - run: pytest backend workers cli -q
   compose:
     runs-on: ubuntu-latest
     steps:
@@ -41,5 +45,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - run: node -e "JSON.parse(require('fs').readFileSync('frontend/package.json'))"
-  # Phase 1: image build + sign (cosign) + SBOM attest (TODO).
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: cd frontend && npm ci && npm run build
+  # Phase 2: image build + sign (cosign) + SBOM attest (TODO).

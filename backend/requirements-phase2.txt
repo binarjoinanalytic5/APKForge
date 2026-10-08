@@ -1,0 +1,9 @@
+# Phase-2 backends (NOT installed in Phase 1): PostgreSQL via
+# SQLAlchemy, Celery + Redis queue, SeaweedFS via boto3. Kept as a
+# separate file so Phase-1 deploys stay dependency-lean; see
+# docs/adr/ADR-004-local-first-backends.md.
+-r requirements.txt
+sqlalchemy>=2.0
+celery[redis]>=5.3
+redis>=5.0
+boto3>=1.34

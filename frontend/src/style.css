@@ -1,0 +1,32 @@
+body {
+  direction: rtl;
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  background: #f6f8fb;
+  color: #1c2733;
+  margin: 0;
+}
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: #1c2733;
+  color: #fff;
+}
+.topbar .spacer { flex: 1; }
+.page { padding: 1.5rem; max-width: 1100px; margin: 0 auto; }
+.row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+.card { margin-bottom: 1rem; }
+.logs {
+  background: #10151c;
+  color: #c9e2ff;
+  direction: ltr;
+  text-align: left;
+  padding: 1rem;
+  border-radius: 6px;
+  max-height: 320px;
+  overflow: auto;
+  font-family: monospace;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+}
