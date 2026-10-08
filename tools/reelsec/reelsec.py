@@ -33,6 +33,8 @@ from adb_deploy import (
     diagnose_install_failure,
     artifact_preflight_checks,
     artifact_integrity_gate,
+    package_state_snapshot,
+    build_install_semantics,
     verify_installed_package,
     _default_runner,
 )
@@ -2600,21 +2602,21 @@ def write_runtime_probe(output, root, target, input_apk=None):
                 wc_path.read_text(encoding="utf-8"))
         except Exception:
             working_control_doc = None
-    deploy_status = None
+    deploy_doc = None
     deploy_path = output / "ADB-DEPLOY.json"
     if deploy_path.is_file():
         try:
-            deploy_status = json.loads(
-                deploy_path.read_text(encoding="utf-8")).get("status")
+            deploy_doc = json.loads(deploy_path.read_text(encoding="utf-8"))
         except Exception:
-            deploy_status = None
+            deploy_doc = None
     verdict = runtime_health.runtime_verdict(
         baseline_health, instrumented_health, comparison=comparison,
         runtime_probe=result, probe_allowed=result.get("runtime_probe_allowed"),
         crash_comparison=result.get("crash_comparison"),
         working_control=working_control_doc,
         common_cause=result.get("common_cause_comparison"),
-        deploy_status=deploy_status)
+        deploy_status=(deploy_doc or {}).get("status"),
+        deploy=deploy_doc)
     verdict["BASELINE_STATUS"] = baseline_status
     result["verdict"] = verdict
     (output / "RUNTIME-VERDICT.json").write_text(
@@ -3487,6 +3489,11 @@ def main():
                     "artifact integrity gate failed (%s); runtime blocked "
                     "before install" % ",".join(failed))
             install_cmd = install_command(adb, serial, sign_verify["signed_path"])
+            # Package-state snapshot BEFORE the install (read-only): proves
+            # what existed and for which users before the replacement.
+            pkg_before = (package_state_snapshot(adb, serial, os.environ.get(
+                              "REELSEC_TEST_PACKAGE") or "")
+                          if os.environ.get("REELSEC_TEST_PACKAGE") else None)
             try:
                 install_output = run_checked(install_cmd)
                 reinstall_mode = "UPDATE"
@@ -3516,6 +3523,12 @@ def main():
                 verify_installed_package(adb, serial, test_package)
                 if test_package else
                 {"status": "SKIPPED", "reason": "REELSEC_TEST_PACKAGE not configured"})
+            # Package-state snapshot AFTER the install + explicit
+            # replacement semantics (shared-APK model, users 0/95).
+            pkg_after = (package_state_snapshot(adb, serial, test_package)
+                         if test_package else None)
+            install_semantics = (build_install_semantics(pkg_before, pkg_after)
+                                 if test_package else None)
             adb_deploy = {
                 "status": "INSTALLED" if installed_check.get("present", True)
                           else "INSTALLED_NOT_VERIFIED",
@@ -3535,6 +3548,9 @@ def main():
                 "uninstall_output_tail": uninstall_output[-2000:],
                 "install_output_tail": install_output[-2000:],
                 "installed_verification": installed_check,
+                "package_state_before": pkg_before,
+                "package_state_after": pkg_after,
+                "install_semantics": install_semantics,
             }
         except Exception as exc:
             adb_deploy = {

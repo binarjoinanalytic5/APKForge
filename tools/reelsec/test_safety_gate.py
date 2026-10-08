@@ -18,8 +18,10 @@ import time
 import unittest
 from pathlib import Path
 
+import adb_deploy as ad
 import collectors as col
 import orchestrator as orch
+import runtime_health as rh
 import safety_gate as sg
 
 HERE = Path(__file__).resolve().parent
@@ -498,6 +500,163 @@ class TimelineTruthAggregationTests(unittest.TestCase):
             self.assertEqual(rt["REGRESSION_STATUS"], "NOT_ESTABLISHED")
             self.assertEqual(rt["COMMON_CAUSE_COMPARISON"],
                              "COMMON_CAUSE_BOTH_CRASH")
+
+
+# ---------------------------------------------------------------------------
+# Test-model isolation (field-verified model): the dual-app profile is user
+# 95 of the SAME package — `install -r` replaces the ONE shared base.apk for
+# ALL users. The original's health is a PRE-replacement fact; crashes after
+# the replacement belong to the instrumented build on ANY user.
+# ---------------------------------------------------------------------------
+
+DUMPSYS_SNAPSHOT_FIXTURE = """Packages:
+  Package [com.test.pkg] (a1b2c3d):
+    userId=10814
+    codePath=/data/app/~~Qog5==/com.test.pkg-SQSV==
+    versionName=4.2.00
+    versionCode=4200
+    firstInstallTime=2026-10-08 03:07:50
+    lastUpdateTime=2026-10-08 04:07:55
+    User 0: ceDataInode=0 installed=true hidden=false stopped=false
+    User 95: ceDataInode=0 installed=true hidden=false stopped=false
+"""
+
+
+class PackageStateSnapshotTests(unittest.TestCase):
+    def test_snapshot_parses_users_codepath_and_update_time(self):
+        snap = ad.package_state_snapshot(
+            "/adb", "s1", "com.test.pkg",
+            runner=lambda cmd, timeout=30: (0, DUMPSYS_SNAPSHOT_FIXTURE))
+        self.assertTrue(snap["present"])
+        self.assertEqual(snap["uid"], "10814")
+        self.assertEqual(snap["users_installed"], [0, 95])
+        self.assertEqual(snap["last_update_time"], "2026-10-08 04:07:55")
+        self.assertEqual(snap["first_install_time"], "2026-10-08 03:07:50")
+        self.assertIn("~~Qog5==", snap["code_path"])
+
+    def test_snapshot_absent_package(self):
+        snap = ad.package_state_snapshot(
+            "/adb", "s1", "com.test.pkg",
+            runner=lambda cmd, timeout=30: (0, ""))
+        self.assertFalse(snap["present"])
+        self.assertEqual(snap["users_installed"], [])
+
+    def test_install_semantics_replacement_model(self):
+        before = {"present": True, "code_path": "/data/app/~~X==/orig",
+                  "users_installed": [0, 95], "last_update_time": "t0"}
+        after = {"present": True, "code_path": "/data/app/~~Y==/instr",
+                 "users_installed": [0, 95], "last_update_time": "t1"}
+        sem = ad.build_install_semantics(before, after)
+        self.assertEqual(sem["mode"], "REPLACE_SHARED_APK")
+        self.assertTrue(sem["replaced_existing_build"])
+        self.assertEqual(sem["shared_apk_users"], [0, 95])
+        self.assertIn("NEVER evidence", sem["guard"])
+        self.assertIn("dual-app", sem["guard"])
+        fresh = ad.build_install_semantics({"present": False}, after)
+        self.assertEqual(fresh["mode"], "FRESH_INSTALL")
+
+
+class TestModelIsolationTests(unittest.TestCase):
+    DEPLOY = {"status": "INSTALLED", "install_mode": "UPDATE",
+              "install_semantics": {
+                  "mode": "REPLACE_SHARED_APK",
+                  "replaced_existing_build": True,
+                  "shared_apk_users": [0, 95],
+                  "guard": ("Android keeps ONE base.apk per package shared "
+                            "by all users ... NEVER evidence that the "
+                            "replaced build crashes by itself.")}}
+
+    def test_verdict_records_original_healthy_before_install(self):
+        ins = {"startup": "CRASH", "crash_class": "NATIVE_CRASH",
+               "runtime_probe_allowed": False}
+        v = rh.runtime_verdict(
+            {"startup": "PASS"}, ins,
+            working_control={"status": rh.CONTROL_NOT_INSTALLED},
+            deploy=self.DEPLOY)
+        self.assertIs(v["ORIGINAL_HEALTHY_BEFORE_INSTALL"], True)
+        self.assertIs(v["INSTRUMENTED_CRASH_AFTER_INSTALL"], True)
+        self.assertEqual(v["REPLACED_SHARED_APK_USERS"], [0, 95])
+        self.assertIn("NEVER evidence", v["REPLACEMENT_GUARD"])
+        self.assertEqual(v["REGRESSION_STATUS"], rh.REGRESSION_CONFIRMED)
+        self.assertEqual(v["CAMPAIGN_STATE"], "CAUSAL_CHAIN_INCOMPLETE")
+        states = [t["to"] for t in
+                  rh.campaign_state_machine(
+                      working_control={"status": rh.CONTROL_NOT_INSTALLED},
+                      baseline_health={"startup": "PASS"},
+                      instrumented_health=ins,
+                      deploy=self.DEPLOY)["transitions"]]
+        self.assertEqual(
+            states[:4],
+            ["CONTROL_NOT_INSTALLED", "ORIGINAL_HEALTHY",
+             "INSTRUMENTED_INSTALLED", "INSTRUMENTED_CRASHED"])
+
+    def test_state_machine_install_transition_names_shared_users(self):
+        res = rh.campaign_state_machine(
+            working_control={"status": rh.CONTROL_NOT_INSTALLED},
+            baseline_health={"startup": "PASS"},
+            instrumented_health={"startup": "CRASH",
+                                 "crash_class": "NATIVE_CRASH"},
+            deploy=self.DEPLOY)
+        t = next(x for x in res["transitions"]
+                 if x["to"] == "INSTRUMENTED_INSTALLED")
+        self.assertIn("REPLACE_SHARED_APK", t["reason"])
+        self.assertIn("0, 95", t["reason"])
+
+    def test_unverified_control_identity_establishes_nothing(self):
+        wc = {"status": "CONTROL_ASSESSED",
+              "identity": {"original_verification": {
+                  "verified": False, "installed_sha256": "a" * 64,
+                  "reference_sha256": "b" * 64}}}
+        side, note = rh.audited_original_side(wc)
+        self.assertIsNone(side)
+        self.assertIn("UNVERIFIED", note)
+        ins = {"startup": "CRASH", "runtime_probe_allowed": False}
+        v = rh.runtime_verdict(None, ins, working_control=wc,
+                               deploy=self.DEPLOY)
+        self.assertEqual(v["ORIGINAL_RUNTIME"], "IDENTITY_UNVERIFIED")
+        self.assertIsNone(v["ORIGINAL_HEALTHY_BEFORE_INSTALL"])
+        self.assertNotIn("also crashes", v["NEXT_ACTION"])
+        res = rh.campaign_state_machine(working_control=wc,
+                                        instrumented_health=ins,
+                                        deploy=self.DEPLOY)
+        states = [t["to"] for t in res["transitions"]]
+        self.assertIn("CONTROL_IDENTITY_UNVERIFIED", states)
+        self.assertIn("CONTROL_IDENTITY_UNVERIFIED", rh.CAMPAIGN_STATES)
+
+    def test_verified_control_identity_still_counts(self):
+        wc = {"status": "CONTROL_ASSESSED",
+              "identity": {"original_verification": {
+                  "verified": True, "installed_sha256": "b" * 64,
+                  "reference_sha256": "b" * 64}}}
+        side, _ = rh.audited_original_side(wc)
+        self.assertEqual(side, "PASS")
+
+    def test_aggregation_surfaces_replacement_facts(self):
+        with tempfile.TemporaryDirectory() as td:
+            cd = Path(td)
+            (cd / "SAFETY-GATE.json").write_text(json.dumps({"safety": "OK"}))
+            (cd / "WORKING-CONTROL.json").write_text(json.dumps(
+                {"status": "CONTROL_NOT_INSTALLED"}))
+            (cd / "BASELINE-RUNTIME.json").write_text(json.dumps(
+                {"status": "BASELINE_ASSESSED",
+                 "health": {"startup": "PASS"}}))
+            (cd / "ADB-DEPLOY.json").write_text(json.dumps(self.DEPLOY))
+            (cd / "RUNTIME-HEALTH.json").write_text(json.dumps(
+                {"startup": "CRASH", "crash_class": "NATIVE_CRASH"}))
+            (cd / "RUNTIME-VERDICT.json").write_text(json.dumps(
+                {"ORIGINAL_RUNTIME": "PASS", "INSTRUMENTED_RUNTIME": "CRASH",
+                 "REGRESSION_STATUS": "INSTRUMENTATION_REGRESSION_CONFIRMED",
+                 "RUNTIME_STATUS": "BLOCKED_BY_ARTIFACT_CRASH"}))
+            manifest, verdict = orch.aggregate(str(cd))
+            rt = verdict["runtime"]
+            self.assertEqual(rt["REPLACED_SHARED_APK_USERS"], [0, 95])
+            self.assertIn("NEVER evidence", rt["REPLACEMENT_GUARD"])
+            self.assertIs(rt["ORIGINAL_HEALTHY_BEFORE_INSTALL"], True)
+            self.assertIs(rt["INSTRUMENTED_CRASH_AFTER_INSTALL"], True)
+            states = [t["to"]
+                      for t in verdict["campaign_state_transitions"]]
+            self.assertIn("ORIGINAL_HEALTHY", states)
+            self.assertIn("INSTRUMENTED_INSTALLED", states)
 
 
 class CampaignExitMappingTests(unittest.TestCase):

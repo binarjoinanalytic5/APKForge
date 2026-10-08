@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Guarded deployment of ReelSec test artifacts to an explicit Android device."""
 import json
+import re
 import subprocess
 from pathlib import Path
 
@@ -293,6 +294,75 @@ def verify_installed_package(adb, serial, package, runner=None):
         "installed_path": path,
         "version_code": version_code,
         "status": "VERIFIED_INSTALLED" if path else "NOT_PRESENT_AFTER_INSTALL",
+    }
+
+
+def package_state_snapshot(adb, serial, package, runner=None):
+    """READ-ONLY package-state snapshot around an install (timeline truth).
+
+    Captures the fields that prove WHAT the install changed: codePath,
+    uid, versionName, installed users (a dual-app profile is user 95 of
+    the SAME package, not a separate APK), and the PackageManager
+    firstInstallTime/lastUpdateTime stamps. Missing fields stay None.
+    """
+    runner = runner or _default_runner
+    rc, out = runner([adb, "-s", serial, "shell", "dumpsys", "package",
+                      package], timeout=30)
+    text = out if rc == 0 else ""
+
+    def _one(pattern):
+        m = re.search(pattern, text or "")
+        return m.group(1) if m else None
+
+    users = sorted({int(m.group(1)) for m in re.finditer(
+        r"User (\d+):[^\n]*installed=true", text or "")})
+    return {
+        "present": bool(_one(r"codePath=(\S+)")),
+        "code_path": _one(r"codePath=(\S+)"),
+        "uid": _one(r"userId=(\d+)"),
+        "version_name": _one(r"versionName=(\S+)"),
+        "users_installed": users,
+        "first_install_time": (_one(r"firstInstallTime=(.+)") or "").strip()
+                              or None,
+        "last_update_time": (_one(r"lastUpdateTime=(.+)") or "").strip()
+                            or None,
+        "source": "adb:dumpsys package %s" % package,
+    }
+
+
+def build_install_semantics(before, after):
+    """Explicit replacement semantics for the shared-APK install model.
+
+    Android keeps ONE base.apk per package shared by ALL users (user 0 and
+    the dual-app user 95). `adb install -r` therefore REPLACES the build
+    for every user at once — the original and the instrumented artifact
+    can never coexist. This record makes that structural fact auditable
+    and forbids the misleading reading of post-replacement crashes:
+    whatever crashes after this point — on any user, including the
+    dual-app profile — is the NEW artifact, never the replaced build.
+    """
+    before = before or {}
+    after = after or {}
+    replaced = bool(before.get("present"))
+    users = after.get("users_installed") or before.get("users_installed") or []
+    return {
+        "mode": "REPLACE_SHARED_APK" if replaced else "FRESH_INSTALL",
+        "replaced_existing_build": replaced,
+        "shared_apk_users": users,
+        "code_path_before": before.get("code_path"),
+        "code_path_after": after.get("code_path"),
+        "last_update_time_before": before.get("last_update_time"),
+        "last_update_time_after": after.get("last_update_time"),
+        "guard": (
+            "Android keeps ONE base.apk per package shared by all users "
+            "(e.g. user 0 and dual-app user %s). This install %s that "
+            "single shared APK for ALL listed users at once: after this "
+            "point every launch on ANY user runs the NEW artifact. "
+            "Crashes observed after this point — on any user, including "
+            "the dual-app profile — belong to the NEW artifact and are "
+            "NEVER evidence that the replaced build crashes by itself."
+            % (", ".join(str(u) for u in users) if users else "N",
+               "REPLACED" if replaced else "installed")),
     }
 
 

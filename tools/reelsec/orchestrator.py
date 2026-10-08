@@ -247,11 +247,20 @@ def _final_verdict_logic(campaign_dir, campaign_status=None):
         common_cause=common_cause or None,
         evidence=({"causal_proof": evidence.get("causal_proof"),
                    "missing": (evidence.get("causal_chain") or {}).get(
-                       "missing")} if evidence else None))
+                       "missing")} if evidence else None),
+        deploy=deploy or None)
 
     chain = (evidence.get("causal_chain") or {})
     links = {l["id"].split("_", 1)[0]: l["status"]
              for l in chain.get("links", [])}
+    # Replacement facts (test-model isolation): who the shared APK was
+    # replaced for, and the guard that keeps post-replacement crashes on
+    # ANY user attributed to the instrumented build only.
+    semantics = deploy.get("install_semantics") or {}
+    replaced_users = semantics.get("shared_apk_users") or None
+    replacement_guard = (semantics.get("guard")
+                         if semantics.get("replaced_existing_build")
+                         and health_startup == "CRASH" else None)
     return {
         "schema_version": SCHEMA_VERDICT,
         "generated_at_epoch": time.time(),
@@ -266,7 +275,13 @@ def _final_verdict_logic(campaign_dir, campaign_status=None):
         "campaign_state_transitions": state["transitions"],
         "runtime": {
             "ORIGINAL_RUNTIME": original_runtime,
+            "ORIGINAL_HEALTHY_BEFORE_INSTALL": (
+                True if original_runtime == "PASS"
+                else False if original_runtime == "CRASH" else None),
             "INSTRUMENTED_RUNTIME": runtime_verdict.get("INSTRUMENTED_RUNTIME"),
+            "INSTRUMENTED_CRASH_AFTER_INSTALL": health_startup == "CRASH",
+            "REPLACED_SHARED_APK_USERS": replaced_users,
+            "REPLACEMENT_GUARD": replacement_guard,
             "CRASH_CLASS": runtime_verdict.get("CRASH_CLASS"),
             "CRASH_CAUSE": runtime_verdict.get("CRASH_CAUSE"),
             "REGRESSION_STATUS": regression,

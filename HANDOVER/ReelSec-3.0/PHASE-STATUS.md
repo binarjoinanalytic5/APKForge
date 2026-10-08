@@ -597,3 +597,51 @@ platform run executed this round. Suite: 277/277 (19 new hermetic tests:
 stale-tombstone exclusion, BUFFER_DIFF/PID_MATCH binding, audit override
 guards, ORIGINAL_HEALTHY→INSTRUMENTED_INSTALLED→INSTRUMENTED_CRASHED
 sequence, legacy BOTH_CRASH correction, genuine both-crash preserved).
+
+## 2026-10-08 — test-model-isolation-1: shared-APK replacement model + original-identity binding
+
+Field model confirmed by the user: the dual-app profile is user 95 of the
+SAME package (not a separate APK). `adb install -r` therefore REPLACES the
+one shared base.apk for ALL users: the original and the instrumented
+artifact can never coexist, and "both versions crash after the install"
+means every post-replacement launch — on any user — ran the instrumented
+build. The correct judgment is: ORIGINAL = HEALTHY (pre-replacement) /
+INSTRUMENTED = CRASH (post-replacement); the previous
+COMMON_CAUSE_BOTH_CRASH readings were artifacts of that replacement plus
+stale crash-buffer attribution (fixed in timeline-truth-1).
+
+Fixes (adb_deploy.py / runtime_health.py / reelsec.py / orchestrator.py):
+
+1) package_state_snapshot + build_install_semantics: READ-ONLY dumpsys
+   snapshots BEFORE/AFTER the install (codePath, uid, version, users,
+   firstInstallTime/lastUpdateTime) recorded in ADB-DEPLOY.json as
+   package_state_before/after + install_semantics
+   (REPLACE_SHARED_APK vs FRESH_INSTALL, shared_apk_users, guard text:
+   post-replacement crashes on ANY user belong to the NEW artifact and
+   are NEVER evidence that the replaced build crashes by itself).
+2) Original-identity binding: collect_working_control records
+   identity.original_verification (installed bytes must be hash-bound to
+   the local original). An unverified control (e.g. a leftover
+   instrumented build of the same package) yields
+   ORIGINAL_RUNTIME=IDENTITY_UNVERIFIED and the new state
+   CONTROL_IDENTITY_UNVERIFIED — it establishes NOTHING about the
+   original (no PASS, no CRASH).
+3) Verdict/state machine: ORIGINAL_HEALTHY_BEFORE_INSTALL,
+   INSTRUMENTED_CRASH_AFTER_INSTALL, REPLACED_SHARED_APK_USERS,
+   REPLACEMENT_GUARD fields; INSTRUMENTED_INSTALLED transition names the
+   replacement mode and the shared users.
+4) Aggregator surfaces the same facts; legacy campaigns (deploy docs
+   without install_semantics) degrade to null — never fabricated.
+
+Verified read-only on the real 01-07-35 and 23-43-38 artifacts: both now
+aggregate to ORIGINAL_HEALTHY_BEFORE_INSTALL=True,
+INSTRUMENTED_CRASH_AFTER_INSTALL=True,
+REGRESSION_STATUS=INSTRUMENTATION_REGRESSION_CONFIRMED, states
+CONTROL_NOT_INSTALLED → ORIGINAL_HEALTHY → INSTRUMENTED_INSTALLED →
+INSTRUMENTED_CRASHED → INSTRUMENTATION_ONLY_CRASH. Evidence untouched.
+
+No uninstall/reinstall; no evidence deleted; no campaign run.
+Suite: 285/285 (8 new hermetic tests: snapshot parsing incl. users
+[0,95] + lastUpdateTime, replacement semantics, verdict judgment fields,
+shared-users transition reason, unverified-identity guard end-to-end,
+verified identity still counts, aggregation replacement facts).

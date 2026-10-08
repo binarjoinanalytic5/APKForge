@@ -415,6 +415,21 @@ def audited_original_side(working_control, baseline_health=None):
     """
     wc = working_control or {}
     wc_status = wc.get("status")
+    if wc_status in (CONTROL_ASSESSED, CONTROL_CRASHED):
+        # Test-model isolation guard: the control side only counts as the
+        # ORIGINAL when its installed bytes were hash-bound to the local
+        # original reference. An unverified identity (e.g. a leftover
+        # instrumented build of the SAME package after a replacement
+        # install) establishes NOTHING about the original.
+        verif = (wc.get("identity") or {}).get("original_verification") or {}
+        if verif.get("verified") is False:
+            return None, (
+                "working-control identity UNVERIFIED: installed sha %s != "
+                "original reference %s — the observed build may be a "
+                "leftover instrumented artifact of the same package; "
+                "original-side runtime NOT established"
+                % (verif.get("installed_sha256"),
+                   verif.get("reference_sha256")))
     if wc_status == CONTROL_CRASHED:
         a = audit_startup_classification(wc.get("health") or {})
         if a["contradictions"]:
@@ -997,6 +1012,23 @@ def collect_working_control(runner, adb, serial, package, observe_s=8,
             "matches_installed": matches}
         if matches:
             artifact_apk = str(local_reference_apk)
+        # Original-identity verification (test-model isolation): the
+        # "working control" is only the ORIGINAL when the installed bytes
+        # are hash-bound to the local original. A leftover instrumented
+        # artifact from a previous campaign (same package name — Android
+        # keeps ONE shared APK per package) must never be observed as the
+        # original side; unverified identity yields NO original-side claim.
+        doc["identity"]["original_verification"] = {
+            "verified": bool(matches),
+            "installed_sha256": device_sha,
+            "reference_sha256": local_sha,
+            "reference_path": str(local_reference_apk),
+            "note": None if matches else (
+                "installed build is NOT byte-identical to the local "
+                "original reference; it may be a leftover instrumented "
+                "artifact of the same package — original-side runtime is "
+                "NOT established by this observation"),
+        }
     health = assess_startup(runner, adb, serial, package,
                             label="working_control", observe_s=observe_s,
                             artifact_apk=artifact_apk,
@@ -1686,6 +1718,9 @@ CAMPAIGN_STATES = (
     "CONTROL_NOT_INSTALLED",
     "CONTROL_HEALTHY",
     "CONTROL_CRASHED",
+    # Test-model isolation: control observed but not hash-bound to the
+    # original (possible leftover instrumented build of the same package).
+    "CONTROL_IDENTITY_UNVERIFIED",
     # Real-timeline states (timeline-truth mandate): the baseline round
     # installs and runs the original AFTER CONTROL_NOT_INSTALLED, and the
     # instrumented install is an explicit replacement step.
@@ -1707,7 +1742,7 @@ CAMPAIGN_STATES = (
 def campaign_state_machine(safety=None, device_ok=None, working_control=None,
                            baseline_health=None, deploy_status=None,
                            instrumented_health=None, common_cause=None,
-                           crash_comparison=None, evidence=None):
+                           crash_comparison=None, evidence=None, deploy=None):
     """Derive the single campaign state with an auditable transition log.
 
     Inputs are the collected documents (dicts or None). The machine walks
@@ -1742,7 +1777,16 @@ def campaign_state_machine(safety=None, device_ok=None, working_control=None,
 
     wc = working_control or {}
     wc_status = wc.get("status")
-    if wc_status == CONTROL_NOT_INSTALLED:
+    wc_side, wc_note = (audited_original_side(working_control)
+                        if wc_status in (CONTROL_ASSESSED, CONTROL_CRASHED)
+                        else (None, None))
+    if wc_status in (CONTROL_ASSESSED, CONTROL_CRASHED) and wc_side is None:
+        move("CONTROL_IDENTITY_UNVERIFIED",
+             "installed control is not hash-bound to the local original "
+             "reference — it may be a leftover instrumented build of the "
+             "same package; original-side runtime NOT established (%s)"
+             % (wc_note or "identity unverified"))
+    elif wc_status == CONTROL_NOT_INSTALLED:
         move("CONTROL_NOT_INSTALLED",
              "pm path reports no installed original package at control time "
              "(this does NOT mean the original never ran: a baseline round "
@@ -1775,13 +1819,24 @@ def campaign_state_machine(safety=None, device_ok=None, working_control=None,
     ih = instrumented_health or {}
     ih_audit = audit_startup_classification(ih) if ih else {}
     ins_startup = ih_audit.get("audited_startup") or ih.get("startup")
-    if deploy_status == "INSTALLED" or ih:
-        move("INSTRUMENTED_INSTALLED",
-             "instrumented artifact installed over the package via "
-             "replace-install (install -r): every subsequent launch runs "
-             "the instrumented build" if deploy_status == "INSTALLED" else
-             "instrumented runtime session recorded: the instrumented "
-             "artifact was installed")
+    deploy = deploy or {}
+    eff_deploy_status = deploy_status or deploy.get("status")
+    semantics = deploy.get("install_semantics") or {}
+    if eff_deploy_status == "INSTALLED" or ih:
+        reason = ("instrumented runtime session recorded: the instrumented "
+                  "artifact was installed")
+        if eff_deploy_status == "INSTALLED":
+            reason = ("instrumented artifact installed over the package via "
+                      "replace-install (install -r): every subsequent launch "
+                      "runs the instrumented build")
+            if semantics:
+                reason += (" [%s: shared APK of users %s — original and "
+                           "instrumented can never coexist; post-replacement "
+                           "crashes on ANY user belong to the instrumented "
+                           "build]"
+                           % (semantics.get("mode"),
+                              semantics.get("shared_apk_users")))
+        move("INSTRUMENTED_INSTALLED", reason)
 
     if not ih:
         move("INSTRUMENTED_NOT_RUN", "no instrumented runtime health recorded")
@@ -1869,7 +1924,7 @@ def _state_result(transitions):
 def runtime_verdict(baseline_health, instrumented_health, comparison=None,
                     runtime_probe=None, probe_allowed=None,
                     crash_comparison=None, working_control=None,
-                    common_cause=None, deploy_status=None):
+                    common_cause=None, deploy_status=None, deploy=None):
     """Compact autonomous verdict (requirement 12).
 
     Timeline-truth mandate: recorded health documents are audited for
@@ -1955,6 +2010,12 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
         }.get(wc_status, "NOT_RUN")
         if wc_status == CONTROL_CRASHED and original_side == "PASS":
             original_runtime = "PASS"
+        if wc_status in (CONTROL_ASSESSED, CONTROL_CRASHED) and \
+                original_side is None:
+            # Test-model isolation: the observed control is not hash-bound
+            # to the original (possible leftover instrumented build of the
+            # same package) — it establishes NO original-side runtime.
+            original_runtime = "IDENTITY_UNVERIFIED"
         if original_runtime in ("PASS", "CRASH"):
             original_source = "WORKING_CONTROL"
 
@@ -2029,20 +2090,42 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
     else:
         next_action = "Runtime proof recorded; evaluate evidence gate."
 
+    eff_deploy = deploy or {}
+    eff_deploy_status = deploy_status or eff_deploy.get("status")
     state = campaign_state_machine(
         working_control=working_control,
         baseline_health=b_view,
-        deploy_status=deploy_status,
+        deploy_status=eff_deploy_status,
         instrumented_health=i_view,
         common_cause=common_cause,
-        crash_comparison=crash_comparison)
+        crash_comparison=crash_comparison,
+        deploy=eff_deploy or None)
+
+    # Correct-verdict model (test-model isolation): the original's health
+    # is a PRE-replacement fact; the instrumented crash is a
+    # POST-replacement fact; the replacement itself is recorded with the
+    # shared-APK users so post-replacement crashes on ANY user (including
+    # the dual-app profile) are never read as baseline crashes.
+    semantics = eff_deploy.get("install_semantics") or {}
+    replaced_users = semantics.get("shared_apk_users") or None
+    original_healthy_before = (True if original_side == "PASS"
+                               else False if original_side == "CRASH"
+                               else None)
+    instrumented_crash_after = bool(ih.get("startup") == "CRASH")
+    replacement_guard = (semantics.get("guard")
+                         if semantics.get("replaced_existing_build")
+                         and instrumented_crash_after else None)
 
     return {
         "schema_version": SCHEMA,
         "ORIGINAL_RUNTIME": original_runtime,
         "ORIGINAL_RUNTIME_SOURCE": original_source,
+        "ORIGINAL_HEALTHY_BEFORE_INSTALL": original_healthy_before,
         "INSTRUMENTED_RUNTIME": ih.get("startup") or "NOT_RUN",
-        "INSTRUMENTED_INSTALLED": bool(deploy_status == "INSTALLED" or ih),
+        "INSTRUMENTED_CRASH_AFTER_INSTALL": instrumented_crash_after,
+        "INSTRUMENTED_INSTALLED": bool(eff_deploy_status == "INSTALLED" or ih),
+        "REPLACED_SHARED_APK_USERS": replaced_users,
+        "REPLACEMENT_GUARD": replacement_guard,
         "CRASH_CLASS": ih.get("crash_class"),
         "CRASH_CAUSE": ih.get("crash_cause"),
         "CRASH_CAUSE_CONFIDENCE": ih.get("crash_cause_confidence"),
