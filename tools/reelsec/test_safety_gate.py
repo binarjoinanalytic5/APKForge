@@ -403,6 +403,103 @@ class FinalVerdictAggregationTests(unittest.TestCase):
                          "NOT_ESTABLISHED")
 
 
+class TimelineTruthAggregationTests(unittest.TestCase):
+    """Campaign 2026-10-07T23-43-38 (field-verified timeline): the original
+    ran healthy in its baseline window; a STALE crash-buffer tombstone from
+    an earlier session fabricated ORIGINAL_RUNTIME=CRASH, producing a false
+    BOTH_CRASH. The aggregation must correct the verdict from the recorded
+    evidence WITHOUT rewriting any evidence document."""
+
+    def _legacy_campaign(self, td):
+        cd = Path(td)
+        stale_health = {
+            "startup": "CRASH", "process_observed": True,
+            "process_alive_at_exit": True, "pids": [15683],
+            "crash_class": "NATIVE_CRASH",
+            "classification": {
+                "crash_class": "NATIVE_CRASH",
+                "evidence_source": "adb:logcat -b crash (tombstone echo)",
+                "exit_reason_code": None, "pid": 30953},
+            "evidence": {
+                "exit_info_new_entries": [],
+                "tombstone": {"pid": 30953, "fatal_signal": "SIGABRT",
+                              "package_associated": True}}}
+        (cd / "SAFETY-GATE.json").write_text(json.dumps({"safety": "OK"}))
+        (cd / "WORKING-CONTROL.json").write_text(json.dumps(
+            {"schema_version": "working-control-1",
+             "status": "CONTROL_NOT_INSTALLED",
+             "reason": "pm path reports no installed package"}))
+        (cd / "BASELINE-RUNTIME.json").write_text(json.dumps(
+            {"status": "BASELINE_ASSESSED", "health": stale_health}))
+        (cd / "ADB-DEPLOY.json").write_text(json.dumps(
+            {"status": "INSTALLED", "install_mode": "UPDATE"}))
+        # device campaigns store RUNTIME-HEALTH in a collector envelope
+        (cd / "RUNTIME-HEALTH.json").write_text(json.dumps(
+            {"schema_version": "collector-envelope-1",
+             "collector": "RUNTIME-HEALTH", "status": "COLLECTED",
+             "data": {"startup": "CRASH", "crash_class": "NATIVE_CRASH",
+                      "crash_cause": "NATIVE_LIBRARY:libc.so"}}))
+        (cd / "CRASH-COMPARISON.json").write_text(json.dumps(
+            {"status": "BOTH_CRASH"}))
+        (cd / "RUNTIME-VERDICT.json").write_text(json.dumps(
+            {"ORIGINAL_RUNTIME": "CRASH", "INSTRUMENTED_RUNTIME": "CRASH",
+             "REGRESSION_STATUS": "BASELINE_RUNTIME_FAILURE",
+             "RUNTIME_STATUS": "BLOCKED_BY_ARTIFACT_CRASH",
+             "RUNTIME_PROOF_STATUS": "BLOCKED_BY_ARTIFACT_CRASH",
+             "CRASH_CLASS": "NATIVE_CRASH",
+             "NEXT_ACTION": "Original-side runtime failure: the unmodified "
+                            "original also crashes on this device/build"}))
+        return cd
+
+    def test_legacy_false_both_crash_is_corrected_documents_untouched(self):
+        with tempfile.TemporaryDirectory() as td:
+            cd = self._legacy_campaign(td)
+            manifest, verdict = orch.aggregate(str(cd),
+                                               campaign_status="COMPLETED")
+            rt = verdict["runtime"]
+            self.assertEqual(verdict["final_verdict"],
+                             "BLOCKED_BY_ARTIFACT_CRASH")
+            self.assertEqual(rt["ORIGINAL_RUNTIME"], "PASS")
+            self.assertEqual(rt["REGRESSION_STATUS"],
+                             "INSTRUMENTATION_REGRESSION_CONFIRMED")
+            self.assertNotIn("also crashes", rt["NEXT_ACTION"])
+            self.assertIn("regression confirmed", rt["NEXT_ACTION"].lower())
+            self.assertIsNotNone(rt["STARTUP_AUDIT"])
+            states = [t["to"]
+                      for t in verdict["campaign_state_transitions"]]
+            self.assertIn("ORIGINAL_HEALTHY", states)
+            self.assertIn("INSTRUMENTED_INSTALLED", states)
+            self.assertIn("INSTRUMENTED_CRASHED", states)
+            self.assertIn("INSTRUMENTATION_ONLY_CRASH", states)
+            # evidence documents are NEVER rewritten by the correction
+            doc = json.loads((cd / "BASELINE-RUNTIME.json").read_text())
+            self.assertEqual(doc["health"]["startup"], "CRASH")
+            verdict_doc = json.loads((cd / "RUNTIME-VERDICT.json").read_text())
+            self.assertEqual(verdict_doc["ORIGINAL_RUNTIME"], "CRASH")
+
+    def test_genuine_both_crash_campaign_is_not_corrected(self):
+        # same shape, but the original-side crash is session-bound: the
+        # aggregator must leave the BOTH_CRASH conclusion intact.
+        with tempfile.TemporaryDirectory() as td:
+            cd = self._legacy_campaign(td)
+            doc = json.loads((cd / "BASELINE-RUNTIME.json").read_text())
+            doc["health"]["crash_session_binding"] = {
+                "bound": True, "method": "BUFFER_DIFF"}
+            (cd / "BASELINE-RUNTIME.json").write_text(json.dumps(doc))
+            (cd / "COMMON-CAUSE-COMPARISON.json").write_text(json.dumps(
+                {"status": "COMMON_CAUSE_BOTH_CRASH"}))
+            (cd / "WORKING-CONTROL.json").write_text(json.dumps(
+                {"status": "CONTROL_CRASHED",
+                 "health": {"startup": "CRASH",
+                            "crash_session_binding": {"bound": True}}}))
+            manifest, verdict = orch.aggregate(str(cd))
+            rt = verdict["runtime"]
+            self.assertEqual(rt["ORIGINAL_RUNTIME"], "CRASH")
+            self.assertEqual(rt["REGRESSION_STATUS"], "NOT_ESTABLISHED")
+            self.assertEqual(rt["COMMON_CAUSE_COMPARISON"],
+                             "COMMON_CAUSE_BOTH_CRASH")
+
+
 class CampaignExitMappingTests(unittest.TestCase):
     """End-to-end requirement 13 at the platform layer."""
 

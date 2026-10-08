@@ -1625,5 +1625,289 @@ class ExitClassificationTests(unittest.TestCase):
         self.assertEqual(code, 0)
 
 
+# ---------------------------------------------------------------------------
+# Timeline-truth mandate (campaign 2026-10-07T23-43-38 correction):
+# crash-buffer tombstones from EARLIER sessions must never be attributed to
+# the current session; CONTROL_NOT_INSTALLED never means "original never
+# ran"; ORIGINAL_RUNTIME=CRASH requires crash evidence bound to the
+# original's process after its launch.
+# ---------------------------------------------------------------------------
+
+STALE_TOMBSTONE_LOG = """10-07 21:31:14.550 30953 30953 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 30953 (.android.victor), pid 30953 (.android.victor)
+10-07 21:31:14.700 30999 30999 F DEBUG   : pid: 30953, tid: 30953, name: .android.victor  >>> com.x <<<
+10-07 21:31:14.702 30999 30999 F DEBUG   :       #00 pc 00000000000537d4  /apex/com.android.runtime/lib64/bionic/libc.so (abort+168)
+"""
+
+
+def _timeline_runner(exit_post="", ps_line=None, crash_pre="", crash_log="",
+                     pre_crash_rc=0):
+    """Fake device runner with faithful crash-buffer semantics: the FIRST
+    logcat crash read is the pre-launch snapshot; the second read returns
+    the buffer including anything appended during the session."""
+    state = {"exit_calls": 0, "logcat_calls": 0}
+
+    def runner(cmd, timeout=30):
+        joined = " ".join(str(c) for c in cmd)
+        if "exit-info" in joined:
+            state["exit_calls"] += 1
+            return 0, exit_post if state["exit_calls"] > 1 else ""
+        if "monkey" in joined:
+            return 0, "Events injected: 1"
+        if joined.endswith("ps -A"):
+            if ps_line:
+                return 0, "USER PID PPID VSZ RSS WCHAN ADDR S NAME\n" + ps_line
+            return 0, "USER PID PPID VSZ RSS WCHAN ADDR S NAME\n"
+        if "logcat" in joined:
+            state["logcat_calls"] += 1
+            if state["logcat_calls"] == 1:
+                return pre_crash_rc, crash_pre
+            return 0, crash_log
+        return 1, ""
+    return runner
+
+
+def _assess_with(runner, package="com.x", label="original"):
+    with mock.patch("time.sleep"):
+        return rh.assess_startup(runner, "/adb", "s1", package, label=label,
+                                 observe_s=1, interval=0)
+
+
+def _legacy_stale_health(pid_observed=15683, tomb_pid=30953, alive=True):
+    """Health document shaped exactly like the recorded (pre-fix) baseline
+    round of campaign 2026-10-07T23-43-38."""
+    return {
+        "startup": "CRASH",
+        "process_observed": True,
+        "process_alive_at_exit": alive,
+        "pids": [pid_observed],
+        "crash_class": "NATIVE_CRASH",
+        "classification": {
+            "crash_class": "NATIVE_CRASH",
+            "evidence_source": "adb:logcat -b crash (tombstone echo)",
+            "exit_reason_code": None, "pid": tomb_pid},
+        "evidence": {
+            "exit_info_new_entries": [],
+            "tombstone": {"pid": tomb_pid, "fatal_signal": "SIGABRT",
+                          "package_associated": True}},
+    }
+
+
+class SessionBoundCrashAttributionTests(unittest.TestCase):
+    """The 23-43-38 misattribution: a stale crash-buffer tombstone (pid
+    30953, hours old) classified a HEALTHY original session (pid 15683
+    alive at window exit, zero new exit-info) as CRASH."""
+
+    def test_stale_tombstone_never_crashes_a_healthy_session(self):
+        h = _assess_with(_timeline_runner(
+            ps_line="u0_a113 15683 500 1 1 0 0 S com.x",
+            crash_pre=STALE_TOMBSTONE_LOG, crash_log=STALE_TOMBSTONE_LOG))
+        self.assertEqual(h["startup"], "PASS")
+        self.assertEqual(h["crash_class"], rh.HEALTHY)
+        self.assertTrue(h["runtime_probe_allowed"])
+        self.assertIsNone(h["crash_artifact"])
+        self.assertFalse(h["crash_session_binding"]["bound"])
+        self.assertEqual(h["crash_session_binding"]["method"], "BUFFER_DIFF")
+        # the stale evidence is PRESERVED (never deleted), just excluded
+        self.assertEqual(h["evidence"]["tombstone"]["pid"], 30953)
+        self.assertIn("stale", h["crash_session_binding"]["reason"])
+
+    def test_new_tombstone_after_launch_is_session_bound_crash(self):
+        h = _assess_with(_timeline_runner(
+            crash_pre="", crash_log=SIGABRT_BASE_APK_LOG.replace(
+                "com.newleaf.app.android.victor", "com.x")))
+        self.assertEqual(h["startup"], "CRASH")
+        self.assertEqual(h["crash_class"], rh.NATIVE_CRASH)
+        self.assertIsNotNone(h["crash_artifact"])
+        self.assertTrue(h["crash_session_binding"]["bound"])
+        self.assertEqual(h["crash_session_binding"]["method"], "BUFFER_DIFF")
+
+    def test_pid_match_binds_when_pre_snapshot_unavailable(self):
+        h = _assess_with(_timeline_runner(
+            ps_line="u0_a113 14210 500 1 1 0 0 S com.x",
+            crash_log=SIGABRT_BASE_APK_LOG.replace(
+                "com.newleaf.app.android.victor", "com.x"),
+            pre_crash_rc=1))
+        self.assertEqual(h["startup"], "CRASH")
+        self.assertEqual(h["crash_session_binding"]["method"], "PID_MATCH")
+
+    def test_pid_mismatch_with_alive_process_excluded_when_pre_unavailable(
+            self):
+        h = _assess_with(_timeline_runner(
+            ps_line="u0_a113 999 500 1 1 0 0 S com.x",
+            crash_log=SIGABRT_BASE_APK_LOG.replace(
+                "com.newleaf.app.android.victor", "com.x"),
+            pre_crash_rc=1))
+        self.assertEqual(h["startup"], "PASS")
+        self.assertFalse(h["crash_session_binding"]["bound"])
+        self.assertEqual(h["evidence"]["tombstone"]["pid"], 14210)
+
+
+class StartupAuditTests(unittest.TestCase):
+    """Post-hoc audit of RECORDED documents: corrects stale-tombstone
+    fabrications for the verdict layer without rewriting evidence."""
+
+    def test_audit_overrides_stale_recorded_crash(self):
+        a = rh.audit_startup_classification(_legacy_stale_health())
+        self.assertEqual(a["recorded_startup"], "CRASH")
+        self.assertEqual(a["audited_startup"], "PASS")
+        self.assertIn("STALE_TOMBSTONE_ATTRIBUTION", a["contradictions"])
+
+    def test_audit_never_overrides_exitinfo_crash(self):
+        h = _legacy_stale_health(tomb_pid=15683)
+        h["classification"]["exit_reason_code"] = 5
+        h["evidence"]["exit_info_new_entries"] = [
+            {"pid": 15683, "reason_code": 5}]
+        a = rh.audit_startup_classification(h)
+        self.assertEqual(a["audited_startup"], "CRASH")
+        self.assertEqual(a["contradictions"], [])
+
+    def test_audit_never_overrides_session_bound_crash(self):
+        h = _legacy_stale_health(tomb_pid=15683)
+        h["crash_session_binding"] = {"bound": True, "method": "BUFFER_DIFF"}
+        a = rh.audit_startup_classification(h)
+        self.assertEqual(a["audited_startup"], "CRASH")
+        self.assertEqual(a["contradictions"], [])
+
+    def test_audit_keeps_crash_when_process_died_in_window(self):
+        a = rh.audit_startup_classification(_legacy_stale_health(alive=False))
+        self.assertEqual(a["audited_startup"], "CRASH")
+        self.assertEqual(a["contradictions"], [])
+
+    def test_control_not_installed_never_means_never_ran(self):
+        side, _ = rh.audited_original_side(
+            {"status": rh.CONTROL_NOT_INSTALLED},
+            baseline_health={"startup": "PASS"})
+        self.assertEqual(side, "PASS")
+        side, note = rh.audited_original_side(
+            {"status": rh.CONTROL_NOT_INSTALLED})
+        self.assertIsNone(side)
+        self.assertIn("never run in this campaign", note)
+
+    def test_control_crashed_record_is_audited(self):
+        side, note = rh.audited_original_side(
+            {"status": rh.CONTROL_CRASHED,
+             "health": _legacy_stale_health(pid_observed=10332)})
+        self.assertEqual(side, "PASS")
+        self.assertIn("session-bound audit", note)
+
+
+class TimelineStateMachineTests(unittest.TestCase):
+    """The state machine must express the REAL device timeline:
+    ORIGINAL_HEALTHY -> INSTRUMENTED_INSTALLED -> INSTRUMENTED_CRASH."""
+
+    def test_original_healthy_instrumented_installed_instrumented_crash(self):
+        res = rh.campaign_state_machine(
+            working_control={"status": rh.CONTROL_NOT_INSTALLED},
+            baseline_health={"startup": "PASS"},
+            deploy_status="INSTALLED",
+            instrumented_health={"startup": "CRASH",
+                                 "crash_class": rh.NATIVE_CRASH},
+            common_cause={"status": "COMMON_CAUSE_INCOMPLETE"})
+        states = [t["to"] for t in res["transitions"]]
+        self.assertEqual(
+            states,
+            ["CONTROL_NOT_INSTALLED", "ORIGINAL_HEALTHY",
+             "INSTRUMENTED_INSTALLED", "INSTRUMENTED_CRASHED",
+             "INSTRUMENTATION_ONLY_CRASH", "CAUSAL_CHAIN_INCOMPLETE"])
+        for s in states:
+            self.assertIn(s, rh.CAMPAIGN_STATES)
+
+    def test_legacy_stale_documents_are_audited_not_trusted(self):
+        res = rh.campaign_state_machine(
+            working_control={"status": rh.CONTROL_NOT_INSTALLED},
+            baseline_health=_legacy_stale_health(),
+            deploy_status="INSTALLED",
+            instrumented_health={"startup": "CRASH",
+                                 "crash_class": rh.NATIVE_CRASH},
+            crash_comparison={"status": "BOTH_CRASH"})
+        states = [t["to"] for t in res["transitions"]]
+        self.assertIn("ORIGINAL_HEALTHY", states)
+        self.assertIn("INSTRUMENTED_INSTALLED", states)
+        self.assertIn("INSTRUMENTATION_ONLY_CRASH", states)
+        self.assertNotIn("COMMON_CAUSE_BOTH_CRASH", states)
+        reason = next(t["reason"] for t in res["transitions"]
+                      if t["to"] == "ORIGINAL_HEALTHY")
+        self.assertIn("audit", reason)
+
+    def test_genuine_original_crash_still_reaches_common_cause(self):
+        genuine = {"startup": "CRASH", "crash_class": rh.NATIVE_CRASH,
+                   "crash_session_binding": {"bound": True,
+                                             "method": "BUFFER_DIFF"}}
+        res = rh.campaign_state_machine(
+            working_control={"status": rh.CONTROL_NOT_INSTALLED},
+            baseline_health=genuine,
+            deploy_status="INSTALLED",
+            instrumented_health={"startup": "CRASH",
+                                 "crash_class": rh.NATIVE_CRASH},
+            crash_comparison={"status": "BOTH_CRASH"})
+        states = [t["to"] for t in res["transitions"]]
+        self.assertIn("ORIGINAL_CRASHED", states)
+        self.assertIn("COMMON_CAUSE_BOTH_CRASH", states)
+
+
+class TimelineVerdictTests(unittest.TestCase):
+    """Runtime verdict must reflect the real timeline, with annotations."""
+
+    def test_audited_baseline_flips_false_both_crash_to_regression(self):
+        ins = {"startup": "CRASH", "crash_class": rh.NATIVE_CRASH,
+               "crash_cause": "NATIVE_LIBRARY:libc.so",
+               "runtime_probe_allowed": False}
+        v = rh.runtime_verdict(
+            _legacy_stale_health(), ins,
+            working_control={"status": rh.CONTROL_NOT_INSTALLED},
+            common_cause={"status": "COMMON_CAUSE_INCOMPLETE"},
+            crash_comparison={"status": "BOTH_CRASH"},
+            deploy_status="INSTALLED")
+        self.assertEqual(v["ORIGINAL_RUNTIME"], "PASS")
+        self.assertEqual(v["ORIGINAL_RUNTIME_SOURCE"], "BASELINE_ROUND")
+        self.assertEqual(v["REGRESSION_STATUS"], rh.REGRESSION_CONFIRMED)
+        self.assertEqual(v["RUNTIME_STATUS"], "BLOCKED_BY_ARTIFACT_CRASH")
+        self.assertIn("regression confirmed", v["NEXT_ACTION"].lower())
+        self.assertIsNotNone(v["STARTUP_AUDIT"])
+        self.assertTrue(v["INSTRUMENTED_INSTALLED"])
+
+    def test_both_crash_common_cause_downgraded_when_control_crash_stale(
+            self):
+        wc = {"status": rh.CONTROL_CRASHED,
+              "health": _legacy_stale_health(pid_observed=10332)}
+        ins = {"startup": "CRASH", "crash_class": rh.NATIVE_CRASH,
+               "runtime_probe_allowed": False}
+        v = rh.runtime_verdict(
+            None, ins, working_control=wc,
+            common_cause={"status": "COMMON_CAUSE_BOTH_CRASH"},
+            crash_comparison={"status": "BOTH_CRASH"})
+        self.assertEqual(v["ORIGINAL_RUNTIME"], "PASS")
+        self.assertEqual(v["COMMON_CAUSE_COMPARISON"],
+                         "CONTROL_HEALTHY_INSTRUMENTED_CRASH")
+        self.assertEqual(v["COMMON_CAUSE_COMPARISON_RECORDED"],
+                         "COMMON_CAUSE_BOTH_CRASH")
+        self.assertEqual(v["REGRESSION_STATUS"], "SUSPECTED_NOT_PROVEN")
+        self.assertIn("CANDIDATE", v["NEXT_ACTION"])
+
+    def test_genuine_both_crash_still_not_established(self):
+        genuine = {"startup": "CRASH",
+                   "crash_session_binding": {"bound": True}}
+        wc = {"status": rh.CONTROL_CRASHED, "health": genuine}
+        ins = {"startup": "CRASH", "runtime_probe_allowed": False}
+        v = rh.runtime_verdict(
+            None, ins, working_control=wc,
+            common_cause={"status": "COMMON_CAUSE_BOTH_CRASH"})
+        self.assertEqual(v["ORIGINAL_RUNTIME"], "CRASH")
+        self.assertEqual(v["COMMON_CAUSE_COMPARISON"],
+                         "COMMON_CAUSE_BOTH_CRASH")
+        self.assertEqual(v["REGRESSION_STATUS"], "NOT_ESTABLISHED")
+
+    def test_baseline_pass_instrumented_crash_is_regression_without_audit(
+            self):
+        v = rh.runtime_verdict(
+            {"startup": "PASS"}, {"startup": "CRASH",
+                                 "runtime_probe_allowed": False},
+            working_control={"status": rh.CONTROL_NOT_INSTALLED},
+            deploy_status="INSTALLED")
+        self.assertEqual(v["ORIGINAL_RUNTIME"], "PASS")
+        self.assertEqual(v["REGRESSION_STATUS"], rh.REGRESSION_CONFIRMED)
+        self.assertIsNone(v["STARTUP_AUDIT"])
+
+
 if __name__ == "__main__":
     unittest.main()

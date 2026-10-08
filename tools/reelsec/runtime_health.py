@@ -258,6 +258,187 @@ def parse_tombstone_logcat(text, package=None):
     }
 
 
+def _crash_buffer_new_lines(pre_text, post_text):
+    """Lines that appeared in the append-only crash buffer after a snapshot.
+
+    The logcat crash ring buffer retains tombstones from PREVIOUS sessions
+    (potentially hours old). Only lines that were NOT present in the
+    pre-launch snapshot can belong to the current session. Returns
+    (new_lines, matched): matched=False means the pre-snapshot tail could
+    not be located in the post text (buffer rotated between reads) and the
+    caller must fall back to PID-based binding.
+    """
+    pre_lines = [l for l in (pre_text or "").splitlines() if l.strip()]
+    post_lines = [l for l in (post_text or "").splitlines() if l.strip()]
+    if not pre_lines:
+        return post_lines, True
+    for anchor in reversed(pre_lines[-5:]):
+        for i in range(len(post_lines) - 1, -1, -1):
+            if post_lines[i] == anchor:
+                return post_lines[i + 1:], True
+    return post_lines, False
+
+
+def _session_tombstone_binding(pre_crash_text, pre_rc, post_crash_text,
+                               post_rc, package, proc, fresh_entries=None):
+    """Bind crash-buffer tombstone evidence to the CURRENT session.
+
+    Timeline-truth mandate: a package-associated fatal signal that was
+    ALREADY in the crash buffer before this session launched is stale
+    evidence from an earlier session/artifact. It is preserved (never
+    deleted) but MUST NOT classify the current session as CRASH. A tombstone
+    is session-bound only when:
+      * BUFFER_DIFF  — its lines appeared in the crash buffer after launch;
+      * PID_MATCH    — its pid equals a pid observed in this session (or an
+                       ApplicationExitInfo crash pid of this session);
+      * IN_WINDOW_DEATH — the observed process died inside the window and
+                       the tombstone is the only package crash evidence;
+      * NO_PROCESS_OBSERVED — the launch never produced an observable
+                       process and a package fatal signal exists
+                       (crash-before-first-poll; freshness unverifiable).
+    A process that was still ALIVE at window exit with zero new exit-info
+    entries is NEVER declared crashed from a different pid's tombstone.
+    Returns (session_tombstone, binding) — the parsed tombstone usable for
+    THIS session's classification (possibly empty) plus audit metadata.
+    """
+    empty = parse_tombstone_logcat("", package)
+    full = parse_tombstone_logcat(post_crash_text if post_rc == 0 else "",
+                                  package)
+    if post_rc != 0:
+        return empty, {"bound": False, "method": "CRASH_BUFFER_UNAVAILABLE",
+                       "reason": "crash buffer read failed (rc=%s)" % post_rc}
+    pids = set(proc.get("pids") or [])
+    pids |= {e.get("pid") for e in (fresh_entries or []) if e.get("pid")}
+    if pre_rc == 0:
+        new_lines, matched = _crash_buffer_new_lines(pre_crash_text,
+                                                     post_crash_text)
+        if matched:
+            sess = parse_tombstone_logcat("\n".join(new_lines), package)
+            if sess.get("fatal_signal") and sess.get("package_associated"):
+                return sess, {
+                    "bound": True, "method": "BUFFER_DIFF",
+                    "reason": ("package-associated fatal signal appeared in "
+                               "the crash buffer after launch (pid=%s)"
+                               % sess.get("pid"))}
+            reason = "no new package-associated fatal line after launch"
+            if full.get("fatal_signal"):
+                reason += ("; stale tombstone (pid=%s) predates this session: "
+                           "excluded from attribution, evidence preserved"
+                           % full.get("pid"))
+            return empty, {"bound": False, "method": "BUFFER_DIFF",
+                           "reason": reason}
+    # Pre-snapshot unusable (read failed or buffer rotated): PID binding.
+    tp = full.get("pid")
+    if not (full.get("fatal_signal") and full.get("package_associated")):
+        return empty, {"bound": False, "method": "PID_FALLBACK",
+                       "reason": "no package-associated fatal signal in buffer"}
+    if tp is not None and tp in pids:
+        return full, {"bound": True, "method": "PID_MATCH",
+                      "reason": "tombstone pid %s belongs to this session" % tp}
+    if proc.get("observed") and proc.get("alive_at_exit"):
+        return empty, {
+            "bound": False, "method": "PID_FALLBACK",
+            "reason": ("tombstone pid %s does not match the session pids %s "
+                       "and the launched process was alive at window exit "
+                       "with no new exit-info: stale evidence from an "
+                       "earlier session, excluded (preserved)"
+                       % (tp, sorted(pids) if pids else []))}
+    if proc.get("observed"):
+        return full, {
+            "bound": True, "method": "IN_WINDOW_DEATH",
+            "reason": ("observed process died inside the window and the "
+                       "tombstone (pid=%s) is the only package crash "
+                       "evidence; freshness not independently verifiable"
+                       % tp)}
+    return full, {
+        "bound": True, "method": "NO_PROCESS_OBSERVED",
+        "reason": ("launch never produced an observable process and a "
+                   "package-associated fatal signal exists "
+                   "(crash-before-first-poll; freshness unverifiable)")}
+
+
+def audit_startup_classification(health):
+    """Post-hoc timeline-truth audit of a RECORDED health document.
+
+    Documents written before session-bound attribution existed may classify
+    startup=CRASH from a tombstone belonging to an EARLIER session (stale
+    crash-buffer evidence). The audit never deletes evidence and never
+    rewrites documents: it reports contradictions and returns the corrected
+    startup value for verdict/state-machine consumption. Only an explicit
+    contradiction is overridden — recorded CRASH whose ONLY source was a
+    logcat tombstone (no ApplicationExitInfo entry), while the launched
+    process was alive at window exit and the tombstone pid matches no
+    observed pid. Everything else is returned unchanged.
+    """
+    result = {"recorded_startup": None, "audited_startup": None,
+              "contradictions": [], "reason": None}
+    if not health:
+        return result
+    recorded = health.get("startup")
+    result["recorded_startup"] = recorded
+    result["audited_startup"] = recorded
+    if recorded != "CRASH":
+        return result
+    binding = health.get("crash_session_binding") or {}
+    if binding.get("bound") is True:
+        result["reason"] = "crash evidence was session-bound at collection"
+        return result
+    cls = health.get("classification") or {}
+    ev = health.get("evidence") or {}
+    tomb = ev.get("tombstone") or {}
+    if cls.get("exit_reason_code") is not None or \
+            (ev.get("exit_info_new_entries") or []):
+        result["reason"] = ("ApplicationExitInfo crash entry present: "
+                            "authoritative, no override")
+        return result
+    tp = tomb.get("pid")
+    pids = health.get("pids") or []
+    if health.get("process_observed") and health.get("process_alive_at_exit") \
+            and pids and tp is not None and tp not in pids:
+        result["contradictions"].append("STALE_TOMBSTONE_ATTRIBUTION")
+        result["audited_startup"] = "PASS"
+        result["reason"] = (
+            "recorded CRASH attributed tombstone pid %s, but the launched "
+            "process (pids %s) was alive at window exit with zero new "
+            "exit-info entries; the tombstone predates this session — "
+            "evidence preserved, attribution excluded" % (tp, pids))
+    return result
+
+
+def audited_original_side(working_control, baseline_health=None):
+    """Resolve the ORIGINAL-side runtime truth from recorded documents.
+
+    CONTROL_NOT_INSTALLED never means "the original never ran": the baseline
+    round may have installed and run it afterwards. CONTROL_CRASHED records
+    are audited for stale-tombstone attribution. Returns
+    (side, note) with side in {"PASS", "CRASH", None}.
+    """
+    wc = working_control or {}
+    wc_status = wc.get("status")
+    if wc_status == CONTROL_CRASHED:
+        a = audit_startup_classification(wc.get("health") or {})
+        if a["contradictions"]:
+            return "PASS", ("working-control recorded CRASH contradicted by "
+                            "session-bound audit: %s" % a["reason"])
+        return "CRASH", None
+    if wc_status == CONTROL_ASSESSED:
+        return "PASS", None
+    if wc_status == CONTROL_NOT_INSTALLED and baseline_health:
+        a = audit_startup_classification(baseline_health)
+        side = a["audited_startup"] if a["audited_startup"] in (
+            "PASS", "CRASH") else None
+        note = None
+        if a["contradictions"]:
+            note = ("baseline recorded CRASH contradicted by session-bound "
+                    "audit: %s" % a["reason"])
+        return side, note
+    if wc_status == CONTROL_NOT_INSTALLED:
+        return None, ("no installed original at control time and no baseline "
+                      "round recorded: the original was never run in this "
+                      "campaign")
+    return None, None
+
+
 def resolve_apk_offset(apk_path, offset):
     """Map a file offset inside an APK to the STORED zip entry containing it.
 
@@ -1232,6 +1413,14 @@ def assess_startup(runner, adb, serial, package, label="instrumented",
         pre = {"entries": pre_entries, "available": True, "returncode": 0,
                "source": "caller-provided snapshot"}
 
+    # Pre-launch crash-buffer snapshot (read-only): tombstones already in
+    # the buffer belong to EARLIER sessions and must never be attributed
+    # to this one (timeline-truth mandate). Evidence is preserved, not
+    # deleted — only the attribution is session-bound.
+    pre_crash_rc, pre_crash_text = runner(
+        [adb, "-s", serial, "logcat", "-b", "crash", "-d", "-t", "400"],
+        timeout=40)
+
     launch_rc = launch_output = None
     if launch:
         launch_rc, launch_output, _ = _launch_package(runner, adb, serial, package)
@@ -1243,10 +1432,24 @@ def assess_startup(runner, adb, serial, package, label="instrumented",
 
     rc, crash_text = runner([adb, "-s", serial, "logcat", "-b", "crash", "-d",
                              "-t", "400"], timeout=40)
-    tombstone = parse_tombstone_logcat(crash_text, package) if rc == 0 else \
-        parse_tombstone_logcat("", package)
-    tombstone["source"] = "adb:logcat -b crash -d -t 400" if rc == 0 else \
-        "crash buffer unavailable (rc=%s)" % rc
+    tombstone_full = parse_tombstone_logcat(crash_text, package) if rc == 0 \
+        else parse_tombstone_logcat("", package)
+    tombstone_full["source"] = "adb:logcat -b crash -d -t 400" if rc == 0 \
+        else "crash buffer unavailable (rc=%s)" % rc
+    tombstone, crash_binding = _session_tombstone_binding(
+        pre_crash_text, pre_crash_rc, crash_text, rc, package, proc, fresh)
+    # Descriptor tombstone (frames/offsets/abort message): the session
+    # tombstone when present; otherwise the raw-buffer tombstone ONLY when
+    # its pid provably belongs to this session's crashing process.
+    crash_pids = set(proc.get("pids") or [])
+    crash_pids |= {e.get("pid") for e in fresh if e.get("pid")}
+    descriptor = tombstone
+    if not descriptor.get("fatal_signal") and \
+            tombstone_full.get("fatal_signal") and \
+            tombstone_full.get("pid") in crash_pids:
+        descriptor = tombstone_full
+        crash_binding = dict(crash_binding)
+        crash_binding["descriptor_source"] = "RAW_BUFFER_PID_MATCH"
 
     maps_text = None
     if proc["pids"]:
@@ -1257,7 +1460,7 @@ def assess_startup(runner, adb, serial, package, label="instrumented",
 
     classification = classify_crash(package, fresh, tombstone, proc["observed"],
                                     pids=proc["pids"])
-    cause = identify_crash_cause(classification, tombstone=tombstone,
+    cause = identify_crash_cause(classification, tombstone=descriptor,
                                  maps_text=maps_text, exit_entries=fresh)
 
     # Bound the installed APK path (read-only) for crash-evidence binding.
@@ -1285,13 +1488,15 @@ def assess_startup(runner, adb, serial, package, label="instrumented",
                                                 ANR, STARTUP_FAILURE,
                                                 PROCESS_KILLED)
 
-    # Automatic crash evidence: built whenever a crash or a package-associated
-    # fatal signal was observed in THIS session (fresh entries only).
+    # Automatic crash evidence: built ONLY from session-bound crash
+    # evidence (fresh exit-info entries or a session-bound tombstone).
+    # Stale crash-buffer tombstones from earlier sessions never create a
+    # crash artifact for this session.
     crash_artifact = None
     if crashed or (tombstone.get("fatal_signal")
                    and tombstone.get("package_associated")):
         crash_artifact = build_crash_artifact(
-            package, label, fresh, tombstone,
+            package, label, fresh, descriptor,
             installed_path=installed_path,
             artifact_apk=artifact_apk,
             artifact_sha256=artifact_sha256,
@@ -1342,6 +1547,7 @@ def assess_startup(runner, adb, serial, package, label="instrumented",
         "crash_cause": cause["cause"],
         "crash_cause_library": cause["fault_library"],
         "crash_cause_confidence": cause["confidence"],
+        "crash_session_binding": crash_binding,
         "classification": classification,
         "cause_analysis": cause,
         "runtime_probe_allowed": startup == "PASS",
@@ -1350,7 +1556,11 @@ def assess_startup(runner, adb, serial, package, label="instrumented",
             "exit_info_pre_count": len(pre.get("entries") or []),
             "exit_info_new_entries": fresh[:10],
             "exit_info_source": post.get("source"),
-            "tombstone": tombstone,
+            # raw buffer parse — preserved in full, never deleted; stale
+            # entries stay visible but are excluded from attribution.
+            "tombstone": tombstone_full,
+            "session_tombstone": tombstone,
+            "crash_buffer_binding": crash_binding,
             "maps_captured": bool(maps_text),
         },
     }
@@ -1476,6 +1686,12 @@ CAMPAIGN_STATES = (
     "CONTROL_NOT_INSTALLED",
     "CONTROL_HEALTHY",
     "CONTROL_CRASHED",
+    # Real-timeline states (timeline-truth mandate): the baseline round
+    # installs and runs the original AFTER CONTROL_NOT_INSTALLED, and the
+    # instrumented install is an explicit replacement step.
+    "ORIGINAL_HEALTHY",
+    "ORIGINAL_CRASHED",
+    "INSTRUMENTED_INSTALLED",
     "INSTRUMENTED_NOT_RUN",
     "INSTRUMENTED_HEALTHY",
     "INSTRUMENTED_CRASHED",
@@ -1489,13 +1705,22 @@ CAMPAIGN_STATES = (
 
 
 def campaign_state_machine(safety=None, device_ok=None, working_control=None,
+                           baseline_health=None, deploy_status=None,
                            instrumented_health=None, common_cause=None,
                            crash_comparison=None, evidence=None):
     """Derive the single campaign state with an auditable transition log.
 
     Inputs are the collected documents (dicts or None). The machine walks
-    Safety -> Device -> Control -> Instrumented -> Comparison -> Science and
+    Safety -> Device -> Control -> Original (baseline round) ->
+    Instrumented install -> Instrumented run -> Comparison -> Science and
     stops at the first terminal state; every step records its reason.
+
+    Timeline-truth mandate: CONTROL_NOT_INSTALLED never means "the original
+    never ran" — the baseline round may have installed and run it, which is
+    expressed as ORIGINAL_HEALTHY / ORIGINAL_CRASHED. Recorded health
+    documents are audited for stale-tombstone attribution before driving
+    transitions, and audited evidence outranks derived comparison documents
+    written before the audit existed.
     """
     transitions = []
 
@@ -1519,7 +1744,9 @@ def campaign_state_machine(safety=None, device_ok=None, working_control=None,
     wc_status = wc.get("status")
     if wc_status == CONTROL_NOT_INSTALLED:
         move("CONTROL_NOT_INSTALLED",
-             "pm path reports no installed original package")
+             "pm path reports no installed original package at control time "
+             "(this does NOT mean the original never ran: a baseline round "
+             "may install and run it afterwards)")
     elif wc_status == CONTROL_ASSESSED:
         move("CONTROL_HEALTHY",
              "installed original observed starting cleanly in place")
@@ -1527,8 +1754,35 @@ def campaign_state_machine(safety=None, device_ok=None, working_control=None,
         move("CONTROL_CRASHED",
              "installed original itself crashed under observation")
 
+    # --- Original-side timeline (baseline round after CONTROL_NOT_INSTALLED)
+    bh = baseline_health or {}
+    bh_audit = audit_startup_classification(bh) if bh else {}
+    original_side, original_note = audited_original_side(
+        working_control, baseline_health=bh or None)
+    if wc_status == CONTROL_NOT_INSTALLED and bh:
+        if original_side == "PASS":
+            move("ORIGINAL_HEALTHY",
+                 "baseline round installed the original APK and observed it "
+                 "running cleanly within the bounded window"
+                 + (" [audit: %s]" % original_note if original_note else ""))
+        elif original_side == "CRASH":
+            move("ORIGINAL_CRASHED",
+                 "baseline round installed the original APK and it crashed "
+                 "under session-bound evidence (class=%s)"
+                 % bh.get("crash_class"))
+
+    # --- Instrumented install (package replacement via install -r) ---------
     ih = instrumented_health or {}
-    ins_startup = ih.get("startup")
+    ih_audit = audit_startup_classification(ih) if ih else {}
+    ins_startup = ih_audit.get("audited_startup") or ih.get("startup")
+    if deploy_status == "INSTALLED" or ih:
+        move("INSTRUMENTED_INSTALLED",
+             "instrumented artifact installed over the package via "
+             "replace-install (install -r): every subsequent launch runs "
+             "the instrumented build" if deploy_status == "INSTALLED" else
+             "instrumented runtime session recorded: the instrumented "
+             "artifact was installed")
+
     if not ih:
         move("INSTRUMENTED_NOT_RUN", "no instrumented runtime health recorded")
     elif ins_startup == "CRASH":
@@ -1545,7 +1799,24 @@ def campaign_state_machine(safety=None, device_ok=None, working_control=None,
 
     cc = common_cause or {}
     cc_status = cc.get("status")
-    if cc_status == "COMMON_CAUSE_BOTH_CRASH":
+    if original_side == "PASS" and ins_startup == "CRASH":
+        # Audited evidence outranks derived comparison documents: an
+        # original observed healthy in its window plus an instrumented-only
+        # crash is an instrumentation-side timeline, whatever a pre-audit
+        # BOTH_CRASH document recorded.
+        contradicted = cc_status == "COMMON_CAUSE_BOTH_CRASH" or \
+            (crash_comparison or {}).get("status") == "BOTH_CRASH"
+        move("INSTRUMENTATION_ONLY_CRASH",
+             "session-bound timeline: the original ran healthy within its "
+             "observation window while only the instrumented artifact "
+             "crashed after installation; instrumentation is the candidate "
+             "regression"
+             + ("; the recorded BOTH_CRASH comparison predates the "
+                "session-bound audit (%s)" % original_note
+                if contradicted and original_note else
+                "; the recorded BOTH_CRASH comparison predates the "
+                "session-bound audit" if contradicted else ""))
+    elif cc_status == "COMMON_CAUSE_BOTH_CRASH":
         move("COMMON_CAUSE_BOTH_CRASH",
              "installed original AND instrumented artifact crash with a "
              "common cause; instrumentation regression NOT_ESTABLISHED")
@@ -1598,10 +1869,38 @@ def _state_result(transitions):
 def runtime_verdict(baseline_health, instrumented_health, comparison=None,
                     runtime_probe=None, probe_allowed=None,
                     crash_comparison=None, working_control=None,
-                    common_cause=None):
-    """Compact autonomous verdict (requirement 12)."""
-    comparison = comparison or compare_artifacts(baseline_health, instrumented_health)
-    ih = instrumented_health or {}
+                    common_cause=None, deploy_status=None):
+    """Compact autonomous verdict (requirement 12).
+
+    Timeline-truth mandate: recorded health documents are audited for
+    stale-tombstone attribution BEFORE driving the verdict; CONTROL_NOT_
+    INSTALLED never implies the original never ran (the baseline round may
+    have installed and run it); ORIGINAL_RUNTIME=CRASH survives only when
+    crash evidence is bound to the original's process after its launch.
+    Evidence documents are never rewritten — corrections are annotated.
+    """
+    # --- Session-bound audit of recorded startups (legacy correction) ----
+    b_audit = (audit_startup_classification(baseline_health)
+               if baseline_health else None)
+    i_audit = (audit_startup_classification(instrumented_health)
+               if instrumented_health else None)
+    audit_notes = []
+    b_view = baseline_health
+    if b_audit and b_audit["contradictions"]:
+        b_view = dict(baseline_health)
+        b_view["startup"] = b_audit["audited_startup"]
+        audit_notes.append("ORIGINAL: " + b_audit["reason"])
+    i_view = instrumented_health
+    if i_audit and i_audit["contradictions"]:
+        i_view = dict(instrumented_health)
+        i_view["startup"] = i_audit["audited_startup"]
+        audit_notes.append("INSTRUMENTED: " + i_audit["reason"])
+    if audit_notes:
+        # The caller-provided comparison was computed from the unaudited
+        # documents; recompute from the corrected views.
+        comparison = compare_artifacts(b_view, i_view)
+    comparison = comparison or compare_artifacts(b_view, i_view)
+    ih = i_view or {}
     if probe_allowed is None:
         probe_allowed = ih.get("runtime_probe_allowed")
     proof = "NOT_RUN"
@@ -1629,33 +1928,55 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
     cc_status = (common_cause or {}).get("status")
     wc_status = (working_control or {}).get("status")
 
-    original_runtime = (baseline_health or {}).get("startup")
+    # Audited original-side truth: control document first (audited), then
+    # the baseline round. CONTROL_NOT_INSTALLED alone never maps to a
+    # runtime claim about the original.
+    original_side, original_note = audited_original_side(
+        working_control, baseline_health=b_view)
+    if original_note:
+        audit_notes.append("ORIGINAL_SIDE: " + original_note)
+    # A BOTH_CRASH common-cause document built on a misattributed
+    # original-side crash is downgraded to the audited timeline.
+    effective_cc = cc_status
+    if cc_status == "COMMON_CAUSE_BOTH_CRASH" and original_side == "PASS" \
+            and ih.get("startup") == "CRASH":
+        effective_cc = "CONTROL_HEALTHY_INSTRUMENTED_CRASH"
+        audit_notes.append(
+            "COMMON_CAUSE: recorded COMMON_CAUSE_BOTH_CRASH downgraded — the "
+            "original-side crash was contradicted by the session-bound audit")
+
+    original_runtime = (b_view or {}).get("startup")
+    original_source = "BASELINE_ROUND" if original_runtime else None
     if not original_runtime:
         original_runtime = {
             CONTROL_ASSESSED: "PASS",
             CONTROL_CRASHED: "CRASH",
             CONTROL_NOT_INSTALLED: "NOT_INSTALLED",
         }.get(wc_status, "NOT_RUN")
+        if wc_status == CONTROL_CRASHED and original_side == "PASS":
+            original_runtime = "PASS"
+        if original_runtime in ("PASS", "CRASH"):
+            original_source = "WORKING_CONTROL"
 
     regression = comparison["regression_status"]
-    if cc_status == "COMMON_CAUSE_BOTH_CRASH":
+    if effective_cc == "COMMON_CAUSE_BOTH_CRASH":
         regression = "NOT_ESTABLISHED"
-    elif cc_status == "CONTROL_HEALTHY_INSTRUMENTED_CRASH" and \
+    elif effective_cc == "CONTROL_HEALTHY_INSTRUMENTED_CRASH" and \
             regression == "NOT_COMPARABLE":
         regression = "SUSPECTED_NOT_PROVEN"
 
-    if cc_status == "COMMON_CAUSE_BOTH_CRASH":
+    if effective_cc == "COMMON_CAUSE_BOTH_CRASH":
         runtime_status = "COMMON_CAUSE_BOTH_CRASH"
-    elif cc_status == "CONTROL_ONLY_CRASH":
+    elif effective_cc == "CONTROL_ONLY_CRASH":
         runtime_status = "CONTROL_ONLY_CRASH"
-    elif cc_status == "CONTROL_HEALTHY_INSTRUMENTED_CRASH":
+    elif effective_cc == "CONTROL_HEALTHY_INSTRUMENTED_CRASH":
         runtime_status = "CONTROL_HEALTHY_INSTRUMENTED_CRASH"
     elif ih.get("startup") == "CRASH":
         runtime_status = "BLOCKED_BY_ARTIFACT_CRASH"
     else:
         runtime_status = proof
 
-    if cc_status == "COMMON_CAUSE_BOTH_CRASH":
+    if effective_cc == "COMMON_CAUSE_BOTH_CRASH":
         next_action = (
             "COMMON_CAUSE_BOTH_CRASH: the installed original AND the "
             "instrumented artifact crash with a common cause; "
@@ -1667,18 +1988,20 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
     elif ih.get("startup") == "CRASH":
         if regression == REGRESSION_CONFIRMED:
             next_action = (
-                "Instrumentation regression confirmed: review "
+                "Instrumentation regression confirmed: the original ran "
+                "healthy within its observation window while the "
+                "instrumented artifact crashed after installation; review "
                 "INSTRUMENTATION-IMPACT.json change linkage; do NOT "
                 "run further probe rounds until the injected "
                 "loader/gadget change set is reduced or rebuilt.")
         elif regression == BASELINE_RUNTIME_FAILURE or \
-                cc_status == "CONTROL_ONLY_CRASH":
+                effective_cc == "CONTROL_ONLY_CRASH":
             next_action = (
                 "Original-side runtime failure: the unmodified original "
                 "also crashes on this device/build; do not attribute to "
                 "ReelSec. Record device/build constraints; runtime proof "
                 "remains blocked.")
-        elif cc_status == "CONTROL_HEALTHY_INSTRUMENTED_CRASH":
+        elif effective_cc == "CONTROL_HEALTHY_INSTRUMENTED_CRASH":
             next_action = (
                 "Control starts cleanly while the instrumented artifact "
                 "crashes: instrumentation is a CANDIDATE cause "
@@ -1692,7 +2015,7 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
                 "(REELSEC_WORKING_CONTROL, default on) to attribute the "
                 "failure. The installed original is the control; no "
                 "uninstall, clear-data or reinstall is required.")
-    elif cc_status == "CONTROL_ONLY_CRASH":
+    elif effective_cc == "CONTROL_ONLY_CRASH":
         next_action = (
             "Original-side failure: the installed working control itself "
             "crashed while no instrumented crash evidence exists; this "
@@ -1708,14 +2031,18 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
 
     state = campaign_state_machine(
         working_control=working_control,
-        instrumented_health=instrumented_health,
+        baseline_health=b_view,
+        deploy_status=deploy_status,
+        instrumented_health=i_view,
         common_cause=common_cause,
         crash_comparison=crash_comparison)
 
     return {
         "schema_version": SCHEMA,
         "ORIGINAL_RUNTIME": original_runtime,
+        "ORIGINAL_RUNTIME_SOURCE": original_source,
         "INSTRUMENTED_RUNTIME": ih.get("startup") or "NOT_RUN",
+        "INSTRUMENTED_INSTALLED": bool(deploy_status == "INSTALLED" or ih),
         "CRASH_CLASS": ih.get("crash_class"),
         "CRASH_CAUSE": ih.get("crash_cause"),
         "CRASH_CAUSE_CONFIDENCE": ih.get("crash_cause_confidence"),
@@ -1723,10 +2050,12 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
         "RUNTIME_STATUS": runtime_status,
         "CRASH_COMPARISON": (crash_comparison or {}).get("status"),
         "WORKING_CONTROL": wc_status,
-        "COMMON_CAUSE_COMPARISON": cc_status,
+        "COMMON_CAUSE_COMPARISON": effective_cc,
+        "COMMON_CAUSE_COMPARISON_RECORDED": cc_status,
         "RUNTIME_PROOF_STATUS": proof,
         "CAMPAIGN_STATE": state["state"],
         "CAMPAIGN_STATE_REASON": state["reason"],
+        "STARTUP_AUDIT": "; ".join(audit_notes) if audit_notes else None,
         "runtime_probe_allowed": bool(probe_allowed),
         "NEXT_ACTION": next_action,
     }
