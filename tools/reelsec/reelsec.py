@@ -14,7 +14,12 @@ from pathlib import Path
 from environment import write_capability_matrix
 from apktool_backend import ApktoolBackendError, select_apktool_backend, decode_command
 from instrumentation_backend import plan_secshell_injection, find_secshell_application
-from instrumented_copy import prepare_instrumented_copy, apply_text_probe
+from instrumented_copy import (
+    finalize_no_gadget_manifest,
+    prepare_instrumented_copy,
+    apply_text_probe,
+    resolve_instrumentation_mode,
+)
 from gadget_embed import embed_frida_gadget
 from build_verify import (
     apktool_build_command,
@@ -3245,7 +3250,19 @@ def main():
             )
             gadget_requested = os.environ.get("REELSEC_USE_GADGET", "").strip().lower() in ("1", "true", "yes")
             gadget_path = os.environ.get("REELSEC_FRIDA_GADGET", "").strip()
-            if gadget_requested:
+            instrument_mode = resolve_instrumentation_mode(os.environ)
+            if instrument_mode == "no-gadget":
+                # Causal-isolation experiment: the instrumented tree keeps
+                # every standard mutation (notably LOG_I_PROBE) but Gadget
+                # embedding is refused even when explicitly requested. The
+                # finalizer verifies Gadget absence and stamps the proof.
+                ignored = str(Path(gadget_path).expanduser().resolve()) if gadget_path else None
+                instrumented_copy = finalize_no_gadget_manifest(
+                    instrumented_copy_root,
+                    gadget_requested=gadget_requested,
+                    gadget_source_ignored=ignored,
+                )
+            elif gadget_requested:
                 if not gadget_path:
                     raise RuntimeError(
                         "REELSEC_USE_GADGET=1 requires REELSEC_FRIDA_GADGET to point to an existing Frida Gadget binary"
@@ -3267,6 +3284,7 @@ def main():
                 instrumented_copy["gadget_enabled"] = False
                 if gadget_path:
                     instrumented_copy["gadget_source_ignored"] = str(Path(gadget_path).expanduser().resolve())
+            instrumented_copy["instrumentation_mode"] = instrument_mode
             instrumented_copy["instrumentation_target"] = str(copied_target)
         except Exception as exc:
             instrumented_copy = {"status": "FAILED", "error": str(exc)}

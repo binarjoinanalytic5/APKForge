@@ -645,3 +645,23 @@ Suite: 285/285 (8 new hermetic tests: snapshot parsing incl. users
 [0,95] + lastUpdateTime, replacement semantics, verdict judgment fields,
 shared-users transition reason, unverified-identity guard end-to-end,
 verified identity still counts, aggregation replacement facts).
+
+## تجربة العزل بدون الأدوات — ٨ أكتوبر ٢٠٢٦
+
+أُضيف مسار تعديل تجريبي صريح (`REELSEC_INSTRUMENT_MODE=no-gadget`) يبني
+النسخة المعدلة بدون أي أثر لأدوات الرصد، مع إبقاء علامة القياس وبقية
+المراحل كما هي. المسار يرفض التضمين حتى عند طلبه صراحةً، ويفشل مغلقًا
+عند كشف أي مكتبة أو إعدادات أو علامة تحميل أو سجل تضمين، ويختم البيان
+بالحقول: `GADGET_PRESENT=false` و`GADGET_SOURCE_ABSENT=true` و
+`original_apk_untouched=true` و`experiment=INSTRUMENTED_NO_GADGET`، مع
+قيد آلي بأن الإسناد السببي يتطلب المقارنة الزمنية.
+
+الحالات الموثقة: `ORIGINAL_HEALTHY_BEFORE_INSTALL` ثم
+`INSTRUMENTED_NO_GADGET`، ونتيجة التشغيل تُسجَّل لاحقًا بعد الخطوة
+الواحدة على الهاتف. سلامة النسخة بدون الأدوات وحدها لا تثبت سبب
+الانهيار قبل المقارنة الزمنية المرتبطة بالجلسة.
+
+لا حملة جديدة ولا تثبيت ولا عمليات مدمرة في هذه الجولة، ولا artifact
+مبني هنا؛ البناء يتم على الهاتف.
+المجموعة: 295/295 (10 اختبارات انحدار جديدة لمسار العزل).
+التفاصيل: حقيبة التسليم/تجربة-العزل-بدون-الأدوات-٢٠٢٦-١٠-٠٨.md.

@@ -6,6 +6,7 @@ Only an explicit copied working tree may be changed.
 """
 import hashlib
 import json
+import os
 import re
 from pathlib import Path
 import shutil
@@ -13,6 +14,112 @@ import shutil
 
 class InstrumentedCopyError(RuntimeError):
     pass
+
+
+# Causal-isolation experiment (2026-10-08): an explicit instrumentation mode
+# that builds the instrumented tree WITHOUT Frida Gadget while keeping every
+# other mutation (notably the LOG_I_PROBE telemetry marker) identical. The
+# mode is selected with REELSEC_INSTRUMENT_MODE=no-gadget and is verified by
+# finalize_no_gadget_manifest, which fails closed on ANY Gadget trace.
+INSTRUMENT_MODES = ("standard", "no-gadget")
+NO_GADGET_EXPERIMENT = "INSTRUMENTED_NO_GADGET"
+GADGET_LIBRARY_NAMES = ("libfrida-gadget.so", "libfrida-gadget.config.so")
+GADGET_SMALI_MARKERS = ("frida-gadget", "ReelSec-Gadget-Load")
+
+
+def resolve_instrumentation_mode(env=None):
+    """Resolve the instrumentation mode from the environment.
+
+    Returns "standard" (default) or "no-gadget". Unknown values raise
+    InstrumentedCopyError: a misconfigured isolation experiment must never
+    run silently as something else.
+    """
+    values = env if env is not None else os.environ
+    mode = str(values.get("REELSEC_INSTRUMENT_MODE", "standard")).strip().lower()
+    if mode not in INSTRUMENT_MODES:
+        raise InstrumentedCopyError(
+            "unknown REELSEC_INSTRUMENT_MODE %r: expected one of %s"
+            % (mode, ", ".join(INSTRUMENT_MODES))
+        )
+    return mode
+
+
+def find_gadget_artifacts(work_dir):
+    """Return a sorted list of Frida Gadget traces inside the work tree.
+
+    An empty list means the tree is Gadget-free. Checks cover the native
+    libraries, the Smali load markers, and the recorded mutations.
+    """
+    work = Path(work_dir).expanduser().resolve()
+    violations = []
+    if work.is_dir():
+        for name in GADGET_LIBRARY_NAMES:
+            for hit in sorted(work.rglob(name)):
+                violations.append("file:%s" % hit.relative_to(work))
+        for smali in sorted(work.rglob("*.smali")):
+            try:
+                text = smali.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            for marker in GADGET_SMALI_MARKERS:
+                if marker in text:
+                    violations.append("smali:%s:marker:%s"
+                                      % (smali.relative_to(work), marker))
+    manifest_path = work / "INSTRUMENTED-COPY-MANIFEST.json"
+    if manifest_path.is_file():
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except ValueError:
+            manifest = {}
+        for mutation in manifest.get("mutations", []) or []:
+            if isinstance(mutation, dict) and mutation.get("type") == "FRIDA_GADGET_EMBED":
+                violations.append("mutation:FRIDA_GADGET_EMBED")
+                break
+    return sorted(set(violations))
+
+
+def finalize_no_gadget_manifest(work_dir, gadget_requested=False,
+                                gadget_source_ignored=None):
+    """Verify and stamp a Gadget-free instrumented tree.
+
+    Fails closed: raises InstrumentedCopyError when ANY Gadget artifact,
+    marker, or recorded FRIDA_GADGET_EMBED mutation is present. On success
+    the manifest carries the machine-readable isolation proof:
+    GADGET_PRESENT=false, GADGET_SOURCE_ABSENT=true,
+    original_apk_untouched=true. The stamp also records that causal
+    attribution REQUIRES_TEMPORAL_COMPARISON: a healthy no-gadget run alone
+    proves nothing about the cause of the Gadget-run crash.
+    """
+    work = Path(work_dir).expanduser().resolve()
+    violations = find_gadget_artifacts(work)
+    if violations:
+        raise InstrumentedCopyError(
+            "no-gadget experiment refused: Gadget traces present: %s"
+            % ", ".join(violations)
+        )
+    manifest_path = work / "INSTRUMENTED-COPY-MANIFEST.json"
+    if not manifest_path.is_file():
+        raise InstrumentedCopyError("instrumented copy manifest missing")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["instrumentation_mode"] = "no-gadget"
+    manifest["experiment"] = NO_GADGET_EXPERIMENT
+    manifest["gadget_enabled"] = False
+    manifest["GADGET_PRESENT"] = False
+    manifest["GADGET_SOURCE_ABSENT"] = True
+    manifest["original_apk_untouched"] = True
+    manifest["gadget_refused_by_no_gadget_mode"] = bool(gadget_requested)
+    if gadget_source_ignored:
+        manifest["gadget_source_ignored"] = str(gadget_source_ignored)
+    manifest["causal_attribution"] = "REQUIRES_TEMPORAL_COMPARISON"
+    manifest["causal_attribution_note"] = (
+        "A healthy INSTRUMENTED_NO_GADGET run alone establishes no causal "
+        "claim about the Gadget-run crash. Attribution requires the "
+        "session-bound temporal comparison against the Gadget baseline."
+    )
+    manifest_path.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return manifest
 
 
 def sha256_file(path):
