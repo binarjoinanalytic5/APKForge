@@ -1,0 +1,41 @@
+      [apktool-recovery] mode=no-res timeout=180s heartbeat=10s
+
+ReelSec Campaign
+===============
+Report: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T16-36-04
+Progress: 0%
+
+[----------------------------]   0%  01/14  Isolation bootstrap       RUNNING   keystore, device, and arm plan
+
+[##--------------------------]   7%  01/14  Isolation bootstrap       PASS      arms=A,B1,B2 package=com.newleaf.app.android.victor serial=192.168.8.8:33257
+
+[##--------------------------]   7%  02/14  Isolation arm A           RUNNING   original APK test-signed with the isolated test key; no rebuild, no mutation
+
+[####------------------------]  14%  02/14  Isolation arm A           PASS      HEALTHY
+
+[####------------------------]  14%  03/14  Isolation arm B1          RUNNING   apktool rebuild WITHOUT page alignment + re-signing, zero mutations (no probe, no Gadget)
+
+[######----------------------]  21%  03/14  Isolation arm B1          PASS      CRASHED
+
+[######----------------------]  21%  04/14  Isolation arm B2          RUNNING   apktool rebuild WITH 16 KiB page alignment + re-signing, zero mutations (no probe, no Gadget)
+
+[########--------------------]  28%  04/14  Isolation arm B2          PASS      CRASHED
+
+[##########------------------]  35%  05/14  Isolation decision        PASS      REBUILD_SUFFICES
+{
+  "ISOLATION_ARMS": {
+    "A": "HEALTHY",
+    "B": "NOT_RUN",
+    "B1": "CRASHED",
+    "B2": "CRASHED",
+    "C": "NOT_RUN"
+  },
+  "ISOLATION_DECISION": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T16-36-04/ISOLATION-DECISION.json",
+  "ISOLATION_REASON": "UNALIGNED_REBUILD_CRASHES",
+  "ISOLATION_REGRESSION": "SUSPECTED_NOT_PROVEN",
+  "ISOLATION_STATUS": "REBUILD_SUFFICES"
+}
+ISOLATION_STATUS=REBUILD_SUFFICES
+ISOLATION_DECISION=/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T16-36-04/ISOLATION-DECISION.json
+INPUT_APK_SHA256=e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278
+FINAL_STATUS=DECIDED

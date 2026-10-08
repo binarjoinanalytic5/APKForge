@@ -1,0 +1,434 @@
+{
+  "artifact_type": "isolation_arm_b2",
+  "cause_analysis": {
+    "cause": "NATIVE_LIBRARY:libc.so",
+    "confidence": "HIGH",
+    "evidence": [
+      "first backtrace frame: #00 pc 00000000000537d4 in /apex/com.android.runtime/lib64/bionic/libc.so"
+    ],
+    "fault_library": "libc.so",
+    "searched_sources": [
+      "logcat backtrace frames",
+      "/proc/<pid>/maps (unavailable without privilege)"
+    ]
+  },
+  "classification": {
+    "confidence": "MEDIUM",
+    "crash_class": "NATIVE_CRASH",
+    "evidence_source": "adb:logcat -b crash (tombstone echo)",
+    "exit_reason_code": null,
+    "exit_reason_name": null,
+    "exit_status": null,
+    "package": "com.newleaf.app.android.victor",
+    "pid": 6929,
+    "reason": "fatal signal SIGABRT in logcat associated with package",
+    "stage": "PROCESS_HEALTH_GATE",
+    "timestamp": null,
+    "user": null
+  },
+  "crash_artifact": {
+    "abort_message": null,
+    "abort_message_present": false,
+    "apk_offset_resolution": null,
+    "artifact": {
+      "artifact_sha256": "38016cdd500e796a8df8e532143d7b8390d41c160e0533d5749d0757dc85a564",
+      "artifact_type": "isolation_arm_b2",
+      "installed_path": "/data/app/~~6reTAFLR6c7NCv-f0vvSBQ==/com.newleaf.app.android.victor-fyMeNU8lAubPoAMU3GCr4w==/base.apk",
+      "label": "isolation_arm_b2",
+      "local_artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T16-36-04/isolation-B2-signed.apk"
+    },
+    "crash_instances": [
+      {
+        "description": "synthesized from logcat crash-buffer tombstone echo (signal SIGABRT, pid 6929, thread .android.victor); UID/user binding unavailable in this source",
+        "fatal_signal": "SIGABRT",
+        "package": "com.newleaf.app.android.victor",
+        "pid": 6929,
+        "reason_code": null,
+        "reason_name": null,
+        "source": "LOGCAT_TOMBSTONE_ECHO",
+        "status": null,
+        "timestamp_device": null,
+        "tombstone_path": null,
+        "uid": null,
+        "user": null
+      }
+    ],
+    "evidence_lines": {
+      "fatal_lines": [
+        "10-08 19:38:24.026  6848  6848 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 6848 (.android.victor), pid 6848 (.android.victor)",
+        "10-08 19:38:25.506  6929  6929 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 6929 (.android.victor), pid 6929 (.android.victor)"
+      ],
+      "package_matched_lines": [
+        "10-08 19:38:24.026  6848  6848 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 6848 (.android.victor), pid 6848 (.android.victor)",
+        "10-08 19:38:24.252  6883  6883 F DEBUG   : Cmdline: com.newleaf.app.android.victor",
+        "10-08 19:38:24.252  6883  6883 F DEBUG   : pid: 6848, tid: 6848, name: .android.victor  >>> com.newleaf.app.android.victor <<<",
+        "10-08 19:38:24.252  6883  6883 F DEBUG   :       #01 pc 0000000000031e10  /data/app/~~6reTAFLR6c7NCv-f0vvSBQ==/com.newleaf.app.android.victor-fyMeNU8lAubPoAMU3GCr4w==/base.apk",
+        "10-08 19:38:25.506  6929  6929 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 6929 (.android.victor), pid 6929 (.android.victor)",
+        "10-08 19:38:26.327  6957  6957 F DEBUG   : Cmdline: com.newleaf.app.android.victor",
+        "10-08 19:38:26.327  6957  6957 F DEBUG   : pid: 6929, tid: 6929, name: .android.victor  >>> com.newleaf.app.android.victor <<<",
+        "10-08 19:38:26.328  6957  6957 F DEBUG   :       #01 pc 0000000000031e10  /data/app/~~6reTAFLR6c7NCv-f0vvSBQ==/com.newleaf.app.android.victor-fyMeNU8lAubPoAMU3GCr4w==/base.apk"
+      ]
+    },
+    "fatal_signal": "SIGABRT",
+    "fault_addr": null,
+    "fault_location": {
+      "library": "libc.so",
+      "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+      "pc": "00000000000537d4",
+      "symbol": "abort+168"
+    },
+    "grouping": {
+      "instance_count": 1,
+      "instances_completeness": "EVIDENCE_PRESENT_BUT_INSTANCE_INCOMPLETE",
+      "sessions_detected": 1,
+      "uids": [],
+      "users": []
+    },
+    "identity": {
+      "apk_sha256": "38016cdd500e796a8df8e532143d7b8390d41c160e0533d5749d0757dc85a564",
+      "code_path": "/data/app/~~6reTAFLR6c7NCv-f0vvSBQ==/com.newleaf.app.android.victor-fyMeNU8lAubPoAMU3GCr4w==",
+      "primary_cpu_abi": "arm64-v8a",
+      "signing_certificate_raw_prefix": "signatures=PackageSignatures{498d660 version:3, signatures:[6df869f4], past signatures:[]}",
+      "signing_certificate_sha256": null,
+      "uid": "10817",
+      "users_installed": [
+        0,
+        95
+      ],
+      "version_code": "4200",
+      "version_name": "4.2.00"
+    },
+    "integrity_notes": [
+      "no textual abort() message captured in this record; the cause MUST NOT be labeled anti-tamper or screenshot protection on this evidence alone",
+      "crash evidence present but structured instance incomplete (no ApplicationExitInfo entry): raw fatal/package-matched lines are preserved; UID/user binding unavailable; this MUST NOT upgrade any scientific verdict"
+    ],
+    "package": "com.newleaf.app.android.victor",
+    "schema_version": "crash-artifact-1",
+    "session": {
+      "first_process_seen_epoch": 1791477504.130399,
+      "last_process_seen_epoch": 1791477504.130399,
+      "launch_returncode": 0,
+      "observe_s": 8,
+      "observed_process_lifetime_ms": 0,
+      "process_alive_at_exit": false,
+      "started_at_epoch": 1791477503.3401668
+    }
+  },
+  "crash_cause": "NATIVE_LIBRARY:libc.so",
+  "crash_cause_confidence": "HIGH",
+  "crash_cause_library": "libc.so",
+  "crash_class": "NATIVE_CRASH",
+  "crash_session_binding": {
+    "bound": true,
+    "method": "BUFFER_DIFF",
+    "reason": "package-associated fatal signal appeared in the crash buffer after launch (pid=6929)"
+  },
+  "crash_source": "adb:logcat -b crash (tombstone echo)",
+  "elapsed_ms": 9046,
+  "evidence": {
+    "crash_buffer_binding": {
+      "bound": true,
+      "method": "BUFFER_DIFF",
+      "reason": "package-associated fatal signal appeared in the crash buffer after launch (pid=6929)"
+    },
+    "exit_info_new_entries": [],
+    "exit_info_pre_count": 0,
+    "exit_info_source": "adb:dumpsys activity exit-info com.newleaf.app.android.victor",
+    "maps_captured": false,
+    "session_tombstone": {
+      "abort_message": null,
+      "abort_message_present": false,
+      "backtrace_frames": [
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~6reTAFLR6c7NCv-f0vvSBQ==/com.newleaf.app.android.victor-fyMeNU8lAubPoAMU3GCr4w==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        },
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~6reTAFLR6c7NCv-f0vvSBQ==/com.newleaf.app.android.victor-fyMeNU8lAubPoAMU3GCr4w==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        }
+      ],
+      "fatal_lines": [
+        "10-08 19:38:24.026  6848  6848 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 6848 (.android.victor), pid 6848 (.android.victor)",
+        "10-08 19:38:25.506  6929  6929 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 6929 (.android.victor), pid 6929 (.android.victor)"
+      ],
+      "fatal_signal": "SIGABRT",
+      "fatal_status": "6",
+      "fault_addr": null,
+      "package_associated": true,
+      "package_matched_lines": [
+        "10-08 19:38:24.026  6848  6848 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 6848 (.android.victor), pid 6848 (.android.victor)",
+        "10-08 19:38:24.252  6883  6883 F DEBUG   : Cmdline: com.newleaf.app.android.victor",
+        "10-08 19:38:24.252  6883  6883 F DEBUG   : pid: 6848, tid: 6848, name: .android.victor  >>> com.newleaf.app.android.victor <<<",
+        "10-08 19:38:24.252  6883  6883 F DEBUG   :       #01 pc 0000000000031e10  /data/app/~~6reTAFLR6c7NCv-f0vvSBQ==/com.newleaf.app.android.victor-fyMeNU8lAubPoAMU3GCr4w==/base.apk",
+        "10-08 19:38:25.506  6929  6929 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 6929 (.android.victor), pid 6929 (.android.victor)",
+        "10-08 19:38:26.327  6957  6957 F DEBUG   : Cmdline: com.newleaf.app.android.victor",
+        "10-08 19:38:26.327  6957  6957 F DEBUG   : pid: 6929, tid: 6929, name: .android.victor  >>> com.newleaf.app.android.victor <<<",
+        "10-08 19:38:26.328  6957  6957 F DEBUG   :       #01 pc 0000000000031e10  /data/app/~~6reTAFLR6c7NCv-f0vvSBQ==/com.newleaf.app.android.victor-fyMeNU8lAubPoAMU3GCr4w==/base.apk"
+      ],
+      "pid": 6929,
+      "thread_name": ".android.victor",
+      "tid": 6929
+    },
+    "tombstone": {
+      "abort_message": null,
+      "abort_message_present": false,
+      "backtrace_frames": [
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~DgitVCYh34U0IkfBnlRFOA==/com.newleaf.app.android.victor-HWjw-bN599maU9sj9kwW7g==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        },
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~DgitVCYh34U0IkfBnlRFOA==/com.newleaf.app.android.victor-HWjw-bN599maU9sj9kwW7g==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        },
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~DgitVCYh34U0IkfBnlRFOA==/com.newleaf.app.android.victor-HWjw-bN599maU9sj9kwW7g==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        },
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~DgitVCYh34U0IkfBnlRFOA==/com.newleaf.app.android.victor-HWjw-bN599maU9sj9kwW7g==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        },
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~avCuEPp17FVfBDx3Ugj29Q==/com.newleaf.app.android.victor-fOAqUSt2Uw2zGS7ltsLFgw==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        },
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~avCuEPp17FVfBDx3Ugj29Q==/com.newleaf.app.android.victor-fOAqUSt2Uw2zGS7ltsLFgw==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        },
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~avCuEPp17FVfBDx3Ugj29Q==/com.newleaf.app.android.victor-fOAqUSt2Uw2zGS7ltsLFgw==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        },
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~avCuEPp17FVfBDx3Ugj29Q==/com.newleaf.app.android.victor-fOAqUSt2Uw2zGS7ltsLFgw==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        },
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~avCuEPp17FVfBDx3Ugj29Q==/com.newleaf.app.android.victor-fOAqUSt2Uw2zGS7ltsLFgw==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        },
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~avCuEPp17FVfBDx3Ugj29Q==/com.newleaf.app.android.victor-fOAqUSt2Uw2zGS7ltsLFgw==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        },
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~avCuEPp17FVfBDx3Ugj29Q==/com.newleaf.app.android.victor-fOAqUSt2Uw2zGS7ltsLFgw==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        },
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~VA9uHuq4zhtnEqjnTSVjXw==/com.newleaf.app.android.victor-0AruveGcwIfEqoJ4a4CnVA==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        },
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~VA9uHuq4zhtnEqjnTSVjXw==/com.newleaf.app.android.victor-0AruveGcwIfEqoJ4a4CnVA==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        },
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~6reTAFLR6c7NCv-f0vvSBQ==/com.newleaf.app.android.victor-fyMeNU8lAubPoAMU3GCr4w==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        },
+        {
+          "library": "libc.so",
+          "library_path": "/apex/com.android.runtime/lib64/bionic/libc.so",
+          "pc": "00000000000537d4",
+          "symbol": "abort+168"
+        },
+        {
+          "library": "base.apk",
+          "library_path": "/data/app/~~6reTAFLR6c7NCv-f0vvSBQ==/com.newleaf.app.android.victor-fyMeNU8lAubPoAMU3GCr4w==/base.apk",
+          "pc": "0000000000031e10",
+          "symbol": null
+        }
+      ],
+      "fatal_lines": [
+        "10-08 18:53:23.393 27137 27137 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 27137 (.android.victor), pid 27137 (.android.victor)",
+        "10-08 18:53:25.554 27217 27217 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 27217 (.android.victor), pid 27217 (.android.victor)",
+        "10-08 18:53:30.447 27610 27610 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 27610 (.android.victor), pid 27610 (.android.victor)",
+        "10-08 18:53:31.875 27686 27686 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 27686 (.android.victor), pid 27686 (.android.victor)",
+        "10-08 18:54:15.472 28770 28770 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 28770 (.android.victor), pid 28770 (.android.victor)"
+      ],
+      "fatal_signal": "SIGABRT",
+      "fatal_status": "6",
+      "fault_addr": null,
+      "package_associated": true,
+      "package_matched_lines": [
+        "10-08 18:53:23.393 27137 27137 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 27137 (.android.victor), pid 27137 (.android.victor)",
+        "10-08 18:53:24.285 27158 27158 F DEBUG   : Cmdline: com.newleaf.app.android.victor",
+        "10-08 18:53:24.285 27158 27158 F DEBUG   : pid: 27137, tid: 27137, name: .android.victor  >>> com.newleaf.app.android.victor <<<",
+        "10-08 18:53:24.285 27158 27158 F DEBUG   :       #01 pc 0000000000031e10  /data/app/~~DgitVCYh34U0IkfBnlRFOA==/com.newleaf.app.android.victor-HWjw-bN599maU9sj9kwW7g==/base.apk",
+        "10-08 18:53:25.554 27217 27217 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 27217 (.android.victor), pid 27217 (.android.victor)",
+        "10-08 18:53:25.885 27242 27242 F DEBUG   : Cmdline: com.newleaf.app.android.victor",
+        "10-08 18:53:25.885 27242 27242 F DEBUG   : pid: 27217, tid: 27217, name: .android.victor  >>> com.newleaf.app.android.victor <<<",
+        "10-08 18:53:25.885 27242 27242 F DEBUG   :       #01 pc 0000000000031e10  /data/app/~~DgitVCYh34U0IkfBnlRFOA==/com.newleaf.app.android.victor-HWjw-bN599maU9sj9kwW7g==/base.apk",
+        "10-08 18:53:30.447 27610 27610 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 27610 (.android.victor), pid 27610 (.android.victor)",
+        "10-08 18:53:30.668 27648 27648 F DEBUG   : Cmdline: com.newleaf.app.android.victor"
+      ],
+      "pid": 6929,
+      "source": "adb:logcat -b crash -d -t 400",
+      "thread_name": ".android.victor",
+      "tid": 6929
+    }
+  },
+  "exit_reason": null,
+  "exit_status": null,
+  "installed_apk_path": "/data/app/~~6reTAFLR6c7NCv-f0vvSBQ==/com.newleaf.app.android.victor-fyMeNU8lAubPoAMU3GCr4w==/base.apk",
+  "installed_identity": {
+    "apk_sha256": "38016cdd500e796a8df8e532143d7b8390d41c160e0533d5749d0757dc85a564",
+    "code_path": "/data/app/~~6reTAFLR6c7NCv-f0vvSBQ==/com.newleaf.app.android.victor-fyMeNU8lAubPoAMU3GCr4w==",
+    "primary_cpu_abi": "arm64-v8a",
+    "signing_certificate_raw_prefix": "signatures=PackageSignatures{498d660 version:3, signatures:[6df869f4], past signatures:[]}",
+    "signing_certificate_sha256": null,
+    "uid": "10817",
+    "users_installed": [
+      0,
+      95
+    ],
+    "version_code": "4200",
+    "version_name": "4.2.00"
+  },
+  "launch_returncode": 0,
+  "package": "com.newleaf.app.android.victor",
+  "pids": [],
+  "process_alive_at_exit": false,
+  "process_alive_ms": 0,
+  "process_observed": true,
+  "runtime_probe_allowed": false,
+  "schema_version": "runtime-health-1",
+  "session_timing": {
+    "first_process_seen_epoch": 1791477504.130399,
+    "last_process_seen_epoch": 1791477504.130399,
+    "started_at_epoch": 1791477503.3401668
+  },
+  "startup": "CRASH"
+}

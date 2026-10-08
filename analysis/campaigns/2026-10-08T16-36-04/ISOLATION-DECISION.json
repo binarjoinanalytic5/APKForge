@@ -1,0 +1,44 @@
+{
+  "arm_states": {
+    "A": "HEALTHY",
+    "B": "NOT_RUN",
+    "B1": "CRASHED",
+    "B2": "CRASHED",
+    "C": "NOT_RUN"
+  },
+  "candidates": [
+    "apktool rebuild (repacked content, manifest/resources handling, compression, entry ordering, signature-block layout)",
+    "re-signing with the isolated test key"
+  ],
+  "crash_signatures": {
+    "B1": "SIGABRT|libc.so|00000000000537d4",
+    "B2": "SIGABRT|libc.so|00000000000537d4"
+  },
+  "crash_signatures_equal": true,
+  "detail": "arm A healthy, arm B1 (rebuild WITHOUT alignment, zero mutations) crashed with signature SIGABRT|libc.so|00000000000537d4: page alignment is NOT required for the crash \u2014 the apktool rebuild delta alone suffices; the telemetry probe is excluded; crashed arms share one crash signature (SIGABRT|libc.so|00000000000537d4): the same failure across arms",
+  "excluded": [
+    "page alignment as a necessary cause",
+    "LOG_I_PROBE telemetry probe",
+    "Frida Gadget"
+  ],
+  "matrix": {
+    "arms": [
+      "A",
+      "B1",
+      "B2"
+    ],
+    "observe_s": 8,
+    "package": "com.newleaf.app.android.victor",
+    "serial": "192.168.8.8:33257"
+  },
+  "next_action": "Narrow inside the rebuild: inspect ISOLATION-ARTIFACT-DIFF.json for the A-to-B1 entry/section changes and re-run the matrix after each narrowing. Do not blame alignment or the probe.",
+  "planned_arms": [
+    "A",
+    "B1",
+    "B2"
+  ],
+  "reason": "UNALIGNED_REBUILD_CRASHES",
+  "regression": "SUSPECTED_NOT_PROVEN",
+  "schema_version": "isolation-decision-1",
+  "status": "REBUILD_SUFFICES"
+}

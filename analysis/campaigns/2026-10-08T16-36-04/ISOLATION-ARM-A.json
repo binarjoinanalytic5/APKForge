@@ -1,0 +1,122 @@
+{
+  "arm": "A",
+  "compatibility": {
+    "artifact": {
+      "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+      "version_code": null
+    },
+    "compatible": true,
+    "installed": null,
+    "mode": "FRESH_INSTALL",
+    "package": "com.newleaf.app.android.victor",
+    "reason": "package not installed; fresh install path",
+    "reason_code": "NOT_INSTALLED"
+  },
+  "manifest": {
+    "arm": "A",
+    "mutations": [],
+    "note": "original APK signed directly; no rebuild, no decoded tree involved"
+  },
+  "observe_s": 8,
+  "record": {
+    "arm": "A",
+    "artifact_sha256": "3a3650633fbddfc16e081eaff146dfc884220998b65dcdede973e0c608f9c000",
+    "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+    "crash": {
+      "abort_message_present": null,
+      "fatal_signal": null,
+      "fault_library": null,
+      "fault_pc": null
+    },
+    "description": "original APK test-signed with the isolated test key; no rebuild, no mutation",
+    "install": {
+      "mode": "INSTALL_R",
+      "output_tail": "Performing Streamed Install\nSuccess\n",
+      "stage": "install",
+      "success": true
+    },
+    "observed_ms": 7250,
+    "pids": [
+      977
+    ],
+    "post_install_identity": {
+      "expected_certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+      "expected_sha256": "3a3650633fbddfc16e081eaff146dfc884220998b65dcdede973e0c608f9c000",
+      "identity": "MATCH",
+      "installed_certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+      "installed_path": "/data/app/~~0Qj28gGC_70741Yyp0VsZA==/com.newleaf.app.android.victor-3zIQEj6X5DOHe9GEQmIISg==/base.apk",
+      "installed_sha256": "3a3650633fbddfc16e081eaff146dfc884220998b65dcdede973e0c608f9c000",
+      "package": "com.newleaf.app.android.victor",
+      "reason": "installed bytes and signer certificate match the signed artifact"
+    },
+    "reason": "arm installed, identity MATCH, process ran healthy in its observation window",
+    "schema_version": "isolation-arm-1",
+    "session_bound": {
+      "bound": false,
+      "method": "BUFFER_DIFF",
+      "reason": "no new package-associated fatal line after launch; stale tombstone (pid=29268) predates this session: excluded from attribution, evidence preserved"
+    },
+    "startup": "PASS",
+    "startup_stage": null,
+    "status": "HEALTHY"
+  },
+  "sign": {
+    "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+    "preflight": {
+      "checks": {
+        "apksigner_present": {
+          "path": "/data/data/com.termux/files/usr/bin/apksigner",
+          "status": "PASS"
+        },
+        "apksigner_works": {
+          "returncode": 0,
+          "status": "PASS",
+          "version": "0.9"
+        },
+        "keystore_nonempty": {
+          "status": "PASS"
+        },
+        "keystore_present": {
+          "path": "/data/data/com.termux/files/home/.reelsec/keystores/reelsec-test.p12",
+          "status": "PASS"
+        },
+        "password_envs_set": {
+          "key_password_env": "REELSEC_TEST_KEY_PASSWORD",
+          "keystore_password_env": "REELSEC_TEST_KEYSTORE_PASSWORD",
+          "status": "PASS"
+        },
+        "pkcs12_alias_present": {
+          "alias": "reelsec-test",
+          "aliases": [
+            "reelsec-test"
+          ],
+          "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+          "status": "PASS"
+        },
+        "pkcs12_password_valid": {
+          "reason": null,
+          "status": "PASS"
+        }
+      },
+      "failed": [],
+      "status": "READY"
+    },
+    "sign_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "sign",
+      "--ks",
+      "/data/data/com.termux/files/home/.reelsec/keystores/reelsec-test.p12",
+      "--ks-key-alias",
+      "reelsec-test",
+      "--ks-pass",
+      "env:REELSEC_TEST_KEYSTORE_PASSWORD",
+      "--key-pass",
+      "env:REELSEC_TEST_KEY_PASSWORD",
+      "--out",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T16-36-04/isolation-A-signed.apk",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk"
+    ],
+    "signed_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T16-36-04/isolation-A-signed.apk",
+    "signed_sha256": "3a3650633fbddfc16e081eaff146dfc884220998b65dcdede973e0c608f9c000"
+  }
+}
