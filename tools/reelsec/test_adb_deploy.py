@@ -519,6 +519,43 @@ class DeployGateTests(unittest.TestCase):
         self.assertEqual(record["identity"], "MISMATCH")
         self.assertIn("runtime blocked", record["reason"].lower())
 
+    def test_post_install_identity_sha_match(self):
+        import hashlib
+        from adb_deploy import verify_installed_artifact_identity
+        adb, serial, fake, _ = self._device(installed_cert="AA:BB")
+        expected = hashlib.sha256(b"installed-apk").hexdigest()
+        with tempfile.TemporaryDirectory() as tmp:
+            record = verify_installed_artifact_identity(
+                adb=adb, serial=serial, package="com.x",
+                expected_cert_sha256="aabb", expected_sha256=expected,
+                apksigner="/usr/bin/apksigner", runner=fake, tmp_dir=tmp)
+        self.assertEqual(record["identity"], "MATCH")
+        self.assertEqual(record["installed_sha256"], expected)
+        self.assertIn("bytes", record["reason"].lower())
+
+    def test_post_install_identity_sha_mismatch_blocks_before_certs(self):
+        from adb_deploy import verify_installed_artifact_identity
+        adb, serial, fake, calls = self._device(installed_cert="AA:BB")
+        with tempfile.TemporaryDirectory() as tmp:
+            record = verify_installed_artifact_identity(
+                adb=adb, serial=serial, package="com.x",
+                expected_cert_sha256="aabb", expected_sha256="00" * 32,
+                apksigner="/usr/bin/apksigner", runner=fake, tmp_dir=tmp)
+        self.assertEqual(record["identity"], "MISMATCH")
+        self.assertIn("SHA-256 mismatch", record["reason"])
+        self.assertFalse(any("--print-certs" in c for c in calls))
+
+    def test_post_install_identity_legacy_cert_only_match(self):
+        from adb_deploy import verify_installed_artifact_identity
+        adb, serial, fake, _ = self._device(installed_cert="AA:BB")
+        with tempfile.TemporaryDirectory() as tmp:
+            record = verify_installed_artifact_identity(
+                adb=adb, serial=serial, package="com.x",
+                expected_cert_sha256="aabb",
+                apksigner="/usr/bin/apksigner", runner=fake, tmp_dir=tmp)
+        self.assertEqual(record["identity"], "MATCH")
+        self.assertEqual(record["expected_sha256"], None)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

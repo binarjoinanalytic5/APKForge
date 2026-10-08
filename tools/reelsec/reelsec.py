@@ -2330,6 +2330,13 @@ def update_instrumentation_impact(output, crash_cause, crash_library):
                                         crash_library=crash_library)
 
 
+def _read_stage_doc(path):
+    try:
+        return json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
 def write_runtime_probe(output, root, target, input_apk=None):
     package, manifest = _find_package_name(root)
     package_source = "analysis_root_manifest" if package else None
@@ -2439,13 +2446,26 @@ def write_runtime_probe(output, root, target, input_apk=None):
                 run, adb, serial, package)
             result["stages"].append(package_present_stage)
 
+            # --- Instrumented runtime gate (deploy binding) ---
+            # A present package is NEVER assessed as the campaign artifact
+            # unless the sign/deploy documents of THIS campaign prove the
+            # full chain. Computed once here; enforced below before any
+            # launch, assess, or probe.
+            gate_deploy = _read_stage_doc(output / "ADB-DEPLOY.json")
+            gate_sign = _read_stage_doc(output / "SIGN-VERIFY.json")
+            runtime_gate = runtime_health.instrumented_runtime_gate(
+                package=package, deploy=gate_deploy, sign=gate_sign)
+            result["runtime_gate"] = runtime_gate
+
             gadget_mode = os.environ.get("REELSEC_USE_GADGET", "").strip().lower() in ("1", "true", "yes")
             gadget_port = _positive_int_env("REELSEC_FRIDA_GADGET_PORT", 27042)
             result["gadget_mode"] = gadget_mode
             result["gadget_port"] = gadget_port
             forward_established = False
 
-            if present:
+            # The runtime gate MUST hold before any launch/assess/probe: a
+            # foreign on-device build is never the campaign artifact.
+            if present and runtime_gate["allowed"]:
                 # --- Stage: PROCESS_HEALTH_GATE (artifact crash gate BEFORE Frida) ---
                 # Native Crash Gate: launch the installed artifact, observe the
                 # process bounded, and consult ApplicationExitInfo + the crash
@@ -2595,6 +2615,47 @@ def write_runtime_probe(output, root, target, input_apk=None):
                     frida_rc, frida_output = run(
                         [frida, "-U", "-f", package, "-l", str(script)],
                         timeout=(probe_window_ms // 1000) + 8)
+
+            if present and not runtime_gate["allowed"]:
+                # Deploy binding refused: the on-device build is NOT this
+                # campaign artifact (or nothing was installed). No launch,
+                # no assess, no probe — a BLOCKED health document records
+                # the refusal instead of assessing a foreign leftover.
+                blocked_health = {
+                    "schema_version": runtime_health.SCHEMA,
+                    "label": "instrumented",
+                    "package": package,
+                    "status": "BLOCKED",
+                    "startup": None,
+                    "runtime_probe_allowed": False,
+                    "blocked_by": {
+                        "code": runtime_gate["code"],
+                        "reason": runtime_gate["reason"],
+                        "checks": runtime_gate["checks"],
+                    },
+                    "artifact_claim": {
+                        "artifact": (gate_deploy or {}).get("artifact"),
+                        "artifact_sha256":
+                            (gate_deploy or {}).get("artifact_sha256"),
+                    },
+                }
+                (output / "RUNTIME-HEALTH.json").write_text(
+                    json.dumps(blocked_health, indent=2, sort_keys=True)
+                    + "\n", encoding="utf-8")
+                health_blocked = True
+                result["status"] = runtime_gate["code"]
+                result["reason"] = runtime_gate["reason"]
+                result["reason_code"] = runtime_gate["code"]
+                result["blocked_by"] = blocked_health["blocked_by"]
+                result["runtime_probe_allowed"] = False
+                result["execution_attempted"] = False
+                for skipped in ("PROCESS_HEALTH_GATE", "APP_LAUNCH_ATTEMPTED",
+                                "PROBE_ATTACHED", "MODULE_OBSERVED",
+                                "TARGET_RESOLUTION", "TARGET_OBSERVED"):
+                    result["stages"].append(runtime_probe.make_stage(
+                        skipped, runtime_probe.SKIP,
+                        source="skipped: instrumented runtime gate refused "
+                               "(%s)" % runtime_gate["code"]))
 
             if forward_established:
                 run([adb, "-s", serial, "forward", "--remove", "tcp:%d" % gadget_port],
@@ -3474,6 +3535,7 @@ def main():
                     "signing and verifying the isolated APK artifact")
     sign_verify = {"status": "NOT_SIGNED"}
     if build_verify.get("status") == "BUILT":
+        preflight = None
         try:
             apksigner = capabilities.get("tools", {}).get("apksigner", {}).get("path")
             openssl = capabilities.get("tools", {}).get("openssl", {}).get("path")
@@ -3533,7 +3595,8 @@ def main():
                 "certs_output_tail": scrub_secrets(certs_output[-2000:], secret_values),
             })
         except Exception as exc:
-            sign_verify = {"status": "BLOCKED_OR_FAILED", "error": str(exc)}
+            sign_verify = {"status": "BLOCKED_OR_FAILED", "error": str(exc),
+                           "signing_preflight": preflight}
         (output / "SIGN-VERIFY.json").write_text(
             json.dumps(sign_verify, indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
@@ -3725,6 +3788,7 @@ def main():
             identity = verify_installed_artifact_identity(
                 adb=adb, serial=serial, package=test_package,
                 expected_cert_sha256=sign_verify.get("certificate_sha256"),
+                expected_sha256=sign_verify.get("signed_sha256"),
                 apksigner=apksigner_path, runner=_default_runner)
             if identity["identity"] != "MATCH":
                 raise RuntimeError(
@@ -3733,6 +3797,7 @@ def main():
             adb_deploy = {
                 "status": "INSTALLED" if installed_check.get("present", True)
                           else "INSTALLED_NOT_VERIFIED",
+                "package": test_package,
                 "serial": serial,
                 "requested_serial": resolution.get("requested_serial"),
                 "device_resolution": resolution.get("resolution"),
