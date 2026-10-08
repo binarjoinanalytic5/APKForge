@@ -501,6 +501,232 @@ def artifact_integrity_gate(apk_path, runner=None, adb=None, serial=None,
     return gate
 
 
+def deploy_readiness(*, sign_status=None, artifact_path=None,
+                     artifact_sha256=None, certificate_sha256=None,
+                     apksigner_path=None, keystore_path=None, test_package=None):
+    """Pure install-readiness gate: every upstream fact must be present.
+
+    No subprocesses, no device access. Any missing fact blocks the deploy
+    with an explicit reason instead of a futile install attempt.
+    """
+    checks = {
+        "signed_verified": {
+            "status": "PASS" if sign_status == "SIGNED_VERIFIED" else "FAIL",
+            "sign_status": sign_status},
+        "artifact_present": {
+            "status": ("PASS" if artifact_path
+                       and Path(str(artifact_path)).is_file() else "FAIL"),
+            "artifact": str(artifact_path) if artifact_path else None},
+        "artifact_sha256_recorded": {
+            "status": "PASS" if artifact_sha256 else "FAIL"},
+        "certificate_recorded": {
+            "status": "PASS" if certificate_sha256 else "FAIL",
+            "certificate_sha256": certificate_sha256},
+        "apksigner_available": {
+            "status": "PASS" if apksigner_path else "FAIL",
+            "path": str(apksigner_path) if apksigner_path else None},
+        "keystore_present": {
+            "status": ("PASS" if keystore_path
+                       and Path(str(keystore_path)).is_file() else "FAIL"),
+            "path": str(keystore_path) if keystore_path else None},
+        "test_package_resolved": {
+            "status": "PASS" if test_package else "FAIL",
+            "package": test_package},
+    }
+    failed = [name for name, check in checks.items()
+              if check.get("status") == "FAIL"]
+    return {"checks": checks, "failed": failed,
+            "ready": not failed,
+            "status": "READY" if not failed else "NOT_READY"}
+
+
+def _installed_base_apk(adb, serial, package, runner, tmp_dir=None):
+    """Pull the currently installed base.apk to a temp file (read-only).
+
+    Returns (temp_path_or_None, installed_path_or_None, error_or_None).
+    The caller owns cleanup of the temp file.
+    """
+    import tempfile
+    rc, out = runner([adb, "-s", serial, "shell", "pm", "path", package],
+                     timeout=20)
+    installed = None
+    for line in (out or "").splitlines():
+        if line.startswith("package:"):
+            installed = line.split(":", 1)[1].strip()
+            break
+    if not installed:
+        return None, None, None
+    tmp = tempfile.NamedTemporaryFile(prefix="reelsec-installed-",
+                                      suffix=".apk", dir=tmp_dir,
+                                      delete=False)
+    tmp.close()
+    rc, out = runner([adb, "-s", serial, "pull", installed, tmp.name],
+                     timeout=180)
+    if rc != 0:
+        try:
+            Path(tmp.name).unlink()
+        except OSError:
+            pass
+        return None, installed, "adb pull failed (rc=%s): %s" % (
+            rc, (out or "")[-500:])
+    return tmp.name, installed, None
+
+
+def _apk_certificate_sha256(apksigner, apk_path, runner):
+    """Signer certificate SHA-256 of an APK via apksigner (no password)."""
+    from sign_verify import parse_apksigner_certificates
+    rc, out = runner([str(apksigner), "verify", "--print-certs",
+                      str(apk_path)], timeout=120)
+    if rc != 0:
+        return None, "apksigner verify --print-certs failed (rc=%s)" % rc
+    digests = parse_apksigner_certificates(out)
+    if not digests:
+        return None, "no signer certificate digest in apksigner output"
+    return digests[0], None
+
+
+def check_install_compatibility(*, adb, serial, package, artifact_cert_sha256,
+                                artifact_version_code=None, apksigner=None,
+                                runner=None, tmp_dir=None):
+    """Compatibility gate: can this artifact replace the installed build?
+
+    Compares the artifact signer certificate against the on-device build
+    (pulled read-only) and checks versionCode downgrade. A mismatch blocks
+    the deploy with an explicit reason; uninstall/clear-data are never
+    triggered here — that path requires an explicit hash-bound
+    authorization document handled by the caller.
+    """
+    runner = runner or _default_runner
+    record = {"package": package,
+              "artifact": {"certificate_sha256": artifact_cert_sha256,
+                           "version_code": artifact_version_code},
+              "installed": None, "compatible": False,
+              "mode": None, "reason_code": None, "reason": None}
+    if not package:
+        record.update(reason_code="PACKAGE_UNRESOLVED",
+                      reason="test package unresolved; refusing install")
+        return record
+    if not artifact_cert_sha256:
+        record.update(reason_code="ARTIFACT_CERT_UNKNOWN",
+                      reason="artifact signer certificate unrecorded; refusing install")
+        return record
+    if not apksigner:
+        record.update(reason_code="APKSIGNER_UNAVAILABLE",
+                      reason="apksigner unavailable; cannot verify installed identity")
+        return record
+    pulled, installed_path, pull_error = _installed_base_apk(
+        adb, serial, package, runner, tmp_dir=tmp_dir)
+    if pull_error:
+        record.update(reason_code="COMPATIBILITY_UNVERIFIED", reason=pull_error)
+        return record
+    if not pulled:
+        record.update(compatible=True, mode="FRESH_INSTALL",
+                      reason_code="NOT_INSTALLED",
+                      reason="package not installed; fresh install path")
+        return record
+    try:
+        installed_cert, cert_error = _apk_certificate_sha256(
+            apksigner, pulled, runner)
+        if cert_error:
+            record.update(reason_code="COMPATIBILITY_UNVERIFIED",
+                          reason=cert_error)
+            record["installed"] = {"installed_path": installed_path}
+            return record
+        installed_version = None
+        rc, out = runner([adb, "-s", serial, "shell", "dumpsys",
+                          "package", package], timeout=30)
+        if rc == 0:
+            for line in (out or "").splitlines():
+                if "versionCode=" in line:
+                    installed_version = line.split(
+                        "versionCode=", 1)[1].split()[0].strip()
+                    break
+        record["installed"] = {"installed_path": installed_path,
+                               "certificate_sha256": installed_cert,
+                               "version_code": installed_version}
+        if installed_cert != (artifact_cert_sha256 or "").lower():
+            record.update(
+                reason_code="SIGNATURE_MISMATCH",
+                reason=("installed build is signed with a different "
+                        "certificate; non-destructive replace is impossible "
+                        "without an explicit hash-bound destructive "
+                        "authorization document"))
+            return record
+        try:
+            downgrade = (artifact_version_code is not None
+                         and installed_version is not None
+                         and int(str(artifact_version_code))
+                         < int(str(installed_version)))
+        except (TypeError, ValueError):
+            downgrade = False
+        if downgrade:
+            record.update(
+                reason_code="VERSION_DOWNGRADE",
+                reason=("artifact versionCode %s is lower than installed %s"
+                        % (artifact_version_code, installed_version)))
+            return record
+        record.update(compatible=True, mode="REPLACE_INSTALL",
+                      reason_code="SIGNATURE_MATCH",
+                      reason=("signer certificate matches the installed "
+                              "build; non-destructive replace permitted"))
+        return record
+    finally:
+        try:
+            Path(pulled).unlink()
+        except OSError:
+            pass
+
+
+def verify_installed_artifact_identity(*, adb, serial, package,
+                                       expected_cert_sha256, apksigner,
+                                       runner=None, tmp_dir=None):
+    """Post-install identity: is the on-device build OUR artifact?
+
+    Pulls the installed base.apk read-only and compares its signer
+    certificate against the signed artifact. A mismatch blocks runtime:
+    evidence about the wrong build is worse than no evidence.
+    """
+    runner = runner or _default_runner
+    record = {"package": package,
+              "expected_certificate_sha256": expected_cert_sha256,
+              "installed_certificate_sha256": None,
+              "installed_path": None, "identity": "UNVERIFIED",
+              "reason": None}
+    if not expected_cert_sha256:
+        record["reason"] = "expected certificate unrecorded"
+        return record
+    pulled, installed_path, pull_error = _installed_base_apk(
+        adb, serial, package, runner, tmp_dir=tmp_dir)
+    record["installed_path"] = installed_path
+    if pull_error:
+        record["reason"] = pull_error
+        return record
+    if not pulled:
+        record["reason"] = "package not present after install"
+        return record
+    try:
+        installed_cert, cert_error = _apk_certificate_sha256(
+            apksigner, pulled, runner)
+        if cert_error:
+            record["reason"] = cert_error
+            return record
+        record["installed_certificate_sha256"] = installed_cert
+        if installed_cert == (expected_cert_sha256 or "").lower():
+            record["identity"] = "MATCH"
+            record["reason"] = ("installed signer certificate matches the "
+                                "signed artifact")
+        else:
+            record["identity"] = "MISMATCH"
+            record["reason"] = ("installed signer certificate differs from "
+                                "the signed artifact; runtime blocked")
+        return record
+    finally:
+        try:
+            Path(pulled).unlink()
+        except OSError:
+            pass
+
+
 def write_deploy_manifest(path, data):
     p = Path(path).resolve()
     p.parent.mkdir(parents=True, exist_ok=True)

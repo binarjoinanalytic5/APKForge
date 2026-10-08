@@ -6,7 +6,11 @@ from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from reelsec import inventory_decoded_apk
+from reelsec import (
+    _decoded_manifest_version_code,
+    inventory_decoded_apk,
+    resolve_test_package,
+)
 
 
 class DecodedInventoryTests(unittest.TestCase):
@@ -34,6 +38,38 @@ class DecodedInventoryTests(unittest.TestCase):
             result = inventory_decoded_apk(root)
             self.assertEqual(result["status"], "READY")
             self.assertEqual(result["smali_file_count"], 1)
+
+
+class ResolveTestPackageTests(unittest.TestCase):
+    def test_explicit_env_wins(self):
+        result = resolve_test_package({"REELSEC_TEST_PACKAGE": "com.explicit"})
+        self.assertEqual(result["package"], "com.explicit")
+        self.assertEqual(result["source"], "EXPLICIT_ENV")
+
+    def test_decoded_manifest_fallback(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "decoded"
+            root.mkdir()
+            (root / "AndroidManifest.xml").write_text(
+                '<manifest package="com.from.manifest" '
+                'android:versionCode="4200" />\n', encoding="utf-8")
+            result = resolve_test_package({}, decoded_root=root)
+            self.assertEqual(result["package"], "com.from.manifest")
+            self.assertEqual(result["source"], "DECODED_MANIFEST")
+
+    def test_unresolved_package_records_reason(self):
+        result = resolve_test_package({}, decoded_root="/no/such/root")
+        self.assertIsNone(result["package"])
+        self.assertIn("refusing to touch any package", result["reason"])
+
+    def test_decoded_manifest_version_code(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "decoded"
+            root.mkdir()
+            (root / "AndroidManifest.xml").write_text(
+                '<manifest android:versionCode="4200" />\n', encoding="utf-8")
+            self.assertEqual(_decoded_manifest_version_code(root), 4200)
+            self.assertIsNone(_decoded_manifest_version_code("/no/such/root"))
 
 
 if __name__ == "__main__":

@@ -1924,7 +1924,8 @@ def _state_result(transitions):
 def runtime_verdict(baseline_health, instrumented_health, comparison=None,
                     runtime_probe=None, probe_allowed=None,
                     crash_comparison=None, working_control=None,
-                    common_cause=None, deploy_status=None, deploy=None):
+                    common_cause=None, deploy_status=None, deploy=None,
+                    sign=None):
     """Compact autonomous verdict (requirement 12).
 
     Timeline-truth mandate: recorded health documents are audited for
@@ -2037,7 +2038,40 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
     else:
         runtime_status = proof
 
-    if effective_cc == "COMMON_CAUSE_BOTH_CRASH":
+    eff_deploy = deploy or {}
+    eff_deploy_status = deploy_status or eff_deploy.get("status")
+
+    # Upstream-block propagation (no false PACKAGE_NOT_INSTALLED): when
+    # runtime never ran AND an earlier stage positively recorded a block,
+    # the verdict names the true blocker instead of reading as a
+    # device-side mystery. The probe-level fact stays in
+    # RUNTIME_PROOF_STATUS for traceability. With no stage documents at
+    # all, behavior is exactly as before.
+    blocked_by = None
+    if proof in ("PACKAGE_NOT_INSTALLED", "NOT_RUN") and not ih.get("startup"):
+        if sign is not None and (sign or {}).get("status") != "SIGNED_VERIFIED":
+            blocked_by = {
+                "stage": "SIGN",
+                "status": (sign or {}).get("status") or "NOT_SIGNED",
+                "reason": ((sign or {}).get("error")
+                           or "sign stage did not verify an artifact"),
+            }
+        elif (deploy is not None or deploy_status is not None) \
+                and eff_deploy_status != "INSTALLED":
+            blocked_by = {
+                "stage": "DEPLOY",
+                "status": eff_deploy_status or "NOT_DEPLOYED",
+                "reason": (eff_deploy.get("error") or eff_deploy.get("reason")
+                           or "deploy stage did not install an artifact"),
+            }
+
+    if blocked_by:
+        next_action = (
+            "Blocked before runtime by %s (%s): %s. Fix the %s stage; "
+            "no device-side debugging is indicated by this verdict."
+            % (blocked_by["stage"], blocked_by["status"],
+               blocked_by["reason"], blocked_by["stage"].lower()))
+    elif effective_cc == "COMMON_CAUSE_BOTH_CRASH":
         next_action = (
             "COMMON_CAUSE_BOTH_CRASH: the installed original AND the "
             "instrumented artifact crash with a common cause; "
@@ -2136,6 +2170,7 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
         "COMMON_CAUSE_COMPARISON": effective_cc,
         "COMMON_CAUSE_COMPARISON_RECORDED": cc_status,
         "RUNTIME_PROOF_STATUS": proof,
+        "BLOCKED_BY": blocked_by,
         "CAMPAIGN_STATE": state["state"],
         "CAMPAIGN_STATE_REASON": state["reason"],
         "STARTUP_AUDIT": "; ".join(audit_notes) if audit_notes else None,
