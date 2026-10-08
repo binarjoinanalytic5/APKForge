@@ -1,0 +1,41 @@
+      [apktool-recovery] mode=no-res timeout=180s heartbeat=10s
+
+      [apktool-recovery] [#######---------------------]  25.5% 04/14 apktool-recovery RUNNING elapsed=10s stage=57.4% phase=BAKSMALI baksmali 235/514 classes activity=LOG dlog=+102B ETA=11s
+
+ReelSec Campaign
+===============
+Report: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-51-34
+Progress: 0%
+
+[----------------------------]   0%  01/14  Isolation bootstrap       RUNNING   keystore, device, and arm plan
+
+[##--------------------------]   7%  01/14  Isolation bootstrap       PASS      arms=A,B,C package=com.newleaf.app.android.victor serial=192.168.8.8:33257
+
+[##--------------------------]   7%  02/14  Isolation arm A           RUNNING   original APK test-signed with the isolated test key; no rebuild, no mutation
+
+[####------------------------]  14%  02/14  Isolation arm A           PASS      HEALTHY
+
+[####------------------------]  14%  03/14  Isolation arm B           RUNNING   apktool rebuild + re-signing, zero mutations (no probe, no Gadget)
+
+[######----------------------]  21%  03/14  Isolation arm B           PASS      CRASHED
+
+[######----------------------]  21%  04/14  Isolation arm C           RUNNING   apktool rebuild + LOG_I_PROBE telemetry probe + re-signing, no Gadget
+
+[########--------------------]  28%  04/14  Isolation arm C           PASS      CRASHED
+
+[##########------------------]  35%  05/14  Isolation decision        PASS      REPACKAGING_SIGNING_CANDIDATE
+{
+  "ISOLATION_ARMS": {
+    "A": "HEALTHY",
+    "B": "CRASHED",
+    "C": "CRASHED"
+  },
+  "ISOLATION_DECISION": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-51-34/ISOLATION-DECISION.json",
+  "ISOLATION_REASON": "REBUILD_DELTA_SUFFICES",
+  "ISOLATION_REGRESSION": "SUSPECTED_NOT_PROVEN",
+  "ISOLATION_STATUS": "REPACKAGING_SIGNING_CANDIDATE"
+}
+ISOLATION_STATUS=REPACKAGING_SIGNING_CANDIDATE
+ISOLATION_DECISION=/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-51-34/ISOLATION-DECISION.json
+INPUT_APK_SHA256=e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278
+FINAL_STATUS=DECIDED

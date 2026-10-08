@@ -1,0 +1,35 @@
+{
+  "device": {
+    "online_devices": [
+      "192.168.8.8:33257"
+    ],
+    "requested_serial": null,
+    "resolution": "AUTO_SINGLE_ONLINE_DEVICE",
+    "serial": "192.168.8.8:33257"
+  },
+  "error": null,
+  "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+  "keystore": {
+    "alias": "reelsec-test",
+    "backend": "openssl-pkcs12",
+    "bootstrapped": false,
+    "path": "/data/data/com.termux/files/home/.reelsec/keystores/reelsec-test.p12",
+    "reused": true
+  },
+  "package": "com.newleaf.app.android.victor",
+  "plan": {
+    "arms": [
+      "A",
+      "B",
+      "C"
+    ],
+    "descriptions": {
+      "A": "original APK test-signed with the isolated test key; no rebuild, no mutation",
+      "B": "apktool rebuild + re-signing, zero mutations (no probe, no Gadget)",
+      "C": "apktool rebuild + LOG_I_PROBE telemetry probe + re-signing, no Gadget"
+    },
+    "requested": "ABC",
+    "source": "REELSEC_ISOLATION_MATRIX"
+  },
+  "schema_version": "isolation-plan-1"
+}

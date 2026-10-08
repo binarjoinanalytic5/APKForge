@@ -1,0 +1,138 @@
+{
+  "arm": "B",
+  "compatibility": {
+    "artifact": {
+      "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+      "version_code": null
+    },
+    "compatible": true,
+    "installed": {
+      "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+      "installed_path": "/data/app/~~eF1AswkE6IVXSnZLYGdLZg==/com.newleaf.app.android.victor-zt13tDSjSiYtMasDn4iPhw==/base.apk",
+      "version_code": "4200"
+    },
+    "mode": "REPLACE_INSTALL",
+    "package": "com.newleaf.app.android.victor",
+    "reason": "signer certificate matches the installed build; non-destructive replace permitted",
+    "reason_code": "SIGNATURE_MATCH"
+  },
+  "manifest": {
+    "GADGET_PRESENT": false,
+    "GADGET_SOURCE_ABSENT": true,
+    "PROBE_PRESENT": false,
+    "causal_attribution": "REQUIRES_ISOLATION_MATRIX",
+    "causal_attribution_note": "This tree rebuilds the decoded APK with zero mutations: any crash difference against arm A isolates the apktool rebuild + re-signing delta. Attribution requires the session-bound A/B/C isolation matrix, never this arm alone.",
+    "experiment": "REPACK_ONLY",
+    "gadget_enabled": false,
+    "instrumentation_mode": "repack-only",
+    "instrumentation_target": null,
+    "mutations": [],
+    "mutations_verified_empty": true,
+    "original_apk_untouched": true,
+    "schema_version": 1,
+    "source_manifest_sha256": "3fe3d6c8811e4d4ece4108b94d9afca2301eb0cf3118d707648e9484a2c7a1f4",
+    "source_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-51-34/decoded-apk-no-res",
+    "status": "COPIED",
+    "work_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-51-34/isolation-arm-b"
+  },
+  "observe_s": 8,
+  "record": {
+    "arm": "B",
+    "artifact_sha256": "b3434c9228fdc05d19b9a34c068a8066a96820438bbad047b1d2be2af30bacec",
+    "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+    "crash": {
+      "abort_message_present": false,
+      "fatal_signal": "SIGABRT",
+      "fault_library": "libc.so",
+      "fault_pc": "00000000000537d4"
+    },
+    "description": "apktool rebuild + re-signing, zero mutations (no probe, no Gadget)",
+    "install": {
+      "mode": "INSTALL_R",
+      "output_tail": "Performing Streamed Install\nSuccess\n",
+      "stage": "install",
+      "success": true
+    },
+    "observed_ms": 5882,
+    "pids": [],
+    "post_install_identity": {
+      "expected_certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+      "expected_sha256": "b3434c9228fdc05d19b9a34c068a8066a96820438bbad047b1d2be2af30bacec",
+      "identity": "MATCH",
+      "installed_certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+      "installed_path": "/data/app/~~DgitVCYh34U0IkfBnlRFOA==/com.newleaf.app.android.victor-HWjw-bN599maU9sj9kwW7g==/base.apk",
+      "installed_sha256": "b3434c9228fdc05d19b9a34c068a8066a96820438bbad047b1d2be2af30bacec",
+      "package": "com.newleaf.app.android.victor",
+      "reason": "installed bytes and signer certificate match the signed artifact"
+    },
+    "reason": "arm installed, identity MATCH, process crashed: SIGABRT|libc.so|00000000000537d4",
+    "schema_version": "isolation-arm-1",
+    "session_bound": {
+      "bound": true,
+      "method": "BUFFER_DIFF",
+      "reason": "package-associated fatal signal appeared in the crash buffer after launch (pid=27686)"
+    },
+    "startup": "CRASH",
+    "startup_stage": null,
+    "status": "CRASHED"
+  },
+  "sign": {
+    "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+    "preflight": {
+      "checks": {
+        "apksigner_present": {
+          "path": "/data/data/com.termux/files/usr/bin/apksigner",
+          "status": "PASS"
+        },
+        "apksigner_works": {
+          "returncode": 0,
+          "status": "PASS",
+          "version": "0.9"
+        },
+        "keystore_nonempty": {
+          "status": "PASS"
+        },
+        "keystore_present": {
+          "path": "/data/data/com.termux/files/home/.reelsec/keystores/reelsec-test.p12",
+          "status": "PASS"
+        },
+        "password_envs_set": {
+          "key_password_env": "REELSEC_TEST_KEY_PASSWORD",
+          "keystore_password_env": "REELSEC_TEST_KEYSTORE_PASSWORD",
+          "status": "PASS"
+        },
+        "pkcs12_alias_present": {
+          "alias": "reelsec-test",
+          "aliases": [
+            "reelsec-test"
+          ],
+          "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+          "status": "PASS"
+        },
+        "pkcs12_password_valid": {
+          "reason": null,
+          "status": "PASS"
+        }
+      },
+      "failed": [],
+      "status": "READY"
+    },
+    "sign_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "sign",
+      "--ks",
+      "/data/data/com.termux/files/home/.reelsec/keystores/reelsec-test.p12",
+      "--ks-key-alias",
+      "reelsec-test",
+      "--ks-pass",
+      "env:REELSEC_TEST_KEYSTORE_PASSWORD",
+      "--key-pass",
+      "env:REELSEC_TEST_KEY_PASSWORD",
+      "--out",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-51-34/isolation-B-signed.apk",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-51-34/isolation-B-unsigned-aligned.apk"
+    ],
+    "signed_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-51-34/isolation-B-signed.apk",
+    "signed_sha256": "b3434c9228fdc05d19b9a34c068a8066a96820438bbad047b1d2be2af30bacec"
+  }
+}

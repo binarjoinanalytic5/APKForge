@@ -1,0 +1,18 @@
+{
+  "GADGET_PRESENT": false,
+  "GADGET_SOURCE_ABSENT": true,
+  "PROBE_PRESENT": false,
+  "causal_attribution": "REQUIRES_ISOLATION_MATRIX",
+  "causal_attribution_note": "This tree rebuilds the decoded APK with zero mutations: any crash difference against arm A isolates the apktool rebuild + re-signing delta. Attribution requires the session-bound A/B/C isolation matrix, never this arm alone.",
+  "experiment": "REPACK_ONLY",
+  "gadget_enabled": false,
+  "instrumentation_mode": "repack-only",
+  "mutations": [],
+  "mutations_verified_empty": true,
+  "original_apk_untouched": true,
+  "schema_version": 1,
+  "source_manifest_sha256": "3fe3d6c8811e4d4ece4108b94d9afca2301eb0cf3118d707648e9484a2c7a1f4",
+  "source_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-51-34/decoded-apk-no-res",
+  "status": "COPIED",
+  "work_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-51-34/isolation-arm-b"
+}

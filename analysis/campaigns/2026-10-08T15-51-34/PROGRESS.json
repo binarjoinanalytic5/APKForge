@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "started_at": "2026-10-08T18:51:52+0300",
+  "total": 14,
+  "stages": [
+    {
+      "index": 1,
+      "name": "Isolation bootstrap",
+      "status": "RUNNING",
+      "detail": "keystore, device, and arm plan",
+      "timestamp": "2026-10-08T18:51:52+0300"
+    },
+    {
+      "index": 1,
+      "name": "Isolation bootstrap",
+      "status": "PASS",
+      "detail": "arms=A,B,C package=com.newleaf.app.android.victor serial=192.168.8.8:33257",
+      "timestamp": "2026-10-08T18:51:53+0300"
+    },
+    {
+      "index": 2,
+      "name": "Isolation arm A",
+      "status": "RUNNING",
+      "detail": "original APK test-signed with the isolated test key; no rebuild, no mutation",
+      "timestamp": "2026-10-08T18:51:53+0300"
+    },
+    {
+      "index": 2,
+      "name": "Isolation arm A",
+      "status": "PASS",
+      "detail": "HEALTHY",
+      "timestamp": "2026-10-08T18:52:36+0300"
+    },
+    {
+      "index": 3,
+      "name": "Isolation arm B",
+      "status": "RUNNING",
+      "detail": "apktool rebuild + re-signing, zero mutations (no probe, no Gadget)",
+      "timestamp": "2026-10-08T18:52:36+0300"
+    },
+    {
+      "index": 3,
+      "name": "Isolation arm B",
+      "status": "PASS",
+      "detail": "CRASHED",
+      "timestamp": "2026-10-08T18:53:34+0300"
+    },
+    {
+      "index": 4,
+      "name": "Isolation arm C",
+      "status": "RUNNING",
+      "detail": "apktool rebuild + LOG_I_PROBE telemetry probe + re-signing, no Gadget",
+      "timestamp": "2026-10-08T18:53:34+0300"
+    },
+    {
+      "index": 4,
+      "name": "Isolation arm C",
+      "status": "PASS",
+      "detail": "CRASHED",
+      "timestamp": "2026-10-08T18:54:24+0300"
+    },
+    {
+      "index": 5,
+      "name": "Isolation decision",
+      "status": "PASS",
+      "detail": "REPACKAGING_SIGNING_CANDIDATE",
+      "timestamp": "2026-10-08T18:54:24+0300"
+    }
+  ],
+  "current": "Isolation decision",
+  "current_status": "PASS"
+}

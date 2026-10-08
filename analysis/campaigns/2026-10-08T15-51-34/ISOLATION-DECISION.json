@@ -1,0 +1,36 @@
+{
+  "arm_states": {
+    "A": "HEALTHY",
+    "B": "CRASHED",
+    "C": "CRASHED"
+  },
+  "candidates": [
+    "apktool rebuild + zipalign",
+    "re-signing with the isolated test key"
+  ],
+  "crash_signatures": {
+    "B": "SIGABRT|libc.so|00000000000537d4",
+    "C": "SIGABRT|libc.so|00000000000537d4"
+  },
+  "crash_signatures_equal": true,
+  "detail": "arm A healthy, arm B (rebuild + re-sign, zero mutations) crashed with signature SIGABRT|libc.so|00000000000537d4: the repackaging/signing delta suffices for the crash; the telemetry probe is excluded; crashed arms share one crash signature (SIGABRT|libc.so|00000000000537d4): the same failure across arms",
+  "excluded": [
+    "LOG_I_PROBE telemetry probe",
+    "Frida Gadget"
+  ],
+  "matrix": {
+    "arms": [
+      "A",
+      "B",
+      "C"
+    ],
+    "observe_s": 8,
+    "package": "com.newleaf.app.android.victor",
+    "serial": "192.168.8.8:33257"
+  },
+  "next_action": "Narrow the repackaging delta: compare the rebuilt APK against the original (entries, compression, alignment, manifest/resources handling) and re-run the matrix after each narrowing. Do not blame the telemetry probe.",
+  "reason": "REBUILD_DELTA_SUFFICES",
+  "regression": "SUSPECTED_NOT_PROVEN",
+  "schema_version": "isolation-decision-1",
+  "status": "REPACKAGING_SIGNING_CANDIDATE"
+}

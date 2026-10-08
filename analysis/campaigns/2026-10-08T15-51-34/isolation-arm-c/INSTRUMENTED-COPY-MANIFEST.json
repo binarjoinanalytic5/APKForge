@@ -1,0 +1,30 @@
+{
+  "GADGET_PRESENT": false,
+  "GADGET_SOURCE_ABSENT": true,
+  "causal_attribution": "REQUIRES_TEMPORAL_COMPARISON",
+  "causal_attribution_note": "A healthy INSTRUMENTED_NO_GADGET run alone establishes no causal claim about the Gadget-run crash. Attribution requires the session-bound temporal comparison against the Gadget baseline.",
+  "experiment": "INSTRUMENTED_NO_GADGET",
+  "gadget_enabled": false,
+  "gadget_refused_by_no_gadget_mode": false,
+  "instrumentation_mode": "no-gadget",
+  "mutations": [
+    {
+      "anchor": "Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+      "file": "smali/com/SecShell/SecShell/AW.smali",
+      "log_message": "SecShell loadLibrary reached",
+      "log_tag": "ReelSec-Instrumentation",
+      "matched_registers": [
+        "v0"
+      ],
+      "purpose": "telemetry_only",
+      "registers_added": 2,
+      "type": "LOG_I_PROBE"
+    }
+  ],
+  "original_apk_untouched": true,
+  "schema_version": 1,
+  "source_manifest_sha256": "3fe3d6c8811e4d4ece4108b94d9afca2301eb0cf3118d707648e9484a2c7a1f4",
+  "source_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-51-34/decoded-apk-no-res",
+  "status": "MUTATED",
+  "work_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-51-34/isolation-arm-c"
+}
