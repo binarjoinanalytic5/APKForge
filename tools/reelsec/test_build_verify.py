@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_verify import (
     BuildVerifyError,
     apktool_build_command,
+    plan_artifact_alignment,
     verify_artifact,
     verify_native_library_packaging,
     zipalign_command,
@@ -82,6 +83,30 @@ class BuildVerifyTests(unittest.TestCase):
     def test_missing_artifact(self):
         with self.assertRaises(BuildVerifyError):
             verify_artifact("/no/such/artifact.apk")
+
+    def test_alignment_plan_aligns_gadget_build(self):
+        plan = plan_artifact_alignment(gadget_enabled=True, zipalign_available=True)
+        self.assertIs(plan["align"], True)
+
+    def test_alignment_plan_aligns_no_gadget_build(self):
+        # Regression: the first no-gadget campaign shipped an unaligned APK
+        # because alignment was gated on Gadget; preflight then rejected it
+        # and the package never reached the device.
+        plan = plan_artifact_alignment(gadget_enabled=False, zipalign_available=True)
+        self.assertIs(plan["align"], True)
+
+    def test_alignment_plan_refuses_gadget_build_without_zipalign(self):
+        with self.assertRaises(BuildVerifyError):
+            plan_artifact_alignment(gadget_enabled=True, zipalign_available=False)
+
+    def test_alignment_plan_skips_explicitly_without_zipalign(self):
+        plan = plan_artifact_alignment(gadget_enabled=False, zipalign_available=False)
+        self.assertIs(plan["align"], False)
+        self.assertIn("zipalign unavailable", plan["reason"])
+
+    def test_alignment_plan_defaults_to_no_zipalign(self):
+        plan = plan_artifact_alignment()
+        self.assertIs(plan["align"], False)
 
 
 if __name__ == "__main__":

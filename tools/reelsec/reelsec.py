@@ -23,6 +23,7 @@ from instrumented_copy import (
 from gadget_embed import embed_frida_gadget
 from build_verify import (
     apktool_build_command,
+    plan_artifact_alignment,
     verify_artifact,
     zipalign_command,
     zipalign_verify_command,
@@ -3319,10 +3320,17 @@ def main():
             align_verify_cmd = None
             align_rc = None
             align_log = ""
-            if instrumented_copy.get("gadget_enabled"):
-                zipalign = capabilities.get("tools", {}).get("zipalign", {}).get("path")
-                if not zipalign:
-                    raise RuntimeError("zipalign unavailable; Gadget APK requires native-library alignment")
+            # Alignment is decided for EVERY build, not only Gadget builds:
+            # the deploy preflight verifies 16 KiB page alignment whenever
+            # zipalign exists on the host, so skipping it here would doom
+            # the artifact to PREFLIGHT_FAILED and the run to
+            # PACKAGE_NOT_INSTALLED (first no-gadget campaign, 2026-10-08).
+            zipalign = capabilities.get("tools", {}).get("zipalign", {}).get("path")
+            align_plan = plan_artifact_alignment(
+                gadget_enabled=bool(instrumented_copy.get("gadget_enabled")),
+                zipalign_available=bool(zipalign),
+            )
+            if align_plan["align"]:
                 aligned_apk = output / "instrumented-unsigned-aligned.apk"
                 align_cmd = zipalign_command(
                     zipalign, raw_built_apk, aligned_apk, page_size_kb=16
@@ -3351,6 +3359,9 @@ def main():
             build_verify["command"] = build_cmd
             build_verify["returncode"] = build_rc
             build_verify["output_tail"] = (build_log or "")[-4000:]
+            build_verify["alignment_plan"] = align_plan
+            if not align_cmd:
+                build_verify["alignment_skipped_reason"] = align_plan["reason"]
             if align_cmd:
                 build_verify.update({
                     "raw_built_path": str(raw_built_apk.resolve()),

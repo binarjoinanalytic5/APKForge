@@ -119,6 +119,39 @@ def verify_native_library_packaging(path):
     )
 
 
+def plan_artifact_alignment(*, gadget_enabled=False, zipalign_available=False):
+    """Decide whether the freshly built APK must pass through zipalign.
+
+    Alignment is REQUIRED for every instrumented artifact whenever the
+    zipalign binary is available: the deploy-stage preflight verifies 16
+    KiB page alignment on the same host, so an unaligned build would be
+    deterministically rejected (PREFLIGHT_FAILED) and the package would
+    never reach the device (PACKAGE_NOT_INSTALLED / INSTRUMENTED_RUNTIME
+    NOT_RUN). This bit the first no-gadget run, whose build skipped
+    alignment because the step used to be gated on Gadget embedding.
+
+    Gadget builds additionally refuse to proceed without zipalign.
+    Non-Gadget builds without zipalign record the skip explicitly and
+    continue; preflight skips the same check on the same host.
+
+    Returns {"align": bool, "reason": str}.
+    """
+    if zipalign_available:
+        return {
+            "align": True,
+            "reason": ("zipalign available: every instrumented artifact is "
+                       "page-aligned before signing, with or without Gadget"),
+        }
+    if gadget_enabled:
+        raise BuildVerifyError(
+            "zipalign unavailable; Gadget APK requires native-library alignment")
+    return {
+        "align": False,
+        "reason": ("zipalign unavailable; non-Gadget build continues "
+                   "unaligned and preflight skips the alignment check"),
+    }
+
+
 def verify_artifact(path):
     apk = Path(path).resolve()
     if not apk.is_file():
