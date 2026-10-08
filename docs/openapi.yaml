@@ -275,6 +275,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JobLogs'
+  /setup/status:
+    get:
+      operationId: setupStatus
+      tags: [setup]
+      summary: حالة التهيئة الأولى (عام — للإقلاع)
+      responses:
+        '200':
+          description: حسنًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetupStatus'
+  /setup/admin:
+    post:
+      operationId: setupAdmin
+      tags: [setup]
+      summary: إنشاء المدير الأول (مرة واحدة فقط)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetupAdminRequest'
+      responses:
+        '201':
+          description: أُنشئ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetupAdminResponse'
+        '403':
+          description: النظام مهيأ مسبقًا
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   securitySchemes:
     bearerAuth:
@@ -427,5 +463,38 @@ components:
           items:
             type: string
             enum: [v1, v2, v3, v4]
+    SetupStatus:
+      type: object
+      required: [initialized]
+      properties:
+        initialized:
+          type: boolean
+    SetupAdminRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+          minLength: 12
+        display_name:
+          type: string
+        email:
+          type: string
+    SetupAdminResponse:
+      type: object
+      required: [username, role, access_token, token_type]
+      properties:
+        username:
+          type: string
+        role:
+          type: string
+        access_token:
+          type: string
+        token_type:
+          type: string
+          enum: [bearer]
 x-frozen: true
 x-contract-version: 1.0.0

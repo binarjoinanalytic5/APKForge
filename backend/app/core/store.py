@@ -9,6 +9,8 @@ import sqlite3
 import time
 import uuid
 
+from .migrations import migrate
+
 
 class StoreError(RuntimeError):
     pass
@@ -18,59 +20,13 @@ def _now():
     return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
 
-SCHEMA = """
-CREATE TABLE IF NOT EXISTS users (
-    username TEXT PRIMARY KEY,
-    pw_hash TEXT NOT NULL,
-    role TEXT NOT NULL,
-    created_at TEXT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS projects (
-    id TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    owner TEXT NOT NULL,
-    created_at TEXT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS jobs (
-    job_id TEXT PRIMARY KEY,
-    project_id TEXT NOT NULL,
-    kind TEXT NOT NULL,
-    status TEXT NOT NULL,
-    input_ref TEXT,
-    options TEXT NOT NULL DEFAULT '{}',
-    result_ref TEXT,
-    error TEXT,
-    log_lines TEXT NOT NULL DEFAULT '[]',
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS artifacts (
-    sha256 TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    size INTEGER NOT NULL,
-    kind TEXT NOT NULL,
-    project_id TEXT NOT NULL,
-    created_at TEXT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS audit (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    ts TEXT NOT NULL,
-    actor TEXT NOT NULL,
-    action TEXT NOT NULL,
-    target TEXT NOT NULL,
-    result TEXT NOT NULL,
-    detail TEXT NOT NULL DEFAULT '{}'
-);
-"""
-
-
 class SqliteStore:
     def __init__(self, path):
         # Single-process Phase 1: the API thread and background tasks
         # share one connection (PostgreSQL pooling arrives in Phase 2).
         self.db = sqlite3.connect(path, check_same_thread=False)
         self.db.row_factory = sqlite3.Row
-        self.db.executescript(SCHEMA)
+        migrate(self.db)  # idempotent; legacy DBs are baselined
 
     # -- users ------------------------------------------------------
     def user_count(self):
@@ -190,3 +146,16 @@ class SqliteStore:
     def list_audit(self, limit=200):
         return [dict(row) for row in self.db.execute(
             "SELECT * FROM audit ORDER BY id DESC LIMIT ?", (limit,))]
+
+    # -- system config --------------------------------------------
+    def get_config(self, key, default=None):
+        row = self.db.execute(
+            "SELECT value FROM system_config WHERE key=?",
+            (key,)).fetchone()
+        return row[0] if row else default
+
+    def set_config(self, key, value):
+        self.db.execute(
+            "INSERT OR REPLACE INTO system_config VALUES (?,?,?)",
+            (key, value, _now()))
+        self.db.commit()

@@ -9,6 +9,7 @@ on:
       - "plugins/**"
       - "frontend/**"
       - "cli/**"
+      - "scripts/**"
       - "infra/**"
       - "docs/**"
       - ".github/workflows/apkforge-ci.yml"
@@ -19,6 +20,7 @@ on:
       - "plugins/**"
       - "frontend/**"
       - "cli/**"
+      - "scripts/**"
       - "infra/**"
       - "docs/**"
 env:
@@ -32,7 +34,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r backend/requirements-test.txt
-      - run: pytest backend workers cli -q
+      - run: pytest backend workers cli scripts -q
   compose:
     runs-on: ubuntu-latest
     steps:

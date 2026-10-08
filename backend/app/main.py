@@ -21,6 +21,26 @@ from fastapi.middleware.cors import CORSMiddleware
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+def _load_dotenv():
+    """Load KEY=VALUE lines from <repo>/.env (bootstrap-managed).
+
+    Never overrides real environment variables and never logs values.
+    """
+    env_file = ROOT / ".env"
+    if not env_file.is_file():
+        return
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key, value = key.strip(), value.strip().strip("'\"")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
+_load_dotenv()
+
 from workers.loader import load_plugins  # noqa: E402
 from workers.runner import Runner  # noqa: E402
 
@@ -28,6 +48,7 @@ from .api import auth as auth_routes  # noqa: E402
 from .api import jobs as job_routes  # noqa: E402
 from .api import projects as project_routes  # noqa: E402
 from .api import ws as ws_routes  # noqa: E402
+from .api import setup as setup_routes  # noqa: E402
 from .core.security import resolve_key  # noqa: E402
 from .core.store import SqliteStore  # noqa: E402
 from .services.auth import AuthService  # noqa: E402
@@ -93,6 +114,7 @@ def create_app():
     app.include_router(project_routes.router)
     app.include_router(job_routes.router)
     app.include_router(ws_routes.router)
+    app.include_router(setup_routes.router)
     return app
 
 

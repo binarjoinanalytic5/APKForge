@@ -1,0 +1,18 @@
+#!/bin/sh
+# APKForge one-command bootstrap.
+#   ./apkforge            full pipeline: provision → serve → verify
+#   ./apkforge --check    audit only · --status · --logs · --stop
+#   ./apkforge --repair   retry · --reset-dev --yes (guarded dev reset)
+set -eu
+HERE="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+if [ -f "$HERE/.governance/path.sh" ]; then
+  # Project-local tools (e.g. a provisioned node) take precedence.
+  # shellcheck disable=SC1091
+  . "$HERE/.governance/path.sh"
+fi
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "error: python3 >=3.10 is required (the one prerequisite)" >&2
+  echo "install it from https://www.python.org/downloads/ then re-run" >&2
+  exit 2
+fi
+exec python3 "$HERE/scripts/apkforge.py" "$@"

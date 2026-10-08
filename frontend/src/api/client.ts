@@ -82,6 +82,36 @@ export async function downloadBlob(projectId: string): Promise<Blob> {
   return r.data as Blob
 }
 
+export interface SetupState {
+  initialized: boolean
+}
+
+export interface SetupAdminInput {
+  username: string
+  password: string
+  display_name?: string
+  email?: string
+}
+
+export interface SetupAdminDone {
+  username: string
+  role: string
+  access_token: string
+  token_type: string
+}
+
+export async function setupStatus(): Promise<SetupState> {
+  const r = await api.get('/api/v1/setup/status')
+  return r.data as SetupState
+}
+
+export async function setupAdmin(
+  input: SetupAdminInput,
+): Promise<SetupAdminDone> {
+  const r = await api.post('/api/v1/setup/admin', input)
+  return r.data as SetupAdminDone
+}
+
 export function wsUrl(jobId: string, token: string): string {
   const proto = window.location.protocol === 'https:' ? 'wss' : 'ws'
   const host =

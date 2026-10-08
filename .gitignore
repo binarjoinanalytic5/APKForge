@@ -10,3 +10,9 @@ build/
 coverage/
 .pytest_cache/
 data/
+# APKForge bootstrap (local-only; never commit)
+.env*
+.governance/
+logs/
+.tools/
+.venv/
