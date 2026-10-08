@@ -1921,6 +1921,118 @@ def _state_result(transitions):
             "transitions": transitions}
 
 
+def instrumented_runtime_gate(*, package, deploy, sign):
+    """May the campaign launch/assess `package` as ITS instrumented artifact?
+
+    A pre-existing on-device build is NEVER the campaign artifact unless
+    the sign and deploy documents of THIS campaign prove the full chain:
+    signed+verified, installed, and post-install byte/certificate
+    identity MATCH. Anything else returns allowed=False with an explicit
+    code (SIGN_BLOCKED / DEPLOY_BLOCKED) — the caller must not launch,
+    assess, or probe the package at all (2026-10-08 incident: a stale
+    baseline leftover was assessed as the instrumented artifact and
+    produced a false HEALTHY verdict).
+    """
+    dep = deploy or {}
+    sg = sign or {}
+    checks = {}
+    checks["sign_verified"] = {
+        "status": "PASS" if sg.get("status") == "SIGNED_VERIFIED" else "FAIL",
+        "sign_status": sg.get("status"),
+    }
+    if sg.get("status") != "SIGNED_VERIFIED":
+        return {"allowed": False, "code": "SIGN_BLOCKED",
+                "reason": ("sign stage did not verify an artifact "
+                           "(status=%s); runtime refused"
+                           % (sg.get("status") or "NOT_SIGNED")),
+                "checks": checks}
+    checks["deploy_installed"] = {
+        "status": "PASS" if dep.get("status") == "INSTALLED" else "FAIL",
+        "deploy_status": dep.get("status"),
+    }
+    if dep.get("status") != "INSTALLED":
+        return {"allowed": False, "code": "DEPLOY_BLOCKED",
+                "reason": ("deploy stage did not install an artifact "
+                           "(status=%s: %s); runtime refused"
+                           % (dep.get("status") or "NOT_DEPLOYED",
+                              dep.get("error") or dep.get("reason")
+                              or "no install recorded")),
+                "checks": checks}
+    identity = (dep.get("post_install_identity") or {}).get("identity")
+    checks["post_install_identity"] = {
+        "status": ("PASS" if identity in ("MATCH", None) else "FAIL"),
+        "identity": identity,
+    }
+    if identity is not None and identity != "MATCH":
+        return {"allowed": False, "code": "DEPLOY_BLOCKED",
+                "reason": ("post-install identity %s: %s; the on-device "
+                           "build is not this campaign artifact"
+                           % (identity, (dep.get("post_install_identity")
+                                         or {}).get("reason")
+                              or "identity mismatch")),
+                "checks": checks}
+    sign_sha = (sg.get("signed_sha256") or "").lower() or None
+    dep_sha = (dep.get("artifact_sha256") or "").lower() or None
+    checks["sha_consistent"] = {
+        "status": ("PASS" if not (sign_sha and dep_sha)
+                   or sign_sha == dep_sha else "FAIL"),
+        "sign_sha256": sign_sha, "deploy_sha256": dep_sha,
+    }
+    if sign_sha and dep_sha and sign_sha != dep_sha:
+        return {"allowed": False, "code": "DEPLOY_BLOCKED",
+                "reason": ("sign/deploy documents disagree on the artifact "
+                           "SHA-256; refusing to attribute runtime"),
+                "checks": checks}
+    sign_cert = (sg.get("certificate_sha256") or "").lower() or None
+    dep_cert = (dep.get("certificate_sha256") or "").lower() or None
+    checks["certificate_consistent"] = {
+        "status": ("PASS" if not (sign_cert and dep_cert)
+                   or sign_cert == dep_cert else "FAIL"),
+        "sign_certificate": sign_cert, "deploy_certificate": dep_cert,
+    }
+    if sign_cert and dep_cert and sign_cert != dep_cert:
+        return {"allowed": False, "code": "DEPLOY_BLOCKED",
+                "reason": ("sign/deploy documents disagree on the signer "
+                           "certificate; refusing to attribute runtime"),
+                "checks": checks}
+    dep_package = dep.get("package")
+    checks["package_bound"] = {
+        "status": ("PASS" if not dep_package or dep_package == package
+                   else "FAIL"),
+        "deploy_package": dep_package, "package": package,
+    }
+    if dep_package and dep_package != package:
+        return {"allowed": False, "code": "DEPLOY_BLOCKED",
+                "reason": ("deploy document binds package %r, not %r; "
+                           "refusing to attribute runtime"
+                           % (dep_package, package)),
+                "checks": checks}
+    return {"allowed": True, "code": "ALLOWED",
+            "reason": ("signed, verified, installed, and identity-bound "
+                       "to this campaign artifact"),
+            "checks": checks}
+
+
+def instrumented_installed(sign, deploy, deploy_status):
+    """True only when the campaign artifact completed the install chain.
+
+    Requires: deploy status INSTALLED, post-install identity MATCH when
+    a record exists (byte + certificate match), and sign SIGNED_VERIFIED
+    when a sign document is available. Legacy verdict inputs (bare
+    deploy_status without documents) keep their historical meaning.
+    """
+    status = deploy_status or (deploy or {}).get("status")
+    if status != "INSTALLED":
+        return False
+    identity = ((deploy or {}).get("post_install_identity") or {}).get(
+        "identity")
+    if deploy is not None and identity is not None and identity != "MATCH":
+        return False
+    if sign is not None and (sign or {}).get("status") != "SIGNED_VERIFIED":
+        return False
+    return True
+
+
 def runtime_verdict(baseline_health, instrumented_health, comparison=None,
                     runtime_probe=None, probe_allowed=None,
                     crash_comparison=None, working_control=None,
@@ -2048,7 +2160,9 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
     # RUNTIME_PROOF_STATUS for traceability. With no stage documents at
     # all, behavior is exactly as before.
     blocked_by = None
-    if proof in ("PACKAGE_NOT_INSTALLED", "NOT_RUN") and not ih.get("startup"):
+    if proof in ("PACKAGE_NOT_INSTALLED", "NOT_RUN",
+                 "SIGN_BLOCKED", "DEPLOY_BLOCKED") \
+            and not ih.get("startup"):
         if sign is not None and (sign or {}).get("status") != "SIGNED_VERIFIED":
             blocked_by = {
                 "stage": "SIGN",
@@ -2157,7 +2271,8 @@ def runtime_verdict(baseline_health, instrumented_health, comparison=None,
         "ORIGINAL_HEALTHY_BEFORE_INSTALL": original_healthy_before,
         "INSTRUMENTED_RUNTIME": ih.get("startup") or "NOT_RUN",
         "INSTRUMENTED_CRASH_AFTER_INSTALL": instrumented_crash_after,
-        "INSTRUMENTED_INSTALLED": bool(eff_deploy_status == "INSTALLED" or ih),
+        "INSTRUMENTED_INSTALLED": instrumented_installed(
+            sign, eff_deploy or None, eff_deploy_status),
         "REPLACED_SHARED_APK_USERS": replaced_users,
         "REPLACEMENT_GUARD": replacement_guard,
         "CRASH_CLASS": ih.get("crash_class"),

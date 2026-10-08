@@ -15,6 +15,7 @@ import re
 import secrets
 import shutil
 import subprocess
+import tempfile
 import time
 from pathlib import Path
 
@@ -235,6 +236,19 @@ def bootstrap_test_keystore(keystore_path, *, alias=DEFAULT_KEY_ALIAS,
             raise SignVerifyError(
                 "existing bootstrapped keystore failed validation: %s"
                 % valid.get("reason"))
+        meta_path = target.parent / BOOTSTRAP_META_NAME
+        if meta_path.is_file():
+            try:
+                meta_fp = (json.loads(meta_path.read_text(encoding="utf-8"))
+                           .get("certificate_sha256"))
+            except (OSError, ValueError):
+                meta_fp = None
+            live_fp = valid.get("certificate_sha256")
+            if meta_fp and live_fp and meta_fp != live_fp:
+                raise SignVerifyError(
+                    "existing bootstrapped keystore file changed under a "
+                    "reused path (live certificate differs from "
+                    "keystore-meta.json); refusing reuse")
         return {"keystore": str(target), "alias": alias,
                 "bootstrapped": False, "reused": True,
                 "backend": "openssl-pkcs12",
@@ -269,7 +283,8 @@ def bootstrap_test_keystore(keystore_path, *, alias=DEFAULT_KEY_ALIAS,
         rc, out = runner([str(openssl), "x509", "-in", str(cert_pem),
                           "-noout", "-fingerprint", "-sha256"], timeout=30)
         if rc == 0:
-            match = re.search(r"SHA256 Fingerprint=([0-9A-Fa-f:]+)", out or "")
+            match = re.search(r"SHA256 Fingerprint=([0-9A-Fa-f:]+)",
+                                out or "", re.IGNORECASE)
             if match:
                 cert_sha256 = match.group(1).replace(":", "").lower()
         os.chmod(target, 0o600)
@@ -304,9 +319,55 @@ def bootstrap_test_keystore(keystore_path, *, alias=DEFAULT_KEY_ALIAS,
             "certificate_sha256": cert_sha256}
 
 
+def pkcs12_decode(keystore_path, *, openssl, runner, env):
+    """Decode a PKCS#12 keystore's certificate bags (password via env only).
+
+    Returns (returncode, output). The decode uses `-nodes -nokeys`, so the
+    output carries the stable `friendlyName:` bag-attribute headers plus
+    the public certificate PEM blocks, and never any private key
+    material. `-info -noout` is deliberately NOT used: on OpenSSL 3.x it
+    reports bag types but never prints friendlyName, so it cannot
+    validate aliases at all (2026-10-08 incident: every keystore failed
+    the alias check while signing itself worked).
+    """
+    values = env if env is not None else os.environ
+    target = Path(keystore_path).expanduser()
+    password = (values.get(KEYSTORE_PASSWORD_ENV) or "").strip()
+    if not password:
+        return 2, ""
+    return runner([str(openssl), "pkcs12", "-in", str(target),
+                   "-passin", "env:" + KEYSTORE_PASSWORD_ENV,
+                   "-nodes", "-nokeys"], timeout=60)
+
+
+def pkcs12_bag_names(decode_output):
+    """Alias names from decoded PKCS#12 bag headers (robust parse)."""
+    names = set()
+    for line in (decode_output or "").splitlines():
+        match = re.match(r"\s*friendlyName\s*:\s*(\S(?:.*\S)?)\s*$", line,
+                         re.IGNORECASE)
+        if match:
+            names.add(match.group(1).strip())
+    return sorted(names)
+
+
+def pkcs12_first_certificate(decode_output):
+    """First PEM certificate block from decoded PKCS#12 output (or None)."""
+    match = re.search(
+        r"-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----",
+        decode_output or "", re.DOTALL)
+    return match.group(0) + "\n" if match else None
+
+
 def validate_pkcs12(keystore_path, *, alias=None, openssl=None,
                     runner=None, env=None):
-    """Validate a PKCS#12 keystore password (and alias) without argv secrets."""
+    """Validate a PKCS#12 keystore password (and alias) without argv secrets.
+
+    Password validity is the binary `-noout` returncode; aliases come from
+    the decoded certificate-bag headers; the certificate SHA-256 comes
+    from `x509 -fingerprint` over the decoded PEM (best effort, recorded
+    for reuse-time identity cross-checks).
+    """
     values = env if env is not None else os.environ
     runner = runner or _default_runner
     openssl = openssl or shutil.which("openssl")
@@ -319,23 +380,49 @@ def validate_pkcs12(keystore_path, *, alias=None, openssl=None,
                 "reason": "%s unset" % KEYSTORE_PASSWORD_ENV}
     if not openssl:
         return {"valid": False, "reason": "openssl unavailable"}
-    rc, out = runner([str(openssl), "pkcs12", "-in", str(target),
-                      "-noout", "-passin", "env:" + KEYSTORE_PASSWORD_ENV],
-                     timeout=60)
+    rc, _out = runner([str(openssl), "pkcs12", "-in", str(target),
+                       "-noout", "-passin",
+                       "env:" + KEYSTORE_PASSWORD_ENV],
+                      timeout=60)
     if rc != 0:
         return {"valid": False,
                 "reason": "pkcs12 password rejected (rc=%s)" % rc}
     record = {"valid": True, "password": "VALID"}
-    if alias:
-        rc, out = runner([str(openssl), "pkcs12", "-in", str(target),
-                          "-info", "-noout", "-passin",
-                          "env:" + KEYSTORE_PASSWORD_ENV], timeout=60)
-        names = set(re.findall(r"friendlyName:\s*(\S+)", out or ""))
-        record["aliases"] = sorted(names)
-        if alias not in names:
-            record["valid"] = False
-            record["reason"] = ("alias %r not present in keystore "
-                                "(found: %s)" % (alias, sorted(names) or "none"))
+    rc, decoded = pkcs12_decode(target, openssl=openssl, runner=runner,
+                                env=values)
+    if rc != 0:
+        record["valid"] = False
+        record["reason"] = ("pkcs12 decode failed (rc=%s); keystore "
+                            "unreadable with the configured password" % rc)
+        return record
+    record["aliases"] = pkcs12_bag_names(decoded)
+    if alias and alias not in record["aliases"]:
+        record["valid"] = False
+        record["reason"] = ("alias %r not present in keystore (found: %s)"
+                            % (alias, record["aliases"] or "none"))
+        return record
+    fingerprint = None
+    pem = pkcs12_first_certificate(decoded)
+    if pem:
+        fd, tmp = tempfile.mkstemp(prefix="reelsec-p12cert-",
+                                   suffix=".pem")
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                handle.write(pem)
+            rc, out = runner([str(openssl), "x509", "-in", tmp,
+                              "-noout", "-fingerprint", "-sha256"],
+                             timeout=30)
+            if rc == 0:
+                match = re.search(r"SHA256 Fingerprint=([0-9A-Fa-f:]+)",
+                                  out or "", re.IGNORECASE)
+                if match:
+                    fingerprint = match.group(1).replace(":", "").lower()
+        finally:
+            try:
+                os.unlink(tmp)
+            except OSError:
+                pass
+    record["certificate_sha256"] = fingerprint
     return record
 
 
@@ -382,7 +469,8 @@ def signing_preflight(*, apksigner, keystore, alias, openssl=None,
                 checks["pkcs12_alias_present"] = {
                     "status": ("PASS" if alias in (valid.get("aliases") or [])
                                else "FAIL"),
-                    "alias": alias, "aliases": valid.get("aliases")}
+                    "alias": alias, "aliases": valid.get("aliases"),
+                    "certificate_sha256": valid.get("certificate_sha256")}
         else:
             checks["pkcs12_password_valid"] = {
                 "status": "SKIPPED", "reason": "openssl unavailable"}

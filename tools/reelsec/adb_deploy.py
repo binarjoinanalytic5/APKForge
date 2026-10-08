@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Guarded deployment of ReelSec test artifacts to an explicit Android device."""
+import hashlib
 import json
 import re
 import subprocess
@@ -677,17 +678,29 @@ def check_install_compatibility(*, adb, serial, package, artifact_cert_sha256,
             pass
 
 
+def _sha256_file(path):
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def verify_installed_artifact_identity(*, adb, serial, package,
                                        expected_cert_sha256, apksigner,
+                                       expected_sha256=None,
                                        runner=None, tmp_dir=None):
     """Post-install identity: is the on-device build OUR artifact?
 
-    Pulls the installed base.apk read-only and compares its signer
+    Pulls the installed base.apk read-only and compares its bytes
+    (SHA-256, when an expected digest is supplied) and its signer
     certificate against the signed artifact. A mismatch blocks runtime:
     evidence about the wrong build is worse than no evidence.
     """
     runner = runner or _default_runner
     record = {"package": package,
+              "expected_sha256": expected_sha256,
+              "installed_sha256": None,
               "expected_certificate_sha256": expected_cert_sha256,
               "installed_certificate_sha256": None,
               "installed_path": None, "identity": "UNVERIFIED",
@@ -705,6 +718,17 @@ def verify_installed_artifact_identity(*, adb, serial, package,
         record["reason"] = "package not present after install"
         return record
     try:
+        try:
+            installed_sha = _sha256_file(pulled)
+        except OSError as exc:
+            record["reason"] = "cannot hash pulled apk: %s" % exc
+            return record
+        record["installed_sha256"] = installed_sha
+        if expected_sha256 and installed_sha != expected_sha256.lower():
+            record["identity"] = "MISMATCH"
+            record["reason"] = ("installed bytes differ from the signed "
+                                "artifact (SHA-256 mismatch); runtime blocked")
+            return record
         installed_cert, cert_error = _apk_certificate_sha256(
             apksigner, pulled, runner)
         if cert_error:
@@ -713,7 +737,10 @@ def verify_installed_artifact_identity(*, adb, serial, package,
         record["installed_certificate_sha256"] = installed_cert
         if installed_cert == (expected_cert_sha256 or "").lower():
             record["identity"] = "MATCH"
-            record["reason"] = ("installed signer certificate matches the "
+            record["reason"] = ("installed bytes and signer certificate "
+                                "match the signed artifact"
+                                if expected_sha256 else
+                                "installed signer certificate matches the "
                                 "signed artifact")
         else:
             record["identity"] = "MISMATCH"

@@ -659,8 +659,30 @@ class _ProbeHarness(unittest.TestCase):
         self.root = self.out / "decoded"
         self.root.mkdir()
         self.frida_calls = []
+        self.cmd_log = []
         os.environ.pop("REELSEC_USE_GADGET", None)
         os.environ["REELSEC_HEALTH_WINDOW_MS"] = "2000"
+        # Platform contract: runtime may assess the package only when the
+        # sign/deploy documents of THIS campaign prove the full chain.
+        self._stage_binding(status="INSTALLED")
+
+    def _stage_binding(self, status="INSTALLED", identity="MATCH",
+                       sha="aa" * 32, cert="bb" * 32, package="com.x"):
+        (self.out / "SIGN-VERIFY.json").write_text(json.dumps({
+            "status": "SIGNED_VERIFIED",
+            "signed_path": str(self.out / "instrumented-signed.apk"),
+            "signed_sha256": sha,
+            "certificate_sha256": cert,
+        }), encoding="utf-8")
+        (self.out / "ADB-DEPLOY.json").write_text(json.dumps({
+            "status": status,
+            "package": package,
+            "artifact": str(self.out / "instrumented-signed.apk"),
+            "artifact_sha256": sha,
+            "certificate_sha256": cert,
+            "post_install_identity": {"identity": identity}
+            if identity is not None else None,
+        }), encoding="utf-8")
 
     def tearDown(self):
         os.environ.pop("REELSEC_HEALTH_WINDOW_MS", None)
@@ -703,6 +725,7 @@ class _ProbeHarness(unittest.TestCase):
         def runner(cmd, timeout=60):
             self_cmd = [str(c) for c in cmd]
             joined = " ".join(self_cmd)
+            self.cmd_log.append(joined)
             if self_cmd and Path(self_cmd[0]).name == "frida":
                 self.frida_calls.append(self_cmd)
                 return 0, frida_output
@@ -760,9 +783,11 @@ class _ProbeHarness(unittest.TestCase):
         campaign path must write CRASH-ARTIFACT.json with UID/PID/APK-path
         bindings and the offset resolved into the artifact's STORED entry."""
         apk = _craft_apk_with_offset(self.out / "instrumented-signed.apk")
-        (self.out / "ADB-DEPLOY.json").write_text(json.dumps({
-            "artifact": str(apk), "artifact_sha256": "f" * 64}),
-            encoding="utf-8")
+        self._stage_binding(status="INSTALLED", identity="MATCH",
+                            sha="f" * 64, cert="c" * 64)
+        (self.out / "ADB-DEPLOY.json").write_text(json.dumps(dict(
+            json.loads((self.out / "ADB-DEPLOY.json").read_text()),
+            artifact=str(apk))), encoding="utf-8")
         exit_info = EXIT_INFO_NATIVE.replace(
             "com.newleaf.app.android.victor", "com.x")
         log = SIGABRT_BASE_APK_LOG.replace(
@@ -800,9 +825,11 @@ class _ProbeHarness(unittest.TestCase):
         crash => CRASH-COMPARISON.json explicitly reports BOTH_CRASH and the
         verdict surfaces it."""
         apk = _craft_apk_with_offset(self.out / "instrumented-signed.apk")
-        (self.out / "ADB-DEPLOY.json").write_text(json.dumps({
-            "artifact": str(apk), "artifact_sha256": "f" * 64}),
-            encoding="utf-8")
+        self._stage_binding(status="INSTALLED", identity="MATCH",
+                            sha="f" * 64, cert="c" * 64)
+        (self.out / "ADB-DEPLOY.json").write_text(json.dumps(dict(
+            json.loads((self.out / "ADB-DEPLOY.json").read_text()),
+            artifact=str(apk))), encoding="utf-8")
         (self.out / "BASELINE-CRASH-ARTIFACT.json").write_text(
             json.dumps(_simulated_crash_artifact("original", "e" * 64,
                                                  apk)),
@@ -823,6 +850,46 @@ class _ProbeHarness(unittest.TestCase):
                          "BASELINE-CRASH-ARTIFACT.json")
         verdict = json.loads((self.out / "RUNTIME-VERDICT.json").read_text())
         self.assertEqual(verdict["CRASH_COMPARISON"], "BOTH_CRASH")
+
+    def test_probe_refuses_foreign_leftover_without_binding(self):
+        """A present but unbound package is never launched or assessed."""
+        (self.out / "ADB-DEPLOY.json").unlink()
+        (self.out / "SIGN-VERIFY.json").unlink()
+        result = self._run_probe(self._runner())
+        self.assertEqual(result["status"], "SIGN_BLOCKED")
+        health = json.loads(
+            (self.out / "RUNTIME-HEALTH.json").read_text(encoding="utf-8"))
+        self.assertEqual(health["status"], "BLOCKED")
+        self.assertIsNone(health["startup"])
+        self.assertFalse(health["runtime_probe_allowed"])
+        self.assertEqual(self.frida_calls, [])
+        self.assertFalse(any("monkey" in c for c in self.cmd_log))
+        self.assertFalse(any("force-stop" in c for c in self.cmd_log))
+
+    def test_probe_refuses_when_deploy_did_not_install(self):
+        """Sign-verified but not deployed: DEPLOY_BLOCKED, nothing runs."""
+        self._stage_binding(status="BLOCKED_OR_FAILED")
+        (self.out / "ADB-DEPLOY.json").write_text(json.dumps(dict(
+            json.loads((self.out / "ADB-DEPLOY.json").read_text()),
+            error="deploy not ready")), encoding="utf-8")
+        result = self._run_probe(self._runner())
+        self.assertEqual(result["status"], "DEPLOY_BLOCKED")
+        self.assertIn("deploy not ready", result["reason"])
+        health = json.loads(
+            (self.out / "RUNTIME-HEALTH.json").read_text(encoding="utf-8"))
+        self.assertEqual(health["status"], "BLOCKED")
+        self.assertEqual(self.frida_calls, [])
+        self.assertFalse(any("monkey" in c for c in self.cmd_log))
+
+    def test_probe_refuses_on_identity_mismatch(self):
+        """INSTALLED with a non-MATCH identity record: not our artifact."""
+        self._stage_binding(status="INSTALLED", identity="MISMATCH")
+        result = self._run_probe(self._runner())
+        self.assertEqual(result["status"], "DEPLOY_BLOCKED")
+        health = json.loads(
+            (self.out / "RUNTIME-HEALTH.json").read_text(encoding="utf-8"))
+        self.assertEqual(health["status"], "BLOCKED")
+        self.assertEqual(self.frida_calls, [])
 
 
 class BaselineRoundTests(unittest.TestCase):
@@ -1950,6 +2017,151 @@ class BlockedByTests(unittest.TestCase):
         self.assertEqual(v["RUNTIME_PROOF_STATUS"], "NOT_RUN")
         self.assertIsNone(v["BLOCKED_BY"])
         self.assertIn("probe is permitted", v["NEXT_ACTION"])
+
+
+class InstrumentedRuntimeGateTests(unittest.TestCase):
+    def _docs(self, sign_status="SIGNED_VERIFIED",
+              deploy_status="INSTALLED", identity="MATCH",
+              sha="aa" * 32, cert="bb" * 32, package="com.x",
+              deploy_package="com.x", deploy_sha=None, deploy_cert=None):
+        sign = {"status": sign_status, "signed_sha256": sha,
+                "certificate_sha256": cert}
+        deploy = {"status": deploy_status, "package": deploy_package,
+                  "artifact_sha256": deploy_sha or sha,
+                  "certificate_sha256": deploy_cert or cert}
+        if identity is not None:
+            deploy["post_install_identity"] = {"identity": identity}
+        return sign, deploy
+
+    def test_full_chain_allowed(self):
+        sign, deploy = self._docs()
+        gate = rh.instrumented_runtime_gate(
+            package="com.x", deploy=deploy, sign=sign)
+        self.assertTrue(gate["allowed"])
+        self.assertEqual(gate["code"], "ALLOWED")
+
+    def test_sign_failure_blocks(self):
+        sign, deploy = self._docs(sign_status="BLOCKED_OR_FAILED")
+        gate = rh.instrumented_runtime_gate(
+            package="com.x", deploy=deploy, sign=sign)
+        self.assertFalse(gate["allowed"])
+        self.assertEqual(gate["code"], "SIGN_BLOCKED")
+
+    def test_missing_sign_blocks(self):
+        _sign, deploy = self._docs()
+        gate = rh.instrumented_runtime_gate(
+            package="com.x", deploy=deploy, sign=None)
+        self.assertFalse(gate["allowed"])
+        self.assertEqual(gate["code"], "SIGN_BLOCKED")
+
+    def test_deploy_not_installed_blocks(self):
+        sign, deploy = self._docs(deploy_status="NOT_DEPLOYED")
+        deploy["reason"] = "sign stage did not verify an artifact"
+        gate = rh.instrumented_runtime_gate(
+            package="com.x", deploy=deploy, sign=sign)
+        self.assertFalse(gate["allowed"])
+        self.assertEqual(gate["code"], "DEPLOY_BLOCKED")
+        self.assertIn("did not verify", gate["reason"])
+
+    def test_identity_mismatch_blocks(self):
+        sign, deploy = self._docs(identity="MISMATCH")
+        gate = rh.instrumented_runtime_gate(
+            package="com.x", deploy=deploy, sign=sign)
+        self.assertFalse(gate["allowed"])
+        self.assertEqual(gate["code"], "DEPLOY_BLOCKED")
+
+    def test_legacy_deploy_without_identity_record_allowed(self):
+        sign, deploy = self._docs(identity=None)
+        gate = rh.instrumented_runtime_gate(
+            package="com.x", deploy=deploy, sign=sign)
+        self.assertTrue(gate["allowed"])
+
+    def test_sha_inconsistency_blocks(self):
+        sign, deploy = self._docs(deploy_sha="cc" * 32)
+        gate = rh.instrumented_runtime_gate(
+            package="com.x", deploy=deploy, sign=sign)
+        self.assertFalse(gate["allowed"])
+        self.assertIn("SHA-256", gate["reason"])
+
+    def test_certificate_inconsistency_blocks(self):
+        sign, deploy = self._docs(deploy_cert="cc" * 32)
+        gate = rh.instrumented_runtime_gate(
+            package="com.x", deploy=deploy, sign=sign)
+        self.assertFalse(gate["allowed"])
+        self.assertIn("certificate", gate["reason"])
+
+    def test_package_mismatch_blocks(self):
+        sign, deploy = self._docs(deploy_package="com.other")
+        gate = rh.instrumented_runtime_gate(
+            package="com.x", deploy=deploy, sign=sign)
+        self.assertFalse(gate["allowed"])
+        self.assertIn("com.other", gate["reason"])
+
+
+class DeployBindingVerdictTests(unittest.TestCase):
+    def test_sign_blocked_proof_names_sign_and_denies_install(self):
+        v = rh.runtime_verdict(
+            {"startup": "PASS"}, None,
+            runtime_probe={"status": "SIGN_BLOCKED"},
+            deploy={"status": "NOT_DEPLOYED",
+                    "reason": "sign stage did not verify an artifact"},
+            sign={"status": "BLOCKED_OR_FAILED",
+                  "error": "signing preflight not ready "
+                           "(pkcs12_password_valid)"})
+        self.assertEqual(v["RUNTIME_STATUS"], "SIGN_BLOCKED")
+        self.assertEqual(v["RUNTIME_PROOF_STATUS"], "SIGN_BLOCKED")
+        self.assertEqual(v["BLOCKED_BY"]["stage"], "SIGN")
+        self.assertFalse(v["INSTRUMENTED_INSTALLED"])
+        self.assertEqual(v["INSTRUMENTED_RUNTIME"], "NOT_RUN")
+
+    def test_deploy_blocked_proof_names_deploy(self):
+        v = rh.runtime_verdict(
+            {"startup": "PASS"}, None,
+            runtime_probe={"status": "DEPLOY_BLOCKED"},
+            deploy={"status": "BLOCKED_OR_FAILED",
+                    "error": "install compatibility gate "
+                             "(SIGNATURE_MISMATCH)"},
+            sign={"status": "SIGNED_VERIFIED"})
+        self.assertEqual(v["RUNTIME_STATUS"], "DEPLOY_BLOCKED")
+        self.assertEqual(v["BLOCKED_BY"]["stage"], "DEPLOY")
+        self.assertIn("SIGNATURE_MISMATCH", v["BLOCKED_BY"]["reason"])
+        self.assertFalse(v["INSTRUMENTED_INSTALLED"])
+
+    def test_full_chain_marks_installed(self):
+        v = rh.runtime_verdict(
+            {"startup": "PASS"},
+            {"startup": "PASS", "runtime_probe_allowed": True},
+            runtime_probe={"status": "RUNTIME_TARGET_NOT_OBSERVED"},
+            deploy={"status": "INSTALLED",
+                    "post_install_identity": {"identity": "MATCH"}},
+            sign={"status": "SIGNED_VERIFIED"})
+        self.assertTrue(v["INSTRUMENTED_INSTALLED"])
+
+    def test_mismatch_identity_denies_install(self):
+        v = rh.runtime_verdict(
+            {"startup": "PASS"},
+            {"startup": "PASS", "runtime_probe_allowed": True},
+            runtime_probe={"status": "RUNTIME_TARGET_NOT_OBSERVED"},
+            deploy={"status": "INSTALLED",
+                    "post_install_identity": {"identity": "MISMATCH"}},
+            sign={"status": "SIGNED_VERIFIED"})
+        self.assertFalse(v["INSTRUMENTED_INSTALLED"])
+
+    def test_unverified_sign_denies_install_despite_match(self):
+        v = rh.runtime_verdict(
+            {"startup": "PASS"},
+            {"startup": "PASS", "runtime_probe_allowed": True},
+            runtime_probe={"status": "RUNTIME_TARGET_NOT_OBSERVED"},
+            deploy={"status": "INSTALLED",
+                    "post_install_identity": {"identity": "MATCH"}},
+            sign={"status": "BLOCKED_OR_FAILED"})
+        self.assertFalse(v["INSTRUMENTED_INSTALLED"])
+
+    def test_legacy_status_only_install_keeps_meaning(self):
+        v = rh.runtime_verdict(None, None,
+                               runtime_probe={"status": "NOT_RUN"},
+                               deploy_status="INSTALLED")
+        self.assertTrue(v["INSTRUMENTED_INSTALLED"])
 
 
 if __name__ == "__main__":
