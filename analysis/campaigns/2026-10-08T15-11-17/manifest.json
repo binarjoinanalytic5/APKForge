@@ -1,0 +1,768 @@
+{
+  "tool": "ReelSec",
+  "version": "3.0.0",
+  "probes": [
+    "elf",
+    "symbols",
+    "strings",
+    "vtable",
+    "dispatch",
+    "critical-function",
+    "protection-bridge",
+    "vtable-abi",
+    "critical-function-behavior",
+    "native-security-api",
+    "java-screen-security",
+    "auto-publish",
+    "autonomous-dataflow",
+    "runtime-proof-readiness",
+    "runtime-frida-probe",
+    "target-provenance",
+    "runtime-toolchain-preflight",
+    "environment-capability",
+    "campaign-cli"
+  ],
+  "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so",
+  "created_at": "2026-10-08T18:12:46+0300",
+  "mode": "campaign",
+  "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+  "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+  "capabilities": {
+    "schema_version": "1.0",
+    "resolver": "ReelSec Environment Resolver",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00",
+    "tools": {
+      "java": {
+        "name": "java",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "openjdk 21.0.12 2026-07-21",
+        "returncode": 0
+      },
+      "python": {
+        "name": "python",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/python3.14",
+        "version": "Python 3.14.6",
+        "returncode": 0
+      },
+      "adb": {
+        "name": "adb",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/adb",
+        "version": "Android Debug Bridge version 1.0.41",
+        "returncode": 0,
+        "device_query": "USABLE",
+        "devices": [
+          "192.168.8.8:33257      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+        ]
+      },
+      "apktool": {
+        "name": "apktool-standalone",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+        "version": "2.7.0-dirty",
+        "backend": "java-classpath",
+        "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+        "attempts": [
+          {
+            "backend": "cli",
+            "path": "/data/data/com.termux/files/usr/bin/apktool",
+            "returncode": 1
+          },
+          {
+            "backend": "java-classpath",
+            "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+            "returncode": 0
+          }
+        ]
+      },
+      "frida": {
+        "name": "frida",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/frida",
+        "version": "17.2.14",
+        "returncode": 0
+      },
+      "signing": {
+        "zipalign": {
+          "name": "zipalign",
+          "status": "BROKEN",
+          "path": "/data/data/com.termux/files/usr/bin/zipalign",
+          "version": null,
+          "returncode": 127
+        },
+        "apksigner": {
+          "name": "apksigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/bin/apksigner",
+          "version": "0.9",
+          "returncode": 0
+        },
+        "jarsigner": {
+          "name": "jarsigner",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+          "version": "jarsigner 21.0.12",
+          "returncode": 0
+        },
+        "openssl": {
+          "name": "openssl",
+          "status": "USABLE",
+          "path": "/data/data/com.termux/files/usr/bin/openssl",
+          "version": "OpenSSL 3.6.3 9 Jun 2026 (Library: OpenSSL 3.6.3 9 Jun 2026)",
+          "returncode": 0
+        }
+      },
+      "zipalign": {
+        "name": "zipalign",
+        "status": "BROKEN",
+        "path": "/data/data/com.termux/files/usr/bin/zipalign",
+        "version": null,
+        "returncode": 127
+      },
+      "apksigner": {
+        "name": "apksigner",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/apksigner",
+        "version": "0.9",
+        "returncode": 0
+      },
+      "jarsigner": {
+        "name": "jarsigner",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/jarsigner",
+        "version": "jarsigner 21.0.12",
+        "returncode": 0
+      },
+      "openssl": {
+        "name": "openssl",
+        "status": "USABLE",
+        "path": "/data/data/com.termux/files/usr/bin/openssl",
+        "version": "OpenSSL 3.6.3 9 Jun 2026 (Library: OpenSSL 3.6.3 9 Jun 2026)",
+        "returncode": 0
+      }
+    },
+    "device": {
+      "online_count": 1,
+      "state": "USABLE",
+      "records": [
+        "192.168.8.8:33257      device product:c2qsqw model:SM_N986U device:c2q transport_id:1"
+      ]
+    },
+    "policy": {
+      "available_is_not_usable": true,
+      "resolver_does_not_install": true,
+      "original_apk_is_immutable": true
+    }
+  },
+  "apktool_backend": {
+    "name": "apktool-standalone",
+    "backend": "java-classpath",
+    "path": "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+    "version": "2.7.0-dirty",
+    "classpath": "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+    "status": "SELECTED"
+  },
+  "apktool_decode": {
+    "status": "DECODED_NO_RES",
+    "returncode": 0,
+    "command": [
+      "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "-cp",
+      "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "brut.apktool.Main",
+      "d",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+      "-o",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/decoded-apk-no-res",
+      "-r"
+    ],
+    "output_dir": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/decoded-apk-no-res",
+    "log": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/decoded-apk-no-res/reelsec-apktool-recovery.log",
+    "mode": "APKTOOL_NO_RES",
+    "resources_decoded": false,
+    "instrumentable_smali": true,
+    "buildable_with_apktool": true,
+    "selection_strategy": "NO_RES_FIRST"
+  },
+  "decoded_input_inventory": {
+    "schema_version": "1.1",
+    "status": "READY",
+    "analysis_mode": "DECODED_SMALI_NATIVE",
+    "root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/decoded-apk-no-res",
+    "manifest": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/decoded-apk-no-res/AndroidManifest.xml",
+    "smali_roots": [
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/decoded-apk-no-res/smali"
+    ],
+    "smali_file_count": 514,
+    "native_library_count": 50,
+    "native_libraries": [
+      "lib/arm64-v8a/libSecShell-x86.so",
+      "lib/arm64-v8a/libSecShell.so",
+      "lib/arm64-v8a/libalinetworkdiagnosis.so",
+      "lib/arm64-v8a/libalivcffmpeg.so",
+      "lib/arm64-v8a/libapplovin-native-crash-reporter.so",
+      "lib/arm64-v8a/libbuffer_pgl.so",
+      "lib/arm64-v8a/libc++_shared.so",
+      "lib/arm64-v8a/libcrashlytics-common.so",
+      "lib/arm64-v8a/libcrashlytics-handler.so",
+      "lib/arm64-v8a/libcrashlytics-trampoline.so",
+      "lib/arm64-v8a/libcrashlytics.so",
+      "lib/arm64-v8a/libdatastore_shared_counter.so",
+      "lib/arm64-v8a/libfile_lock_pgl.so",
+      "lib/arm64-v8a/libmarsxlog.so",
+      "lib/arm64-v8a/libmku_aaab.so",
+      "lib/arm64-v8a/libmmkv.so",
+      "lib/arm64-v8a/libnms.so",
+      "lib/arm64-v8a/libpglarmor.so",
+      "lib/arm64-v8a/libprotect.so",
+      "lib/arm64-v8a/libsaasCorePlayer.so",
+      "lib/arm64-v8a/libsaasDownloader.so",
+      "lib/arm64-v8a/libsls_producer.so",
+      "lib/arm64-v8a/libstupid.so",
+      "lib/arm64-v8a/libtapjoy.so",
+      "lib/arm64-v8a/libtt_ugen_layout.so",
+      "lib/armeabi-v7a/libSecShell-x86.so",
+      "lib/armeabi-v7a/libSecShell.so",
+      "lib/armeabi-v7a/libalinetworkdiagnosis.so",
+      "lib/armeabi-v7a/libalivcffmpeg.so",
+      "lib/armeabi-v7a/libapplovin-native-crash-reporter.so",
+      "lib/armeabi-v7a/libbuffer_pgl.so",
+      "lib/armeabi-v7a/libc++_shared.so",
+      "lib/armeabi-v7a/libcrashlytics-common.so",
+      "lib/armeabi-v7a/libcrashlytics-handler.so",
+      "lib/armeabi-v7a/libcrashlytics-trampoline.so",
+      "lib/armeabi-v7a/libcrashlytics.so",
+      "lib/armeabi-v7a/libdatastore_shared_counter.so",
+      "lib/armeabi-v7a/libfile_lock_pgl.so",
+      "lib/armeabi-v7a/libmarsxlog.so",
+      "lib/armeabi-v7a/libmku_aaab.so",
+      "lib/armeabi-v7a/libmmkv.so",
+      "lib/armeabi-v7a/libnms.so",
+      "lib/armeabi-v7a/libpglarmor.so",
+      "lib/armeabi-v7a/libprotect.so",
+      "lib/armeabi-v7a/libsaasCorePlayer.so",
+      "lib/armeabi-v7a/libsaasDownloader.so",
+      "lib/armeabi-v7a/libsls_producer.so",
+      "lib/armeabi-v7a/libstupid.so",
+      "lib/armeabi-v7a/libtapjoy.so",
+      "lib/armeabi-v7a/libtt_ugen_layout.so"
+    ],
+    "dex_count": 0,
+    "dex_files": [],
+    "decode_mode": "APKTOOL_NO_RES",
+    "resources_decoded": false
+  },
+  "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/decoded-apk-no-res",
+  "target_source": "decoded-apk-no-res",
+  "input_provenance": {
+    "schema_version": "1.1",
+    "input_apk": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/original.apk",
+    "input_apk_sha256": "e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278",
+    "analysis_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/decoded-apk-no-res",
+    "analysis_root_kind": "repository_or_external_root",
+    "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/decoded-apk-no-res/lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_relative_path": "lib/arm64-v8a/libsaasCorePlayer.so",
+    "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+    "target_relation": "WITHIN_ANALYSIS_ROOT",
+    "evidence_scope": "static-analysis-input-provenance",
+    "causality_proven": false
+  },
+  "instrumentation_plan": {
+    "status": "READY",
+    "mode": "NON_MUTATING_PLAN",
+    "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+    "class_name": "com/SecShell/SecShell/AW",
+    "loadlibrary_line": 135,
+    "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+    "anchor": "System.loadLibrary(\"SecShell\")",
+    "placement": "immediately_after_loadLibrary_before_normal_application_init",
+    "runtime_proof": false,
+    "discovery": "STRUCTURAL_CONTENT",
+    "candidate_count": 1,
+    "candidates": [
+      {
+        "target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+        "class_name": "com/SecShell/SecShell/AW",
+        "loadlibrary_line": 135,
+        "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "is_application": true,
+        "has_attach_base_context": true
+      }
+    ],
+    "discovered_candidates": [
+      {
+        "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/decoded-apk-no-res/smali/com/SecShell/SecShell/AW.smali",
+        "relative_path": "smali/com/SecShell/SecShell/AW.smali",
+        "class_name": "com/SecShell/SecShell/AW",
+        "score": 185,
+        "is_application": true,
+        "has_attach_base_context": true,
+        "manifest_application": null,
+        "manifest_match": false,
+        "loadlibrary_line": 135,
+        "loadlibrary_anchor": "invoke-static {v0}, Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "secshell_reference_in_class": true
+      }
+    ]
+  },
+  "instrumented_copy": {
+    "mutations": [
+      {
+        "anchor": "Ljava/lang/System;->loadLibrary(Ljava/lang/String;)V",
+        "file": "smali/com/SecShell/SecShell/AW.smali",
+        "log_message": "SecShell loadLibrary reached",
+        "log_tag": "ReelSec-Instrumentation",
+        "matched_registers": [
+          "v0"
+        ],
+        "purpose": "telemetry_only",
+        "registers_added": 2,
+        "type": "LOG_I_PROBE"
+      }
+    ],
+    "schema_version": 1,
+    "source_manifest_sha256": "3fe3d6c8811e4d4ece4108b94d9afca2301eb0cf3118d707648e9484a2c7a1f4",
+    "source_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/decoded-apk-no-res",
+    "status": "MUTATED",
+    "work_root": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-apk",
+    "instrumentation_mode": "no-gadget",
+    "experiment": "INSTRUMENTED_NO_GADGET",
+    "gadget_enabled": false,
+    "GADGET_PRESENT": false,
+    "GADGET_SOURCE_ABSENT": true,
+    "original_apk_untouched": true,
+    "gadget_refused_by_no_gadget_mode": false,
+    "causal_attribution": "REQUIRES_TEMPORAL_COMPARISON",
+    "causal_attribution_note": "A healthy INSTRUMENTED_NO_GADGET run alone establishes no causal claim about the Gadget-run crash. Attribution requires the session-bound temporal comparison against the Gadget baseline.",
+    "instrumentation_target": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-apk/smali/com/SecShell/SecShell/AW.smali"
+  },
+  "build_verify": {
+    "status": "BUILT",
+    "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-unsigned-aligned.apk",
+    "size": 51049230,
+    "sha256": "6fb86aaa1718c07fd07c53e1c885c008ed050b68930817a87fe2e81e170cdf6e",
+    "command": [
+      "/data/data/com.termux/files/usr/lib/jvm/java-21-openjdk/bin/java",
+      "-cp",
+      "/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/apktool/*:/data/data/com.termux/files/usr/var/lib/proot-distro/containers/ubuntu/rootfs/usr/share/java/*",
+      "brut.apktool.Main",
+      "b",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-apk",
+      "-o",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-unsigned.apk"
+    ],
+    "returncode": 0,
+    "output_tail": "I: Using Apktool 2.7.0-dirty\nI: Checking whether sources has changed...\nI: Smaling smali folder into classes.dex...\nI: Checking whether resources has changed...\nI: Copying raw resources...\nI: Copying libs... (/lib)\nI: Copying libs... (/kotlin)\nI: Copying libs... (/META-INF/services)\nI: Building apk file...\nI: Copying unknown files/dir...\nI: Built apk into: /data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-unsigned.apk\n",
+    "alignment_plan": {
+      "align": true,
+      "reason": "zipalign available: every instrumented artifact is page-aligned before signing, with or without Gadget"
+    },
+    "raw_built_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-unsigned.apk",
+    "alignment_command": [
+      "/data/data/com.termux/files/usr/bin/zipalign",
+      "-P",
+      "16",
+      "-f",
+      "-v",
+      "4",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-unsigned.apk",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-unsigned-aligned.apk"
+    ],
+    "alignment_returncode": 0,
+    "alignment_output_tail": "n_rules_english.txt (OK - compressed)\n50446499 org/apache/commons/codec/language/bm/gen_approx_russian.txt (OK - compressed)\n50447291 org/apache/commons/codec/language/bm/sep_exact_portuguese.txt (OK - compressed)\n50447854 org/apache/commons/codec/language/bm/sep_exact_any.txt (OK - compressed)\n50448423 org/apache/commons/codec/language/bm/ash_approx_spanish.txt (OK - compressed)\n50449005 org/apache/commons/codec/language/bm/gen_approx_cyrillic.txt (OK - compressed)\n50449591 org/apache/commons/codec/language/bm/ash_approx_hungarian.txt (OK - compressed)\n50450172 org/apache/commons/codec/language/bm/sep_approx_italian.txt (OK - compressed)\n50450744 org/apache/commons/codec/language/bm/sep_lang.txt (OK - compressed)\n50451796 org/apache/commons/codec/language/bm/gen_approx_greeklatin.txt (OK - compressed)\n50452384 org/apache/commons/codec/language/bm/gen_rules_polish.txt (OK - compressed)\n50453923 org/apache/commons/codec/language/bm/gen_exact_english.txt (OK - compressed)\n50454505 org/apache/commons/codec/language/bm/ash_rules_polish.txt (OK - compressed)\n50456054 org/apache/commons/codec/language/bm/ash_rules_cyrillic.txt (OK - compressed)\n50457123 org/apache/commons/codec/language/bm/gen_exact_cyrillic.txt (OK - compressed)\n50457709 org/apache/commons/codec/language/bm/sep_rules_portuguese.txt (OK - compressed)\n50458903 org/apache/commons/codec/language/bm/ash_approx_common.txt (OK - compressed)\n50460439 org/apache/commons/codec/language/bm/sep_approx_spanish.txt (OK - compressed)\n50461022 org/apache/commons/codec/language/bm/gen_rules_romanian.txt (OK - compressed)\n50461847 org/apache/commons/codec/language/bm/ash_exact_romanian.txt (OK - compressed)\n50462426 org/apache/commons/codec/language/bm/ash_rules_hebrew.txt (OK - compressed)\n50463210 org/apache/commons/codec/language/bm/sep_hebrew_common.txt (OK - compressed)\n50464221 org/apache/commons/codec/language/bm/gen_rules_hebrew.txt (OK - compressed)\n50465008 org/apache/commons/codec/language/bm/gen_rules_czech.txt (OK - compressed)\n50465848 org/apache/commons/codec/language/bm/ash_lang.txt (OK - compressed)\n50467479 org/apache/http/version.properties (OK - compressed)\n50468083 org/apache/http/client/version.properties (OK - compressed)\n50468772 google/protobuf/timestamp.proto (OK - compressed)\n50471671 google/protobuf/field_mask.proto (OK - compressed)\n50474865 google/protobuf/api.proto (OK - compressed)\n50477855 google/protobuf/duration.proto (OK - compressed)\n50479987 google/protobuf/struct.proto (OK - compressed)\n50481733 google/protobuf/wrappers.proto (OK - compressed)\n50483361 google/protobuf/source_context.proto (OK - compressed)\n50484626 google/protobuf/any.proto (OK - compressed)\n50487319 google/protobuf/type.proto (OK - compressed)\n50489769 google/protobuf/empty.proto (OK - compressed)\n50491068 okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n50532528 okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n50532792 com/applovin/shadow/okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n50574272 com/applovin/shadow/okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n50574524 com/google/api/client/http/google-http-client.properties (OK)\n50574632 com/google/api/client/googleapis/google.p12 (OK)\n50651181 com/google/api/client/googleapis/google.jks (OK - compressed)\n50694532 com/google/api/client/googleapis/google-api-client.properties (OK)\n50694630 src/google/protobuf/timestamp.proto (OK - compressed)\n50697533 src/google/protobuf/field_mask.proto (OK - compressed)\n50700731 src/google/protobuf/api.proto (OK - compressed)\n50703725 src/google/protobuf/duration.proto (OK - compressed)\n50705861 src/google/protobuf/struct.proto (OK - compressed)\n50707611 src/google/protobuf/wrappers.proto (OK - compressed)\n50709243 src/google/protobuf/source_context.proto (OK - compressed)\n50710512 src/google/protobuf/any.proto (OK - compressed)\n50713209 src/google/protobuf/type.proto (OK - compressed)\n50715663 src/google/protobuf/empty.proto (OK - compressed)\nVerification successful\n",
+    "alignment_verify_command": [
+      "/data/data/com.termux/files/usr/bin/zipalign",
+      "-c",
+      "-P",
+      "16",
+      "-v",
+      "4",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-unsigned-aligned.apk"
+    ],
+    "alignment_page_size_kb": 16,
+    "native_library_packaging": {
+      "status": "NATIVE_LIBRARIES_UNCOMPRESSED",
+      "native_library_count": 50,
+      "compressed_native_libraries": []
+    }
+  },
+  "sign_verify": {
+    "unsigned_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-unsigned-aligned.apk",
+    "unsigned_sha256": "6fb86aaa1718c07fd07c53e1c885c008ed050b68930817a87fe2e81e170cdf6e",
+    "signed_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk",
+    "signed_sha256": "bc7c909703ac2735cc529d12cb4a3e899da16626c62623a14e67e1cf967708a9",
+    "original_mutation": false,
+    "status": "SIGNED_VERIFIED",
+    "keystore": {
+      "path": "/data/data/com.termux/files/home/.reelsec/keystores/reelsec-test.p12",
+      "alias": "reelsec-test",
+      "bootstrapped": false,
+      "reused": true,
+      "backend": "openssl-pkcs12"
+    },
+    "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+    "signing_preflight": {
+      "checks": {
+        "apksigner_present": {
+          "status": "PASS",
+          "path": "/data/data/com.termux/files/usr/bin/apksigner"
+        },
+        "apksigner_works": {
+          "status": "PASS",
+          "returncode": 0,
+          "version": "0.9"
+        },
+        "keystore_present": {
+          "status": "PASS",
+          "path": "/data/data/com.termux/files/home/.reelsec/keystores/reelsec-test.p12"
+        },
+        "keystore_nonempty": {
+          "status": "PASS"
+        },
+        "password_envs_set": {
+          "status": "PASS",
+          "keystore_password_env": "REELSEC_TEST_KEYSTORE_PASSWORD",
+          "key_password_env": "REELSEC_TEST_KEY_PASSWORD"
+        },
+        "pkcs12_password_valid": {
+          "status": "PASS",
+          "reason": null
+        },
+        "pkcs12_alias_present": {
+          "status": "PASS",
+          "alias": "reelsec-test",
+          "aliases": [
+            "reelsec-test"
+          ],
+          "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995"
+        }
+      },
+      "status": "READY",
+      "failed": []
+    },
+    "sign_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "sign",
+      "--ks",
+      "/data/data/com.termux/files/home/.reelsec/keystores/reelsec-test.p12",
+      "--ks-key-alias",
+      "reelsec-test",
+      "--ks-pass",
+      "env:REELSEC_TEST_KEYSTORE_PASSWORD",
+      "--key-pass",
+      "env:REELSEC_TEST_KEY_PASSWORD",
+      "--out",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-unsigned-aligned.apk"
+    ],
+    "verify_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "verify",
+      "--verbose",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk"
+    ],
+    "certs_command": [
+      "/data/data/com.termux/files/usr/bin/apksigner",
+      "verify",
+      "--print-certs",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk"
+    ],
+    "sign_output_tail": "",
+    "verify_output_tail": "Verifies\nVerified using v1 scheme (JAR signing): true\nVerified using v2 scheme (APK Signature Scheme v2): true\nVerified using v3 scheme (APK Signature Scheme v3): true\nVerified using v3.1 scheme (APK Signature Scheme v3.1): false\nVerified using v3.2 scheme (APK Signature Scheme v3.2): false\nVerified using v4 scheme (APK Signature Scheme v4): false\nVerified for SourceStamp: false\nNumber of signers: 1\nWARNING: META-INF/services/io.ktor.client.HttpClientEngineContainer not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.CoroutineExceptionHandler not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.internal.MainDispatcherFactory not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\n",
+    "certs_output_tail": "V3.0 Signer: certificate DN: O=ReelSec, OU=ReelSec Test, CN=ReelSec Test Key\nV3.0 Signer: certificate SHA-256 digest: 2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995\nV3.0 Signer: certificate SHA-1 digest: 4bfaa12fdef3de4e0828c5b7336e7956417be1b3\nV3.0 Signer: certificate MD5 digest: 40658c3cd0310f81b1b9716b11373e0a\nWARNING: META-INF/services/io.ktor.client.HttpClientEngineContainer not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.CoroutineExceptionHandler not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.internal.MainDispatcherFactory not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\n"
+  },
+  "adb_deploy": {
+    "status": "INSTALLED",
+    "package": "com.newleaf.app.android.victor",
+    "serial": "192.168.8.8:33257",
+    "requested_serial": null,
+    "device_resolution": "AUTO_SINGLE_ONLINE_DEVICE",
+    "online_devices": [
+      "192.168.8.8:33257"
+    ],
+    "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk",
+    "artifact_sha256": "bc7c909703ac2735cc529d12cb4a3e899da16626c62623a14e67e1cf967708a9",
+    "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+    "artifact_kind": "INSTRUMENTED_TEST_ARTIFACT",
+    "device_inventory_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "devices",
+      "-l"
+    ],
+    "device_check_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "-s",
+      "192.168.8.8:33257",
+      "get-state"
+    ],
+    "deploy_readiness": {
+      "checks": {
+        "signed_verified": {
+          "status": "PASS",
+          "sign_status": "SIGNED_VERIFIED"
+        },
+        "artifact_present": {
+          "status": "PASS",
+          "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk"
+        },
+        "artifact_sha256_recorded": {
+          "status": "PASS"
+        },
+        "certificate_recorded": {
+          "status": "PASS",
+          "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995"
+        },
+        "apksigner_available": {
+          "status": "PASS",
+          "path": "/data/data/com.termux/files/usr/bin/apksigner"
+        },
+        "keystore_present": {
+          "status": "PASS",
+          "path": "/data/data/com.termux/files/home/.reelsec/keystores/reelsec-test.p12"
+        },
+        "test_package_resolved": {
+          "status": "PASS",
+          "package": "com.newleaf.app.android.victor"
+        }
+      },
+      "failed": [],
+      "ready": true,
+      "status": "READY"
+    },
+    "artifact_preflight": {
+      "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk",
+      "checks": {
+        "native_libs_uncompressed": {
+          "status": "PASS",
+          "so_count": 50,
+          "compressed_entries": []
+        },
+        "abi_directories": {
+          "status": "PASS",
+          "abis": [
+            "arm64-v8a",
+            "armeabi-v7a"
+          ]
+        },
+        "zipalign_page_alignment": {
+          "status": "PASS",
+          "command": [
+            "/data/data/com.termux/files/usr/bin/zipalign",
+            "-c",
+            "-P",
+            "16",
+            "-v",
+            "4",
+            "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk"
+          ],
+          "returncode": 0,
+          "output_tail": "google/protobuf/any.proto (OK - compressed)\n50487515 google/protobuf/type.proto (OK - compressed)\n50489965 google/protobuf/empty.proto (OK - compressed)\n50491272 okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n50532732 okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n50533000 com/applovin/shadow/okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n50574480 com/applovin/shadow/okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n50574740 com/google/api/client/http/google-http-client.properties (OK)\n50574852 com/google/api/client/googleapis/google.p12 (OK)\n50651401 com/google/api/client/googleapis/google.jks (OK - compressed)\n50694760 com/google/api/client/googleapis/google-api-client.properties (OK)\n50694858 src/google/protobuf/timestamp.proto (OK - compressed)\n50697761 src/google/protobuf/field_mask.proto (OK - compressed)\n50700959 src/google/protobuf/api.proto (OK - compressed)\n50703953 src/google/protobuf/duration.proto (OK - compressed)\n50706089 src/google/protobuf/struct.proto (OK - compressed)\n50707839 src/google/protobuf/wrappers.proto (OK - compressed)\n50709471 src/google/protobuf/source_context.proto (OK - compressed)\n50710740 src/google/protobuf/any.proto (OK - compressed)\n50713437 src/google/protobuf/type.proto (OK - compressed)\n50715891 src/google/protobuf/empty.proto (OK - compressed)\n50717163 META-INF/REELSEC-.SF (OK - compressed)\n50876282 META-INF/REELSEC-.RSA (OK - compressed)\n50877444 META-INF/MANIFEST.MF (OK - compressed)\nVerification successful\n"
+        },
+        "abi_compatibility": {
+          "status": "PASS",
+          "device_abilist": "arm64-v8a,armeabi-v7a,armeabi",
+          "apk_abis": [
+            "arm64-v8a",
+            "armeabi-v7a"
+          ],
+          "compatible": true
+        }
+      },
+      "status": "PASS"
+    },
+    "install_compatibility": {
+      "package": "com.newleaf.app.android.victor",
+      "artifact": {
+        "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+        "version_code": null
+      },
+      "installed": {
+        "installed_path": "/data/app/~~bggEg_Ctnthfft8HU_r1Kw==/com.newleaf.app.android.victor-D3_B1Dp7l6zCVRkpX2BNDw==/base.apk",
+        "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+        "version_code": "4200"
+      },
+      "compatible": true,
+      "mode": "REPLACE_INSTALL",
+      "reason_code": "SIGNATURE_MATCH",
+      "reason": "signer certificate matches the installed build; non-destructive replace permitted"
+    },
+    "post_install_identity": {
+      "package": "com.newleaf.app.android.victor",
+      "expected_sha256": "bc7c909703ac2735cc529d12cb4a3e899da16626c62623a14e67e1cf967708a9",
+      "installed_sha256": "bc7c909703ac2735cc529d12cb4a3e899da16626c62623a14e67e1cf967708a9",
+      "expected_certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+      "installed_certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+      "installed_path": "/data/app/~~jS_Xz1b4DrRJdLEhR8-VZA==/com.newleaf.app.android.victor-5AetJxBZobVVsmYVcXRGIw==/base.apk",
+      "identity": "MATCH",
+      "reason": "installed bytes and signer certificate match the signed artifact"
+    },
+    "install_command": [
+      "/data/data/com.termux/files/usr/bin/adb",
+      "-s",
+      "192.168.8.8:33257",
+      "install",
+      "-r",
+      "--no-incremental",
+      "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk"
+    ],
+    "install_mode": "UPDATE",
+    "uninstall_command": null,
+    "uninstall_output_tail": "",
+    "install_output_tail": "Performing Streamed Install\nSuccess\n",
+    "installed_verification": {
+      "present": true,
+      "installed_path": "/data/app/~~jS_Xz1b4DrRJdLEhR8-VZA==/com.newleaf.app.android.victor-5AetJxBZobVVsmYVcXRGIw==/base.apk",
+      "version_code": "4200",
+      "status": "VERIFIED_INSTALLED"
+    },
+    "package_state_before": {
+      "present": true,
+      "code_path": "/data/app/~~bggEg_Ctnthfft8HU_r1Kw==/com.newleaf.app.android.victor-D3_B1Dp7l6zCVRkpX2BNDw==",
+      "uid": "10816",
+      "version_name": "4.2.00",
+      "users_installed": [
+        0,
+        95
+      ],
+      "first_install_time": "2026-10-08 17:40:19",
+      "last_update_time": "2026-10-08 17:40:19",
+      "source": "adb:dumpsys package com.newleaf.app.android.victor"
+    },
+    "package_state_after": {
+      "present": true,
+      "code_path": "/data/app/~~jS_Xz1b4DrRJdLEhR8-VZA==/com.newleaf.app.android.victor-5AetJxBZobVVsmYVcXRGIw==",
+      "uid": "10816",
+      "version_name": "4.2.00",
+      "users_installed": [
+        0,
+        95
+      ],
+      "first_install_time": "2026-10-08 17:40:19",
+      "last_update_time": "2026-10-08 18:12:32",
+      "source": "adb:dumpsys package com.newleaf.app.android.victor"
+    },
+    "install_semantics": {
+      "mode": "REPLACE_SHARED_APK",
+      "replaced_existing_build": true,
+      "shared_apk_users": [
+        0,
+        95
+      ],
+      "code_path_before": "/data/app/~~bggEg_Ctnthfft8HU_r1Kw==/com.newleaf.app.android.victor-D3_B1Dp7l6zCVRkpX2BNDw==",
+      "code_path_after": "/data/app/~~jS_Xz1b4DrRJdLEhR8-VZA==/com.newleaf.app.android.victor-5AetJxBZobVVsmYVcXRGIw==",
+      "last_update_time_before": "2026-10-08 17:40:19",
+      "last_update_time_after": "2026-10-08 18:12:32",
+      "guard": "Android keeps ONE base.apk per package shared by all users (e.g. user 0 and dual-app user 0, 95). This install REPLACED that single shared APK for ALL listed users at once: after this point every launch on ANY user runs the NEW artifact. Crashes observed after this point \u2014 on any user, including the dual-app profile \u2014 belong to the NEW artifact and are NEVER evidence that the replaced build crashes by itself."
+    }
+  },
+  "runtime_capture": {
+    "schema_version": 1,
+    "captured_at_epoch": 1791472362.8041744,
+    "device_serial": "192.168.8.8:33257",
+    "package": "com.newleaf.app.android.victor",
+    "observations": {
+      "state": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:33257",
+          "get-state"
+        ],
+        "returncode": 0,
+        "output": "device\n"
+      },
+      "package_path": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:33257",
+          "shell",
+          "pm",
+          "path",
+          "com.newleaf.app.android.victor"
+        ],
+        "returncode": 0,
+        "output": "package:/data/app/~~jS_Xz1b4DrRJdLEhR8-VZA==/com.newleaf.app.android.victor-5AetJxBZobVVsmYVcXRGIw==/base.apk\n"
+      },
+      "process": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:33257",
+          "shell",
+          "sh",
+          "-c",
+          "ps -A | grep -F com.newleaf.app.android.victor || true"
+        ],
+        "returncode": 0,
+        "output": ""
+      },
+      "logcat_tail": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/adb",
+          "-s",
+          "192.168.8.8:33257",
+          "logcat",
+          "-d",
+          "-t",
+          "250",
+          "-v",
+          "threadtime"
+        ],
+        "returncode": 0,
+        "output": "--------- beginning of main\n10-08 18:12:43.732 28435 28435 I FaceWidgetPositionAlgorithm: getClockContainerHeight() supplier = 270, bottom margin = 0, real height = 333\n10-08 18:12:43.732 28435 28435 I FaceWidgetPositionAlgorithm: getClockContainerHeight() supplier = 270, bottom margin = 63, real height = 333\n10-08 18:12:43.732 28435 28435 I FaceWidgetPositionAlgorithm: getMediaContainerHeight() height = 0 container Visibility = 8, isValid = false, mIsDozing = false, fraction = 1.0, source = 0, target = 0\n10-08 18:12:43.732 28435 28435 I FaceWidgetPositionAlgorithm: getMediaContainerHeight() supplier = 0\n10-08 18:12:43.741  1103  1893 D DlbDlbEffect: handle_EFFECT_CMD_SET_DEVICE(device=0x00000002)\n10-08 18:12:43.741  1103  1893 D DlbEffectContext: setDevice(00000002)\n10-08 18:12:43.741  1103  1893 D DlbEndpointParamCache: setDevice(device=0x00000002)\n10-08 18:12:43.741  1103  1893 I MySound : setDevice 2, 2\n10-08 18:12:43.741  1103  1893 I AudioEffectExtendAction: setDevice_l empty address, empty name\n10-08 18:12:43.741  1103  1893 D DlbDlbEffect: handle_EFFECT_CMD_SET_DEVICE(device=0x00000002)\n10-08 18:12:43.741  1103  1893 D DlbEffectContext: setDevice(00000002)\n10-08 18:12:43.741  1103  1893 D DlbEndpointParamCache: setDevice(device=0x00000002)\n10-08 18:12:43.741  1103  1893 D DlbDlbEffect: handle_EFFECT_CMD_SET_DEVICE(device=0x00000002)\n10-08 18:12:43.741  1103  1893 D DlbEffectContext: setDevice(00000002)\n10-08 18:12:43.741  1103  1893 D DlbEndpointParamCache: setDevice(device=0x00000002)\n10-08 18:12:43.741  1103  1893 D DlbDlbEffect: handle_EFFECT_CMD_SET_DEVICE(device=0x00000002)\n10-08 18:12:43.741  1103  1893 D DlbEffectContext: setDevice(00000002)\n10-08 18:12:43.741  1103  1893 D DlbEndpointParamCache: setDevice(device=0x00000002)\n10-08 18:12:43.742  1103  1893 I AudioFlinger: reviewTrackPromotion size 2\n10-08 18:12:43.742  1103  1893 I AF::Track: setMixerOutConfig return default condition, mixer key 2002, thread key 2002\n10-08 18:12:43.742  1103  1893 I AF::Track: setMixerOutConfig expectKey 202\n10-08 18:12:43.742  1103  1893 I AF::Track: setMixerOutConfig select, mixer out f 5, s 48000, thread out f 5, s 48000\n10-08 18:12:43.742   995  1066 D audio_hw_primary: adev_create_audio_patch: enter: num sources 1, num_sinks 1, handle 0\n10-08 18:12:43.742   995  1066 D audio_hw_primary: adev_create_audio_patch: Playback patch from mix handle 29 to device 2\n10-08 18:12:43.742   995  1066 D audio_hw_primary: update_patch: enter\n10-08 18:12:43.742   995  1066 D audio_hw_primary: route_output_stream: enter: usecase(2: low-latency-playback) devices 2\n10-08 18:12:43.742   995  1066 D audio_hw_primary: adev_create_audio_patch: Added a new patch with handle 256\n10-08 18:12:43.742  1103  1893 D AudioFlinger: setCurDevice() 0x2\n10-08 18:12:43.743  1103  1923 V APM_AudioPolicyManager: setOutputDevices() AF::createAudioPatch returned 0 patchHandle 2252 num_sources 1 num_sinks 1\n10-08 18:12:43.744  1103  1923 V APM_AudioPolicyManager: computeVolume: stream 10, index 3, volume 0.006310, deviceTypes 0x2\n10-08 18:12:43.744  1103  1923 V APM_AudioPolicyManager: computeVolume: stream 4, index 15, volume 1.000000, deviceTypes 0x2\n10-08 18:12:43.744  1103  1923 V APM_AudioPolicyManager: checkAndSetVolume cannot set volume group 3 volume when is not requested for comm\n10-08 18:12:43.744  1103  1923 V APM_AudioPolicyManager: computeVolume: stream 8, index 1, volume 0.003350, deviceTypes 0x2\n10-08 18:12:43.746  1103  1923 V APM_AudioPolicyManager: computeVolume: stream 7, index 15, volume 0.446684, deviceTypes 0x2\n10-08 18:12:43.748  1103  1923 V APM_AudioPolicyManager: computeVolume: stream 3, index 3, volume 0.006310, deviceTypes 0x2\n10-08 18:12:43.748  1103  1923 V APM_AudioPolicyManager: computeVolume: stream 3, index 4, volume 0.011220, deviceTypes 0x2\n10-08 18:12:43.748  1103  1923 V APM_AudioPolicyManager: computeVolume: stream 5, index 0, volume 0.000000, deviceTypes 0x2\n10-08 18:12:43.748  1103  1923 V APM_AudioPolicyManager: computeVolume: stream 2, index 1, volume 0.003548, deviceTypes 0x2\n10-08 18:12:43.748  1103  1923 V APM_AudioPolicyManager: computeVolume: stream 1, index 0, volume 0.000000, deviceTypes 0x2\n10-08 18:12:43.749  1103  1923 V APM_AudioPolicyManager: computeVolume: stream 9, index 3, volume 0.105925, deviceTypes 0x2\n10-08 18:12:43.749  1103  1923 V APM_AudioPolicyManager: computeVolume: stream 0, index 5, volume 0.354813, deviceTypes 0x2\n10-08 18:12:43.749  1103  1923 V APM_AudioPolicyManager: computeVolume use music stream 11, stream=AUDIO_STREAM_ASSISTANT\n10-08 18:12:43.749  1103  1923 V APM_AudioPolicyManager: computeVolume: stream 3, index 12, volume 0.199526, deviceTypes 0x2\n10-08 18:12:43.749  1103  1923 V APM_AudioPolicyManager: computeVolume: stream 1, index 0, volume 0.000000, deviceTypes 0x2\n10-08 18:12:43.750  1103 18021 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 0 ports 0xb400006f5c247410\n10-08 18:12:43.750  1103 18021 V APM_AudioPolicyManager: listAudioPorts() got 0 ports needed 14\n10-08 18:12:43.750  1103 29179 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 0 ports 0xb400006f5c247bb0\n10-08 18:12:43.750  1103 29179 V APM_AudioPolicyManager: listAudioPorts() got 0 ports needed 14\n10-08 18:12:43.750  1103 26278 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 0 ports 0xb400006f5c243730\n10-08 18:12:43.750  1103 26278 V APM_AudioPolicyManager: listAudioPorts() got 0 ports needed 14\n10-08 18:12:43.750  1103 18021 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 14 ports 0xb40000717c33a080\n10-08 18:12:43.750  1103 18021 V APM_AudioPolicyManager: listAudioPorts() got 14 ports needed 14\n10-08 18:12:43.750  1103 26278 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 14 ports 0xb40000717c272030\n10-08 18:12:43.750  1103 26278 V APM_AudioPolicyManager: listAudioPorts() got 14 ports needed 14\n10-08 18:12:43.751  1103 29437 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 0 ports 0xb400006f5c2433d0\n10-08 18:12:43.751  1103 29437 V APM_AudioPolicyManager: listAudioPorts() got 0 ports needed 14\n10-08 18:12:43.751  1103  1103 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 0 ports 0xb400006f5c244a10\n10-08 18:12:43.751  1103  1103 V APM_AudioPolicyManager: listAudioPorts() got 0 ports needed 14\n10-08 18:12:43.751  1103 29437 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 14 ports 0xb40000717c3da0c0\n10-08 18:12:43.751  1103 29437 V APM_AudioPolicyManager: listAudioPorts() got 14 ports needed 14\n10-08 18:12:43.752  1103 24620 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 0 ports 0xb400006f5c248130\n10-08 18:12:43.752  1103 24620 V APM_AudioPolicyManager: listAudioPorts() got 0 ports needed 14\n10-08 18:12:43.752  1103 22487 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 0 ports 0xb400006f5c247050\n10-08 18:12:43.752  1103 22487 V APM_AudioPolicyManager: listAudioPorts() got 0 ports needed 14\n10-08 18:12:43.752  1103  1103 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 14 ports 0xb40000717c2c2050\n10-08 18:12:43.752  1103  1103 V APM_AudioPolicyManager: listAudioPorts() got 14 ports needed 14\n10-08 18:12:43.752  1103  3249 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 0 ports 0xb400006f5c247290\n10-08 18:12:43.752  1103  3249 V APM_AudioPolicyManager: listAudioPorts() got 0 ports needed 14\n10-08 18:12:43.753  1103  7666 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 0 ports 0xb400006f5c244c90\n10-08 18:12:43.753  1103  7666 V APM_AudioPolicyManager: listAudioPorts() got 0 ports needed 14\n10-08 18:12:43.753  1103  3249 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 14 ports 0xb40000717c42a0e0\n10-08 18:12:43.753  1103  3249 V APM_AudioPolicyManager: listAudioPorts() got 14 ports needed 14\n10-08 18:12:43.753 27677 27677 I Choreographer: Skipped 48 frames!  The application may be doing too much work on its main thread.\n10-08 18:12:43.753  1103 11609 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 0 ports 0xb400006f5c22ded0\n10-08 18:12:43.753  1103 11609 V APM_AudioPolicyManager: listAudioPorts() got 0 ports needed 14\n10-08 18:12:43.754   995  4831 D audio_hw_primary: start_output_stream: enter: stream(0xe4d8c970)usecase(2: low-latency-playback) devices(0x2) is_haptic_usecase(0)\n10-08 18:12:43.754   995  4831 D audio_hw_primary: select_devices for use case (low-latency-playback)\n10-08 18:12:43.754   995  4831 I sm8250_platform: platform_check_and_set_codec_backend_cfg:becf: afe: bitwidth 24, samplerate 48000 channels 2, backend_idx 0 usecase = 2 device (speaker)\n10-08 18:12:43.754   995  4831 D sm8250_platform: platform_split_snd_device: snd_device(2) num devices(1) new_snd_devices(0)\n10-08 18:12:43.754   995  4831 I sm8250_platform: platform_check_and_set_codec_backend_cfg: new_snd_devices[0] is 2\n10-08 18:12:43.754   995  4831 I sm8250_platform: platform_check_codec_backend_cfg:becf: afe: bitwidth 24, samplerate 48000 channels 2, backend_idx 0 usecase = 2 device (speaker)\n10-08 18:12:43.754  1103 26278 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 14 ports 0xb40000717c272030\n10-08 18:12:43.754   995  4831 D sm8250_platform: platform_check_codec_backend_cfg:becf: updated afe: bitwidth 24, samplerate 48000 channels 2,backend_idx 0 usecase = 2 device (speaker)\n10-08 18:12:43.754  1103 26278 V APM_AudioPolicyManager: listAudioPorts() got 14 ports needed 14\n10-08 18:12:43.754   995  4831 D sm8250_platform: platform_check_codec_backend_cfg:becf: afe: playback on codec device not supporting native playback set default Sample Rate(48k)\n10-08 18:12:43.754   995  4831 I sm8250_platform: platform_check_codec_backend_cfg:becf: afe: Codec selected backend: 0 updated bit width: 24 and sample rate: 48000\n10-08 18:12:43.754   995  4831 D audio_hw_primary: check_usecases_codec_backend:becf: force routing 1\n10-08 18:12:43.754   995  4831 E sm8250_platform: platform_check_backends_match: Invalid snd_device = \n10-08 18:12:43.754   995  4831 D audio_hw_primary: check_usecases_codec_backend:becf: (81) check_usecases curr device: speaker, usecase device: backends match 0\n10-08 18:12:43.754   995  4831 D audio_hw_primary: check_usecases_codec_backend:becf: check_usecases num.of Usecases to switch 0\n10-08 18:12:43.754   995  4831 D hardware_info: hw_info_append_hw_type : device_name = speaker\n10-08 18:12:43.754   995  4831 V audio_hw_sec: sec_dsm_spkr_prot_control_tx_topology() enable:1, dsm_is_enabled:0\n10-08 18:12:43.754   995  4831 D hardware_info: hw_info_append_hw_type : device_name = vi-feedback\n10-08 18:12:43.754   995  4831 D audio_hw_primary: enable_snd_device: snd_device(299: vi-feedback)\n10-08 18:12:43.754   995  4831 D sm8250_platform: platform_get_island_cfg_on_device:island cfg status on snd_device = (vi-feedback 0)\n10-08 18:12:43.754   995  4831 I soundtrigger: audio_extn_sound_trigger_update_device_status: device 0x12b of type 1 for Event 1, with Raise=0\n10-08 18:12:43.754   995  4831 D audio_route: Apply path: vi-feedback\n10-08 18:12:43.754   995  4831 D soundtrigger: audio_extn_sound_trigger_update_stream_status: uc_info->id 79 of type 1 for Event 3, with Raise=0\n10-08 18:12:43.754   995  4831 D audio_hw_utils: audio_extn_utils_send_app_type_cfg: usecase->in_snd_device vi-feedback\n10-08 18:12:43.754   995  4831 E voice   : voice_is_in_call_rec_stream: input stream is NULL\n10-08 18:12:43.754   995  4831 D sm8250_platform: platform_split_snd_device: snd_device(299) num devices(0) new_snd_devices(0)\n10-08 18:12:43.754   995  4831 E voice   : voice_is_in_call_rec_stream: input stream is NULL\n10-08 18:12:43.754   995  4831 I audio_hw_utils: send_app_type_cfg_for_device default app_type 69938, acdb_dev_id 102, sample_rate 48000, snd_device_be_idx 56\n10-08 18:12:43.755  1103 11609 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 14 ports 0xb40000717c272030\n10-08 18:12:43.755  1103 11609 V APM_AudioPolicyManager: listAudioPorts() got 14 ports needed 14\n10-08 18:12:43.755   995  4831 D sm8250_platform: platform_split_snd_device: snd_device(299) num devices(1) new_snd_devices(0)\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> send_audio_cal, acdb_id = 102, path = 1, app id = 0x11132, sample rate = 48000, afe_sample_rate = 48000\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> send_asm_topology\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AUDPROC_STREAM_TOPOLOGY_ID\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> send_adm_topology\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AUDPROC_COMMON_TOPOLOGY_ID\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> send_audtable\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AUDPROC_INSTANCE_COMMON_TABLE_SIZE\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AUDPROC_INSTANCE_COMMON_TABLE\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> AUDIO_SET_AUDPROC_CAL cal_type[11] acdb_id[102] app_type[69938]\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_PERSISTENT_AUDPROC_INSTANCE_COMMON_TABLE_SIZE\n10-08 18:12:43.755   995  4831 D android.hardware.audio.service: [Data Manager]-> No data found\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: Error: ACDB_CMD_GET_PERSISTENT_AUDPROC_INSTANCE_COMMON_TABLE_SIZE returned -18\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> send_audproc_persist_table -18 \n10-08 18:12:43.755   995  4831 D ACDB-LOADER: Error: Invalid Audproc persist size = -18\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AUDPROC_INSTANCE_STREAM_TABLE_SIZE\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> send_audstrmtable\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AUDPROC_INSTANCE_STREAM_TABLE\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> audstrm_cal->cal_type.cal_data.cal_size = 20\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> send_afe_topology\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AFE_TOPOLOGY_ID\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> GET_AFE_TOPOLOGY_ID for adcd_id 102, Topology Id 112fb\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> send_afe_cal\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AFE_INSTANCE_COMMON_TABLE_SIZE\n10-08 18:12:43.755   995  4831 D android.hardware.audio.service: Failed to fetch the lookup information of the device 00000066 \n10-08 18:12:43.755   995  4831 D ACDB-LOADER: Error: ACDB_CMD_GET_AFE_INSTANCE_COMMON_TABLE_SIZE Returned = -19\n10-08 18:12:43.755   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AFE_INSTANCE_COMMON_TABLE\n10-08 18:12:43.756   995  4831 D android.hardware.audio.service: Failed to fetch the lookup information of the device 00000066 \n10-08 18:12:43.756   995  4831 D ACDB-LOADER: Error: ACDB AFE returned = -19\n10-08 18:12:43.756   995  4831 D ACDB-LOADER: ACDB -> AUDIO_SET_AFE_CAL cal_type[17] acdb_id[102]\n10-08 18:12:43.756   995  4831 D ACDB-LOADER: ACDB -> send_hw_delay : acdb_id = 102 path = 1\n10-08 18:12:43.756   995  4831 D ACDB-LOADER: ACDB -> ACDB_AVSYNC_INFO: ACDB_CMD_GET_DEVICE_PROPERTY\n10-08 18:12:43.756   995  4831 D audio_hw_primary: enable_audio_route: apply mixer and update path: spkr-vi-feedback\n10-08 18:12:43.756   995  4831 D audio_route: Apply path: spkr-vi-feedback\n10-08 18:12:43.756  1103 22487 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 14 ports 0xb40000717c4520f0\n10-08 18:12:43.756  1103 22487 V APM_AudioPolicyManager: listAudioPorts() got 14 ports needed 14\n10-08 18:12:43.756 27677 27677 I [SC_ScreenRecorder]_ScreenRecorderController: unregisterUserSwitchObserver\n10-08 18:12:43.757 27677 27677 I [SC_ScreenRecorder]_UserSwitchObserver: invoke : method=asBinder\n10-08 18:12:43.757  1103  1103 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 14 ports 0xb40000717c2c2050\n10-08 18:12:43.757  1103  1103 V APM_AudioPolicyManager: listAudioPorts() got 14 ports needed 14\n10-08 18:12:43.758 27677 27677 I [SC_ScreenRecorder]_ScreenRecorderController: unregisterExternalEventDetector\n10-08 18:12:43.760  1103  3249 V APM_AudioPolicyManager: listAudioPorts() role 0 type 0 num_ports 14 ports 0xb40000717c42a0e0\n10-08 18:12:43.760  1103  3249 V APM_AudioPolicyManager: listAudioPorts() got 14 ports needed 14\n--------- beginning of system\n10-08 18:12:43.760  1269  5171 D StatusBarManagerService: isSecCustomTile : componentName =ComponentInfo{com.samsung.android.app.smartcapture/com.samsung.android.app.screenrecorder.view.RecordScreenTile}\n10-08 18:12:43.761 27642 27642 I [SC_ScreenRecorder]_RecordScreenTile: onReceive\n10-08 18:12:43.761 27642 27642 I [SC_ScreenRecorder]_RecordScreenTile: setRecordingState : false\n10-08 18:12:43.762 28435 28435 D TileLifecycleManager: onStartListening\n10-08 18:12:43.762 28435 28435 V Tile.CustomTile: refreshDetailInfo ComponentInfo{com.samsung.android.app.smartcapture/com.samsung.android.app.screenrecorder.view.RecordScreenTile}\n10-08 18:12:43.762 28435 28435 D TileLifecycleManager: semGetDetailView\n10-08 18:12:43.762 27642 29019 I [SC_ScreenRecorder]_RecordScreenTile: semGetDetailView\n10-08 18:12:43.763  1269  3082 D SecContentProvider: query(), uri = 17 selection = isSettingsChangesAllowed\n10-08 18:12:43.763  1269  3082 D SecContentProvider: called from com.samsung.android.app.smartcapture\n10-08 18:12:43.763  1269  3082 D RestrictionPolicy: isSettingsChangesAllowedAsUser, userId 0 : true\n10-08 18:12:43.765 27677 27677 I [SC_ScreenRecorder]_RecorderStatusManager: setRecorderStatus() : 0\n10-08 18:12:43.766 27677 27677 I [SC_ScreenRecorder]_ScreenRecorderService: onDestroy\n10-08 18:12:43.767 27642 29019 I [SC_ScreenRecorder]_QuickPanelRemoteView: updateTextColor\n10-08 18:12:43.768 28435 28435 D TileLifecycleManager: semGetDetailViewTitle\n10-08 18:12:43.768 28435 28435 D TileLifecycleManager: semGetSettingsIntent\n10-08 18:12:43.769 27642 29019 I [SC_ScreenRecorder]_RecordScreenTile: semGetSettingsIntent -- long press\n10-08 18:12:43.769  1269  5171 D SecContentProvider: query(), uri = 17 selection = isSettingsChangesAllowed\n10-08 18:12:43.770  1269  5171 D SecContentProvider: called from com.samsung.android.app.smartcapture\n10-08 18:12:43.770  1269  5171 D RestrictionPolicy: isSettingsChangesAllowedAsUser, userId 0 : true\n10-08 18:12:43.770 27642 29019 I [SmartCapture]_SmartCaptureSamsungAnalyticsUtils: insertScreenLog... screenID:238\n10-08 18:12:43.771 28435 28435 D TileLifecycleManager: semIsToggleButtonExists\n10-08 18:12:43.772 28435 28518 D TileLifecycleManager: onStopListening\n10-08 18:12:43.772 28435 28474 D Tile.CustomTile: updateState : Label = \u0645\u0633\u062c\u0644 \u0627\u0644\u0634\u0627\u0634\u0629, State = 1, Icon = Icon(typ=RESOURCE pkg=com.samsung.android.app.smartcapture id=0x7f080169)\n10-08 18:12:43.772 28435 28474 D TileLifecycleManager: onStopListening\n10-08 18:12:43.773 28435 28474 W Tile.CustomTile: setStateToPref : mPrefsKey = null, tileState = 1\n10-08 18:12:43.773 28435 28518 D TileServices: semUpdateDetailView : customTile =  com.android.systemui.qs.external.CustomTile@b1b50c7\n10-08 18:12:43.773 27642 27642 I [SC_ScreenRecorder]_RecordScreenTile: onStartListening\n10-08 18:12:43.774 27642 27642 I [SmartCapture]_DeviceUtils: Service is not running\n10-08 18:12:43.774 27642 27642 I [SC_ScreenRecorder]_RecordScreenTile: onStartListening, mIsServiceRunning is false\n10-08 18:12:43.775 28435 28518 D TileLifecycleManager: onStopListening\n10-08 18:12:43.775 28435 28474 D Tile.CustomTile: updateState : Label = \u0645\u0633\u062c\u0644 \u0627\u0644\u0634\u0627\u0634\u0629, State = 1, Icon = Icon(typ=RESOURCE pkg=com.samsung.android.app.smartcapture id=0x7f080169)\n10-08 18:12:43.775 28435 28518 D TileServices: semUpdateDetailView : customTile =  com.android.systemui.qs.external.CustomTile@b1b50c7\n10-08 18:12:43.775 28435 28474 D TileLifecycleManager: onStopListening\n10-08 18:12:43.776 27642 27642 I [SC_ScreenRecorder]_RecordScreenTile: onStopListening\n10-08 18:12:43.776   995  4831 V audio_hw_sec: sec_dsm_spkr_prot_control_tx_topology() dsm enabled (c:0 d:1 m:0)\n10-08 18:12:43.776   995  4831 D audio_hw_primary: enable_snd_device: snd_device(2: dual-speaker)\n10-08 18:12:43.776   995  4831 D sm8250_platform: platform_get_island_cfg_on_device:island cfg status on snd_device = (speaker 0)\n10-08 18:12:43.776   995  4831 I soundtrigger: audio_extn_sound_trigger_update_device_status: device 0x2 of type 0 for Event 1, with Raise=0\n10-08 18:12:43.776   995  4831 D audio_route: Apply path: dual-speaker\n10-08 18:12:43.782 28435 28435 I FaceWidgetPositionAlgorithm: getClockContainerHeight() supplier = 270, bottom margin = 0, real height = 333\n10-08 18:12:43.782 28435 28435 I FaceWidgetPositionAlgorithm: getClockContainerHeight() supplier = 270, bottom margin = 63, real height = 333\n10-08 18:12:43.782 28435 28435 I FaceWidgetPositionAlgorithm: getMediaContainerHeight() height = 0 container Visibility = 8, isValid = false, mIsDozing = false, fraction = 1.0, source = 0, target = 0\n10-08 18:12:43.782 28435 28435 I FaceWidgetPositionAlgorithm: getMediaContainerHeight() supplier = 0\n10-08 18:12:43.783 28435 28435 V QsExpandAnimator: setQsExpansionPosition 0.0\n10-08 18:12:43.785   995  4831 I audio_hw_utils: set_app_type_cfg app_type_cfg->app_type 69937, app_type_cfg->sample_rate 48000, app_type_cfg->bit_width 16\n10-08 18:12:43.785   995  4831 E soundtrigger: audio_extn_sound_trigger_update_stream_status: invalid input device 0x0, for event 3\n10-08 18:12:43.785   995  4831 D soundtrigger: audio_extn_sound_trigger_update_stream_status: uc_info->id 2 of type 0 for Event 3, with Raise=0\n10-08 18:12:43.785   995  4831 D audio_hw_utils: audio_extn_utils_send_app_type_cfg: usecase->out_snd_device speaker\n10-08 18:12:43.785   995  4831 D sm8250_platform: platform_split_snd_device: snd_device(2) num devices(0) new_snd_devices(0)\n10-08 18:12:43.785   995  4831 I audio_hw_utils: send_app_type_cfg_for_device PLAYBACK app_type 69937, acdb_dev_id 13, sample_rate 48000, snd_device_be_idx 55\n10-08 18:12:43.786   995  4831 D sm8250_platform: platform_split_snd_device: snd_device(2) num devices(1) new_snd_devices(0)\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> send_audio_cal, acdb_id = 13, path = 0, app id = 0x11131, sample rate = 48000, afe_sample_rate = 48000\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> send_asm_topology\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AUDPROC_STREAM_TOPOLOGY_ID\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> send_adm_topology\n10-08 18:12:43.786 28435 28435 V QsExpandAnimator: updateAnimators\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AUDPROC_COMMON_TOPOLOGY_ID\n10-08 18:12:43.786 28435 28435 V QsExpandAnimator: clearAnimationState \n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> send_audtable\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AUDPROC_INSTANCE_COMMON_TABLE_SIZE\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AUDPROC_INSTANCE_COMMON_TABLE\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> AUDIO_SET_AUDPROC_CAL cal_type[11] acdb_id[13] app_type[69937]\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> send_audvoltable\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AUDPROC_INSTANCE_GAIN_DEP_STEP_TABLE_SIZE\n10-08 18:12:43.786   995  4831 D android.hardware.audio.service: Failed to fetch the lookup information of the device 0000000D \n10-08 18:12:43.786   995  4831 D ACDB-LOADER: Error: ACDB_CMD_GET_AUDPROC_INSTANCE_GAIN_DEP_STEP_TABLE_SIZE Returned = -19\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AUDPROC_INSTANCE_GAIN_DEP_STEP_TABLE, vol index 0\n10-08 18:12:43.786   995  4831 D android.hardware.audio.service: Failed to fetch the lookup information of the device 0000000D \n10-08 18:12:43.786   995  4831 D ACDB-LOADER: Error: ACDB AudProc vol returned = -19\n10-08 18:12:43.786 28435 28435 V QsExpandAnimator: updateViews\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> AUDIO_SET_VOL_CAL cal type = 12\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AUDPROC_INSTANCE_STREAM_TABLE_SIZE\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> send_audstrmtable\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AUDPROC_INSTANCE_STREAM_TABLE\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> audstrm_cal->cal_type.cal_data.cal_size = 20\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> send_afe_topology\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AFE_TOPOLOGY_ID\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> GET_AFE_TOPOLOGY_ID for adcd_id 13, Topology Id 112fc\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> send_afe_cal\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AFE_INSTANCE_COMMON_TABLE_SIZE\n10-08 18:12:43.786   995  4831 D android.hardware.audio.service: Failed to fetch the lookup information of the device 0000000D \n10-08 18:12:43.786   995  4831 D ACDB-LOADER: Error: ACDB_CMD_GET_AFE_INSTANCE_COMMON_TABLE_SIZE Returned = -19\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> ACDB_CMD_GET_AFE_INSTANCE_COMMON_TABLE\n10-08 18:12:43.786   995  4831 D android.hardware.audio.service: Failed to fetch the lookup information of the device 0000000D \n10-08 18:12:43.786   995  4831 D ACDB-LOADER: Error: ACDB AFE returned = -19\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> AUDIO_SET_AFE_CAL cal_type[16] acdb_id[13]\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> send_hw_delay : acdb_id = 13 path = 0\n10-08 18:12:43.786   995  4831 D ACDB-LOADER: ACDB -> ACDB_AVSYNC_INFO: ACDB_CMD_GET_DEVICE_PROPERTY\n10-08 18:12:43.786   995  4831 D sm8250_platform: platform_split_snd_device: snd_device(2) num devices(0) new_snd_devices(0)\n10-08 18:12:43.786   995  4831 I sm8250_platform: platform_get_custom_mtmx_params: no matching param with id 0 ip_ch 2 op_ch 2 uc_id 2 snd_dev 2\n10-08 18:12:43.786   995  4831 D audio_hw_primary: enable_audio_route: apply mixer and update path: low-latency-playback speaker\n10-08 18:12:43.786   995  4831 D audio_route: Apply path: low-latency-playback speaker\n10-08 18:12:43.787   995  4831 D audio_hw_primary: select_devices: done\n10-08 18:12:43.788 28435 28435 V QsExpandAnimator: updateTileAnimator\n10-08 18:12:43.789 28435 28435 V QsExpandAnimator: updateHeaderAnimator\n10-08 18:12:43.789 28435 28435 V QsExpandAnimator: updateBarAnimator\n10-08 18:12:43.789 28435 28435 V QsExpandAnimator: setQsExpansionPosition 0.0\n10-08 18:12:43.789 28435 28435 V QsExpandAnimator: onAnimationAtStart\n10-08 18:12:43.794  1002  1934 D qmi_secgps_clnt: SECGPS: QMI_SECGPS_AGNSS_CONFIG_MESSAGE_IND_V01 received\n10-08 18:12:43.798  3935  4061 W QcomMsgHandler_FLP: Not used msg : RPUSH/00000\n10-08 18:12:43.800 26963 26963 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color:export ANDROID_LOG_TAGS=''; exec logcat '-d' '-t' '250' '-v' 'threadtime''\n10-08 18:12:43.819  1269  1614 W Looper  : Slow dispatch took 115ms android.fg h=android.os.Handler c=<recycled PooledLambda@49e8f7e> m=0\n"
+      }
+    },
+    "artifact": {
+      "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk",
+      "sha256": "bc7c909703ac2735cc529d12cb4a3e899da16626c62623a14e67e1cf967708a9"
+    },
+    "evidence_class": "OBSERVED",
+    "causal_proof": false,
+    "status": "CAPTURED"
+  },
+  "gadget_observation": {
+    "schema_version": 1,
+    "status": "READY",
+    "mode": "OBSERVATION_ONLY",
+    "artifact": {
+      "path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk",
+      "sha256": "bc7c909703ac2735cc529d12cb4a3e899da16626c62623a14e67e1cf967708a9"
+    },
+    "package": "com.newleaf.app.android.victor",
+    "module": "libsaasCorePlayer.so",
+    "target_offset": "0x27a510",
+    "requires_gadget": true,
+    "mutates_original_apk": false,
+    "causal_proof": false,
+    "proof_class": "OBSERVED_ONLY"
+  },
+  "evidence_ledger": {
+    "status": "NOT_READY"
+  },
+  "status": "completed",
+  "target_sha256": "a3b0c3fdc0817158cbbfaadb71fbcd608fe9835280bbf1defcb36c60090900e4",
+  "critical_pointer": "0x27a510",
+  "jni_semantic_found": true,
+  "vtable_abi": {
+    "address_point": "0x717e60",
+    "slot": "0x717f68",
+    "rtti": "0x71f4d0",
+    "type_name": "N6Cicada17mediaCodecDecoderE",
+    "container_vtable": null,
+    "pointer": "0x27a510",
+    "function_symbol": null
+  },
+  "critical_function_behavior": "NO_SECURITY_OPERATION_OBSERVED",
+  "autonomous_dataflow": {
+    "status": "completed",
+    "proven": 0,
+    "candidates": 473,
+    "cxx_unresolved": 354,
+    "jni_excluded_count": 6,
+    "constructor_calls": 4
+  },
+  "runtime_probe_status": "RUNTIME_ARTIFACT_CRASH"
+}

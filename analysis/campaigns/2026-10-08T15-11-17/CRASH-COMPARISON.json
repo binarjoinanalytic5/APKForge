@@ -1,0 +1,88 @@
+{
+  "attribution": {
+    "guard": "only the instrumented artifact has crash evidence; instrumentation is a candidate cause, not a proven one, until a clean original round on the same device/session is recorded",
+    "instrumentation_regression": "SUSPECTED_NOT_PROVEN"
+  },
+  "instrumented": {
+    "abort_message_present": false,
+    "apk_offset_resolution": null,
+    "artifact_sha256": "bc7c909703ac2735cc529d12cb4a3e899da16626c62623a14e67e1cf967708a9",
+    "artifact_type": "INSTRUMENTED_TEST_ARTIFACT",
+    "exit_reason": null,
+    "fatal_signal": "SIGABRT",
+    "fault_library": "libc.so",
+    "fault_location": {
+      "library": "libc.so",
+      "pc": "00000000000537d4",
+      "symbol": "abort+168"
+    },
+    "fault_pc": "00000000000537d4",
+    "installed_path": "/data/app/~~jS_Xz1b4DrRJdLEhR8-VZA==/com.newleaf.app.android.victor-5AetJxBZobVVsmYVcXRGIw==/base.apk",
+    "instance_count": 1,
+    "instances_completeness": "EVIDENCE_PRESENT_BUT_INSTANCE_INCOMPLETE",
+    "lifetime_ms": 0,
+    "local_artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk",
+    "logcat_evidence_lines": 10,
+    "package": "com.newleaf.app.android.victor",
+    "pids": [
+      29932
+    ],
+    "primary_cpu_abi": "arm64-v8a",
+    "role": "instrumented",
+    "signing_certificate_sha256": null,
+    "startup": "CRASH",
+    "startup_stage": "CRASHED_AFTER_PROCESS_OBSERVED",
+    "uid": "10816",
+    "uids": [],
+    "users": [],
+    "version_code": "4200",
+    "version_name": "4.2.00"
+  },
+  "integrity_notes": [
+    "no textual abort() message captured on either side; the cause MUST NOT be labeled anti-tamper or screenshot protection on this evidence"
+  ],
+  "original": null,
+  "questions": {
+    "abort_message": {
+      "captured_either": false,
+      "instrumented_captured": false,
+      "original_captured": false
+    },
+    "apk_offset_resolution": {
+      "instrumented": {
+        "entry": null,
+        "offset_within_entry": null,
+        "status": null
+      },
+      "note": "offsets are resolved independently against each side's own local artifact (different builds bound by artifact_sha256); identical resolution shows the same relative code location but never by itself proves a shared cause",
+      "original": {
+        "entry": null,
+        "offset_within_entry": null,
+        "status": null
+      },
+      "resolved_identically": false
+    },
+    "both_sigabrt": false,
+    "fatal_signals": {
+      "instrumented": "SIGABRT",
+      "match": false,
+      "original": null
+    },
+    "fault_location": {
+      "instrumented": "libc.so+00000000000537d4",
+      "match": false,
+      "original": null
+    },
+    "startup_stage": {
+      "instrumented": "CRASHED_AFTER_PROCESS_OBSERVED",
+      "match": null,
+      "original": null
+    }
+  },
+  "schema_version": "crash-comparison-1",
+  "source_documents": {
+    "instrumented": "CRASH-ARTIFACT.json",
+    "original": null
+  },
+  "status": "INSTRUMENTED_ONLY_CRASH"
+}

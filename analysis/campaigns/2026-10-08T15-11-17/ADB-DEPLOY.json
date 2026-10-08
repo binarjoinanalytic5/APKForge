@@ -1,0 +1,184 @@
+{
+  "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk",
+  "artifact_kind": "INSTRUMENTED_TEST_ARTIFACT",
+  "artifact_preflight": {
+    "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk",
+    "checks": {
+      "abi_compatibility": {
+        "apk_abis": [
+          "arm64-v8a",
+          "armeabi-v7a"
+        ],
+        "compatible": true,
+        "device_abilist": "arm64-v8a,armeabi-v7a,armeabi",
+        "status": "PASS"
+      },
+      "abi_directories": {
+        "abis": [
+          "arm64-v8a",
+          "armeabi-v7a"
+        ],
+        "status": "PASS"
+      },
+      "native_libs_uncompressed": {
+        "compressed_entries": [],
+        "so_count": 50,
+        "status": "PASS"
+      },
+      "zipalign_page_alignment": {
+        "command": [
+          "/data/data/com.termux/files/usr/bin/zipalign",
+          "-c",
+          "-P",
+          "16",
+          "-v",
+          "4",
+          "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk"
+        ],
+        "output_tail": "google/protobuf/any.proto (OK - compressed)\n50487515 google/protobuf/type.proto (OK - compressed)\n50489965 google/protobuf/empty.proto (OK - compressed)\n50491272 okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n50532732 okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n50533000 com/applovin/shadow/okhttp3/internal/publicsuffix/publicsuffixes.gz (OK)\n50574480 com/applovin/shadow/okhttp3/internal/publicsuffix/NOTICE (OK - compressed)\n50574740 com/google/api/client/http/google-http-client.properties (OK)\n50574852 com/google/api/client/googleapis/google.p12 (OK)\n50651401 com/google/api/client/googleapis/google.jks (OK - compressed)\n50694760 com/google/api/client/googleapis/google-api-client.properties (OK)\n50694858 src/google/protobuf/timestamp.proto (OK - compressed)\n50697761 src/google/protobuf/field_mask.proto (OK - compressed)\n50700959 src/google/protobuf/api.proto (OK - compressed)\n50703953 src/google/protobuf/duration.proto (OK - compressed)\n50706089 src/google/protobuf/struct.proto (OK - compressed)\n50707839 src/google/protobuf/wrappers.proto (OK - compressed)\n50709471 src/google/protobuf/source_context.proto (OK - compressed)\n50710740 src/google/protobuf/any.proto (OK - compressed)\n50713437 src/google/protobuf/type.proto (OK - compressed)\n50715891 src/google/protobuf/empty.proto (OK - compressed)\n50717163 META-INF/REELSEC-.SF (OK - compressed)\n50876282 META-INF/REELSEC-.RSA (OK - compressed)\n50877444 META-INF/MANIFEST.MF (OK - compressed)\nVerification successful\n",
+        "returncode": 0,
+        "status": "PASS"
+      }
+    },
+    "status": "PASS"
+  },
+  "artifact_sha256": "bc7c909703ac2735cc529d12cb4a3e899da16626c62623a14e67e1cf967708a9",
+  "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+  "deploy_readiness": {
+    "checks": {
+      "apksigner_available": {
+        "path": "/data/data/com.termux/files/usr/bin/apksigner",
+        "status": "PASS"
+      },
+      "artifact_present": {
+        "artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk",
+        "status": "PASS"
+      },
+      "artifact_sha256_recorded": {
+        "status": "PASS"
+      },
+      "certificate_recorded": {
+        "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+        "status": "PASS"
+      },
+      "keystore_present": {
+        "path": "/data/data/com.termux/files/home/.reelsec/keystores/reelsec-test.p12",
+        "status": "PASS"
+      },
+      "signed_verified": {
+        "sign_status": "SIGNED_VERIFIED",
+        "status": "PASS"
+      },
+      "test_package_resolved": {
+        "package": "com.newleaf.app.android.victor",
+        "status": "PASS"
+      }
+    },
+    "failed": [],
+    "ready": true,
+    "status": "READY"
+  },
+  "device_check_command": [
+    "/data/data/com.termux/files/usr/bin/adb",
+    "-s",
+    "192.168.8.8:33257",
+    "get-state"
+  ],
+  "device_inventory_command": [
+    "/data/data/com.termux/files/usr/bin/adb",
+    "devices",
+    "-l"
+  ],
+  "device_resolution": "AUTO_SINGLE_ONLINE_DEVICE",
+  "install_command": [
+    "/data/data/com.termux/files/usr/bin/adb",
+    "-s",
+    "192.168.8.8:33257",
+    "install",
+    "-r",
+    "--no-incremental",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk"
+  ],
+  "install_compatibility": {
+    "artifact": {
+      "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+      "version_code": null
+    },
+    "compatible": true,
+    "installed": {
+      "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+      "installed_path": "/data/app/~~bggEg_Ctnthfft8HU_r1Kw==/com.newleaf.app.android.victor-D3_B1Dp7l6zCVRkpX2BNDw==/base.apk",
+      "version_code": "4200"
+    },
+    "mode": "REPLACE_INSTALL",
+    "package": "com.newleaf.app.android.victor",
+    "reason": "signer certificate matches the installed build; non-destructive replace permitted",
+    "reason_code": "SIGNATURE_MATCH"
+  },
+  "install_mode": "UPDATE",
+  "install_output_tail": "Performing Streamed Install\nSuccess\n",
+  "install_semantics": {
+    "code_path_after": "/data/app/~~jS_Xz1b4DrRJdLEhR8-VZA==/com.newleaf.app.android.victor-5AetJxBZobVVsmYVcXRGIw==",
+    "code_path_before": "/data/app/~~bggEg_Ctnthfft8HU_r1Kw==/com.newleaf.app.android.victor-D3_B1Dp7l6zCVRkpX2BNDw==",
+    "guard": "Android keeps ONE base.apk per package shared by all users (e.g. user 0 and dual-app user 0, 95). This install REPLACED that single shared APK for ALL listed users at once: after this point every launch on ANY user runs the NEW artifact. Crashes observed after this point \u2014 on any user, including the dual-app profile \u2014 belong to the NEW artifact and are NEVER evidence that the replaced build crashes by itself.",
+    "last_update_time_after": "2026-10-08 18:12:32",
+    "last_update_time_before": "2026-10-08 17:40:19",
+    "mode": "REPLACE_SHARED_APK",
+    "replaced_existing_build": true,
+    "shared_apk_users": [
+      0,
+      95
+    ]
+  },
+  "installed_verification": {
+    "installed_path": "/data/app/~~jS_Xz1b4DrRJdLEhR8-VZA==/com.newleaf.app.android.victor-5AetJxBZobVVsmYVcXRGIw==/base.apk",
+    "present": true,
+    "status": "VERIFIED_INSTALLED",
+    "version_code": "4200"
+  },
+  "online_devices": [
+    "192.168.8.8:33257"
+  ],
+  "package": "com.newleaf.app.android.victor",
+  "package_state_after": {
+    "code_path": "/data/app/~~jS_Xz1b4DrRJdLEhR8-VZA==/com.newleaf.app.android.victor-5AetJxBZobVVsmYVcXRGIw==",
+    "first_install_time": "2026-10-08 17:40:19",
+    "last_update_time": "2026-10-08 18:12:32",
+    "present": true,
+    "source": "adb:dumpsys package com.newleaf.app.android.victor",
+    "uid": "10816",
+    "users_installed": [
+      0,
+      95
+    ],
+    "version_name": "4.2.00"
+  },
+  "package_state_before": {
+    "code_path": "/data/app/~~bggEg_Ctnthfft8HU_r1Kw==/com.newleaf.app.android.victor-D3_B1Dp7l6zCVRkpX2BNDw==",
+    "first_install_time": "2026-10-08 17:40:19",
+    "last_update_time": "2026-10-08 17:40:19",
+    "present": true,
+    "source": "adb:dumpsys package com.newleaf.app.android.victor",
+    "uid": "10816",
+    "users_installed": [
+      0,
+      95
+    ],
+    "version_name": "4.2.00"
+  },
+  "post_install_identity": {
+    "expected_certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+    "expected_sha256": "bc7c909703ac2735cc529d12cb4a3e899da16626c62623a14e67e1cf967708a9",
+    "identity": "MATCH",
+    "installed_certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+    "installed_path": "/data/app/~~jS_Xz1b4DrRJdLEhR8-VZA==/com.newleaf.app.android.victor-5AetJxBZobVVsmYVcXRGIw==/base.apk",
+    "installed_sha256": "bc7c909703ac2735cc529d12cb4a3e899da16626c62623a14e67e1cf967708a9",
+    "package": "com.newleaf.app.android.victor",
+    "reason": "installed bytes and signer certificate match the signed artifact"
+  },
+  "requested_serial": null,
+  "serial": "192.168.8.8:33257",
+  "status": "INSTALLED",
+  "uninstall_command": null,
+  "uninstall_output_tail": ""
+}

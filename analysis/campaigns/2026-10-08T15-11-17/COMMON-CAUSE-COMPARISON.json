@@ -1,0 +1,104 @@
+{
+  "attribution": {
+    "guard": "the working control starts cleanly while the instrumented artifact crashes: instrumentation is a candidate cause, not a proven one, until the differential is confirmed on the same device/session",
+    "instrumentation_regression": "SUSPECTED_NOT_PROVEN"
+  },
+  "instrumented": {
+    "abort_message_present": false,
+    "apk_offset_resolution": null,
+    "artifact_sha256": "bc7c909703ac2735cc529d12cb4a3e899da16626c62623a14e67e1cf967708a9",
+    "artifact_type": "INSTRUMENTED_TEST_ARTIFACT",
+    "exit_reason": null,
+    "fatal_signal": "SIGABRT",
+    "fault_library": "libc.so",
+    "fault_location": {
+      "library": "libc.so",
+      "pc": "00000000000537d4",
+      "symbol": "abort+168"
+    },
+    "fault_pc": "00000000000537d4",
+    "installed_path": "/data/app/~~jS_Xz1b4DrRJdLEhR8-VZA==/com.newleaf.app.android.victor-5AetJxBZobVVsmYVcXRGIw==/base.apk",
+    "instance_count": 1,
+    "instances_completeness": "EVIDENCE_PRESENT_BUT_INSTANCE_INCOMPLETE",
+    "lifetime_ms": 0,
+    "local_artifact": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk",
+    "logcat_evidence_lines": 10,
+    "package": "com.newleaf.app.android.victor",
+    "pids": [
+      29932
+    ],
+    "primary_cpu_abi": "arm64-v8a",
+    "role": "instrumented",
+    "signing_certificate_sha256": null,
+    "startup": "CRASH",
+    "startup_stage": "CRASHED_AFTER_PROCESS_OBSERVED",
+    "uid": "10816",
+    "uids": [],
+    "users": [],
+    "version_code": "4200",
+    "version_name": "4.2.00"
+  },
+  "integrity_notes": [
+    "this comparison MUST NOT upgrade SCREENSHOT_BLOCKING; that verdict remains NOT_PROVEN until the full causal chain is evidenced",
+    "no textual abort() message captured on either side; the cause MUST NOT be labeled anti-tamper or screenshot protection on this evidence"
+  ],
+  "questions": {
+    "abort_message": {
+      "captured_either": false,
+      "instrumented_captured": false,
+      "working_control_captured": false
+    },
+    "apk_identity": {
+      "instrumented_sha256": "bc7c909703ac2735cc529d12cb4a3e899da16626c62623a14e67e1cf967708a9",
+      "note": "different artifacts by construction: the control is the installed original APK, the instrumented side is the re-signed test build",
+      "working_control_sha256": "3a3650633fbddfc16e081eaff146dfc884220998b65dcdede973e0c608f9c000"
+    },
+    "both_sigabrt": false,
+    "fault_location": {
+      "instrumented": "libc.so+00000000000537d4",
+      "match": false,
+      "working_control": null
+    }
+  },
+  "schema_version": "common-cause-comparison-1",
+  "source_documents": {
+    "instrumented": "CRASH-ARTIFACT.json",
+    "working_control": "WORKING-CONTROL.json"
+  },
+  "status": "CONTROL_HEALTHY_INSTRUMENTED_CRASH",
+  "working_control": {
+    "abort_message_present": null,
+    "artifact_sha256": "3a3650633fbddfc16e081eaff146dfc884220998b65dcdede973e0c608f9c000",
+    "artifact_type": "ORIGINAL_APK",
+    "code_path": "/data/app/~~bggEg_Ctnthfft8HU_r1Kw==/com.newleaf.app.android.victor-D3_B1Dp7l6zCVRkpX2BNDw==",
+    "exit_reason": null,
+    "fatal_signal": null,
+    "fault_library": null,
+    "fault_location": null,
+    "fault_pc": null,
+    "installed_path": "/data/app/~~bggEg_Ctnthfft8HU_r1Kw==/com.newleaf.app.android.victor-D3_B1Dp7l6zCVRkpX2BNDw==/base.apk",
+    "lifetime_ms": 7628,
+    "local_reference_apk": null,
+    "logcat_evidence_lines": null,
+    "matches_installed": null,
+    "package": "com.newleaf.app.android.victor",
+    "pids": [
+      26593
+    ],
+    "primary_cpu_abi": "arm64-v8a",
+    "role": "working_control",
+    "signing_certificate_sha256": null,
+    "startup": "PASS",
+    "status": "CONTROL_ASSESSED",
+    "uid": "10816",
+    "uids": [
+      "10816"
+    ],
+    "users": [
+      0,
+      95
+    ],
+    "version_code": "4200",
+    "version_name": "4.2.00"
+  }
+}

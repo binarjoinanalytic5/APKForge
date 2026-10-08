@@ -1,0 +1,31 @@
+{
+  "BASELINE_STATUS": "BASELINE_SKIPPED_WORKING_CONTROL_PRESENT",
+  "BLOCKED_BY": null,
+  "CAMPAIGN_STATE": "CAUSAL_CHAIN_INCOMPLETE",
+  "CAMPAIGN_STATE_REASON": "no evidence report: causal chain not evaluated",
+  "COMMON_CAUSE_COMPARISON": "CONTROL_HEALTHY_INSTRUMENTED_CRASH",
+  "COMMON_CAUSE_COMPARISON_RECORDED": "CONTROL_HEALTHY_INSTRUMENTED_CRASH",
+  "CRASH_CAUSE": "NATIVE_LIBRARY:libc.so",
+  "CRASH_CAUSE_CONFIDENCE": "HIGH",
+  "CRASH_CLASS": "NATIVE_CRASH",
+  "CRASH_COMPARISON": "INSTRUMENTED_ONLY_CRASH",
+  "INSTRUMENTED_CRASH_AFTER_INSTALL": true,
+  "INSTRUMENTED_INSTALLED": true,
+  "INSTRUMENTED_RUNTIME": "CRASH",
+  "NEXT_ACTION": "Control starts cleanly while the instrumented artifact crashes: instrumentation is a CANDIDATE cause (SUSPECTED_NOT_PROVEN); review INSTRUMENTATION-IMPACT.json change linkage before any further round. No destructive operation is required.",
+  "ORIGINAL_HEALTHY_BEFORE_INSTALL": null,
+  "ORIGINAL_RUNTIME": "IDENTITY_UNVERIFIED",
+  "ORIGINAL_RUNTIME_SOURCE": null,
+  "REGRESSION_STATUS": "SUSPECTED_NOT_PROVEN",
+  "REPLACED_SHARED_APK_USERS": [
+    0,
+    95
+  ],
+  "REPLACEMENT_GUARD": "Android keeps ONE base.apk per package shared by all users (e.g. user 0 and dual-app user 0, 95). This install REPLACED that single shared APK for ALL listed users at once: after this point every launch on ANY user runs the NEW artifact. Crashes observed after this point \u2014 on any user, including the dual-app profile \u2014 belong to the NEW artifact and are NEVER evidence that the replaced build crashes by itself.",
+  "RUNTIME_PROOF_STATUS": "BLOCKED_BY_ARTIFACT_CRASH",
+  "RUNTIME_STATUS": "CONTROL_HEALTHY_INSTRUMENTED_CRASH",
+  "STARTUP_AUDIT": "ORIGINAL_SIDE: working-control identity UNVERIFIED: installed sha 3a3650633fbddfc16e081eaff146dfc884220998b65dcdede973e0c608f9c000 != original reference e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278 \u2014 the observed build may be a leftover instrumented artifact of the same package; original-side runtime NOT established",
+  "WORKING_CONTROL": "CONTROL_ASSESSED",
+  "runtime_probe_allowed": false,
+  "schema_version": "runtime-health-1"
+}

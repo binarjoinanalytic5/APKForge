@@ -1,0 +1,12 @@
+{
+  "collected_at_epoch": 1791472405.815854,
+  "collector": "BASELINE",
+  "data": {
+    "reason": "the currently installed original was observed in place as the working control (WORKING-CONTROL.json, status=CONTROL_ASSESSED); re-installing a signed copy over it is neither needed nor performed",
+    "schema_version": "runtime-health-1",
+    "status": "BASELINE_SKIPPED_WORKING_CONTROL_PRESENT"
+  },
+  "errors": [],
+  "schema_version": "collector-1",
+  "status": "FAILED"
+}

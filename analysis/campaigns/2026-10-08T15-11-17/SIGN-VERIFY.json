@@ -1,0 +1,85 @@
+{
+  "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+  "certs_command": [
+    "/data/data/com.termux/files/usr/bin/apksigner",
+    "verify",
+    "--print-certs",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk"
+  ],
+  "certs_output_tail": "V3.0 Signer: certificate DN: O=ReelSec, OU=ReelSec Test, CN=ReelSec Test Key\nV3.0 Signer: certificate SHA-256 digest: 2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995\nV3.0 Signer: certificate SHA-1 digest: 4bfaa12fdef3de4e0828c5b7336e7956417be1b3\nV3.0 Signer: certificate MD5 digest: 40658c3cd0310f81b1b9716b11373e0a\nWARNING: META-INF/services/io.ktor.client.HttpClientEngineContainer not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.CoroutineExceptionHandler not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.internal.MainDispatcherFactory not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\n",
+  "keystore": {
+    "alias": "reelsec-test",
+    "backend": "openssl-pkcs12",
+    "bootstrapped": false,
+    "path": "/data/data/com.termux/files/home/.reelsec/keystores/reelsec-test.p12",
+    "reused": true
+  },
+  "original_mutation": false,
+  "sign_command": [
+    "/data/data/com.termux/files/usr/bin/apksigner",
+    "sign",
+    "--ks",
+    "/data/data/com.termux/files/home/.reelsec/keystores/reelsec-test.p12",
+    "--ks-key-alias",
+    "reelsec-test",
+    "--ks-pass",
+    "env:REELSEC_TEST_KEYSTORE_PASSWORD",
+    "--key-pass",
+    "env:REELSEC_TEST_KEY_PASSWORD",
+    "--out",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-unsigned-aligned.apk"
+  ],
+  "sign_output_tail": "",
+  "signed_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk",
+  "signed_sha256": "bc7c909703ac2735cc529d12cb4a3e899da16626c62623a14e67e1cf967708a9",
+  "signing_preflight": {
+    "checks": {
+      "apksigner_present": {
+        "path": "/data/data/com.termux/files/usr/bin/apksigner",
+        "status": "PASS"
+      },
+      "apksigner_works": {
+        "returncode": 0,
+        "status": "PASS",
+        "version": "0.9"
+      },
+      "keystore_nonempty": {
+        "status": "PASS"
+      },
+      "keystore_present": {
+        "path": "/data/data/com.termux/files/home/.reelsec/keystores/reelsec-test.p12",
+        "status": "PASS"
+      },
+      "password_envs_set": {
+        "key_password_env": "REELSEC_TEST_KEY_PASSWORD",
+        "keystore_password_env": "REELSEC_TEST_KEYSTORE_PASSWORD",
+        "status": "PASS"
+      },
+      "pkcs12_alias_present": {
+        "alias": "reelsec-test",
+        "aliases": [
+          "reelsec-test"
+        ],
+        "certificate_sha256": "2eadccaddcd19a7e4882426479a4cc77bd502afc4171fdd8e94da532d79c3995",
+        "status": "PASS"
+      },
+      "pkcs12_password_valid": {
+        "reason": null,
+        "status": "PASS"
+      }
+    },
+    "failed": [],
+    "status": "READY"
+  },
+  "status": "SIGNED_VERIFIED",
+  "unsigned_path": "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-unsigned-aligned.apk",
+  "unsigned_sha256": "6fb86aaa1718c07fd07c53e1c885c008ed050b68930817a87fe2e81e170cdf6e",
+  "verify_command": [
+    "/data/data/com.termux/files/usr/bin/apksigner",
+    "verify",
+    "--verbose",
+    "/data/data/com.termux/files/home/apk-lab/ReelShort-v4.2.00/analysis/campaigns/2026-10-08T15-11-17/instrumented-signed.apk"
+  ],
+  "verify_output_tail": "Verifies\nVerified using v1 scheme (JAR signing): true\nVerified using v2 scheme (APK Signature Scheme v2): true\nVerified using v3 scheme (APK Signature Scheme v3): true\nVerified using v3.1 scheme (APK Signature Scheme v3.1): false\nVerified using v3.2 scheme (APK Signature Scheme v3.2): false\nVerified using v4 scheme (APK Signature Scheme v4): false\nVerified for SourceStamp: false\nNumber of signers: 1\nWARNING: META-INF/services/io.ktor.client.HttpClientEngineContainer not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.CoroutineExceptionHandler not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\nWARNING: META-INF/services/kotlinx.coroutines.internal.MainDispatcherFactory not protected by signature. Unauthorized modifications to this JAR entry will not be detected. Delete or move the entry outside of META-INF/.\n"
+}
