@@ -1,0 +1,73 @@
+# APKForge single-node stack (Phase 0 skeleton).
+# Secrets pass via environment only — never commit values here.
+name: apkforge
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
+      POSTGRES_DB: ${POSTGRES_DB:-apkforge}
+    volumes:
+      - apkforge-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - apkforge-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  s3:
+    # Phase-0 waiver: tag pinned at first verified pull in Phase 1.
+    image: chrislusf/seaweedfs:latest
+    restart: unless-stopped
+    command: ["server", "-s3", "-dir=/data", "-volume.max=0"]
+    ports:
+      - "8333:8333"
+    volumes:
+      - apkforge-s3:/data
+  api:
+    build:
+      context: ..
+      dockerfile: infra/backend.Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:?required}:${POSTGRES_PASSWORD:?required}@db:5432/${POSTGRES_DB:-apkforge}
+      REDIS_URL: redis://redis:6379/0
+      S3_ENDPOINT: http://s3:8333
+      JWT_SECRET: ${JWT_SECRET:?required}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+  worker:
+    build:
+      context: ..
+      dockerfile: infra/worker.Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:?required}:${POSTGRES_PASSWORD:?required}@db:5432/${POSTGRES_DB:-apkforge}
+      REDIS_URL: redis://redis:6379/0
+      S3_ENDPOINT: http://s3:8333
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+volumes:
+  apkforge-db:
+  apkforge-redis:
+  apkforge-s3:

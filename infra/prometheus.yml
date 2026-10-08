@@ -1,0 +1,7 @@
+# Minimal scrape config (Phase 0). Grafana dashboards + Loki land in Phase 3.
+global:
+  scrape_interval: 15s
+scrape_configs:
+  - job_name: apkforge-api
+    static_configs:
+      - targets: ["api:8000"]

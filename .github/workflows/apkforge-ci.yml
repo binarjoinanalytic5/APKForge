@@ -1,0 +1,45 @@
+# APKForge CI (Phase 0: contract gates + descriptor validation).
+name: apkforge-ci
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "workers/**"
+      - "plugins/**"
+      - "frontend/**"
+      - "infra/**"
+      - "docs/**"
+      - ".github/workflows/apkforge-ci.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "workers/**"
+      - "plugins/**"
+      - "frontend/**"
+      - "infra/**"
+      - "docs/**"
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pytest pyyaml
+      - run: pytest backend/tests workers -q
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose -f infra/compose.yaml config -q
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: node -e "JSON.parse(require('fs').readFileSync('frontend/package.json'))"
+  # Phase 1: image build + sign (cosign) + SBOM attest (TODO).

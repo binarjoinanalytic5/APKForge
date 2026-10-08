@@ -1,19 +1,39 @@
-# ReelShort v4.2.00 — Deep APK Analysis
+# APKForge — منصة متكاملة لهندسة وتوقيع APK
 
-This repository contains the decompiled static-analysis material for ReelShort v4.2.00.
+منصة مفتوحة المصدر (Apache-2.0) لفك وتحليل وتعديل وبناء وتوقيع ملفات APK:
+تدمج أفضل الأدوات المجرّبة (Apktool وJADX وAndroguard وQuark وغيرها) خلف
+واجهات موحدة — ويب وREST وWebSocket وCLI — بدل إعادة اختراعها.
 
-## Original APK
-SHA-256:
+> القاعدة الحاكمة: **لا بناء من الصفر.** أي قدرة لها بديل ناضج تُدمَج،
+> وما يُكتَب هنا طبقة رقيقة (موصلات وعقود وواجهات). الوثيقة الحاكمة:
+> [`docs/plan.md`](docs/plan.md).
 
-e67f2a69a108e5fb36f98eb6ca5fdd1030872f43d216b4163fb3e7c999deb278
+## الحالة: المرحلة 0 (التأسيس)
 
-The original APK is intentionally excluded from Git history.
+- الهيكل والعقود المجمدة: `docs/openapi.yaml` (v1) و`docs/plugin-sdk.md` (SDK v1).
+- `backend/` نواة FastAPI (هيكل)، `workers/` محولات الأدوات، `plugins/` حزم الأدوات.
+- `infra/compose.yaml` تشغيل عقدة واحدة: API وعامل وPostgres وRedis وتخزين S3.
+- `archive/reelsec-legacy/` العمل السابق كاملًا (مؤرشف، يُدمَج لاحقًا كإضافة `reelsec-verify`).
 
-## Analysis material
-- `jadx-src/` — JADX decompilation
-- `apktool-src/` — Apktool Smali/resources
-- `native-libs/` — extracted native libraries
-- `analysis/` — analysis reports and search results
+## التشغيل السريع (عند اكتمال المرحلة 1)
 
-## Focus
-Deep investigation of screenshot / screen-recording prevention and related Java/Smali/Native mechanisms.
+```sh
+docker compose -f infra/compose.yaml up -d
+```
+
+## البنية
+
+انظر [`ARCHITECTURE.md`](ARCHITECTURE.md) وقرارات [`docs/adr/`](docs/adr/).
+
+## المساهمة والأمان
+
+- المساهمة: [`CONTRIBUTING.md`](CONTRIBUTING.md) (البوابات إلزامية: اختبارات خضراء + فحص أسرار + مراجعة عقد).
+- الأمان: [`SECURITY.md`](SECURITY.md) — الاستخدام المصرح به فقط، وبلا أدوات تجاوز DRM.
+
+## English summary
+
+APKForge is an Apache-2.0, self-hostable workbench for APK engineering:
+decompile, analyze, modify, rebuild, align, and sign — by integrating proven
+open-source tools behind unified APIs (REST/WebSocket/CLI) instead of
+rebuilding them. Stage: Phase 0 (skeleton + frozen contracts). See
+[`docs/plan.md`](docs/plan.md) (Arabic, normative).
