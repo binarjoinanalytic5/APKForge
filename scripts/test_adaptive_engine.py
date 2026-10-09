@@ -262,3 +262,38 @@ def test_ladder_exhausts_unknown_failure(engine, ctx, tmp_path,
         engine._recovery.failure_signature(
             "DEPENDENCIES", "-", None, "native",
             "%s|%s|%s" % ("e" * 12, "c", "R")), "native")
+
+
+def test_open_browser_prefers_termux_opener(engine, ctx,
+                                            monkeypatch):
+    monkeypatch.setattr(
+        engine.shutil, "which",
+        lambda name: "/x/termux-open-url"
+        if name == "termux-open-url" else None)
+
+    class Done:
+        returncode = 0
+        stdout = ""
+
+    ran = []
+    monkeypatch.setattr(
+        engine.subprocess, "run",
+        lambda *argv, **kw: ran.append(argv[0]) or Done())
+    used = []
+    monkeypatch.setattr(engine.webbrowser, "open",
+                        lambda *argv, **kw: used.append(argv))
+    assert engine.open_browser(ctx, "http://example/") is True
+    assert ran == [["termux-open-url", "http://example/"]]
+    assert used == []
+
+
+def test_open_browser_falls_back_to_webbrowser(engine, ctx,
+                                               tmp_path,
+                                               monkeypatch):
+    monkeypatch.setattr(engine.shutil, "which",
+                        lambda name: None)
+    monkeypatch.setattr(engine.webbrowser, "open",
+                        lambda *argv, **kw: False)
+    assert engine.open_browser(ctx, "http://example/") is False
+    assert "open manually" in (
+        tmp_path / "run.log").read_text(encoding="utf-8")

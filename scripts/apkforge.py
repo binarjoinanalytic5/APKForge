@@ -1655,6 +1655,27 @@ def write_governance(ctx, env, urls, report):
 
 # -- pipeline -------------------------------------------------------------------
 def open_browser(ctx, url):
+    if shutil.which("termux-open-url") is not None:
+        try:
+            proc = subprocess.run(
+                ["termux-open-url", url],
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                timeout=30, text=True, errors="replace")
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            ctx.say("browser: termux-open-url failed (%s); "
+                    "open manually: %s" % (exc, url))
+            return False
+        if proc.returncode == 0:
+            ctx.say("browser: opened " + url)
+            return True
+        ctx.say("browser: termux-open-url exit %d%s; open "
+                "manually: %s" % (
+                    proc.returncode,
+                    " (install the Termux:API app?)"
+                    if "not found" in (proc.stdout or "").lower()
+                    or "no such" in (proc.stdout or "").lower()
+                    else "", url))
+        return False
     try:
         opened = webbrowser.open(url, new=2)
     except Exception as exc:
