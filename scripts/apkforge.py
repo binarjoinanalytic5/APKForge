@@ -60,7 +60,7 @@ STATES = ("INIT", "ENVIRONMENT_CHECK", "ENVIRONMENT_DETECTED",
           "MIGRATIONS_READY", "SEED_READY", "BUILD_READY",
           "SERVICES_READY", "HEALTHY", "ADMIN_SETUP_REQUIRED",
           "GIT_RECOVERY_REQUIRED", "RECOVERING", "BLOCKED",
-          "READY", "FAILED")
+          "RECOVERY_AVAILABLE", "READY", "FAILED")
 
 SECRET_PATTERNS = (
     re.compile(r"(?i)(bearer\s+)[A-Za-z0-9._~+/-]+=*"),
@@ -712,6 +712,16 @@ class RecoveryExhausted(RuntimeError):
         self.info = info
 
 
+def exhaustion_state(info):
+    """RECOVERY_AVAILABLE when a human/unlock step can resume work.
+
+    BLOCKED is reserved for failures with no known next action.
+    """
+    if info.get("needs_you") or info.get("required"):
+        return "RECOVERY_AVAILABLE"
+    return "BLOCKED"
+
+
 TOOLCHAIN_PKGS = {
     "pkg": {"c": ["clang"], "rust": ["rust"]},
     "apt-get": {"c": ["build-essential", "python3-dev"],
@@ -927,6 +937,19 @@ def _recovery_alternatives(category, package, profile, fp):
                               "backend/requirements.txt"],
         "VERSION_INCOMPATIBILITY": ["relax the pin in "
                                     "backend/requirements.txt"],
+        "RUST_BUILD_FAILURE": [
+            "the crate source failed to compile under rustc here; "
+            "try an older %s with wheels (see the PyPI files page)"
+            % package,
+            "free RAM and re-run (Termux source builds need "
+            "~1 GB free)"],
+        "C_BUILD_FAILURE": [
+            "the C extension failed to compile; try an older %s "
+            "with wheels" % package,
+            c_hint + " (missing headers are the usual cause)"],
+        "BUILD_BACKEND_FAILURE": [
+            "upgrade pip/setuptools/wheel in the venv, then re-run",
+            "try an older %s with wheels" % package],
     }
     return hints.get(category, ["see the log tail, fix the "
                                 "cause, re-run"])
@@ -936,6 +959,22 @@ def _pip_log_path(ctx, strategy):
     safe = "".join(char if char.isalnum() else "-"
                    for char in strategy)[:60]
     return LOGS / ("pip-%s-%s.log" % (ctx.run_id, safe))
+
+
+def _collect_pip_tags(ctx, python):
+    """Snapshot `pip debug` tags for wheel diagnosis (path/None)."""
+    try:
+        code, output = run(
+            [str(python), "-m", "pip", "debug", "--verbose"], ctx,
+            timeout=120)
+    except Exception as exc:
+        ctx.warn("pip tags unavailable: %s" % exc)
+        return None
+    if code != 0 or "Compatible tags" not in output:
+        return None
+    path = LOGS / ("pip-tags-%s.txt" % ctx.run_id)
+    path.write_text(redact(output), encoding="utf-8")
+    return path
 
 
 def _record_attempt(ledger, fp_row, category, result, log_path,
@@ -1031,14 +1070,26 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
               if "name" in item}
     native_reqs = [item for item in parsed_reqs if "name" in item]
     memory = _strategy.last_failure(ledger.path)
-    last = {"category": memory.get("category") or "-",
-            "package": memory.get("package"),
-            "version": memory.get("version"), "evidence": []}
-    if memory.get("package") or memory.get("category"):
-        ctx.say("failure memory: %s (%s) — selecting a changed "
-                "strategy, never a bare repeat" % (
+    mem_status = _strategy.memory_status(
+        memory, _toolchain_now(env_hash).get("hash"))
+    if mem_status["status"] == "ACTIVE":
+        last = {"category": memory.get("category") or "-",
+                "package": memory.get("package"),
+                "version": memory.get("version"), "evidence": []}
+        ctx.say("failure memory ACTIVE: %s (%s) — selecting a "
+                "changed strategy, never a bare repeat" % (
                     memory.get("package") or "?",
                     memory.get("category") or "?"))
+    else:
+        last = {"category": "-",
+                "package": memory.get("package"),
+                "version": memory.get("version"), "evidence": []}
+        if memory:
+            hint = ("; package hint kept: %s" % memory.get("package")
+                    if memory.get("package") else "")
+            ctx.say("failure memory %s (%s) — re-probing from "
+                    "scratch%s" % (mem_status["status"],
+                                   mem_status["reason"], hint))
     python = str(python)
     py_version = fp.get("python_version", "")
     venv = str(Path(python).parent.parent)
@@ -1046,6 +1097,7 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
     skipped = []
     executed = set()
     blocked = []
+    trail = []
     constraints = None
     current_path = req_path
     current_text = base_text
@@ -1069,10 +1121,18 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                 assess_now)
         return cache_cov["now"]
 
-    def fp_for(strategy, command, req_text, py_ver):
+    probe_cache = {}
+
+    def probe_now(refresh=False):
+        if refresh or "probe" not in probe_cache:
+            probe_cache["probe"] = _strategy.probe_toolchain(
+                python)
+        return probe_cache["probe"]
+
+    def fp_for(strategy, command, req_text, py_ver, target=None,
+               target_ver=None):
         return _strategy.attempt_fingerprint(
-            "DEPENDENCIES", strategy, last["package"],
-            last.get("version"), py_ver,
+            "DEPENDENCIES", strategy, target, target_ver, py_ver,
             fp.get("arch_machine", ""),
             profile.get("platform", ""), command, req_text,
             _toolchain_now(env_hash), run_id=ctx.run_id)
@@ -1087,27 +1147,35 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
         argv += ["-r", str(current_path)] + list(extra_pkgs)
         return argv
 
-    def do_pip(strategy, argv, timeout=1200):
+    def do_pip(strategy, argv, target=None, target_ver=None,
+               timeout=1200):
         command = "pip " + " ".join(argv)
         row = fp_for(strategy, command, current_text
                      + ("\n###constraints###\n" + constraints.read_text(
                          encoding="utf-8") if constraints else ""),
-                     py_version)
+                     py_version, target, target_ver)
         if row["attempt_id"] in executed:
+            skipped.append(strategy)
+            for line in _strategy.explain(row, "refuse"):
+                ctx.say(line)
             return "done"
         ident = _strategy.identical_attempt(ledger.path, row)
         if ident is not None and not (
                 strategy == "native" and _strategy.flaky_retry_allowed(
                     ledger.path, row, last["category"])):
             skipped.append(strategy)
-            ctx.say("skip %s (already failed identically)"
-                    % strategy)
+            for line in _strategy.explain(row, "refuse"):
+                ctx.say(line)
             return "skipped"
         if strategy == "native" and ident is not None:
             num = _strategy.count_identical(ledger.path, row)
             ctx.say("flaky network: identical retry %d/3 with "
                     "backoff" % (num + 1))
             time.sleep(5 * (num + 1))
+        for line in _strategy.explain(
+                row, "run",
+                memory.get("strategy") or "recorded failure"):
+            ctx.say(line)
         ctx.say("pip attempt [%s]" % strategy)
         code, output, log_path = run_pip(strategy, argv, timeout)
         executed.add(row["attempt_id"])
@@ -1116,17 +1184,29 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
             _record_attempt(ledger, row, "OK", "ok", log_path, "")
             attempts.append({"strategy": strategy,
                              "result": "ok"})
+            trail.append((strategy, "done", "OK"))
             ctx.recovered(strategy, "pip install succeeded")
             return "ok"
         classified = _recovery.classify_failure(output)
+        probe = probe_now(refresh=True)
+        refined, note = _strategy.refine_category(
+            classified["category"], probe,
+            _strategy.extract_signals(output))
+        if note:
+            ctx.say("probe: %s" % note)
+            classified = dict(classified, category=refined,
+                              root_cause="%s (%s)" % (
+                                  classified["root_cause"], note))
         if ctx.state != "RECOVERING":
             ctx.step("RECOVERING")
         last.update(category=classified["category"],
                     package=classified["package"],
                     evidence=classified["evidence"])
+        row["probe"] = probe.get("tools", {})
         _record_attempt(ledger, row, classified["category"],
                         "failed", log_path, output)
         attempts.append({"strategy": strategy, "result": "failed"})
+        trail.append((strategy, "failed", classified["category"]))
         ctx.warn("attempt %s failed: %s (%s)" % (
             strategy, classified["root_cause"],
             classified["category"]))
@@ -1141,7 +1221,8 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                     "arch_machine", "?"),
             "method": command, "category": classified["category"],
             "root_cause": classified["root_cause"],
-            "command": command, "evidence": classified["evidence"],
+            "command": command, "log": str(log_path),
+            "evidence": classified["evidence"],
             "alternatives": _recovery_alternatives(
                 classified["category"], classified["package"],
                 profile, fp),
@@ -1180,15 +1261,116 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                                 "failed", "", str(exc))
                 attempts.append({"strategy": "provision:" + pkg,
                                  "result": "failed"})
+                trail.append(("provision:" + pkg, "failed",
+                              "PROVISION_FAILED"))
                 ctx.warn("provision %s failed: %s" % (pkg, exc))
                 continue
             _record_attempt(ledger, row, "OK", "ok", "", "")
             attempts.append({"strategy": "provision:" + pkg,
                              "result": "ok"})
+            trail.append(("provision:" + pkg, "done", "OK"))
             nonlocal_provisioned = True
         if nonlocal_provisioned:
             ctx.recovered("provision:" + label, ", ".join(pkgs))
         return nonlocal_provisioned
+
+    def isolated_candidate(label, package, version):
+        """Fresh venv, same interpreter, pinned combo.
+
+        Version-strategy fallback when the shared venv holds a
+        broken mix. Returns ("ok", python, venv_dir) when pip AND
+        the backend import check pass, else ("failed", classified,
+        output) or ("unavailable", reason, "").
+        """
+        safe = "".join(char if char.isalnum() else "-"
+                       for char in label)[:40]
+        cand_dir = ROOT / ".venv-candidates" / ("%s-%s" % (
+            safe, ctx.run_id))
+        command = "pip " + " ".join(pip_argv())
+        row = fp_for(label + " (isolated)", command,
+                     current_text
+                     + ("\n###constraints###\n" + constraints.read_text(
+                         encoding="utf-8") if constraints else ""),
+                     py_version, package, version)
+        if row["attempt_id"] in executed or \
+                _strategy.identical_attempt(ledger.path, row):
+            skipped.append(label + " (isolated)")
+            return ("unavailable", "already failed identically",
+                    "")
+        ctx.say("isolated candidate: %s in %s" % (label, cand_dir))
+        code, output = run([python, "-m", "venv", str(cand_dir)],
+                           ctx, timeout=300)
+        if code != 0:
+            _record_attempt(ledger, row, "PROJECT_ERROR", "failed",
+                            "", output)
+            attempts.append({"strategy": label + " (isolated)",
+                             "result": "failed"})
+            trail.append((label + " (isolated)", "failed",
+                          "PROJECT_ERROR"))
+            return ("failed", {"category": "PROJECT_ERROR",
+                               "package": package,
+                               "root_cause": "candidate venv "
+                               "failed",
+                               "evidence": [output[-200:]]}, output)
+        cand_python = cand_dir / ("Scripts" if os.name == "nt"
+                                  else "bin") / (
+                                      "python.exe" if os.name == "nt"
+                                      else "python")
+        log_path = _pip_log_path(ctx, label + "-isolated")
+        code, output = run([str(cand_python), "-m", "pip"] +
+                           pip_argv(), ctx, timeout=1200)
+        log_path.write_text(redact(output), encoding="utf-8")
+        executed.add(row["attempt_id"])
+        if code != 0:
+            classified = _recovery.classify_failure(output)
+            probe = probe_now(refresh=True)
+            refined, note = _strategy.refine_category(
+                classified["category"], probe,
+                _strategy.extract_signals(output))
+            if note:
+                classified = dict(classified, category=refined)
+            row["probe"] = probe.get("tools", {})
+            _record_attempt(ledger, row, classified["category"],
+                            "failed", log_path, output)
+            attempts.append({"strategy": label + " (isolated)",
+                             "result": "failed"})
+            trail.append((label + " (isolated)", "failed",
+                          classified["category"]))
+            return ("failed", classified, output)
+        if not _backend_imports_ok(ctx, cand_python):
+            _record_attempt(ledger, row, last["category"], "failed",
+                            log_path, "import check failed")
+            attempts.append({"strategy": label + " (isolated)",
+                             "result": "failed"})
+            trail.append((label + " (isolated)", "failed",
+                          last["category"]))
+            return ("failed", {"category": last["category"],
+                               "package": package,
+                               "root_cause": "pip ok but app "
+                               "imports fail in the isolated "
+                               "candidate",
+                               "evidence": []}, output)
+        _record_attempt(ledger, row, "OK", "ok", log_path, "")
+        attempts.append({"strategy": label + " (isolated)",
+                         "result": "ok"})
+        trail.append((label + " (isolated)", "done", "OK"))
+        return ("ok", str(cand_python), str(cand_dir))
+
+    tags_path = _collect_pip_tags(ctx, python)
+    if tags_path is not None:
+        ctx.say("pip tags: %s" % tags_path)
+    _redetect_compilers(profile)
+    need_langs = set()
+    for req in native_reqs:
+        need_langs.update(_compat.native_languages(req["name"]))
+    need_langs -= {"c-optional", "unknown-toolchain"}
+    if need_langs and not offline and \
+            package_manager()[0] is not None and can_elevate():
+        ctx.say("pre-pip probe: requirements may need %s" % (
+            "+".join(sorted(need_langs))))
+        _provision_toolchains(ctx, need_langs, ledger, env_hash,
+                              profile, offline)
+        probe_now(refresh=True)
 
     guard = 0
     runtime_done = set()
@@ -1243,16 +1425,43 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                 current_text = base_text
                 ctx.say("version strategy: %s==%s (%s)" % (
                     package, pick["version"], pick["status"]))
-                outcome = do_pip("version:%s==%s" % (
-                    package, pick["version"]), pip_argv())
+                vlabel = "version:%s==%s" % (package,
+                                                 pick["version"])
+                outcome = do_pip(vlabel, pip_argv(), package,
+                                 pick["version"])
                 if outcome == "ok":
-                    _generated_dir().joinpath(
-                        "resolved-requirements.txt").write_text(
-                            base_text + "\n# resolved pin: %s==%s\n"
-                            % (package, pick["version"]),
-                            encoding="utf-8")
-                    return {"attempts": attempts, "python": python,
-                            "version": py_version, "venv": venv}
+                    if _backend_imports_ok(ctx, python):
+                        _generated_dir().joinpath(
+                            "resolved-requirements.txt").write_text(
+                                base_text
+                                + "\n# resolved pin: %s==%s\n"
+                                % (package, pick["version"]),
+                                encoding="utf-8")
+                        return {"attempts": attempts,
+                                "python": python,
+                                "version": py_version, "venv": venv}
+                    ctx.warn("version combo rejected by the import "
+                             "check; trying an isolated candidate")
+                    cand_outcome = isolated_candidate(
+                        vlabel, package, pick["version"])
+                    if cand_outcome[0] == "ok":
+                        ctx.recovered(vlabel + " (isolated)",
+                                      "adopted %s"
+                                      % cand_outcome[2])
+                        return {"attempts": attempts,
+                                "python": cand_outcome[1],
+                                "version": py_version,
+                                "venv": cand_outcome[2],
+                                "exe": sys.executable}
+                    if cand_outcome[0] == "failed":
+                        failed = cand_outcome[1]
+                        last.update(category=failed["category"],
+                                    package=failed["package"],
+                                    evidence=failed["evidence"])
+                        last_output = cand_outcome[2]
+                        moved = True
+                        break
+                    continue
                 if isinstance(outcome, tuple):
                     last_output = outcome[1]
                     moved = True
@@ -1291,6 +1500,7 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                 except _RuntimeSwitch as switch:
                     attempts.append({"strategy": rlabel,
                                      "result": "ok"})
+                    trail.append((rlabel, "done", "OK"))
                     return {"attempts": attempts,
                             "python": switch.python,
                             "version": switch.version,
@@ -1382,6 +1592,15 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
 
     ideas = list(dict.fromkeys(
         blocked + _strategy.blocked_ideas(last, caps)))
+    skipped = list(dict.fromkeys(skipped))
+    nodes = [{"node": item[0], "status": item[1],
+              "reason": item[2] or "-"} for item in trail]
+    for name in skipped:
+        nodes.append({"node": name, "status": "skipped",
+                      "reason": "identical fingerprint"})
+    for idea in ideas:
+        nodes.append({"node": "unlock", "status": "blocked",
+                      "reason": idea})
     if not attempts:
         prior = [entry for entry in ledger.entries()
                  if entry.get("step") == "DEPENDENCIES"]
@@ -1396,6 +1615,7 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                        "result": entry.get("result")}
                       for entry in prior[-8:]],
             "skipped_identical": skipped,
+            "nodes": nodes,
             "needs_you": ideas,
             "required": "a changed environment (new toolchain, "
             "new pins, new runtime) or a manual fix",
@@ -1410,6 +1630,7 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                 "category"],
             "tried": attempts,
             "skipped_identical": skipped,
+            "nodes": nodes,
             "needs_you": ideas,
             "required": "manual fix for %s" % last["category"],
             "next_action": "; ".join(ideas[:2]) or "; ".join(
@@ -2627,9 +2848,10 @@ def run_pipeline(args):
             print(json.dumps(full, indent=2, default=str))
         return 0
     except RecoveryExhausted as exc:
-        if ctx.state != "BLOCKED":
-            ctx.step("BLOCKED")
         info = exc.info
+        state = exhaustion_state(info)
+        if ctx.state != state:
+            ctx.step(state)
         block = _recovery.exhausted_report(info)
         ctx.say(block)
         (LOGS / "errors").mkdir(exist_ok=True)
@@ -2640,7 +2862,7 @@ def run_pipeline(args):
                        info.get("next_action", "?"))
         try:
             write_bootstrap_report(
-                ctx, report, urls, "BLOCKED",
+                ctx, report, urls, state,
                 failed="%s: %s" % (info.get("step"),
                                    info.get("root_cause")))
         except Exception:
@@ -2919,9 +3141,21 @@ def cmd_doctor(args):
 
 
 def cmd_recover(args):
-    print("failure memory: %s" % (
-        _strategy.last_failure(GOV / "recovery-ledger.jsonl")
-        or "none recorded"))
+    memory = _strategy.last_failure(GOV / "recovery-ledger.jsonl")
+    if not memory:
+        print("failure memory: none recorded")
+    else:
+        status = _strategy.memory_status(
+            memory,
+            _strategy.toolchain_fingerprint().get("hash"))
+        print("failure memory [%s]: package=%s category=%s "
+              "strategy=%s" % (
+                  status["status"], memory.get("package") or "-",
+                  memory.get("category") or "-",
+                  memory.get("strategy") or "-"))
+        print("  recorded: %s (%s)" % (
+            memory.get("ts") or "?", status["reason"]))
+        print("  log: %s" % (memory.get("log") or "-"))
     print("checkpoints: %s" % ", ".join(
         _checkpoint.completed_stages(GOV)) or "none")
     print("resuming bootstrap; the strategy loop picks the next "

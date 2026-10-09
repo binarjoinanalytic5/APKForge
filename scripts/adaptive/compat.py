@@ -32,6 +32,13 @@ NATIVE_INDEX = {
     "markupsafe": {"build": ["c-optional"]},
 }
 
+
+def native_languages(name):
+    """Build languages a requirement may need (set of str)."""
+    key = (name or "").lower().replace("_", "-")
+    key = key.split(";")[0].split("[")[0].strip()
+    return set(NATIVE_INDEX.get(key, {}).get("build", []))
+
 # extra -> native-ish deps it pulls (for build-needs detection).
 KNOWN_EXTRAS = {
     "uvicorn": {"standard": ["uvloop", "httptools", "watchfiles",

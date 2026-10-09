@@ -235,7 +235,8 @@ def test_ladder_skips_recorded_strategy(engine, ctx, tmp_path,
             {"platform": "linux-x86_64", "compiler_c": True,
              "compiler_rust": False}, ledger, "e" * 12,
             offline=False)
-    assert calls == []
+    installs = [argv for argv in calls if "install" in argv[0]]
+    assert installs == []
     info = caught.value.info
     assert info["tried"] == [{"strategy": "native",
                               "result": "failed"}]

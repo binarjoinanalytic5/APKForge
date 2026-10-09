@@ -16,6 +16,8 @@ CATEGORIES = ("NETWORK_FAILURE", "DNS_FAILURE", "PACKAGE_NOT_FOUND",
               "VERSION_INCOMPATIBILITY", "PYTHON_INCOMPATIBILITY",
               "WHEEL_UNAVAILABLE", "BUILD_TOOL_MISSING",
               "COMPILER_MISSING", "RUST_MISSING",
+              "RUST_BUILD_FAILURE", "C_BUILD_FAILURE",
+              "BUILD_BACKEND_FAILURE",
               "ABI_INCOMPATIBILITY", "ARCH_INCOMPATIBILITY",
               "JAVA_INCOMPATIBILITY", "PERMISSION_FAILURE",
               "DISK_SPACE", "CONFIG_ERROR", "PROJECT_ERROR",
@@ -40,6 +42,36 @@ def action_class(name):
 
 def _tail(text, count=80):
     return (text or "").splitlines()[-count:]
+
+
+def evidence_lines(log_text, limit=8):
+    """Decisive lines: error signals from anywhere, then the tail.
+
+    pip buries the real cause above generic boilerplate, so the
+    last lines alone routinely mislead. Signal lines win; the tail
+    fills the remainder.
+    """
+    import re
+    lines = (log_text or "").splitlines()
+    signal = re.compile(
+        r"error|failed|failure|not found|no such|missing|cannot |"
+        r"can't |exception|traceback|\u00d7|\u2570|"
+        r"linker .* not found", re.IGNORECASE)
+    picked = []
+    for line in lines:
+        stripped = line.strip()
+        if len(stripped) > 8 and signal.search(stripped):
+            cleaned = stripped[:200]
+            if cleaned not in picked:
+                picked.append(cleaned)
+        if len(picked) >= limit:
+            break
+    for line in lines[-3:]:
+        stripped = line.strip()
+        if stripped and stripped[:200] not in picked \
+                and len(picked) < limit + 2:
+            picked.append(stripped[:200])
+    return picked
 
 
 def _find_package(lines):
@@ -74,8 +106,7 @@ def classify_failure(log_text):
     lines = _tail(text)
     blob = "\n".join(lines)
     package = _find_package(lines)
-    evidence = [line.strip() for line in lines
-                if line.strip()][-4:]
+    evidence = evidence_lines(text)
 
     def hit(*needles):
         lowered = blob.lower()
@@ -269,9 +300,11 @@ def full_diagnostic(info):
              "CATEGORY    : %s" % info.get("category", "UNKNOWN"),
              "ROOT CAUSE  : %s" % info.get("root_cause", "?"),
              "COMMAND     : %s" % (info.get("command") or "-")]
+    if info.get("log"):
+        lines.append("LOG         : %s" % info["log"])
     if info.get("evidence"):
         lines.append("EVIDENCE    :")
-        for line in info["evidence"][-4:]:
+        for line in info["evidence"][-8:]:
             lines.append("  | %s" % line.strip()[:200])
     if info.get("alternatives"):
         lines.append("ALTERNATIVES:")
@@ -297,6 +330,16 @@ def exhausted_report(info):
         lines.append("  - %s → %s" % (
             attempt.get("strategy", "?"),
             attempt.get("result", "?")))
+    nodes = info.get("nodes", [])
+    if nodes:
+        lines.append("EXHAUSTION REPORT:")
+        for node in nodes:
+            mark = {"done": "v", "failed": "x",
+                    "skipped": "=", "blocked": "!"}.get(
+                        node.get("status"), "?")
+            lines.append("  %s %-28s %s" % (
+                mark, node.get("node", "?"),
+                node.get("reason", "")))
     skipped = info.get("skipped_identical", [])
     if skipped:
         lines.append("SKIPPED     : already failed identically")

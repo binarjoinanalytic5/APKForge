@@ -80,21 +80,114 @@ def _tool_version(argv):
     return first[0][:120] if first else "present"
 
 
-def toolchain_fingerprint(commands=None):
-    """Versions of every build tool (presence alone lies)."""
+def probe_toolchain(python_exe=None, commands=None):
+    """Capability probe: path + version per tool (section 7).
+
+    Runs in the caller's environment (the same one pip inherits).
+    When python_exe is given, visibility is additionally confirmed
+    from inside that interpreter, because a tool on the login PATH
+    is not necessarily visible to the build subprocess.
+    """
     tools = {}
     for name, argv in (commands or TOOL_VERSION_COMMANDS).items():
-        tools[name] = _tool_version(argv)
-    tools["python"] = "%d.%d.%d" % sys.version_info[:3]
-    digest = _short(json.dumps(tools, sort_keys=True))
+        path = shutil.which(argv[0])
+        version = _tool_version(argv) if path else None
+        tools[name] = {"path": path, "version": version,
+                       "ok": bool(path and version)}
+    if python_exe:
+        seen = _venv_which(python_exe, ["rustc", "cargo", "cc",
+                                        "clang", "ld"])
+        for name, path in seen.items():
+            entry = tools.get(name, {})
+            entry["via_venv"] = path
+            if path and not entry.get("path"):
+                entry["path"] = path
+                entry["ok"] = bool(entry.get("version"))
+            tools[name] = entry
+    tools["python"] = {"path": sys.executable, "version":
+                       "%d.%d.%d" % sys.version_info[:3],
+                       "ok": True}
+    digest = _short(json.dumps(tools, sort_keys=True, default=str))
     return {"tools": tools, "hash": digest}
+
+
+def _venv_which(python_exe, names):
+    """shutil.which from inside another interpreter ({} on error)."""
+    code = ("import shutil, json; print(json.dumps({n: "
+            "shutil.which(n) for n in %r}))" % (names,))
+    try:
+        proc = subprocess.run(
+            [str(python_exe), "-c", code], stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL, timeout=60, text=True,
+            errors="replace")
+    except OSError:
+        return {}
+    if proc.returncode != 0:
+        return {}
+    try:
+        data = json.loads((proc.stdout or "").strip())
+    except ValueError:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def toolchain_fingerprint(commands=None):
+    """Versions of every build tool (presence alone lies)."""
+    return probe_toolchain(commands=commands)
+
+
+def refine_category(category, probe, signals):
+    """Log-based MISSING verdicts must survive a live probe.
+
+    Returns (category, note). A toolchain the probe can see is
+    present-but-failing, never missing.
+    """
+    tools = (probe or {}).get("tools", {})
+    rust_ok = bool(tools.get("rustc", {}).get("ok")
+                   and tools.get("cargo", {}).get("ok"))
+    c_ok = bool(tools.get("cc", {}).get("ok")
+                or tools.get("clang", {}).get("ok")
+                or tools.get("gcc", {}).get("ok"))
+    if category == "RUST_MISSING" and rust_ok:
+        rustc = tools["rustc"].get("version", "?")
+        return ("RUST_BUILD_FAILURE",
+                "rustc %s present; the crate build itself failed"
+                % rustc)
+    if category == "COMPILER_MISSING" and c_ok:
+        return ("C_BUILD_FAILURE",
+                "C compiler present; the native build failed")
+    if category == "BUILD_TOOL_MISSING" and rust_ok and c_ok:
+        return ("BUILD_BACKEND_FAILURE",
+                "toolchains present; the PEP 517 backend failed")
+    return (category, "")
+
+
+def memory_status(memory, current_hash):
+    """ACTIVE/STALE lifecycle for failure memory (section 30)."""
+    if not memory:
+        return {"status": "NONE", "reason": "no recorded failure"}
+    if not memory.get("toolchain_fp"):
+        return {"status": "STALE",
+                "reason": "recorded before toolchain "
+                "fingerprinting"}
+    if memory["toolchain_fp"] != current_hash:
+        return {"status": "STALE",
+                "reason": "toolchain changed since the recorded "
+                "failure"}
+    return {"status": "ACTIVE", "reason": "toolchain unchanged"}
 
 
 def attempt_fingerprint(step, strategy, package, version,
                         python_version, arch, platform, command,
                         requirements_text, toolchain_fp,
                         run_id=""):
-    """Full identity of one attempt (section 17)."""
+    """Full identity of one attempt (section 17).
+
+    package/version here are the STRATEGY TARGET (an input, e.g.
+    the pinned release for a version attempt, None for whole-file
+    installs) -- never the diagnosed failure, which is an outcome
+    and must not destabilize identity across rounds.
+    """
     row = {"kind": "attempt", "step": step, "strategy": strategy,
            "package": package, "version": version,
            "python": python_version, "arch": arch,
@@ -179,7 +272,8 @@ def last_failure(ledger_path, step="DEPENDENCIES"):
                 "python": memory.get("python"),
                 "strategy": memory.get("strategy"),
                 "ts": memory.get("ts", ""),
-                "log": memory.get("log", "")}
+                "log": memory.get("log", ""),
+                "toolchain_fp": memory.get("toolchain_fp")}
     classified = _recovery.classify_failure(
         memory.get("detail", ""))
     return {"package": classified["package"],
@@ -187,7 +281,7 @@ def last_failure(ledger_path, step="DEPENDENCIES"):
             "category": classified["category"],
             "python": None,
             "strategy": memory.get("strategy"),
-            "ts": memory.get("ts", ""), "log": ""}
+            "ts": memory.get("ts", ""), "log": "", "toolchain_fp": None}
 
 
 def extract_signals(log_text):
@@ -298,6 +392,12 @@ def order_candidates(failure, caps):
                                          "ld", "ar"):
             toolchain_langs.add("c")
 
+    runtime_implicated = category in (
+        "PYTHON_INCOMPATIBILITY", "WHEEL_UNAVAILABLE",
+        "NO_ARTIFACT", "ABI_INCOMPATIBILITY", "RUST_MISSING",
+        "RUST_BUILD_FAILURE", "COMPILER_MISSING",
+        "C_BUILD_FAILURE", "BUILD_TOOL_MISSING",
+        "BUILD_BACKEND_FAILURE", "UNKNOWN")
     provision_ok = caps.get("provision_ok") and not caps.get(
         "offline")
     if category in ("NETWORK_FAILURE", "DNS_FAILURE"):
@@ -317,7 +417,7 @@ def order_candidates(failure, caps):
         if package:
             add("version", "compatible %s release" % package,
                 package=package)
-        if caps.get("alternate_pythons"):
+        if caps.get("alternate_pythons") or provision_ok:
             add("runtime", "alternate python runtime")
         add("native", "plain pip install")
         return cands
@@ -336,14 +436,11 @@ def order_candidates(failure, caps):
         add("sysdeps", "install %s" % ", ".join(sysdeps),
             packages=sysdeps)
     add("native", "plain pip install")
-    if package and caps.get("version_ok"):
+    if package:
         add("version", "compatible %s release" % package,
             package=package)
-    if caps.get("alternate_pythons") and package and \
-            category in ("WHEEL_UNAVAILABLE", "NO_ARTIFACT",
-                         "ABI_INCOMPATIBILITY", "RUST_MISSING",
-                         "COMPILER_MISSING", "BUILD_TOOL_MISSING",
-                         "UNKNOWN"):
+    if package and runtime_implicated and (
+            caps.get("alternate_pythons") or provision_ok):
         add("runtime", "alternate python runtime")
     if droppable(package, caps.get("direct", set())):
         add("minimal", "drop optional native extras",
@@ -375,6 +472,28 @@ def blocked_ideas(failure, caps):
         ideas.append("no usable package manager for toolchain "
                      "provisioning")
     return ideas[:4]
+
+
+def explain(fp_row, verdict, previous=None):
+    """Why this attempt runs (or is refused): 3 honest lines."""
+    lines = [
+        "WHY        : strategy '%s'%s" % (
+            fp_row.get("strategy"),
+            " for %s" % fp_row["package"]
+            if fp_row.get("package") else " (whole file)"),
+        "FINGERPRINT: py=%s tc=%s req=%s cmd=%s" % (
+            fp_row.get("python"), (fp_row.get("toolchain_fp")
+                                   or "?")[:8],
+            (fp_row.get("requirements_hash") or "?")[:8],
+            (fp_row.get("command_hash") or "?")[:8])]
+    if verdict == "run":
+        lines.append("DECISION   : RUN (%s)" % (
+            "first attempt" if previous is None else
+            "differs from %s" % previous))
+    else:
+        lines.append("DECISION   : REFUSE (byte-identical to a "
+                     "recorded failure)")
+    return lines
 
 
 def now_ts():
