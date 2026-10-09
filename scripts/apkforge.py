@@ -785,6 +785,15 @@ def _backend_imports_ok(ctx, python):
     return code == 0
 
 
+def _import_ok(ctx, python, module):
+    """True when `import <module>` works under that interpreter."""
+    code, output = run(
+        [str(python), "-c",
+         "import %s; print('import-ok')" % module], ctx,
+        timeout=120)
+    return code == 0 and "import-ok" in output
+
+
 def _write_lock(ctx, python):
     code, output = run([str(python), "-m", "pip", "freeze",
                         "--exclude-editable"], ctx, timeout=120)
@@ -950,6 +959,11 @@ def _recovery_alternatives(category, package, profile, fp):
         "BUILD_BACKEND_FAILURE": [
             "upgrade pip/setuptools/wheel in the venv, then re-run",
             "try an older %s with wheels" % package],
+        "ANDROID_API_LEVEL_MISSING": [
+            "retry the build with a detected ANDROID_API_LEVEL "
+            "(automatic android-api strategy)",
+            "manual fallback: export ANDROID_API_LEVEL=$(getprop "
+            "ro.build.version.sdk), then re-run"],
     }
     return hints.get(category, ["see the log tail, fix the "
                                 "cause, re-run"])
@@ -1130,12 +1144,13 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
         return probe_cache["probe"]
 
     def fp_for(strategy, command, req_text, py_ver, target=None,
-               target_ver=None):
+               target_ver=None, build_env=None):
         return _strategy.attempt_fingerprint(
             "DEPENDENCIES", strategy, target, target_ver, py_ver,
             fp.get("arch_machine", ""),
             profile.get("platform", ""), command, req_text,
-            _toolchain_now(env_hash), run_id=ctx.run_id)
+            _toolchain_now(env_hash), run_id=ctx.run_id,
+            build_env=build_env)
 
     def pip_argv(extra_pkgs=()):
         argv = ["install"]
@@ -1230,10 +1245,17 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
             "next_strategy": "next changed strategy"}))
         return ("failed", nonlocal_last_output)
 
-    def run_pip(strategy, argv, timeout):
+    def run_pip(strategy, argv, timeout, env=None):
         log_path = _pip_log_path(ctx, strategy)
+        if env:
+            extra = {key: value for key, value in env.items()
+                     if os.environ.get(key) != value}
+            if extra:
+                ctx.say("build env: %s" % ", ".join(
+                    "%s=%s" % item
+                    for item in sorted(extra.items())))
         code, output = run([python, "-m", "pip"] + argv, ctx,
-                           timeout=timeout)
+                           timeout=timeout, env=env)
         log_path.write_text(redact(output), encoding="utf-8")
         return code, output, log_path
 
@@ -1274,29 +1296,35 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
             ctx.recovered("provision:" + label, ", ".join(pkgs))
         return nonlocal_provisioned
 
-    def isolated_candidate(label, package, version):
-        """Fresh venv, same interpreter, pinned combo.
+    def isolated_candidate(label, package, version, env=None,
+                           extra_imports=()):
+        """Fresh venv, same interpreter, changed build inputs.
 
-        Version-strategy fallback when the shared venv holds a
-        broken mix. Returns ("ok", python, venv_dir) when pip AND
-        the backend import check pass, else ("failed", classified,
-        output) or ("unavailable", reason, "").
+        Fallback when the shared venv holds a broken mix or the
+        build needs extra environment (e.g. ANDROID_API_LEVEL).
+        Lives under .governance/venv-candidates/<attempt-id>; the
+        shared venv is never touched. Returns ("ok", python,
+        venv_dir) when pip AND every import check pass, else
+        ("failed", classified, output) or ("unavailable", reason,
+        "").
         """
-        safe = "".join(char if char.isalnum() else "-"
-                       for char in label)[:40]
-        cand_dir = ROOT / ".venv-candidates" / ("%s-%s" % (
-            safe, ctx.run_id))
+        benv = None
+        if env and env.get("ANDROID_API_LEVEL"):
+            benv = {"ANDROID_API_LEVEL": str(
+                env["ANDROID_API_LEVEL"])}
         command = "pip " + " ".join(pip_argv())
         row = fp_for(label + " (isolated)", command,
                      current_text
                      + ("\n###constraints###\n" + constraints.read_text(
                          encoding="utf-8") if constraints else ""),
-                     py_version, package, version)
+                     py_version, package, version, benv)
         if row["attempt_id"] in executed or \
                 _strategy.identical_attempt(ledger.path, row):
             skipped.append(label + " (isolated)")
             return ("unavailable", "already failed identically",
                     "")
+        cand_dir = GOV / "venv-candidates" / row["attempt_id"][:12]
+        cand_dir.parent.mkdir(parents=True, exist_ok=True)
         ctx.say("isolated candidate: %s in %s" % (label, cand_dir))
         code, output = run([python, "-m", "venv", str(cand_dir)],
                            ctx, timeout=300)
@@ -1317,8 +1345,11 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                                       "python.exe" if os.name == "nt"
                                       else "python")
         log_path = _pip_log_path(ctx, label + "-isolated")
+        if benv:
+            ctx.say("build env: %s" % ", ".join(
+                "%s=%s" % item for item in sorted(benv.items())))
         code, output = run([str(cand_python), "-m", "pip"] +
-                           pip_argv(), ctx, timeout=1200)
+                           pip_argv(), ctx, timeout=1200, env=env)
         log_path.write_text(redact(output), encoding="utf-8")
         executed.add(row["attempt_id"])
         if code != 0:
@@ -1337,18 +1368,23 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
             trail.append((label + " (isolated)", "failed",
                           classified["category"]))
             return ("failed", classified, output)
-        if not _backend_imports_ok(ctx, cand_python):
+        broken = [mod for mod in extra_imports
+                  if not _import_ok(ctx, cand_python, mod)]
+        if not broken and not _backend_imports_ok(ctx, cand_python):
+            broken = ["fastapi/uvicorn/pydantic"]
+        if broken:
             _record_attempt(ledger, row, last["category"], "failed",
-                            log_path, "import check failed")
+                            log_path, "import check failed: %s"
+                            % ", ".join(broken))
             attempts.append({"strategy": label + " (isolated)",
                              "result": "failed"})
             trail.append((label + " (isolated)", "failed",
                           last["category"]))
             return ("failed", {"category": last["category"],
                                "package": package,
-                               "root_cause": "pip ok but app "
-                               "imports fail in the isolated "
-                               "candidate",
+                               "root_cause": "pip ok but %s "
+                               "fail to import in the isolated "
+                               "candidate" % ", ".join(broken),
                                "evidence": []}, output)
         _record_attempt(ledger, row, "OK", "ok", log_path, "")
         attempts.append({"strategy": label + " (isolated)",
@@ -1409,6 +1445,51 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                                 "sysdeps"):
                     moved = True
                     break
+                continue
+            if cid == "native_android_api_level":
+                package = cand["params"].get("package")
+                detection = _strategy.detect_android_api_level()
+                ctx.say("android api detection: "
+                        "ANDROID_API_LEVEL=%s detection_source=%s "
+                        "device_api_level=%s selected=%s" % (
+                            detection.get("level") or "-",
+                            detection.get("source"),
+                            detection.get("device_api_level")
+                            or "-", detection.get("level") or "-"))
+                last["api_detection"] = {
+                    key: detection.get(key) for key in
+                    ("ok", "level", "source", "device_api_level",
+                     "reason")}
+                if not detection["ok"]:
+                    blocked.append("android api level unknown: %s"
+                                   % detection["reason"])
+                    continue
+                level = detection["level"]
+                build_env = os.environ.copy()
+                build_env["ANDROID_API_LEVEL"] = str(level)
+                alabel = "native_android_api_level"
+                cand_outcome = isolated_candidate(
+                    alabel, package, None, env=build_env,
+                    extra_imports=("pydantic_core",))
+                if cand_outcome[0] == "ok":
+                    ctx.recovered(alabel + " (isolated)",
+                                  "adopted %s (ANDROID_API_LEVEL"
+                                  "=%s)" % (cand_outcome[2], level))
+                    return {"attempts": attempts,
+                            "python": cand_outcome[1],
+                            "version": py_version,
+                            "venv": cand_outcome[2],
+                            "exe": sys.executable}
+                if cand_outcome[0] == "failed":
+                    failed = cand_outcome[1]
+                    last.update(category=failed["category"],
+                                package=failed["package"],
+                                evidence=failed["evidence"])
+                    last_output = cand_outcome[2]
+                    moved = True
+                    break
+                blocked.append("android api level %s already "
+                               "failed identically" % level)
                 continue
             if cid == "version":
                 package = cand["params"]["package"]
@@ -2853,7 +2934,8 @@ def run_pipeline(args):
         if ctx.state != state:
             ctx.step(state)
         block = _recovery.exhausted_report(info)
-        ctx.say(block)
+        ctx.say("auto-recovery exhausted: %s"
+                % info.get("root_cause", "?"))
         (LOGS / "errors").mkdir(exist_ok=True)
         (LOGS / "errors" / ("%s.log" % run_id)).write_text(
             redact(block), encoding="utf-8")

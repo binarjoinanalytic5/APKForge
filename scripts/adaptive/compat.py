@@ -2,8 +2,10 @@
 
 Decides BEFORE pip runs whether each requirement has an artifact
 this interpreter can actually install on this platform. On
-Termux/bionic only pure-Python wheels are pip-installable; native
-code needs the system toolchain (``pkg install clang`` / ``rust``).
+Termux/bionic only pure-Python wheels are pip-installable (plus
+android-tagged wheels from an explicitly allowlisted index, which
+are advisory-only and never auto-installed); native code needs the
+system toolchain (``pkg install clang`` / ``rust``).
 """
 from __future__ import annotations
 
@@ -163,12 +165,96 @@ def _machine_matches(machine, plat):
     return machine in plat
 
 
+def _is_android(fp):
+    if fp.get("termux") or fp.get("libc") == "bionic":
+        return True
+    return "android" in (fp.get("os") or "").lower()
+
+
+# Allowlisted external Android wheel indexes (advisory only).
+# Empty by default: no external source is ever consulted unless an
+# operator explicitly lists one here. Each entry:
+# {"name":..., "index_url": "https://.../simple",
+#  "packages": ["pydantic-core", ...]}.
+ANDROID_WHEEL_SOURCES = ()
+
+
+def _simple_index_files(html):
+    import re
+    from urllib.parse import unquote
+    found = []
+    for href in re.findall(r'href="([^"]+)"', html or ""):
+        link, _, frag = href.partition("#")
+        sha = frag[len("sha256="):] \
+            if frag.startswith("sha256=") else None
+        name = unquote(link.rsplit("/", 1)[-1])
+        if name.endswith(".whl") and all(
+                name != item[0] for item in found):
+            found.append((name, sha))
+    return found
+
+
+def android_wheel_candidates(package, version, interpreter,
+                             machine, sources=None):
+    """Advisory-only lookup in allowlisted Android wheel indexes.
+
+    Only allowlisted https indexes holding an explicitly listed
+    package are queried. A filename qualifies only with the running
+    cpXY ABI (or abi3), a native (non-none) ABI, and an android_
+    platform tag matching this arch. Returns [{filename, sha256,
+    source}]; advisory only, nothing installs anything.
+    """
+    package = normalize(package)
+    found = []
+    entries = ANDROID_WHEEL_SOURCES if sources is None else sources
+    for source in entries:
+        index = (source.get("index_url") or "").rstrip("/")
+        if not index.startswith("https://"):
+            continue
+        allowed = [normalize(item)
+                   for item in source.get("packages", [])]
+        if package not in allowed:
+            continue
+        try:
+            request = urllib.request.Request(
+                "%s/%s/" % (index, package),
+                headers={"User-Agent": "apkforge-bootstrap/2.0"})
+            with urllib.request.urlopen(request,
+                                        timeout=20) as response:
+                html = response.read().decode("utf-8", "replace")
+        except (urllib.error.URLError, TimeoutError, OSError,
+                ValueError):
+            continue
+        for filename, sha256 in _simple_index_files(html):
+            parts = filename[:-4].split("-")
+            if normalize(parts[0].replace("_", "-")) != package:
+                continue
+            if version and len(parts) > 1 and parts[1] != version:
+                continue
+            parsed = parse_wheel_filename(filename)
+            if parsed is None or "none" in parsed["abi"]:
+                continue
+            if interpreter not in parsed["abi"] \
+                    and "abi3" not in parsed["abi"]:
+                continue
+            pytags = parsed["python"]
+            if interpreter not in pytags and not (
+                    "abi3" in parsed["abi"] and any(
+                        tag.startswith("cp3") for tag in pytags)):
+                continue
+            if not any(plat.startswith("android_")
+                       and _machine_matches(machine, plat)
+                       for plat in parsed["platform"]):
+                continue
+            found.append({"filename": filename, "sha256": sha256,
+                          "source": source.get("name", "?")})
+    return found
+
+
 def wheel_matches(parsed, interpreter, version_tuple, fp):
     """True if this wheel installs on this interpreter+platform."""
     if parsed is None:
         return False
-    termux = bool(fp.get("termux"))
-    libc = fp.get("libc", "")
     machine = fp.get("arch_machine", "")
     system = (fp.get("os") or "").lower()
     py_ok = False
@@ -186,9 +272,17 @@ def wheel_matches(parsed, interpreter, version_tuple, fp):
         # cpXY abi must equal the running interpreter.
         if not any(tag == interpreter for tag in parsed["abi"]):
             return False
-    if termux or libc == "bionic":
-        return parsed["platform"] == ["any"] \
-            and parsed["abi"] == ["none"]
+    if _is_android(fp):
+        if parsed["platform"] == ["any"] \
+                and parsed["abi"] == ["none"]:
+            return True
+        # glibc linux wheels never install on bionic, even when the
+        # arch name matches; only android-tagged wheels qualify.
+        for plat in parsed["platform"]:
+            if plat.startswith("android_") \
+                    and _machine_matches(machine, plat):
+                return True
+        return False
     for plat in parsed["platform"]:
         if plat == "any" and parsed["abi"] == ["none"]:
             return True
@@ -255,7 +349,9 @@ def pypi_release(package, version=None, cache_dir=None,
     result = {"version": info.get("version", version or ""),
               "requires_python": info.get("requires_python"),
               "files": [{"filename": item.get("filename", ""),
-                         "yanked": bool(item.get("yanked"))}
+                         "yanked": bool(item.get("yanked")),
+                         "sha256": item.get("digests", {}).get(
+                             "sha256")}
                         for item in payload.get("urls", [])],
               "fetched_at": time.time(), "stale": False}
     if cache_dir is not None:
@@ -395,7 +491,9 @@ def assess_package(req, fp, pypi_fn=None):
     verdict = {"package": name, "requested": req.get("spec", ""),
                "via": req.get("via"), "status": "UNKNOWN",
                "version": None, "build": list(native.get(
-                   "build", [])), "notes": []}
+                   "build", [])), "notes": [],
+               "source": "pypi", "wheel": None,
+               "external_android_wheels": []}
     if release is None:
         verdict["notes"].append(
             "pypi unreachable and nothing cached")
@@ -415,7 +513,32 @@ def assess_package(req, fp, pypi_fn=None):
         parsed = parse_wheel_filename(item["filename"])
         if wheel_matches(parsed, interpreter, version_tuple, fp):
             verdict["status"] = "WHEEL_OK"
+            verdict["wheel"] = {
+                "filename": item["filename"],
+                "sha256": item.get("sha256"),
+                "source": "pypi"}
             return verdict
+    if _is_android(fp):
+        linux_wheels = [
+            item for item in wheels
+            if any(tag.split("_")[0] in ("manylinux",
+                                         "musllinux", "linux")
+                   for tag in (parse_wheel_filename(
+                       item["filename"]) or {}).get(
+                       "platform", []))]
+        if linux_wheels:
+            verdict["notes"].append(
+                "%d linux-tagged wheel(s) rejected on android "
+                "(bionic, not glibc)" % len(linux_wheels))
+        external = android_wheel_candidates(
+            name, verdict["version"], interpreter,
+            fp.get("arch_machine", ""))
+        verdict["external_android_wheels"] = external
+        if external:
+            verdict["notes"].append(
+                "%d allowlisted external android wheel(s) "
+                "listed (advisory only, never auto-installed)"
+                % len(external))
     sdists = [item for item in release.get("files", [])
               if item.get("filename", "").endswith(
                   (".tar.gz", ".zip")) and not item.get("yanked")]

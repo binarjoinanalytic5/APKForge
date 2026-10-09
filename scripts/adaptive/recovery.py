@@ -14,10 +14,10 @@ from pathlib import Path
 
 CATEGORIES = ("NETWORK_FAILURE", "DNS_FAILURE", "PACKAGE_NOT_FOUND",
               "VERSION_INCOMPATIBILITY", "PYTHON_INCOMPATIBILITY",
-              "WHEEL_UNAVAILABLE", "BUILD_TOOL_MISSING",
-              "COMPILER_MISSING", "RUST_MISSING",
+               "WHEEL_UNAVAILABLE", "BUILD_TOOL_MISSING",
+               "COMPILER_MISSING", "RUST_MISSING",
               "RUST_BUILD_FAILURE", "C_BUILD_FAILURE",
-              "BUILD_BACKEND_FAILURE",
+              "BUILD_BACKEND_FAILURE", "ANDROID_API_LEVEL_MISSING",
               "ABI_INCOMPATIBILITY", "ARCH_INCOMPATIBILITY",
               "JAVA_INCOMPATIBILITY", "PERMISSION_FAILURE",
               "DISK_SPACE", "CONFIG_ERROR", "PROJECT_ERROR",
@@ -170,6 +170,18 @@ def classify_failure(log_text):
                 "package": package, "evidence": evidence,
                 "root_cause": "package bounds exclude this "
                 "interpreter"}
+
+    # Precise cause first: a maturin metadata step that cannot see
+    # the Android API level is an environment gap, never a missing
+    # Rust toolchain, even though the log names maturin/rustc.
+    if hit("failed to determine android api level",
+           "android_api_level environment variable",
+           "set the android_api_level"):
+        return {"category": "ANDROID_API_LEVEL_MISSING",
+                "package": package, "evidence": evidence,
+                "root_cause": "maturin metadata step cannot "
+                "determine the Android API level "
+                "(ANDROID_API_LEVEL unset)"}
 
     # -- native build chain -----------------------------------------------
     # Rust/C markers are diagnostic on their own: a missing

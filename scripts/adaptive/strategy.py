@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -21,7 +22,15 @@ from . import recovery as _recovery
 
 IDENTITY_KEYS = ("step", "strategy", "package", "version", "python",
                  "env_fp", "toolchain_fp", "command_hash",
-                 "requirements_hash")
+                 "requirements_hash", "build_env_hash")
+
+
+def _ident_value(row, key):
+    """Identity value; pre-build-env rows count as empty env."""
+    value = row.get(key)
+    if value is None and key == "build_env_hash":
+        return _short(json.dumps({}, sort_keys=True))
+    return value
 
 # Bounded retries for flaky failures (identical fp, backoff, max 3).
 FLAKY_CATEGORIES = ("NETWORK_FAILURE", "DNS_FAILURE")
@@ -136,6 +145,96 @@ def toolchain_fingerprint(commands=None):
     return probe_toolchain(commands=commands)
 
 
+def _valid_api_level(text):
+    """An Android API level as int, else None (never invent one)."""
+    cleaned = (text or "").strip()
+    if not cleaned.isdigit():
+        return None
+    level = int(cleaned)
+    if 16 <= level <= 100:
+        return level
+    return None
+
+
+def _run_getprop(getprop_fn):
+    if getprop_fn is not None:
+        try:
+            return getprop_fn()
+        except Exception:
+            return None
+    if shutil.which("getprop") is None:
+        return None
+    try:
+        proc = subprocess.run(
+            ["getprop", "ro.build.version.sdk"],
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            timeout=10, text=True, errors="replace")
+    except OSError:
+        return None
+    if proc.returncode != 0:
+        return None
+    return proc.stdout
+
+
+def _device_api_level(getprop_fn=None,
+                      build_prop_path="/system/build.prop"):
+    """Device API level from getprop, else build.prop (int|None)."""
+    raw = _run_getprop(getprop_fn)
+    level = _valid_api_level(raw)
+    if level is not None:
+        return level, "getprop:ro.build.version.sdk"
+    try:
+        text = Path(build_prop_path).read_text(
+            encoding="utf-8", errors="replace")
+    except OSError:
+        return None, None
+    for line in text.splitlines():
+        if line.startswith("ro.build.version.sdk="):
+            level = _valid_api_level(line.split("=", 1)[1])
+            if level is not None:
+                return level, "file:%s" % build_prop_path
+            return None, None
+    return None, None
+
+
+def detect_android_api_level(env=None, getprop_fn=None,
+                             build_prop_path="/system/build.prop"):
+    """Detect the Android API level for maturin builds.
+
+    Precedence: a valid caller-provided ANDROID_API_LEVEL, then the
+    device level (getprop, else build.prop). Never invents a number:
+    when nothing validates, ok is False with a precise reason naming
+    every source tried.
+    """
+    env = os.environ if env is None else env
+    raw_env = (env.get("ANDROID_API_LEVEL") or "").strip()
+    notes = []
+    if raw_env and _valid_api_level(raw_env) is None:
+        notes.append("env ANDROID_API_LEVEL=%r invalid" % raw_env)
+    device, device_source = _device_api_level(
+        getprop_fn, build_prop_path)
+    if raw_env and _valid_api_level(raw_env) is not None:
+        return {"ok": True, "level": int(raw_env),
+                "source": "env:ANDROID_API_LEVEL",
+                "device_api_level": device,
+                "device_source": device_source,
+                "reason": "using caller-provided "
+                "ANDROID_API_LEVEL"}
+    if device is not None:
+        return {"ok": True, "level": device, "source":
+                device_source, "device_api_level": device,
+                "device_source": device_source,
+                "reason": "device api level detected"}
+    notes.append("no ANDROID_API_LEVEL in the environment")
+    notes.append("getprop ro.build.version.sdk unavailable "
+                 "or non-numeric")
+    notes.append("%s unreadable or without "
+                 "ro.build.version.sdk" % build_prop_path)
+    return {"ok": False, "level": None, "source": "none",
+            "device_api_level": None, "device_source": None,
+            "reason": "; ".join(notes)}
+
+
 def refine_category(category, probe, signals):
     """Log-based MISSING verdicts must survive a live probe.
 
@@ -151,7 +250,7 @@ def refine_category(category, probe, signals):
     if category == "RUST_MISSING" and rust_ok:
         rustc = tools["rustc"].get("version", "?")
         return ("RUST_BUILD_FAILURE",
-                "rustc %s present; the crate build itself failed"
+                "%s present; the crate build itself failed"
                 % rustc)
     if category == "COMPILER_MISSING" and c_ok:
         return ("C_BUILD_FAILURE",
@@ -180,14 +279,18 @@ def memory_status(memory, current_hash):
 def attempt_fingerprint(step, strategy, package, version,
                         python_version, arch, platform, command,
                         requirements_text, toolchain_fp,
-                        run_id=""):
+                        run_id="", build_env=None):
     """Full identity of one attempt (section 17).
 
     package/version here are the STRATEGY TARGET (an input, e.g.
     the pinned release for a version attempt, None for whole-file
     installs) -- never the diagnosed failure, which is an outcome
-    and must not destabilize identity across rounds.
+    and must not destabilize identity across rounds. build_env is
+    the build-only environment (e.g. ANDROID_API_LEVEL): a changed
+    build env is a changed attempt, never a repeat.
     """
+    env_map = {str(key): str(value) for key, value in sorted(
+        (build_env or {}).items())}
     row = {"kind": "attempt", "step": step, "strategy": strategy,
            "package": package, "version": version,
            "python": python_version, "arch": arch,
@@ -196,6 +299,9 @@ def attempt_fingerprint(step, strategy, package, version,
            "toolchain_fp": toolchain_fp.get("hash", ""),
            "command_hash": _short(command),
            "requirements_hash": _short(requirements_text),
+           "build_env": env_map,
+           "build_env_hash": _short(json.dumps(
+               env_map, sort_keys=True)),
            "run_id": run_id}
     row["attempt_id"] = _short(json.dumps(
         {key: row.get(key) for key in IDENTITY_KEYS},
@@ -228,22 +334,24 @@ def read_rows(ledger_path):
 
 def identical_attempt(ledger_path, fp_row):
     """A recorded failure with the exact same full fingerprint."""
-    wanted = {key: fp_row.get(key) for key in IDENTITY_KEYS}
+    wanted = {key: _ident_value(fp_row, key)
+              for key in IDENTITY_KEYS}
     for row in read_rows(ledger_path):
         if row.get("kind") != "attempt":
             continue
-        if all(row.get(key) == value
+        if all(_ident_value(row, key) == value
                for key, value in wanted.items()):
             return row
     return None
 
 
 def count_identical(ledger_path, fp_row):
-    wanted = {key: fp_row.get(key) for key in IDENTITY_KEYS}
+    wanted = {key: _ident_value(fp_row, key)
+              for key in IDENTITY_KEYS}
     return sum(
         1 for row in read_rows(ledger_path)
         if row.get("kind") == "attempt" and all(
-            row.get(key) == value
+            _ident_value(row, key) == value
             for key, value in wanted.items()))
 
 
@@ -428,6 +536,11 @@ def order_candidates(failure, caps):
         add("native", "plain pip install")
         return cands
 
+    if category == "ANDROID_API_LEVEL_MISSING":
+        add("native_android_api_level",
+            "retry with a detected ANDROID_API_LEVEL",
+            package=package)
+
     # Build/wheel/unknown failures: fix inputs, then install.
     if toolchain_langs and provision_ok:
         add("toolchain", "provision %s toolchain" % "+".join(
@@ -452,6 +565,18 @@ def blocked_ideas(failure, caps):
     """Untried paths that need the user (for the final report)."""
     ideas = []
     package = failure.get("package")
+    if failure.get("category") == "ANDROID_API_LEVEL_MISSING":
+        detection = failure.get("api_detection") or {}
+        if detection and not detection.get("ok"):
+            ideas.append("android api level unknown (%s); "
+                         "export ANDROID_API_LEVEL=<device api> "
+                         "and re-run" % detection.get(
+                             "reason", "?"))
+        else:
+            ideas.append("maturin still cannot see "
+                         "ANDROID_API_LEVEL; export it from "
+                         "`getprop ro.build.version.sdk` and "
+                         "re-run")
     if package and not caps.get("version_ok"):
         ideas.append("no %s release with a compatible wheel "
                      "found on PyPI" % package)
@@ -481,11 +606,12 @@ def explain(fp_row, verdict, previous=None):
             fp_row.get("strategy"),
             " for %s" % fp_row["package"]
             if fp_row.get("package") else " (whole file)"),
-        "FINGERPRINT: py=%s tc=%s req=%s cmd=%s" % (
+        "FINGERPRINT: py=%s tc=%s req=%s cmd=%s be=%s" % (
             fp_row.get("python"), (fp_row.get("toolchain_fp")
                                    or "?")[:8],
             (fp_row.get("requirements_hash") or "?")[:8],
-            (fp_row.get("command_hash") or "?")[:8])]
+            (fp_row.get("command_hash") or "?")[:8],
+            (fp_row.get("build_env_hash") or "?")[:8])]
     if verdict == "run":
         lines.append("DECISION   : RUN (%s)" % (
             "first attempt" if previous is None else
