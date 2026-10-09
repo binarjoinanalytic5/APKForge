@@ -761,6 +761,19 @@ def test_wheel_rejects_version_violation():
     assert "violates" in reason
 
 
+def test_wheel_resolver_can_skip_incompatible_dependency_pair():
+    older = WHEEL_BASE.replace("2.49.0", "2.46.3")
+    releases = _wheel_releases(
+        _wheel_asset(WHEEL_BASE), _wheel_asset(older))
+    newest, _ = C.resolve_android_wheel(
+        "", "cp314", "aarch64", 29, releases=releases)
+    assert newest["version"] == "2.49.0"
+    next_candidate, _ = C.resolve_android_wheel(
+        "", "cp314", "aarch64", 29, releases=releases,
+        excluded_versions={"2.49.0"})
+    assert next_candidate["version"] == "2.46.3"
+
+
 def test_wheel_rejects_api_above_device():
     cand, reason = C.resolve_android_wheel(
         "", "cp314", "aarch64", 23,
@@ -828,7 +841,8 @@ def test_fingerprint_changes_with_every_input():
         {"command": "pip install -r other"},
         {"requirements_text": "b\n"},
         {"toolchain_fp": _tools("f" * 12)},
-        {"build_env": {"ANDROID_API_LEVEL": "33"}}]
+        {"build_env": {"ANDROID_API_LEVEL": "33"}},
+        {"implementation_hash": "new-code-revision"}]
     for variant in variants:
         changed = dict(kw)
         changed.update(variant)
@@ -921,6 +935,28 @@ def test_ndk_classification():
         "ANDROID_NDK_MISSING"
 
 
+def test_missing_maturin_is_not_misclassified_as_dns():
+    log = ("Preparing metadata (pyproject.toml) failed\n"
+           "Traceback (most recent call last):\n"
+           "FileNotFoundError: [Errno 2] No such file or directory: "
+           "'maturin'\n")
+    result = R.classify_failure(log)
+    assert result["category"] == "BUILD_TOOL_MISSING"
+    assert "PATH" in result["root_cause"]
+
+
+def test_missing_rust_rlibs_is_a_broken_sysroot():
+    log = ("Building wheel for pydantic-core (pyproject.toml)\n"
+           "error: crate std required to be available in rlib format, "
+           "but was not found in this form\n"
+           "error: crate core required to be available in rlib format, "
+           "but was not found in this form\n"
+           "Failed to build pydantic-core\n")
+    result = R.classify_failure(log)
+    assert result["category"] == "RUST_BUILD_FAILURE"
+    assert "sysroot" in result["root_cause"].lower()
+
+
 def test_find_package_rejects_installable():
     log = ("Collecting installable==1.0\n"
            "  Failed to build `installable`\n"
@@ -995,6 +1031,8 @@ def test_execution_diff_kind():
         base) == "changed-requirements"
     assert S.execution_diff_kind(
         changed(build_env_hash="zzz"), base) == "changed-build-env"
+    assert S.execution_diff_kind(
+        changed(implementation_hash="new"), base) ==         "changed-implementation"
 
 
 # -- dependency graph + wheel constraints ---------------------------------------
@@ -1014,6 +1052,10 @@ def test_pydantic_for_core(monkeypatch):
     monkeypatch.setattr(C, "pypi_release", fake_release)
     assert C.pydantic_for_core("2.49.0") == "2.12.0"
     assert C.pydantic_for_core("9.9.9") is None
+    assert C.pydantic_for_core(
+        "2.49.0", pydantic_spec="<2.13") == "2.12.0"
+    assert C.pydantic_for_core(
+        "2.49.0", pydantic_spec=">=2.14") is None
 
 
 def test_package_in_graph(engine, tmp_path, monkeypatch):
@@ -1224,6 +1266,11 @@ def test_no_isolation_strategy_adopted(engine, ctx, tmp_path,
     seen = {}
 
     def fake_run(argv, *rest, **kw):
+        if "--no-build-isolation" in argv:
+            env = kw.get("env") or {}
+            seen["candidate_path"] = env.get(
+                "PATH", "").split(os.pathsep)[0]
+            seen["candidate_venv"] = env.get("VIRTUAL_ENV", "")
         if "-c" in argv and "layer1" in argv[-1]:
             layer = (kw.get("env") or {}).get(
                 "ANDROID_API_LEVEL", "")
@@ -1254,6 +1301,10 @@ def test_no_isolation_strategy_adopted(engine, ctx, tmp_path,
          "compiler_rust": True}, ledger, "e" * 12,
         offline=False)
     assert seen.get("noiso") is True
+    assert seen.get("candidate_path", "").endswith("/bin")
+    assert ".governance/venv-candidates" in seen.get(
+        "candidate_path", "")
+    assert seen.get("candidate_path", "").removesuffix("/bin") ==         seen.get("candidate_venv")
     assert result["python"] != "/nonexistent/python"
     rows = [entry for entry in ledger.entries()
             if entry.get("strategy")
