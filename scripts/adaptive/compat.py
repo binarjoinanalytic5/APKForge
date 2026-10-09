@@ -320,7 +320,8 @@ def dep_spec(dep):
     return normalize(head), ""
 
 
-def pydantic_for_core(core_version, cache_dir=None, limit=30):
+def pydantic_for_core(core_version, cache_dir=None, limit=30,
+                      pydantic_spec=""):
     """Newest pydantic release accepting this core (or None).
 
     Scans pydantic releases newest-first and returns the first
@@ -335,6 +336,8 @@ def pydantic_for_core(core_version, cache_dir=None, limit=30):
     except Exception:
         return None
     for version in (versions or [])[:limit]:
+        if not spec_satisfied(pydantic_spec, version):
+            continue
         try:
             meta = pypi_release("pydantic", version,
                                 cache_dir=cache_dir)
@@ -460,7 +463,7 @@ def resolve_android_wheel(constraint, interpreter, machine,
                           fetcher=None,
                           repo=ANDROID_PYDANTIC_CORE_REPO,
                           min_api=ANDROID_MIN_API,
-                          releases=None):
+                          releases=None, excluded_versions=None):
     """Pick a verified pydantic-core android wheel.
 
     Returns (candidate|None, reason). candidate: {filename,
@@ -482,6 +485,8 @@ def resolve_android_wheel(constraint, interpreter, machine,
                                                  timeout=20))
     matches = []
     skipped = {}
+    excluded_versions = {str(value) for value in
+                         (excluded_versions or ())}
 
     def drop(reason):
         skipped[reason] = skipped.get(reason, 0) + 1
@@ -497,6 +502,10 @@ def resolve_android_wheel(constraint, interpreter, machine,
                 continue
             parts = name[:-4].split("-")
             version = parts[1] if len(parts) > 1 else ""
+            if version in excluded_versions:
+                drop("version %s already rejected for dependency "
+                     "pair" % version)
+                continue
             if not spec_satisfied(constraint, version):
                 drop("version %s violates %s" % (
                     version, constraint or "constraint"))
