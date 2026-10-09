@@ -1054,11 +1054,11 @@ def _recovery_alternatives(category, package, profile, fp):
         "VERSION_INCOMPATIBILITY": ["relax the pin in "
                                     "backend/requirements.txt"],
         "RUST_BUILD_FAILURE": [
-            "the crate source failed to compile under rustc here; "
-            "try an older %s with wheels (see the PyPI files page)"
-            % package,
-            "free RAM and re-run (Termux source builds need "
-            "~1 GB free)"],
+            "on Termux, check and install the matching Rust target "
+            "standard libraries: pkg install "
+            "rust-std-aarch64-linux-android",
+            "verify rustc and the standard-library package versions "
+            "match before retrying the source build"],
         "C_BUILD_FAILURE": [
             "the C extension failed to compile; try an older %s "
             "with wheels" % package,
@@ -3089,76 +3089,69 @@ def pick_port(ctx, env, key, occupied_ok_url=None):
 
 
 def ensure_services(ctx, env, venv_python):
-    backend_port = pick_port(ctx, env, "APKFORGE_PORT",
-                             "http://127.0.0.1:%s" % env["APKFORGE_PORT"])
-    web_port = pick_port(ctx, env, "APKFORGE_WEB_PORT")
+    backend_port = pick_port(
+        ctx, env, "APKFORGE_PORT",
+        "http://127.0.0.1:%s" % env["APKFORGE_PORT"]
+    )
+    # Frontend is served by FastAPI from the same origin/port.
+    web_port = backend_port
     base_url = "http://127.0.0.1:%d" % backend_port
-    web_url = "http://127.0.0.1:%d" % web_port
+    web_url = base_url
 
     backend = read_pid("backend")
     if backend and api_healthy(base_url):
-        ctx.say("backend already running (pid %d) → reuse"
-                % backend["pid"])
+        ctx.say("backend already running (pid %d) → reuse" % backend["pid"])
     else:
         if backend:
             stop_service("backend", ctx)
+
+        dist = ROOT / "frontend" / "dist"
+        if not (dist / "index.html").is_file():
+            raise RuntimeError("frontend dist missing; build first")
+
         (LOGS / "server").mkdir(parents=True, exist_ok=True)
         pid = spawn_detached(
-            [str(venv_python), "-m", "uvicorn", "app.main:app",
-             "--app-dir", "backend", "--host", "127.0.0.1",
-             "--port", str(backend_port)],
-            LOGS / "server" / "backend.log", service_env(env))
+            [
+                str(venv_python), "-m", "uvicorn", "app.main:app",
+                "--app-dir", "backend", "--host", "127.0.0.1",
+                "--port", str(backend_port)
+            ],
+            LOGS / "server" / "backend.log",
+            service_env(env)
+        )
         write_pid("backend", pid, backend_port)
-        ctx.say("backend starting (pid %d, port %d)" % (pid,
-                                                        backend_port))
+        ctx.say(
+            "backend+frontend starting (pid %d, port %d)"
+            % (pid, backend_port)
+        )
+
         deadline = time.time() + 45
         while time.time() < deadline:
             if api_healthy(base_url):
                 break
             if not pid_alive(pid):
                 raise RuntimeError(
-                    "backend died on boot (see logs/server/backend.log)")
+                    "backend died on boot (see logs/server/backend.log)"
+                )
             time.sleep(0.5)
         else:
             raise RuntimeError("backend never became healthy")
 
-    frontend = read_pid("frontend")
-    dist = ROOT / "frontend" / "dist"
-    web_ok = False
     try:
         code, body = http_json("GET", web_url + "/", timeout=5)
-        web_ok = code == 200 and "APKForge" in str(body)
-    except Exception:
-        web_ok = False
-    if frontend and web_ok:
-        ctx.say("frontend already running (pid %d) → reuse"
-                % frontend["pid"])
-    else:
-        if frontend:
-            stop_service("frontend", ctx)
-        if not (dist / "index.html").is_file():
-            raise RuntimeError("frontend dist missing; build first")
-        pid = spawn_detached(
-            [str(venv_python), "-m", "http.server", str(web_port),
-             "--bind", "127.0.0.1", "--directory", str(dist)],
-            LOGS / "server" / "frontend.log", service_env(env))
-        write_pid("frontend", pid, web_port)
-        ctx.say("frontend starting (pid %d, port %d)" % (pid, web_port))
-        deadline = time.time() + 20
-        while time.time() < deadline:
-            try:
-                code, body = http_json("GET", web_url + "/", timeout=5)
-                if code == 200 and "APKForge" in str(body):
-                    break
-            except Exception:
-                pass
-            if not pid_alive(pid):
-                raise RuntimeError("frontend server died on boot")
-            time.sleep(0.5)
-        else:
-            raise RuntimeError("frontend never became healthy")
-    return {"api_port": backend_port, "web_port": web_port,
-            "api_url": base_url, "web_url": web_url}
+        if code != 200 or "APKForge" not in str(body):
+            raise RuntimeError(
+                "frontend served by backend but index.html health check failed"
+            )
+    except Exception as exc:
+        raise RuntimeError("frontend origin check failed: %s" % exc)
+
+    return {
+        "api_port": backend_port,
+        "web_port": web_port,
+        "api_url": base_url,
+        "web_url": web_url,
+    }
 
 
 # -- health + smoke ---------------------------------------------------------
@@ -3173,15 +3166,12 @@ def health_checks(ctx, env, urls):
                                         detail))
 
     backend = read_pid("backend")
-    frontend = read_pid("frontend")
     add("backend.process", bool(backend),
         "pid %s" % (backend and backend["pid"]))
-    add("frontend.process", bool(frontend),
-        "pid %s" % (frontend and frontend["pid"]))
     add("backend.port", not port_free(urls["api_port"]),
         str(urls["api_port"]))
-    add("frontend.port", not port_free(urls["web_port"]),
-        str(urls["web_port"]))
+    add("frontend.origin", urls["web_url"] == urls["api_url"],
+        "same-origin")
     try:
         code, body = http_json("GET", urls["api_url"] + "/api/v1/health")
         add("api.health", code == 200 and body.get("status") == "ok",

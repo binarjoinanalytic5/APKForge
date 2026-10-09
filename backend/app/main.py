@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -153,6 +154,13 @@ def create_app():
     app.include_router(update_routes.router)
     app.include_router(notification_routes.router)
     app.include_router(admin_routes.router)
+
+    # Serve the built Vue frontend from the same origin as the API.
+    # API and WebSocket routes above remain authoritative under /api/*.
+    frontend_dist = ROOT / "frontend" / "dist"
+    if (frontend_dist / "index.html").is_file():
+        app.mount("/", StaticFiles(directory=str(frontend_dist), html=True), name="frontend")
+
     return app
 
 

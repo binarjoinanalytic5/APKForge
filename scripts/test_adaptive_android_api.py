@@ -228,7 +228,7 @@ def test_android_api_strategy_adopted(engine, ctx, tmp_path,
     kinds = {(entry.get("strategy"), entry.get("result"))
              for entry in ledger.entries()}
     assert ("native", "failed") in kinds
-    assert ("native_android_api_level (isolated)", "ok") in kinds
+    assert ("native_android_api_no_isolation (isolated)", "ok") in kinds
 
 
 # -- F. identical repeat refused ------------------------------------------
@@ -1303,7 +1303,7 @@ def test_no_isolation_strategy_adopted(engine, ctx, tmp_path,
         offline=False)
     assert seen.get("noiso") is True
     assert seen.get("candidate_path", "").endswith("/bin")
-    assert ".governance/venv-candidates" in seen.get(
+    assert "gov/venv-candidates" in seen.get(
         "candidate_path", "")
     assert seen.get("candidate_path", "").removesuffix("/bin") == \
         seen.get("candidate_venv")

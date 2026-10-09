@@ -133,6 +133,63 @@ def probe_toolchain(python_exe=None, commands=None):
                 entry["path"] = path
                 entry["ok"] = bool(entry.get("version"))
             tools[name] = entry
+    # Fingerprint the actual Rust target stdlibs, not only rustc's
+    # version. Termux can have rustc installed while its matching
+    # host .rlib package is missing or stale.
+    rust_path = tools.get("rustc", {}).get("path")
+    rust_std = {
+        "host": "",
+        "libdir": "",
+        "required_rlibs": {},
+        "complete": False,
+    }
+    if rust_path:
+        try:
+            info = subprocess.run(
+                [rust_path, "-vV"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                timeout=15,
+                text=True,
+                errors="replace",
+            )
+            host = next(
+                (line.split(":", 1)[1].strip()
+                 for line in (info.stdout or "").splitlines()
+                 if line.startswith("host:")),
+                "",
+            )
+            if info.returncode == 0 and host:
+                lib = subprocess.run(
+                    [rust_path, "--print", "target-libdir",
+                     "--target", host],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    timeout=15,
+                    text=True,
+                    errors="replace",
+                )
+                libdir = Path(lib.stdout.strip()) if (
+                    lib.returncode == 0 and lib.stdout.strip()
+                ) else None
+                required = {}
+                for crate in ("std", "core", "alloc",
+                              "compiler_builtins"):
+                    required[crate] = sorted(
+                        item.name for item in libdir.glob(
+                            "lib" + crate + "-*.rlib")
+                        if item.is_file()
+                    ) if libdir and libdir.is_dir() else []
+                rust_std = {
+                    "host": host,
+                    "libdir": str(libdir or ""),
+                    "required_rlibs": required,
+                    "complete": all(required.values()),
+                }
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+    tools["rust_std"] = rust_std
+
     tools["python"] = {"path": sys.executable, "version":
                        "%d.%d.%d" % sys.version_info[:3],
                        "ok": True}
