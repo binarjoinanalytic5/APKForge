@@ -142,8 +142,8 @@ def classify_failure(log_text, context=None):
                 "root_cause": "maturin is installed in the candidate "
                 "environment but its executable is not reachable on "
                 "the build subprocess PATH"}
-    if hit("required to be available in rlib format",
-           "not found in this form"):
+    if hit("required to be available in rlib format") and \
+            hit("not found in this form"):
         return {"category": "RUST_BUILD_FAILURE", "package": package,
                 "evidence": evidence,
                 "root_cause": "Rust sysroot lacks required standard "
