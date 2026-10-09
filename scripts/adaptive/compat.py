@@ -9,6 +9,7 @@ system toolchain (``pkg install clang`` / ``rust``).
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import time
 import urllib.error
@@ -251,6 +252,331 @@ def android_wheel_candidates(package, version, interpreter,
     return found
 
 
+# Specialized recovery source: prebuilt pydantic-core wheels for
+# Android/Termux (CI-built, digest-pinned). Consulted ONLY by the
+# android_prebuilt_wheel strategy for pydantic-core -- never as a
+# general index, never for other packages.
+ANDROID_PYDANTIC_CORE_REPO = "Eutalix/android-pydantic-core"
+ANDROID_MIN_API = 24
+
+
+def spec_satisfied(spec, version):
+    """True when version satisfies a spec (comma-AND clauses)."""
+    spec = (spec or "").strip()
+    if not spec:
+        return True
+    current = _version_key(version)
+    for clause in spec.split(","):
+        clause = clause.strip().replace(" ", "")
+        if not clause:
+            continue
+        matched = False
+        for operator in ("===", "==", "~=", ">=", "<=", "!=",
+                         ">", "<"):
+            if not clause.startswith(operator):
+                continue
+            matched = True
+            want = _version_key(clause[len(operator):])
+            if operator in ("==", "===") and current != want:
+                return False
+            if operator == "!=" and current == want:
+                return False
+            if operator == ">=" and current < want:
+                return False
+            if operator == "<=" and current > want:
+                return False
+            if operator == ">" and current <= want:
+                return False
+            if operator == "<" and current >= want:
+                return False
+            if operator == "~=":
+                nums = clause[len(operator):].split(".")
+                try:
+                    ints = [int(part) for part in nums]
+                except ValueError:
+                    return False
+                if len(ints) >= 2:
+                    upper = tuple(ints[:-2] + [ints[-2] + 1])
+                else:
+                    upper = (ints[0] + 1,)
+                if current < want or current >= upper:
+                    return False
+            break
+        if not matched:
+            if current != _version_key(clause):
+                return False
+    return True
+
+
+def dep_spec(dep):
+    """(name, spec) from a requires_dist entry (markers dropped)."""
+    head = (dep or "").split(";")[0].strip()
+    for index, char in enumerate(head):
+        if char in "<>~=!":
+            return normalize(head[:index]), head[index:].strip()
+    parts = head.split()
+    if len(parts) > 1:
+        return normalize(parts[0]), " ".join(parts[1:])
+    return normalize(head), ""
+
+
+def android_arch_aliases(machine):
+    """Accepted android arch tokens for this machine."""
+    machine = (machine or "").lower()
+    if machine in ("x86_64", "amd64"):
+        return {"x86_64"}
+    if machine in ("aarch64", "arm64", "arm64_v8a"):
+        return {"aarch64", "arm64", "arm64_v8a"}
+    if machine.startswith("armv7") or machine == "armeabi_v7a":
+        return {"armv7l", "armeabi_v7a"}
+    if machine in ("x86", "i686", "i386"):
+        return {"x86", "i686"}
+    return {machine}
+
+
+def parse_android_tag(plat):
+    """(api:int|None, arch:str|None) from android_<api>_<arch>."""
+    parts = (plat or "").split("_")
+    if len(parts) < 3 or parts[0] != "android" \
+            or not parts[1].isdigit():
+        return None, None
+    return int(parts[1]), "_".join(parts[2:])
+
+
+def _http_bytes(url, timeout=30):
+    request = urllib.request.Request(
+        url, headers={"User-Agent": "apkforge-bootstrap/2.0"})
+    with urllib.request.urlopen(request, timeout=timeout) as resp:
+        return resp.read()
+
+
+def fetch_github_releases(repo, cache_dir=None, ttl=86400,
+                          timeout=20, fetcher=None):
+    """Reduced release metadata (cached; [] when unreachable).
+
+    [{tag, assets:[{name, url, digest, size}]}]. fetcher(url)->bytes
+    is injectable for tests.
+    """
+    path = None
+    if cache_dir is not None:
+        path = Path(cache_dir) / "android-wheels" / (
+            "%s.json" % repo.replace("/", "-"))
+        if path.is_file():
+            try:
+                cached = json.loads(path.read_text(
+                    encoding="utf-8"))
+            except ValueError:
+                cached = None
+            if cached and time.time() - cached.get(
+                    "fetched_at", 0) < ttl:
+                return cached.get("releases", [])
+    fetch = fetcher or (lambda url: _http_bytes(url,
+                                                 timeout=timeout))
+    try:
+        payload = json.loads(fetch(
+            "https://api.github.com/repos/%s/releases?per_page=30"
+            % repo).decode("utf-8"))
+    except Exception:
+        return []
+    if not isinstance(payload, list):
+        return []
+    reduced = [{"tag": item.get("tag_name", ""),
+                "assets": [{"name": asset.get("name", ""),
+                            "url": asset.get(
+                                "browser_download_url", ""),
+                            "digest": asset.get("digest", ""),
+                            "size": asset.get("size", 0)}
+                           for asset in item.get("assets", [])]}
+               for item in payload]
+    if path is not None:
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(
+                {"releases": reduced,
+                 "fetched_at": time.time()}), encoding="utf-8")
+        except OSError:
+            pass
+    return reduced
+
+
+def _checksum_for(assets, filename, fetcher):
+    """sha256 from a release checksum file (None when absent)."""
+    for asset in assets:
+        lowered = asset.get("name", "").lower()
+        if lowered not in ("sha256sums", "sha256sums.txt",
+                           "checksums.txt", "checksums-sha256.txt") \
+                and not lowered.endswith(".sha256"):
+            continue
+        url = asset.get("url", "")
+        if not url:
+            continue
+        try:
+            text = fetcher(url).decode("utf-8", "replace")
+        except Exception:
+            continue
+        for line in text.splitlines():
+            bits = line.strip().split()
+            if len(bits) >= 2 and bits[-1].lstrip("*") == filename:
+                digest = bits[0].strip().lower()
+                if len(digest) == 64 and all(
+                        char in "0123456789abcdef"
+                        for char in digest):
+                    return digest
+    return None
+
+
+def resolve_android_wheel(constraint, interpreter, machine,
+                          device_api, cache_dir=None,
+                          fetcher=None,
+                          repo=ANDROID_PYDANTIC_CORE_REPO,
+                          min_api=ANDROID_MIN_API,
+                          releases=None):
+    """Pick a verified pydantic-core android wheel.
+
+    Returns (candidate|None, reason). candidate: {filename,
+    version, url, sha256, source, api, arch}. releases injectable
+    for tests (skips fetch). Absence of a trusted digest rejects.
+    """
+    if device_api is None:
+        return None, "device android api unknown; cannot " \
+            "verify min-api"
+    if releases is None:
+        releases = fetch_github_releases(
+            repo, cache_dir=cache_dir, fetcher=fetcher)
+    if not releases:
+        return None, "release metadata unreachable for %s" % repo
+    aliases = android_arch_aliases(machine)
+    flat = {item.replace("_", "") for item in aliases}
+    prefix = "https://github.com/%s/releases/download/" % repo
+    fetch = fetcher or (lambda url: _http_bytes(url,
+                                                 timeout=20))
+    matches = []
+    skipped = {}
+
+    def drop(reason):
+        skipped[reason] = skipped.get(reason, 0) + 1
+
+    for release in releases:
+        assets = release.get("assets", [])
+        for asset in assets:
+            name = asset.get("name", "")
+            if not name.endswith(".whl"):
+                continue
+            if normalize(name[:-4].split("-")[0].replace(
+                    "_", "-")) != "pydantic-core":
+                continue
+            parts = name[:-4].split("-")
+            version = parts[1] if len(parts) > 1 else ""
+            if not spec_satisfied(constraint, version):
+                drop("version %s violates %s" % (
+                    version, constraint or "constraint"))
+                continue
+            parsed = parse_wheel_filename(name)
+            if parsed is None:
+                drop("unparseable filename")
+                continue
+            if "none" in parsed["abi"]:
+                drop("pure-python wheel (pypi covers it)")
+                continue
+            if interpreter not in parsed["abi"] \
+                    and "abi3" not in parsed["abi"]:
+                drop("abi mismatch (need %s)" % interpreter)
+                continue
+            pytags = parsed["python"]
+            if interpreter not in pytags and not (
+                    "abi3" in parsed["abi"] and any(
+                        tag.startswith("cp3")
+                        for tag in pytags)):
+                drop("python tag mismatch (need %s)"
+                     % interpreter)
+                continue
+            hits = [parse_android_tag(plat)
+                    for plat in parsed["platform"]]
+            hits = [(api, arch) for api, arch in hits
+                    if api is not None]
+            if not hits:
+                drop("no android platform tag")
+                continue
+            api, arch = hits[0]
+            if arch not in aliases \
+                    and arch.replace("_", "") not in flat:
+                drop("arch %s not this device (%s)" % (
+                    arch, machine))
+                continue
+            if api < min_api or api > device_api:
+                drop("android api %d outside [%d, device %d]"
+                     % (api, min_api, device_api))
+                continue
+            url = asset.get("url", "")
+            if not url.startswith(prefix):
+                drop("download url outside %s" % repo)
+                continue
+            sha = None
+            digest = asset.get("digest", "")
+            if digest.startswith("sha256:") \
+                    and len(digest) == 71:
+                sha = digest[len("sha256:"):]
+            if sha is None:
+                sha = _checksum_for(assets, name, fetch)
+            if sha is None:
+                drop("no trusted sha256 (no digest, no "
+                     "checksum file)")
+                continue
+            matches.append({"filename": name, "version": version,
+                            "url": url, "sha256": sha,
+                            "source": "%s@%s" % (
+                                repo, release.get("tag", "?")),
+                            "api": api, "arch": arch})
+    if not matches:
+        detail = ", ".join("%s x%d" % (reason, count)
+                           for reason, count in sorted(
+                               skipped.items()))
+        return None, "no compatible asset (%s)" % (
+            detail or "no wheel assets")
+    matches.sort(key=lambda item: _version_key(item["version"]),
+                 reverse=True)
+    return matches[0], "ok"
+
+
+def fetch_verified_wheel(url, expected_sha, dest_path,
+                         fetcher=None, timeout=300,
+                         max_bytes=100 * 1024 * 1024):
+    """Download url to dest (reuse cached), verified by sha256.
+
+    Returns (path|None, reason). A mismatch deletes the file and
+    rejects; nothing unverified is ever returned.
+    """
+    dest = Path(dest_path)
+    if dest.is_file():
+        try:
+            data = dest.read_bytes()
+        except OSError:
+            data = b""
+        if data and hashlib.sha256(data).hexdigest() == \
+                expected_sha:
+            return str(dest), "cached verified copy reused"
+        try:
+            dest.unlink()
+        except OSError:
+            pass
+    fetch = fetcher or (lambda link: _http_bytes(
+        link, timeout=timeout))
+    try:
+        data = fetch(url)
+    except Exception as exc:
+        return None, "download failed: %s" % exc
+    if len(data) > max_bytes:
+        return None, "download exceeds %d bytes" % max_bytes
+    if hashlib.sha256(data).hexdigest() != expected_sha:
+        return None, "sha256 mismatch: file rejected"
+    try:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(data)
+    except OSError as exc:
+        return None, "cannot cache wheel: %s" % exc
+    return str(dest), "downloaded and verified"
+
+
 def wheel_matches(parsed, interpreter, version_tuple, fp):
     """True if this wheel installs on this interpreter+platform."""
     if parsed is None:
@@ -348,6 +674,7 @@ def pypi_release(package, version=None, cache_dir=None,
     info = payload.get("info", {})
     result = {"version": info.get("version", version or ""),
               "requires_python": info.get("requires_python"),
+              "requires_dist": info.get("requires_dist", []),
               "files": [{"filename": item.get("filename", ""),
                          "yanked": bool(item.get("yanked")),
                          "sha256": item.get("digests", {}).get(

@@ -21,8 +21,9 @@ from . import compat as _compat
 from . import recovery as _recovery
 
 IDENTITY_KEYS = ("step", "strategy", "package", "version", "python",
-                 "env_fp", "toolchain_fp", "command_hash",
-                 "requirements_hash", "build_env_hash")
+                 "arch", "platform", "env_fp", "toolchain_fp",
+                 "command_hash", "requirements_hash",
+                 "build_env_hash")
 
 
 def _ident_value(row, key):
@@ -377,8 +378,12 @@ def last_failure(ledger_path, step="DEPENDENCIES"):
         return {"package": memory.get("package"),
                 "version": memory.get("version"),
                 "category": memory.get("category") or "UNKNOWN",
+                "diagnosed_package": memory.get(
+                    "diagnosed_package"),
+                "detail": memory.get("detail", ""),
                 "python": memory.get("python"),
                 "strategy": memory.get("strategy"),
+                "attempt_id": memory.get("attempt_id"),
                 "ts": memory.get("ts", ""),
                 "log": memory.get("log", ""),
                 "toolchain_fp": memory.get("toolchain_fp")}
@@ -387,9 +392,98 @@ def last_failure(ledger_path, step="DEPENDENCIES"):
     return {"package": classified["package"],
             "version": None,
             "category": classified["category"],
+            "diagnosed_package": classified["package"],
+            "detail": memory.get("detail", ""),
             "python": None,
             "strategy": memory.get("strategy"),
+            "attempt_id": None,
             "ts": memory.get("ts", ""), "log": "", "toolchain_fp": None}
+
+
+def _saved_evidence(memory):
+    """Historical evidence for reclassification: (text, source)."""
+    log_path = memory.get("log") or ""
+    if log_path:
+        try:
+            text = Path(log_path).read_text(
+                encoding="utf-8", errors="replace")
+            if text.strip():
+                return text[-262144:], "log"
+        except OSError:
+            pass
+    detail = memory.get("detail") or ""
+    if detail.strip():
+        return detail, "detail"
+    return "", "none"
+
+
+def restore_failure_context(ledger_path):
+    """Failure memory with legacy evidence re-run through the
+    current classifier.
+
+    Returns {"memory", "category", "package" (diagnosed),
+    "target_package", "diagnosed_package", "version", "strategy",
+    "ts", "log", "reclassified", "reclassify_note",
+    "evidence_source"}. History rows are never rewritten; the
+    reclassification is diagnostic context only.
+    """
+    memory = last_failure(ledger_path)
+    if not memory:
+        return {"memory": None, "category": "-",
+                "package": None, "target_package": None,
+                "diagnosed_package": None, "version": None,
+                "strategy": None, "ts": "", "log": "",
+                "reclassified": False, "reclassify_note": "",
+                "evidence_source": "none"}
+    stored_category = memory.get("category") or "UNKNOWN"
+    stored_package = memory.get("diagnosed_package")
+    text, source = _saved_evidence(memory)
+    category, package, note = stored_category, stored_package, ""
+    if text:
+        classified = _recovery.classify_failure(text)
+        if classified["category"] != "UNKNOWN":
+            category = classified["category"]
+        if classified["package"]:
+            package = classified["package"]
+    changed = category != stored_category or (
+        package and not stored_package)
+    if changed:
+        note = "%s/%s -> %s/%s (from saved %s)" % (
+            stored_category, stored_package or "-",
+            category, package or "-", source)
+    return {"memory": memory, "category": category,
+            "package": package,
+            "target_package": memory.get("package"),
+            "diagnosed_package": package,
+            "version": memory.get("version"),
+            "strategy": memory.get("strategy"),
+            "ts": memory.get("ts", ""),
+            "log": memory.get("log", ""),
+            "reclassified": bool(changed),
+            "reclassify_note": note,
+            "evidence_source": source if text else "none"}
+
+
+def record_reclassification(ledger_path, ref, old_category,
+                            new_category, diagnosed_package):
+    """Append one reclassify note (history rows untouched)."""
+    for row in read_rows(ledger_path):
+        if row.get("kind") == "reclassify" \
+                and row.get("ref") == ref \
+                and row.get("new_category") == new_category:
+            return False
+    entry = {"kind": "reclassify", "step": "DEPENDENCIES",
+             "ref": ref, "old_category": old_category,
+             "new_category": new_category,
+             "diagnosed_package": diagnosed_package,
+             "ts": now_ts(), "result": "info"}
+    path = Path(ledger_path)
+    try:
+        with open(path, "a", encoding="utf-8") as handle:
+            handle.write(json.dumps(entry) + "\n")
+    except OSError:
+        return False
+    return True
 
 
 def extract_signals(log_text):
@@ -505,7 +599,8 @@ def order_candidates(failure, caps):
         "NO_ARTIFACT", "ABI_INCOMPATIBILITY", "RUST_MISSING",
         "RUST_BUILD_FAILURE", "COMPILER_MISSING",
         "C_BUILD_FAILURE", "BUILD_TOOL_MISSING",
-        "BUILD_BACKEND_FAILURE", "UNKNOWN")
+        "BUILD_BACKEND_FAILURE", "ANDROID_API_LEVEL_MISSING",
+        "UNKNOWN")
     provision_ok = caps.get("provision_ok") and not caps.get(
         "offline")
     if category in ("NETWORK_FAILURE", "DNS_FAILURE"):
@@ -536,6 +631,14 @@ def order_candidates(failure, caps):
         add("native", "plain pip install")
         return cands
 
+    if package and _compat.normalize(package) == "pydantic-core" \
+            and caps.get("termux") and category in (
+                "ANDROID_API_LEVEL_MISSING", "RUST_BUILD_FAILURE",
+                "RUST_MISSING", "WHEEL_UNAVAILABLE", "NO_ARTIFACT",
+                "BUILD_TOOL_MISSING"):
+        add("android_prebuilt_wheel",
+            "prebuilt android wheel for pydantic-core",
+            package=package)
     if category == "ANDROID_API_LEVEL_MISSING":
         add("native_android_api_level",
             "retry with a detected ANDROID_API_LEVEL",
@@ -583,8 +686,9 @@ def blocked_ideas(failure, caps):
     if not caps.get("alternate_pythons") and failure.get(
             "category") in ("PYTHON_INCOMPATIBILITY",
                             "WHEEL_UNAVAILABLE", "NO_ARTIFACT",
-                            "RUST_MISSING", "COMPILER_MISSING",
-                            "BUILD_TOOL_MISSING"):
+                            "RUST_MISSING", "RUST_BUILD_FAILURE",
+                            "COMPILER_MISSING", "BUILD_TOOL_MISSING",
+                            "ANDROID_API_LEVEL_MISSING"):
         if caps.get("termux"):
             ideas.append("no alternate python on device; try "
                          "'pkg install python3.12' (needs a repo "

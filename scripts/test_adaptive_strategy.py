@@ -127,7 +127,8 @@ def test_order_prefers_changed_strategies():
          "direct": {"pydantic"}, "alternate_pythons": [],
          "signals": []})
     ids = [item["id"] for item in rust]
-    assert ids[0] == "toolchain"
+    assert ids[0] == "android_prebuilt_wheel"
+    assert "toolchain" in ids
     assert "native" in ids
     assert "minimal" not in ids  # required package: never dropped
 

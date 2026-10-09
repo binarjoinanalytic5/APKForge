@@ -960,8 +960,9 @@ def _recovery_alternatives(category, package, profile, fp):
             "upgrade pip/setuptools/wheel in the venv, then re-run",
             "try an older %s with wheels" % package],
         "ANDROID_API_LEVEL_MISSING": [
-            "retry the build with a detected ANDROID_API_LEVEL "
-            "(automatic android-api strategy)",
+            "a verified prebuilt android wheel is tried first, "
+            "else the build retries with a detected "
+            "ANDROID_API_LEVEL (automatic)",
             "manual fallback: export ANDROID_API_LEVEL=$(getprop "
             "ro.build.version.sdk), then re-run"],
     }
@@ -1035,6 +1036,68 @@ def _resolve_version_pick(package, category, fp, cache_dir):
     return None
 
 
+def _pydantic_core_constraint(req_path, cache_dir):
+    """pydantic-core spec implied by the resolved pydantic (or '').
+
+    Reads the pydantic spec from requirements, resolves the newest
+    satisfying release on PyPI, and returns its pydantic-core
+    constraint (usually an exact pin).
+    """
+    try:
+        reqs = _compat.parse_requirements(req_path)
+    except OSError:
+        return ""
+    spec = ""
+    for req in reqs:
+        if "name" in req and _compat.normalize(
+                req["name"]) == "pydantic":
+            spec = req.get("spec", "")
+            break
+    else:
+        return ""
+    try:
+        versions = _compat.pypi_versions("pydantic",
+                                         cache_dir=cache_dir)
+    except Exception:
+        return ""
+    pick = None
+    for version in versions:
+        if _compat.spec_satisfied(spec, version):
+            pick = version
+            break
+    if pick is None:
+        return ""
+    try:
+        meta = _compat.pypi_release("pydantic", pick,
+                                    cache_dir=cache_dir)
+    except Exception:
+        return ""
+    if not meta:
+        return ""
+    for dep in meta.get("requires_dist", []) or []:
+        name, wanted = _compat.dep_spec(dep)
+        if name == "pydantic-core":
+            return wanted
+    return ""
+
+
+def _apt_pkg_available(ctx, pkg):
+    """True/False/None(unknown) for an apt-cache install candidate."""
+    if shutil.which("apt-cache") is None:
+        return None
+    try:
+        code, output = run(["apt-cache", "policy", pkg], ctx,
+                           timeout=60)
+    except Exception:
+        return None
+    if code != 0:
+        return None
+    for line in output.splitlines():
+        if "Candidate:" in line:
+            return "(none)" not in line
+    return None
+
+
 def _python_for_wheels(package, reqs, fp, cache_dir):
     """Newest older minor whose wheels beat this runtime (or None)."""
     current = tuple(sys.version_info[:2])
@@ -1083,24 +1146,38 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
     direct = {item["name"] for item in parsed_reqs
               if "name" in item}
     native_reqs = [item for item in parsed_reqs if "name" in item]
-    memory = _strategy.last_failure(ledger.path)
+    restored = _strategy.restore_failure_context(ledger.path)
+    memory = restored["memory"] or {}
+    if restored["evidence_source"] == "log":
+        ctx.say("legacy failure log loaded: %s" % restored["log"])
+    if restored["reclassified"]:
+        ctx.say("previous category reclassified: %s"
+                % restored["reclassify_note"])
+        _strategy.record_reclassification(
+            ledger.path, memory.get("attempt_id") or "legacy",
+            memory.get("category") or "UNKNOWN",
+            restored["category"], restored["diagnosed_package"])
+    if restored["diagnosed_package"]:
+        ctx.say("diagnosed package: %s"
+                % restored["diagnosed_package"])
     mem_status = _strategy.memory_status(
         memory, _toolchain_now(env_hash).get("hash"))
     if mem_status["status"] == "ACTIVE":
-        last = {"category": memory.get("category") or "-",
-                "package": memory.get("package"),
-                "version": memory.get("version"), "evidence": []}
+        last = {"category": restored["category"],
+                "package": restored["diagnosed_package"],
+                "version": restored["version"], "evidence": []}
         ctx.say("failure memory ACTIVE: %s (%s) — selecting a "
                 "changed strategy, never a bare repeat" % (
-                    memory.get("package") or "?",
-                    memory.get("category") or "?"))
+                    restored["diagnosed_package"] or "?",
+                    restored["category"]))
     else:
         last = {"category": "-",
-                "package": memory.get("package"),
-                "version": memory.get("version"), "evidence": []}
+                "package": restored["diagnosed_package"],
+                "version": restored["version"], "evidence": []}
         if memory:
-            hint = ("; package hint kept: %s" % memory.get("package")
-                    if memory.get("package") else "")
+            hint = ("; package hint kept: %s"
+                    % restored["diagnosed_package"]
+                    if restored["diagnosed_package"] else "")
             ctx.say("failure memory %s (%s) — re-probing from "
                     "scratch%s" % (mem_status["status"],
                                    mem_status["reason"], hint))
@@ -1218,6 +1295,7 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                     package=classified["package"],
                     evidence=classified["evidence"])
         row["probe"] = probe.get("tools", {})
+        row["diagnosed_package"] = classified["package"]
         _record_attempt(ledger, row, classified["category"],
                         "failed", log_path, output)
         attempts.append({"strategy": strategy, "result": "failed"})
@@ -1297,16 +1375,18 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
         return nonlocal_provisioned
 
     def isolated_candidate(label, package, version, env=None,
-                           extra_imports=()):
+                           extra_imports=(), pre_install=(),
+                           pip_check=False, provenance=None):
         """Fresh venv, same interpreter, changed build inputs.
 
         Fallback when the shared venv holds a broken mix or the
         build needs extra environment (e.g. ANDROID_API_LEVEL).
         Lives under .governance/venv-candidates/<attempt-id>; the
-        shared venv is never touched. Returns ("ok", python,
-        venv_dir) when pip AND every import check pass, else
-        ("failed", classified, output) or ("unavailable", reason,
-        "").
+        shared venv is never touched. pre_install paths (verified
+        wheel files) install first; pip_check adds a final `pip
+        check`. Returns ("ok", python, venv_dir) when pip AND
+        every import check pass, else ("failed", classified,
+        output) or ("unavailable", reason, "").
         """
         benv = None
         if env and env.get("ANDROID_API_LEVEL"):
@@ -1329,6 +1409,7 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
         code, output = run([python, "-m", "venv", str(cand_dir)],
                            ctx, timeout=300)
         if code != 0:
+            row["diagnosed_package"] = package
             _record_attempt(ledger, row, "PROJECT_ERROR", "failed",
                             "", output)
             attempts.append({"strategy": label + " (isolated)",
@@ -1344,7 +1425,33 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                                   else "bin") / (
                                       "python.exe" if os.name == "nt"
                                       else "python")
+        for wheel_path in pre_install:
+            wargv = ["install"]
+            if offline:
+                wargv += ["--no-index", "--find-links",
+                          str(cache_dir / "wheels")]
+            wargv.append(str(wheel_path))
+            ctx.say("pre-installing verified wheel: %s"
+                    % Path(wheel_path).name)
+            code, output = run([str(cand_python), "-m", "pip"] +
+                               wargv, ctx, timeout=600)
+            if code != 0:
+                classified = _recovery.classify_failure(output)
+                row["diagnosed_package"] = classified["package"]
+                if provenance:
+                    row["wheel_provenance"] = provenance
+                _record_attempt(ledger, row,
+                                classified["category"], "failed",
+                                "", output)
+                attempts.append(
+                    {"strategy": label + " (isolated)",
+                     "result": "failed"})
+                trail.append((label + " (isolated)", "failed",
+                              classified["category"]))
+                return ("failed", classified, output)
         log_path = _pip_log_path(ctx, label + "-isolated")
+        if provenance:
+            row["wheel_provenance"] = provenance
         if benv:
             ctx.say("build env: %s" % ", ".join(
                 "%s=%s" % item for item in sorted(benv.items())))
@@ -1361,6 +1468,7 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
             if note:
                 classified = dict(classified, category=refined)
             row["probe"] = probe.get("tools", {})
+            row["diagnosed_package"] = classified["package"]
             _record_attempt(ledger, row, classified["category"],
                             "failed", log_path, output)
             attempts.append({"strategy": label + " (isolated)",
@@ -1373,6 +1481,7 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
         if not broken and not _backend_imports_ok(ctx, cand_python):
             broken = ["fastapi/uvicorn/pydantic"]
         if broken:
+            row["diagnosed_package"] = package
             _record_attempt(ledger, row, last["category"], "failed",
                             log_path, "import check failed: %s"
                             % ", ".join(broken))
@@ -1386,6 +1495,27 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                                "fail to import in the isolated "
                                "candidate" % ", ".join(broken),
                                "evidence": []}, output)
+        if pip_check:
+            code, output = run(
+                [str(cand_python), "-m", "pip", "check"], ctx,
+                timeout=120)
+            if code != 0:
+                row["diagnosed_package"] = package
+                _record_attempt(ledger, row, last["category"],
+                                "failed", log_path, output)
+                attempts.append(
+                    {"strategy": label + " (isolated)",
+                     "result": "failed"})
+                trail.append((label + " (isolated)", "failed",
+                              last["category"]))
+                return ("failed", {"category": last["category"],
+                                   "package": package,
+                                   "root_cause": "pip check "
+                                   "failed in the isolated "
+                                   "candidate: %s"
+                                   % (output.strip().splitlines()
+                                      or ["?"])[-1],
+                                   "evidence": []}, output)
         _record_attempt(ledger, row, "OK", "ok", log_path, "")
         attempts.append({"strategy": label + " (isolated)",
                          "result": "ok"})
@@ -1446,16 +1576,91 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                     moved = True
                     break
                 continue
+            if cid == "android_prebuilt_wheel":
+                package = cand["params"].get("package") \
+                    or "pydantic-core"
+                ctx.say("candidate: android_prebuilt_wheel")
+                detection = _strategy.detect_android_api_level()
+                device_api = detection.get("device_api_level")
+                if device_api is None:
+                    blocked.append(
+                        "prebuilt android wheel unavailable: "
+                        "device android api unknown (%s)"
+                        % detection.get("reason", "?"))
+                    continue
+                constraint = _pydantic_core_constraint(
+                    req_path, cache_dir)
+                interpreter, _ = _compat.interpreter_tag(
+                    py_version)
+                candidate, reason = _compat.resolve_android_wheel(
+                    constraint, interpreter,
+                    fp.get("arch_machine", ""), device_api,
+                    cache_dir)
+                if candidate is None:
+                    blocked.append(
+                        "prebuilt android wheel unavailable: %s"
+                        % reason)
+                    continue
+                ctx.say("android wheel selected: %s (sha256=%s, "
+                        "api>=%d, %s)" % (
+                            candidate["filename"],
+                            candidate["sha256"][:16],
+                            candidate["api"],
+                            candidate["source"]))
+                wheel_path, fetch_note = \
+                    _compat.fetch_verified_wheel(
+                        candidate["url"], candidate["sha256"],
+                        GOV / "wheel-cache"
+                        / candidate["filename"])
+                if wheel_path is None:
+                    blocked.append(
+                        "prebuilt android wheel rejected: %s"
+                        % fetch_note)
+                    continue
+                ctx.say("android wheel verified: sha256 ok (%s)"
+                        % fetch_note)
+                wlabel = "android_prebuilt_wheel"
+                provenance = {
+                    key: candidate.get(key) for key in
+                    ("filename", "version", "sha256", "source",
+                     "url", "api", "arch")}
+                cand_outcome = isolated_candidate(
+                    wlabel, package, candidate["version"],
+                    extra_imports=("pydantic_core",),
+                    pre_install=(wheel_path,), pip_check=True,
+                    provenance=provenance)
+                if cand_outcome[0] == "ok":
+                    ctx.recovered(wlabel + " (isolated)",
+                                  "adopted %s (%s)" % (
+                                      cand_outcome[2],
+                                      candidate["filename"]))
+                    return {"attempts": attempts,
+                            "python": cand_outcome[1],
+                            "version": py_version,
+                            "venv": cand_outcome[2],
+                            "exe": sys.executable}
+                if cand_outcome[0] == "failed":
+                    failed = cand_outcome[1]
+                    last.update(category=failed["category"],
+                                package=failed["package"],
+                                evidence=failed["evidence"])
+                    last_output = cand_outcome[2]
+                    moved = True
+                    break
+                blocked.append("android wheel %s==%s already "
+                               "failed identically" % (
+                                   package, candidate["version"]))
+                continue
             if cid == "native_android_api_level":
                 package = cand["params"].get("package")
+                ctx.say("candidate: native_android_api_level")
                 detection = _strategy.detect_android_api_level()
-                ctx.say("android api detection: "
-                        "ANDROID_API_LEVEL=%s detection_source=%s "
-                        "device_api_level=%s selected=%s" % (
+                ctx.say("ANDROID_API_LEVEL detected: %s "
+                        "(source=%s device=%s)" % (
                             detection.get("level") or "-",
                             detection.get("source"),
                             detection.get("device_api_level")
-                            or "-", detection.get("level") or "-"))
+                            or "-"))
                 last["api_detection"] = {
                     key: detection.get(key) for key in
                     ("ok", "level", "source", "device_api_level",
@@ -1468,6 +1673,8 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                 build_env = os.environ.copy()
                 build_env["ANDROID_API_LEVEL"] = str(level)
                 alabel = "native_android_api_level"
+                ctx.say("ANDROID_API_LEVEL passed to isolated "
+                        "pip process: %s" % level)
                 cand_outcome = isolated_candidate(
                     alabel, package, None, env=build_env,
                     extra_imports=("pydantic_core",))
@@ -1560,6 +1767,31 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                             "provision_ok"] and not offline:
                         names = _runtime.provision_names(
                             target, termux)
+                        manager, _ = package_manager()
+                        if names and manager in ("pkg",
+                                                 "apt-get"):
+                            known = [_apt_pkg_available(ctx, name)
+                                     for name in names]
+                            dropped = [
+                                name for name, ok in zip(
+                                    names, known) if ok is False]
+                            names = [
+                                name for name, ok in zip(
+                                    names, known)
+                                if ok is not False]
+                            if dropped:
+                                ctx.say(
+                                    "runtime packages absent "
+                                    "from subscribed repos: %s"
+                                    % ", ".join(dropped))
+                                if not names:
+                                    blocked.append(
+                                        "python%d%d has no "
+                                        "installable package in "
+                                        "subscribed repos (no "
+                                        "third-party repo added "
+                                        "automatically)"
+                                        % target)
                         if names and do_provision(
                                 names, "python%d%d" % target):
                             moved = True
@@ -1684,7 +1916,8 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                       "reason": idea})
     if not attempts:
         prior = [entry for entry in ledger.entries()
-                 if entry.get("step") == "DEPENDENCIES"]
+                 if entry.get("step") == "DEPENDENCIES"
+                 and entry.get("kind") != "reclassify"]
         raise RecoveryExhausted({
             "step": "DEPENDENCIES",
             "package": last["package"] or "-",
@@ -3184,7 +3417,8 @@ def _doctor_collect(ctx):
              "result": row.get("result"),
              "category": row.get("category", "?"),
              "ts": row.get("ts", "")}
-            for row in ledger_rows[-8:]],
+            for row in ledger_rows[-8:]
+            if row.get("kind") != "reclassify"],
         "failure_memory": _strategy.last_failure(
             GOV / "recovery-ledger.jsonl"),
         "checkpoint": {
@@ -3223,7 +3457,9 @@ def cmd_doctor(args):
 
 
 def cmd_recover(args):
-    memory = _strategy.last_failure(GOV / "recovery-ledger.jsonl")
+    restored = _strategy.restore_failure_context(
+        GOV / "recovery-ledger.jsonl")
+    memory = restored["memory"] or {}
     if not memory:
         print("failure memory: none recorded")
     else:
@@ -3232,11 +3468,17 @@ def cmd_recover(args):
             _strategy.toolchain_fingerprint().get("hash"))
         print("failure memory [%s]: package=%s category=%s "
               "strategy=%s" % (
-                  status["status"], memory.get("package") or "-",
-                  memory.get("category") or "-",
+                  status["status"],
+                  restored["diagnosed_package"]
+                  or memory.get("package") or "-",
+                  restored["category"],
                   memory.get("strategy") or "-"))
-        print("  recorded: %s (%s)" % (
-            memory.get("ts") or "?", status["reason"]))
+        print("  recorded: %s (%s) target=%s" % (
+            memory.get("ts") or "?", status["reason"],
+            memory.get("package") or "-"))
+        if restored["reclassified"]:
+            print("  reclassified: %s"
+                  % restored["reclassify_note"])
         print("  log: %s" % (memory.get("log") or "-"))
     print("checkpoints: %s" % ", ".join(
         _checkpoint.completed_stages(GOV)) or "none")
