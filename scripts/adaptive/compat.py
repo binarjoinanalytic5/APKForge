@@ -261,6 +261,83 @@ def pypi_release(package, version=None, cache_dir=None,
     return result
 
 
+def _stable_version(text):
+    import re
+    if not re.match(r"^\d+(\.\d+)*$", (text or "").strip()):
+        return False
+    return True
+
+
+def _version_key(text):
+    try:
+        return tuple(int(part) for part in text.split("."))
+    except ValueError:
+        return (0,)
+
+
+def pypi_versions(package, cache_dir=None, ttl=86400, timeout=20):
+    """Stable release versions, newest first (cached; [] offline)."""
+    package = normalize(package)
+    if cache_dir is not None:
+        path = Path(cache_dir) / ("%s-versions.json" % package)
+        if path.is_file():
+            try:
+                cached = json.loads(path.read_text(
+                    encoding="utf-8"))
+            except ValueError:
+                cached = None
+            if cached and time.time() - cached.get(
+                    "fetched_at", 0) < ttl:
+                return cached.get("versions", [])
+    url = "https://pypi.org/pypi/%s/json" % package
+    try:
+        request = urllib.request.Request(
+            url, headers={"User-Agent": "apkforge-bootstrap/2.0"})
+        with urllib.request.urlopen(request,
+                                    timeout=timeout) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except (urllib.error.URLError, TimeoutError, OSError,
+            ValueError):
+        return []
+    releases = payload.get("releases", {})
+    versions = sorted(
+        (version for version, files in releases.items()
+         if files and _stable_version(version)),
+        key=_version_key, reverse=True)
+    if cache_dir is not None:
+        try:
+            path = Path(cache_dir) / ("%s-versions.json" % package)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(
+                {"versions": versions, "fetched_at": time.time()}),
+                encoding="utf-8")
+        except OSError:
+            pass
+    return versions
+
+
+def compatible_versions(package, fp, cache_dir=None, limit=6):
+    """Newest releases with per-version install verdicts here."""
+    package = normalize(package)
+    cache = cache_dir
+
+    def fetch(name, version=None):
+        return pypi_release(name, version, cache_dir=cache)
+
+    out = []
+    for version in pypi_versions(package, cache_dir)[:limit]:
+        release = fetch(package, version)
+        if not release:
+            continue
+        verdict = assess_package(
+            {"name": package, "spec": "==%s" % version,
+             "extras": [], "marker": "",
+             "raw": "%s==%s" % (package, version)}, fp, fetch)
+        verdict["release_files"] = len(release.get("files", []))
+        out.append(verdict)
+    return out
+
+
 def _bounds_ok(requires_python, version_tuple):
     if not requires_python:
         return True

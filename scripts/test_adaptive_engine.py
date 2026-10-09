@@ -104,7 +104,7 @@ def test_minimal_requirements_local_only(engine, ctx, tmp_path,
                    encoding="utf-8")
     target = engine._write_minimal_requirements(ctx, req)
     assert target is not None
-    assert target.parent == tmp_path / ".governance"
+    assert target.parent == tmp_path / ".governance" / "generated"
     assert "uvicorn>=0.29" in target.read_text(encoding="utf-8")
 
 
@@ -214,17 +214,21 @@ def test_ladder_skips_recorded_strategy(engine, ctx, tmp_path,
                                         monkeypatch):
     monkeypatch.setattr(engine, "LOGS", tmp_path / "logs")
     ledger = engine._recovery.Ledger(tmp_path / "ledger.jsonl")
-    retry_key = "%s|%s|%s" % ("e" * 12, "c", "R")
-    sig = engine._recovery.failure_signature(
-        "DEPENDENCIES", "-", None, "native", retry_key)
-    ledger.record("DEPENDENCIES", sig, "native", "pip install",
-                  retry_key, "failed", "boom")
+    req = tmp_path / "req.txt"
+    req.write_text("pkgx>=1\n", encoding="utf-8")
+    tools = engine._strategy.toolchain_fingerprint()
+    tools["env_hash"] = "e" * 12
+    row = engine._strategy.attempt_fingerprint(
+        "DEPENDENCIES", "native", None, None, "3.13.0", "x86_64",
+        "linux-x86_64", "pip install -r %s" % req, "pkgx>=1\n",
+        tools, run_id="old")
+    row.update({"category": "UNKNOWN", "result": "failed",
+                "log": "", "detail": "boom"})
+    ledger.record_row(row)
     calls = []
     monkeypatch.setattr(
         engine, "run",
         lambda *argv, **kw: calls.append(argv) or (1, "boom"))
-    req = tmp_path / "req.txt"
-    req.write_text("pkgx>=1\n", encoding="utf-8")
     with pytest.raises(engine.RecoveryExhausted) as caught:
         engine.pip_install_with_recovery(
             ctx, "/nonexistent/python", req, _ladder_fp(),
@@ -257,11 +261,10 @@ def test_ladder_exhausts_unknown_failure(engine, ctx, tmp_path,
     assert info["tried"] == [{"strategy": "native",
                               "result": "failed"}]
     assert info["category"] == "UNKNOWN"
-    assert ledger.attempted(
-        "DEPENDENCIES",
-        engine._recovery.failure_signature(
-            "DEPENDENCIES", "-", None, "native",
-            "%s|%s|%s" % ("e" * 12, "c", "R")), "native")
+    rows = engine._strategy.read_rows(tmp_path / "ledger.jsonl")
+    assert len(rows) == 1 and rows[0]["kind"] == "attempt"
+    assert engine._strategy.identical_attempt(
+        tmp_path / "ledger.jsonl", rows[0]) is not None
 
 
 def test_open_browser_prefers_termux_opener(engine, ctx,
@@ -297,3 +300,34 @@ def test_open_browser_falls_back_to_webbrowser(engine, ctx,
     assert engine.open_browser(ctx, "http://example/") is False
     assert "open manually" in (
         tmp_path / "run.log").read_text(encoding="utf-8")
+
+
+def test_doctor_collects_all_sections(engine, tmp_path, monkeypatch,
+                                      capsys):
+    import argparse
+    root = tmp_path / "proj"
+    (root / "backend").mkdir(parents=True)
+    (root / "backend" / "requirements.txt").write_text(
+        "six>=1.0\n", encoding="utf-8")
+    monkeypatch.setattr(engine, "ROOT", root)
+    monkeypatch.setattr(engine, "GOV", root / ".governance")
+    args = argparse.Namespace(json=False)
+    assert engine.cmd_doctor(args) == 0
+    out = capsys.readouterr().out
+    for section in ("environment", "runtime", "toolchain",
+                    "python_compatibility", "dependency_graph",
+                    "wheel_availability", "build_capability",
+                    "recovery_ledger", "failure_memory",
+                    "checkpoint", "database", "frontend", "git",
+                    "disk", "network"):
+        assert "--- %s ---" % section in out
+
+
+def test_recover_delegates_to_pipeline(engine, tmp_path,
+                                       monkeypatch, capsys):
+    import argparse
+    monkeypatch.setattr(engine, "run_pipeline",
+                        lambda args: 7)
+    args = argparse.Namespace()
+    assert engine.cmd_recover(args) == 7
+    assert "resuming bootstrap" in capsys.readouterr().out

@@ -16,3 +16,8 @@ data/
 logs/
 .tools/
 .venv/
+.runtime/
+.venv-py*/
+.cache/
+.toolchain/
+.artifacts/

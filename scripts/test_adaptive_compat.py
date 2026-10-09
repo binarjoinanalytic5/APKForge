@@ -184,3 +184,31 @@ def test_strip_known_extras():
     assert stripped.splitlines()[0] == "uvicorn>=0.29"
     assert stripped.splitlines()[1] == "pydantic>=2.6  # core"
     assert stripped.splitlines()[2] == "x[weird]>=1"
+
+
+def test_pypi_versions_prefers_cache(tmp_path):
+    cache = tmp_path / "cache"
+    cache.mkdir()
+    (cache / "demo-versions.json").write_text(
+        '{"versions": ["2.0", "1.0"], "fetched_at": 9999999999}',
+        encoding="utf-8")
+    assert C.pypi_versions("demo", cache_dir=cache) == ["2.0", "1.0"]
+    assert C._stable_version("2.0") and not C._stable_version("2.0rc1")
+
+
+def test_compatible_versions_reports_per_version(monkeypatch):
+    monkeypatch.setattr(
+        C, "pypi_versions", lambda *args, **kw: ["2.9", "2.10"])
+
+    def fake_release(package, version=None, cache_dir=None, **kw):
+        if version == "2.10":
+            filenames = ["pydantic_core-2.10-cp313-cp313-"
+                         "manylinux_2_17_x86_64.whl"]
+        else:
+            filenames = ["pydantic_core-2.9.tar.gz"]
+        return _release(version, filenames, requires_python=">=3.9")
+
+    monkeypatch.setattr(C, "pypi_release", fake_release)
+    out = C.compatible_versions("pydantic-core", LINUX)
+    assert [item["version"] for item in out] == ["2.9", "2.10"]
+    assert out[1]["status"] == "WHEEL_OK"

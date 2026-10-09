@@ -242,6 +242,16 @@ class Ledger:
             handle.write(json.dumps(row) + "\n")
         return row
 
+    def record_row(self, mapping):
+        """Append one free-form row (attempt fingerprints)."""
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        row = dict(mapping)
+        row.setdefault("ts", time.strftime("%Y-%m-%dT%H:%M:%SZ",
+                                           time.gmtime()))
+        with open(self.path, "a", encoding="utf-8") as handle:
+            handle.write(json.dumps(row) + "\n")
+        return row
+
     def attempts_for(self, step):
         return [entry for entry in self.entries()
                 if entry.get("step") == step]
@@ -287,6 +297,16 @@ def exhausted_report(info):
         lines.append("  - %s → %s" % (
             attempt.get("strategy", "?"),
             attempt.get("result", "?")))
+    skipped = info.get("skipped_identical", [])
+    if skipped:
+        lines.append("SKIPPED     : already failed identically")
+        for name in skipped[:8]:
+            lines.append("  - %s" % name)
+    needs = info.get("needs_you", [])
+    if needs:
+        lines.append("NEEDS YOU   :")
+        for need in needs[:6]:
+            lines.append("  - %s" % need)
     lines.append("REQUIRED    : %s" %
                  info.get("required", "manual intervention"))
     lines.append("NEXT ACTION : %s" % info.get("next_action", "?"))
