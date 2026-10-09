@@ -1032,7 +1032,8 @@ def test_execution_diff_kind():
     assert S.execution_diff_kind(
         changed(build_env_hash="zzz"), base) == "changed-build-env"
     assert S.execution_diff_kind(
-        changed(implementation_hash="new"), base) ==         "changed-implementation"
+        changed(implementation_hash="new"), base) == \
+        "changed-implementation"
 
 
 # -- dependency graph + wheel constraints ---------------------------------------
@@ -1304,7 +1305,8 @@ def test_no_isolation_strategy_adopted(engine, ctx, tmp_path,
     assert seen.get("candidate_path", "").endswith("/bin")
     assert ".governance/venv-candidates" in seen.get(
         "candidate_path", "")
-    assert seen.get("candidate_path", "").removesuffix("/bin") ==         seen.get("candidate_venv")
+    assert seen.get("candidate_path", "").removesuffix("/bin") == \
+        seen.get("candidate_venv")
     assert result["python"] != "/nonexistent/python"
     rows = [entry for entry in ledger.entries()
             if entry.get("strategy")
