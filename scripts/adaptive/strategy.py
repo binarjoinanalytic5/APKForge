@@ -23,14 +23,16 @@ from . import recovery as _recovery
 IDENTITY_KEYS = ("step", "strategy", "package", "version", "python",
                  "arch", "platform", "env_fp", "toolchain_fp",
                  "command_hash", "requirements_hash",
-                 "build_env_hash")
+                 "build_env_hash", "implementation_hash")
 
 
 def _ident_value(row, key):
-    """Identity value; pre-build-env rows count as empty env."""
+    """Normalize legacy rows that predate newer identity dimensions."""
     value = row.get(key)
     if value is None and key == "build_env_hash":
         return _short(json.dumps({}, sort_keys=True))
+    if value is None and key == "implementation_hash":
+        return "legacy"
     return value
 
 # Bounded retries for flaky failures (identical fp, backoff, max 3).
@@ -73,6 +75,23 @@ APT_SYSDEPS = {
 def _short(text):
     return hashlib.sha256((text or "").encode(
         "utf-8", "replace")).hexdigest()[:16]
+
+
+def implementation_fingerprint():
+    """Hash recovery decision/execution code so code fixes reopen attempts."""
+    base = Path(__file__).resolve().parent
+    paths = (base / "compat.py", base / "recovery.py",
+             base / "strategy.py", base.parent / "apkforge.py")
+    digest = hashlib.sha256()
+    for path in paths:
+        digest.update(path.name.encode("utf-8", "replace"))
+        digest.update(b"\0")
+        try:
+            digest.update(path.read_bytes())
+        except OSError:
+            digest.update(b"<unavailable>")
+        digest.update(b"\0")
+    return digest.hexdigest()[:16]
 
 
 def _tool_version(argv):
@@ -280,7 +299,8 @@ def memory_status(memory, current_hash):
 def attempt_fingerprint(step, strategy, package, version,
                         python_version, arch, platform, command,
                         requirements_text, toolchain_fp,
-                        run_id="", build_env=None):
+                        run_id="", build_env=None,
+                        implementation_hash=None):
     """Full identity of one attempt (section 17).
 
     package/version here are the STRATEGY TARGET (an input, e.g.
@@ -303,6 +323,8 @@ def attempt_fingerprint(step, strategy, package, version,
            "build_env": env_map,
            "build_env_hash": _short(json.dumps(
                env_map, sort_keys=True)),
+           "implementation_hash": (implementation_hash
+                                   or implementation_fingerprint()),
            "run_id": run_id}
     row["attempt_id"] = _short(json.dumps(
         {key: row.get(key) for key in IDENTITY_KEYS},
@@ -316,6 +338,7 @@ def attempt_fingerprint(step, strategy, package, version,
         "command_hash": row["command_hash"],
         "requirements_hash": row["requirements_hash"],
         "build_environment_hash": row["build_env_hash"],
+        "implementation_hash": row["implementation_hash"],
         "toolchain_hash": row["toolchain_fp"]}
     return row
 
@@ -338,7 +361,8 @@ def execution_diff_kind(new_row, old_row):
              ("env_fp", "changed-venv"),
              ("command_hash", "changed-command"),
              ("requirements_hash", "changed-requirements"),
-             ("build_env_hash", "changed-build-env"))
+             ("build_env_hash", "changed-build-env"),
+             ("implementation_hash", "changed-implementation"))
     for key, label in order:
         if _ident_value(new_row, key) != _ident_value(old_row, key):
             return label
