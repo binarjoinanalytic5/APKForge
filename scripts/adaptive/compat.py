@@ -320,6 +320,36 @@ def dep_spec(dep):
     return normalize(head), ""
 
 
+def pydantic_for_core(core_version, cache_dir=None, limit=30):
+    """Newest pydantic release accepting this core (or None).
+
+    Scans pydantic releases newest-first and returns the first
+    whose pydantic-core constraint is satisfied by core_version,
+    so a verified prebuilt wheel can be pinned together with a
+    compatible pydantic instead of being replaced by the
+    resolver. Pure metadata reads (cached); None when nothing
+    matches or the index is unreachable.
+    """
+    try:
+        versions = pypi_versions("pydantic", cache_dir=cache_dir)
+    except Exception:
+        return None
+    for version in (versions or [])[:limit]:
+        try:
+            meta = pypi_release("pydantic", version,
+                                cache_dir=cache_dir)
+        except Exception:
+            continue
+        if not meta:
+            continue
+        for dep in meta.get("requires_dist", []) or []:
+            name, wanted = dep_spec(dep)
+            if name == "pydantic-core" and spec_satisfied(
+                    wanted, core_version):
+                return version
+    return None
+
+
 def android_arch_aliases(machine):
     """Accepted android arch tokens for this machine."""
     machine = (machine or "").lower()

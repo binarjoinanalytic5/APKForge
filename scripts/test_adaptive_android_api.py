@@ -196,6 +196,15 @@ def test_android_api_strategy_adopted(engine, ctx, tmp_path,
     seen = {}
 
     def fake_run(argv, *rest, **kw):
+        if "-c" in argv and "layer1" in argv[-1]:
+            layer = (kw.get("env") or {}).get(
+                "ANDROID_API_LEVEL", "")
+            return (0, json.dumps(
+                {"layer1": layer, "layer2": layer,
+                 "want": (kw.get("env") or {}).get(
+                     "APKF_WANT_API", "")}))
+        if "install" in argv and argv[0] == "/nonexistent/python":
+            return (1, ANDROID_FAIL)
         if "install" in argv and (kw.get("env") or {}).get(
                 "ANDROID_API_LEVEL"):
             seen["api"] = kw["env"]["ANDROID_API_LEVEL"]
@@ -235,6 +244,13 @@ def test_android_api_strategy_refused_when_identical(
                                              "hash": "h"})
 
     def fake_run(argv, *rest, **kw):
+        if "-c" in argv and "layer1" in argv[-1]:
+            layer = (kw.get("env") or {}).get(
+                "ANDROID_API_LEVEL", "")
+            return (0, json.dumps(
+                {"layer1": layer, "layer2": layer,
+                 "want": (kw.get("env") or {}).get(
+                     "APKF_WANT_API", "")}))
         if "install" in argv:
             return (1, ANDROID_FAIL)
         if "-c" in argv:
@@ -248,6 +264,10 @@ def test_android_api_strategy_refused_when_identical(
                         lambda *argv, **kw: None)
     monkeypatch.setattr(engine, "_python_for_wheels",
                         lambda *argv, **kw: None)
+    monkeypatch.setattr(
+        engine, "_redetect_compilers",
+        lambda profile: profile.update({"compiler_c": True,
+                                        "compiler_rust": True}))
     with pytest.raises(engine.RecoveryExhausted) as caught:
         engine.pip_install_with_recovery(
             ctx, "/nonexistent/python", req, _ladder_fp(),
@@ -255,7 +275,7 @@ def test_android_api_strategy_refused_when_identical(
              "compiler_rust": True}, ledger, "e" * 12,
             offline=False)
     info = caught.value.info
-    assert info["category"] == "ANDROID_API_LEVEL_MISSING"
+    assert info["category"] == "ENV_PROPAGATION_FAILURE"
     rows = [entry for entry in ledger.entries()
             if entry.get("strategy")
             == "native_android_api_level (isolated)"
@@ -263,8 +283,10 @@ def test_android_api_strategy_refused_when_identical(
     assert len(rows) == 1
     assert "native_android_api_level (isolated)" in info[
         "skipped_identical"]
-    assert any("android api level 34 already failed "
+    assert any("android api level 34: already failed "
                "identically" in need
+               for need in info["needs_you"])
+    assert any("cannot stage maturin" in need
                for need in info["needs_you"])
 
 
@@ -284,6 +306,15 @@ def test_fresh_error_after_api_fix_analyzed(
                         lambda *argv, **kw: bare)
 
     def fake_run(argv, *rest, **kw):
+        if "-c" in argv and "layer1" in argv[-1]:
+            layer = (kw.get("env") or {}).get(
+                "ANDROID_API_LEVEL", "")
+            return (0, json.dumps(
+                {"layer1": layer, "layer2": layer,
+                 "want": (kw.get("env") or {}).get(
+                     "APKF_WANT_API", "")}))
+        if "install" in argv and argv[0] == "/nonexistent/python":
+            return (1, ANDROID_FAIL)
         if "install" in argv and (kw.get("env") or {}).get(
                 "ANDROID_API_LEVEL"):
             return (1, HEADER_FAIL)
@@ -512,6 +543,15 @@ def test_legacy_memory_recovers_without_exhaustion(
     seen = {}
 
     def fake_run(argv, *rest, **kw):
+        if "-c" in argv and "layer1" in argv[-1]:
+            layer = (kw.get("env") or {}).get(
+                "ANDROID_API_LEVEL", "")
+            return (0, json.dumps(
+                {"layer1": layer, "layer2": layer,
+                 "want": (kw.get("env") or {}).get(
+                     "APKF_WANT_API", "")}))
+        if "install" in argv and argv[0] == "/nonexistent/python":
+            return (1, ANDROID_FAIL)
         if "install" in argv and (kw.get("env") or {}).get(
                 "ANDROID_API_LEVEL"):
             seen["api"] = kw["env"]["ANDROID_API_LEVEL"]
@@ -600,6 +640,10 @@ def test_android_wheel_strategy_adopted(engine, ctx, tmp_path,
             + asset, "digest": "sha256:" + sha, "size": 18}]}])
     monkeypatch.setattr(engine._compat, "_http_bytes",
                         lambda url, timeout=30: wheel_bytes)
+    monkeypatch.setattr(engine._compat, "pydantic_for_core",
+                        lambda *argv, **kw: "2.12.0")
+    monkeypatch.setattr(engine, "_package_in_graph",
+                        lambda *argv, **kw: True)
     seen = {}
 
     def fake_run(argv, *rest, **kw):
@@ -608,6 +652,17 @@ def test_android_wheel_strategy_adopted(engine, ctx, tmp_path,
         if "check" in argv:
             seen["check"] = True
             return (0, "")
+        if "show" in argv:
+            return (0, "Name: pydantic-core\nVersion: 2.49.0\n")
+        if "-c" in argv and "layer1" in argv[-1]:
+            layer = (kw.get("env") or {}).get(
+                "ANDROID_API_LEVEL", "")
+            return (0, json.dumps(
+                {"layer1": layer, "layer2": layer,
+                 "want": (kw.get("env") or {}).get(
+                     "APKF_WANT_API", "")}))
+        if "-c" in argv and "__version__" in argv[-1]:
+            return (0, "2.49.0")
         if "-c" in argv:
             return (0, "import-ok")
         return (0, "")
@@ -817,3 +872,490 @@ def test_pydantic_core_constraint_from_pypi(engine, tmp_path,
                                  "typing-extensions>=4.6.1"]})
     assert engine._pydantic_core_constraint(
         req, tmp_path / "cache") == "==2.41.0"
+
+# -- subprocess environment proof ------------------------------------------
+
+def test_android_api_reaches_maturin(engine, ctx):
+    """Two-layer proof with a REAL child process: the candidate env
+    reaches the child (pip layer) and the grandchild (PEP 517
+    backend layer, where maturin runs)."""
+    ok, observed = engine.verify_build_env(
+        sys.executable, {"ANDROID_API_LEVEL": "33"}, ctx)
+    assert ok is True
+    assert observed["layer1"] == "33"
+    assert observed["layer2"] == "33"
+    assert observed["want"] == "33"
+
+
+def test_verify_fails_without_api(engine, ctx):
+    ok, _ = engine.verify_build_env(sys.executable, {}, ctx)
+    assert ok is False
+
+
+def test_run_merges_environment(engine):
+    code, out = engine.run(
+        [sys.executable, "-c",
+         "import os; print('PATH_OK' if os.environ.get('PATH')"
+         " else 'PATH_LOST'); print('X=' + os.environ.get("
+         "'APKF_TEST_X', ''))"],
+        None, timeout=60, env={"APKF_TEST_X": "1"})
+    assert code == 0
+    assert "PATH_OK" in out
+    assert "X=1" in out
+
+
+# -- propagation + ndk classification ---------------------------------------
+
+def test_env_propagation_classification():
+    assert R.classify_failure(
+        ANDROID_FAIL, {"env_had_api": True})["category"] == \
+        "ENV_PROPAGATION_FAILURE"
+    assert R.classify_failure(ANDROID_FAIL)["category"] == \
+        "ANDROID_API_LEVEL_MISSING"
+
+
+def test_ndk_classification():
+    log = ("Collecting pkgx\n  error: could not find ndk "
+           "under $ANDROID_HOME\n")
+    assert R.classify_failure(log)["category"] == \
+        "ANDROID_NDK_MISSING"
+
+
+def test_find_package_rejects_installable():
+    log = ("Collecting installable==1.0\n"
+           "  Failed to build `installable`\n"
+           "  error: something broke\n")
+    assert R.classify_failure(log)["package"] is None
+
+
+# -- no-isolation ordering ----------------------------------------------------
+
+def _termux_caps():
+    return {"termux": True, "provision_ok": False,
+            "offline": False, "direct": set(),
+            "alternate_pythons": [], "signals": []}
+
+
+def test_no_isolation_ordered_for_env_propagation():
+    cands = S.order_candidates(
+        {"category": "ENV_PROPAGATION_FAILURE",
+         "package": "pydantic-core"}, _termux_caps())
+    ids = [item["id"] for item in cands]
+    assert ids[:3] == ["android_prebuilt_wheel",
+                       "native_android_api_no_isolation",
+                       "native_android_api_level"]
+
+
+def test_no_isolation_after_api_for_plain_missing():
+    cands = S.order_candidates(
+        {"category": "ANDROID_API_LEVEL_MISSING",
+         "package": "pydantic-core"}, _termux_caps())
+    ids = [item["id"] for item in cands]
+    assert ids[:3] == ["android_prebuilt_wheel",
+                       "native_android_api_level",
+                       "native_android_api_no_isolation"]
+
+
+def test_wheel_runtime_excludes_wheel():
+    cands = S.order_candidates(
+        {"category": "WHEEL_RUNTIME_INCOMPATIBLE",
+         "package": "pydantic-core"}, _termux_caps())
+    ids = [item["id"] for item in cands]
+    assert "android_prebuilt_wheel" not in ids
+    assert ids[:2] == ["native_android_api_level",
+                       "native_android_api_no_isolation"]
+
+
+# -- execution diff kinds ------------------------------------------------------
+
+def test_execution_diff_kind():
+    base = S.attempt_fingerprint(
+        "DEPENDENCIES", "native", None, None, "3.13.0",
+        "x86_64", "p", "cmd", "req\n", _tools(),
+        run_id="r")
+
+    def changed(**kw):
+        row = dict(base)
+        row.update(kw)
+        return row
+
+    assert S.execution_diff_kind(base, dict(base)) == "identical"
+    assert S.execution_diff_kind(
+        changed(strategy="other"), base) == "changed-strategy"
+    assert S.execution_diff_kind(
+        changed(package="x"), base) == "changed-target"
+    assert S.execution_diff_kind(
+        changed(python="3.12"), base) == "changed-runtime"
+    assert S.execution_diff_kind(
+        changed(toolchain_fp="zzz"), base) == "changed-toolchain"
+    assert S.execution_diff_kind(
+        changed(command_hash="zzz"), base) == "changed-command"
+    assert S.execution_diff_kind(
+        changed(requirements_hash="zzz"),
+        base) == "changed-requirements"
+    assert S.execution_diff_kind(
+        changed(build_env_hash="zzz"), base) == "changed-build-env"
+
+
+# -- dependency graph + wheel constraints ---------------------------------------
+
+def test_pydantic_for_core(monkeypatch):
+    monkeypatch.setattr(
+        C, "pypi_versions",
+        lambda *argv, **kw: ["2.14.0", "2.12.0", "2.11.0"])
+
+    def fake_release(name, version=None, **kw):
+        pins = {"2.14.0": "==2.50.0", "2.12.0": "==2.49.0",
+                "2.11.0": "==2.41.3"}
+        return {"version": version,
+                "requires_dist": ["pydantic-core%s"
+                                  % pins[version]]}
+
+    monkeypatch.setattr(C, "pypi_release", fake_release)
+    assert C.pydantic_for_core("2.49.0") == "2.12.0"
+    assert C.pydantic_for_core("9.9.9") is None
+
+
+def test_package_in_graph(engine, tmp_path, monkeypatch):
+    req = tmp_path / "req.txt"
+    req.write_text("pydantic>=2.6\n", encoding="utf-8")
+    monkeypatch.setattr(engine._compat, "pypi_versions",
+                        lambda *argv, **kw: ["2.12.0"])
+    monkeypatch.setattr(
+        engine._compat, "pypi_release",
+        lambda *argv, **kw: {"version": "2.12.0",
+                             "requires_dist": [
+                                 "pydantic-core==2.49.0"]})
+    assert engine._package_in_graph(
+        "pydantic", req, tmp_path) is True
+    assert engine._package_in_graph(
+        "pydantic-core", req, tmp_path) is True
+    assert engine._package_in_graph(
+        "installable", req, tmp_path) is False
+    assert engine._package_in_graph("", req, tmp_path) is False
+
+
+def test_wheel_constraints_pin_real_packages(engine, ctx, tmp_path,
+                                             monkeypatch):
+    req = tmp_path / "req.txt"
+    req.write_text("pydantic>=2.6\n", encoding="utf-8")
+    monkeypatch.setattr(engine._compat, "pydantic_for_core",
+                        lambda *argv, **kw: "2.12.0")
+    monkeypatch.setattr(engine, "_package_in_graph",
+                        lambda *argv, **kw: True)
+    path, _ = engine._wheel_constraints(
+        "2.49.0", req, tmp_path / "cache")
+    content = Path(path).read_text(encoding="utf-8")
+    assert "pydantic-core==2.49.0" in content
+    assert "pydantic==2.12.0" in content
+    assert "installable" not in content
+    monkeypatch.setattr(engine._compat, "pydantic_for_core",
+                        lambda *argv, **kw: None)
+    missing, why = engine._wheel_constraints(
+        "9.9.9", req, tmp_path / "cache")
+    assert missing is None
+    assert "no pydantic release" in why
+
+
+# -- fake-package refusal --------------------------------------------------------
+
+def test_no_fake_installable_literal():
+    for name in ("apkforge.py", "adaptive/compat.py",
+                 "adaptive/strategy.py", "adaptive/recovery.py",
+                 "adaptive/runtime.py", "adaptive/env.py"):
+        source = (ROOT / "scripts" / name).read_text(
+            encoding="utf-8")
+        assert "installable==1.0" not in source, name
+
+
+def test_no_fake_installable_package_strategy(engine, ctx, tmp_path,
+                                              monkeypatch):
+    req = tmp_path / "req.txt"
+    req.write_text("pkgx>=1\n", encoding="utf-8")
+    tools = engine._strategy.toolchain_fingerprint()
+    tools["env_hash"] = "e" * 12
+    row = engine._strategy.attempt_fingerprint(
+        "DEPENDENCIES", "native", None, None, "3.13.0",
+        "x86_64", "linux-x86_64", "pip install -r %s" % req,
+        "pkgx>=1\n", tools, run_id="old-run")
+    row.update({"category": "RUST_BUILD_FAILURE",
+                "result": "failed", "log": "",
+                "diagnosed_package": "installable", "detail": "",
+                "ts": "2026-10-09T01:02:19Z"})
+    ledger = engine._recovery.Ledger(tmp_path / "ledger.jsonl")
+    ledger.record_row(row)
+    monkeypatch.setattr(engine, "run",
+                        lambda *argv, **kw: (1, "boom"))
+    monkeypatch.setattr(engine, "_resolve_version_pick",
+                        lambda *argv, **kw: {"version": "1.0",
+                                             "status": "WHEEL_OK"})
+    monkeypatch.setattr(engine, "_package_in_graph",
+                        lambda *argv, **kw: False)
+    monkeypatch.setattr(engine._runtime, "select_runtime",
+                        lambda *argv, **kw: None)
+    monkeypatch.setattr(engine, "_python_for_wheels",
+                        lambda *argv, **kw: None)
+    with pytest.raises(engine.RecoveryExhausted) as caught:
+        engine.pip_install_with_recovery(
+            ctx, "/nonexistent/python", req, _ladder_fp(),
+            {"platform": "linux-x86_64", "compiler_c": True,
+             "compiler_rust": True}, ledger, "e" * 12,
+            offline=False)
+    info = caught.value.info
+    assert not [entry for entry in ledger.entries()
+                if (entry.get("strategy") or "").startswith(
+                    "version:installable")]
+    assert any("not part of this project's dependency graph"
+               in need for need in info["needs_you"])
+
+
+# -- per-package states ------------------------------------------------------------
+
+def test_package_tracker_states():
+    tracker = S.PackageTracker()
+    assert tracker.native_blocked(
+        "pydantic-core", "be1") is False
+    tracker.note_native_failed("pydantic-core", "be1")
+    assert tracker.native_blocked(
+        "pydantic-core", "be1") is True
+    assert tracker.native_blocked(
+        "pydantic-core", "be2") is False
+    assert tracker.native_blocked("watchfiles", "be1") is False
+    tracker.recovered("pydantic-core",
+                      "android_prebuilt_wheel (isolated)",
+                      "a1", "log1")
+    assert tracker.summary()[
+        "pydantic-core"]["status"] == "RECOVERED"
+    assert tracker.native_blocked(
+        "pydantic-core", "be1") is True
+    tracker.blocked("watchfiles", "native", "a2", "log2")
+    assert tracker.summary()[
+        "watchfiles"]["status"] == "BLOCKED"
+
+
+def test_order_targets_next_package():
+    cands = S.order_candidates(
+        {"category": "RUST_BUILD_FAILURE",
+         "package": "watchfiles"}, _termux_caps())
+    by_id = {item["id"]: item for item in cands}
+    assert by_id["version"]["params"]["package"] == "watchfiles"
+    assert "native" in by_id
+
+
+# -- contextual restore ---------------------------------------------------------------
+
+def test_restore_keeps_contextual_categories(tmp_path):
+    row = S.attempt_fingerprint(
+        "DEPENDENCIES", "native_android_api_level (isolated)",
+        None, None, "3.13.0", "x86_64", "linux-x86_64",
+        "pip install -r req", "pkgx>=1\n", _tools(),
+        run_id="r1")
+    row.update({"category": "ENV_PROPAGATION_FAILURE",
+                "result": "failed", "log": "",
+                "diagnosed_package": "pydantic-core",
+                "detail": ANDROID_FAIL[-500:], "ts": ""})
+    ledger = tmp_path / "ledger.jsonl"
+    ledger.write_text(json.dumps(row) + "\n", encoding="utf-8")
+    restored = S.restore_failure_context(ledger)
+    assert restored["category"] == "ENV_PROPAGATION_FAILURE"
+    assert restored["diagnosed_package"] == "pydantic-core"
+    assert restored["reclassified"] is False
+
+
+# -- recovery report ---------------------------------------------------------------------
+
+def test_recovery_report_written(engine, ctx, tmp_path):
+    ledger = engine._recovery.Ledger(tmp_path / "ledger.jsonl")
+    row = S.attempt_fingerprint(
+        "DEPENDENCIES", "native", None, None, "3.13.0",
+        "x86_64", "p", "cmd", "req\n", _tools(),
+        run_id="api-run")
+    row.update({"category": "X", "result": "failed", "log": "",
+                "diagnosed_package": "pkgx",
+                "detail": "token=ghp_SECRET123", "ts": ""})
+    ledger.record_row(row)
+    path = engine._write_recovery_report(
+        ctx, ledger, "exhausted",
+        {"category": "X", "package": "pkgx",
+         "root_cause": "r", "tried": [],
+         "next_action": "n"},
+        {"os": "linux", "arch_machine": "x86_64",
+         "termux": False, "python_version": "3.13.0"},
+        {"platform": "p"})
+    text = Path(path).read_text(encoding="utf-8")
+    assert "ghp_SECRET123" not in text
+    data = json.loads(text)
+    for key in ("environment", "toolchain", "attempts",
+                "candidate_fingerprints",
+                "successful_candidates", "failed_candidates",
+                "reclassified_failures", "provisioned_tools",
+                "verified_artifacts", "package_states",
+                "current_blocker", "next_action"):
+        assert key in data, key
+    assert data["package_states"]["pkgx"]["status"] == "BLOCKED"
+    assert data["current_blocker"]["category"] == "X"
+
+
+# -- no-isolation adoption -------------------------------------------------------------------
+
+def test_no_isolation_strategy_adopted(engine, ctx, tmp_path,
+                                       monkeypatch):
+    monkeypatch.setenv("ANDROID_API_LEVEL", "34")
+    req = tmp_path / "req.txt"
+    req.write_text("pkgx>=1\n", encoding="utf-8")
+    tools = engine._strategy.toolchain_fingerprint()
+    tools["env_hash"] = "e" * 12
+    row = engine._strategy.attempt_fingerprint(
+        "DEPENDENCIES", "native_android_api_level (isolated)",
+        None, None, "3.13.0", "x86_64", "linux-x86_64",
+        "pip install -r %s" % req, "pkgx>=1\n", tools,
+        run_id="old-run")
+    row.update({"category": "ENV_PROPAGATION_FAILURE",
+                "result": "failed", "log": "",
+                "diagnosed_package": "pydantic-core",
+                "detail": "",
+                "ts": "2026-10-09T01:02:19Z"})
+    ledger = engine._recovery.Ledger(tmp_path / "ledger.jsonl")
+    ledger.record_row(row)
+    monkeypatch.setattr(
+        engine, "_redetect_compilers",
+        lambda profile: profile.update({"compiler_c": True,
+                                        "compiler_rust": True}))
+    seen = {}
+
+    def fake_run(argv, *rest, **kw):
+        if "-c" in argv and "layer1" in argv[-1]:
+            layer = (kw.get("env") or {}).get(
+                "ANDROID_API_LEVEL", "")
+            return (0, json.dumps(
+                {"layer1": layer, "layer2": layer,
+                 "want": (kw.get("env") or {}).get(
+                     "APKF_WANT_API", "")}))
+        if "install" in argv:
+            if "--no-build-isolation" in argv:
+                seen["noiso"] = True
+            if (kw.get("env") or {}).get("ANDROID_API_LEVEL"):
+                return (0, "ok")
+            return (1, ANDROID_FAIL)
+        if "-c" in argv:
+            return (0, "import-ok")
+        return (0, "")
+
+    monkeypatch.setattr(engine, "run", fake_run)
+    monkeypatch.setattr(engine, "_resolve_version_pick",
+                        lambda *argv, **kw: None)
+    monkeypatch.setattr(engine._runtime, "select_runtime",
+                        lambda *argv, **kw: None)
+    monkeypatch.setattr(engine, "_python_for_wheels",
+                        lambda *argv, **kw: None)
+    result = engine.pip_install_with_recovery(
+        ctx, "/nonexistent/python", req, _ladder_fp(),
+        {"platform": "linux-x86_64", "compiler_c": True,
+         "compiler_rust": True}, ledger, "e" * 12,
+        offline=False)
+    assert seen.get("noiso") is True
+    assert result["python"] != "/nonexistent/python"
+    rows = [entry for entry in ledger.entries()
+            if entry.get("strategy")
+            == "native_android_api_no_isolation (isolated)"]
+    assert len(rows) == 1
+    assert rows[0]["result"] == "ok"
+    assert rows[0]["build_env"]["build_isolation"] == "false"
+    assert rows[0]["build_env"]["ANDROID_API_LEVEL"] == "34"
+
+
+# -- wheel preservation (verified wheel is not replaced) --------------------------------------
+
+def test_verified_android_wheel_is_not_replaced(
+        engine, ctx, tmp_path, monkeypatch):
+    fp = {"termux": True, "libc": "bionic",
+          "arch_machine": "aarch64",
+          "python_version": "3.14.6", "os": "linux",
+          "fingerprint_hash": "e" * 12}
+    log = tmp_path / "pip-old-native.log"
+    log.write_text(ANDROID_FAIL, encoding="utf-8")
+    req = tmp_path / "req.txt"
+    req.write_text("pkgx>=1\n", encoding="utf-8")
+    tools = engine._strategy.toolchain_fingerprint()
+    tools["env_hash"] = "e" * 12
+    row = engine._strategy.attempt_fingerprint(
+        "DEPENDENCIES", "native", None, None, "3.14.6",
+        "aarch64", "android-termux",
+        "pip install -r %s" % req, "pkgx>=1\n", tools,
+        run_id="old-run")
+    del row["build_env_hash"]
+    del row["build_env"]
+    row.update({"category": "RUST_BUILD_FAILURE",
+                "result": "failed", "log": str(log),
+                "detail": ANDROID_FAIL[-500:],
+                "ts": "2026-10-09T01:02:19Z"})
+    ledger = engine._recovery.Ledger(tmp_path / "ledger.jsonl")
+    ledger.record_row(row)
+    wheel_bytes = b"fake-wheel-bytes"
+    sha = hashlib.sha256(wheel_bytes).hexdigest()
+    asset = "pydantic_core-2.49.0-cp314-cp314-android_24_" \
+        "arm64_v8a.whl"
+    monkeypatch.setattr(
+        engine._strategy, "detect_android_api_level",
+        lambda *argv, **kw: {"ok": True, "level": 29,
+                             "source": "getprop",
+                             "device_api_level": 29,
+                             "device_source": "getprop",
+                             "reason": "device api detected"})
+    monkeypatch.setattr(
+        engine._compat, "fetch_github_releases",
+        lambda *argv, **kw: [{"tag": "v2.49.0", "assets": [{
+            "name": asset, "url": "https://github.com/Eutalix/"
+            "android-pydantic-core/releases/download/v2.49.0/"
+            + asset, "digest": "sha256:" + sha, "size": 18}]}])
+    monkeypatch.setattr(engine._compat, "_http_bytes",
+                        lambda url, timeout=30: wheel_bytes)
+    monkeypatch.setattr(engine._compat, "pydantic_for_core",
+                        lambda *argv, **kw: "2.12.0")
+    monkeypatch.setattr(engine, "_package_in_graph",
+                        lambda *argv, **kw: True)
+    installs = []
+    seen = {}
+
+    def fake_run(argv, *rest, **kw):
+        if "install" in argv:
+            installs.append(list(argv))
+            return (0, "ok")
+        if "check" in argv:
+            seen["check"] = True
+            return (0, "")
+        if "show" in argv:
+            seen["show"] = True
+            return (0, "Name: pydantic-core\nVersion: 2.49.0\n")
+        if "-c" in argv and "layer1" in argv[-1]:
+            layer = (kw.get("env") or {}).get(
+                "ANDROID_API_LEVEL", "")
+            return (0, json.dumps(
+                {"layer1": layer, "layer2": layer,
+                 "want": (kw.get("env") or {}).get(
+                     "APKF_WANT_API", "")}))
+        if "-c" in argv and "__version__" in argv[-1]:
+            seen["ver"] = True
+            return (0, "2.49.0")
+        if "-c" in argv:
+            return (0, "import-ok")
+        return (0, "")
+
+    monkeypatch.setattr(engine, "run", fake_run)
+    result = engine.pip_install_with_recovery(
+        ctx, "/nonexistent/python", req, fp,
+        {"platform": "android-termux", "compiler_c": True,
+         "compiler_rust": True}, ledger, "e" * 12,
+        offline=False)
+    assert result["python"] != "/nonexistent/python"
+    full = [argv for argv in installs if "-r" in argv]
+    assert len(full) == 1
+    assert "-c" in full[0]
+    cpath = full[0][full[0].index("-c") + 1]
+    content = Path(cpath).read_text(encoding="utf-8")
+    assert "pydantic-core==2.49.0" in content
+    assert "pydantic==2.12.0" in content
+    assert "installable" not in content
+    assert seen.get("show") is True
+    assert seen.get("ver") is True
+    assert seen.get("check") is True

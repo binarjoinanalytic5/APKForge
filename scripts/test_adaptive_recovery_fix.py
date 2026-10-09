@@ -234,6 +234,8 @@ def test_ladder_runs_version_strategy(engine, ctx, tmp_path,
     monkeypatch.setattr(engine, "_resolve_version_pick",
                         lambda *argv, **kw: {"version": "2.0.0",
                                              "status": "WHEEL_OK"})
+    monkeypatch.setattr(engine, "_package_in_graph",
+                        lambda *argv, **kw: True)
     result = engine.pip_install_with_recovery(
         ctx, "/nonexistent/python", req, _ladder_fp(),
         {"platform": "linux-x86_64", "compiler_c": True,

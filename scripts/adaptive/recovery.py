@@ -18,6 +18,8 @@ CATEGORIES = ("NETWORK_FAILURE", "DNS_FAILURE", "PACKAGE_NOT_FOUND",
                "COMPILER_MISSING", "RUST_MISSING",
               "RUST_BUILD_FAILURE", "C_BUILD_FAILURE",
               "BUILD_BACKEND_FAILURE", "ANDROID_API_LEVEL_MISSING",
+              "ENV_PROPAGATION_FAILURE", "WHEEL_RUNTIME_INCOMPATIBLE",
+              "ANDROID_NDK_MISSING",
               "ABI_INCOMPATIBILITY", "ARCH_INCOMPATIBILITY",
               "JAVA_INCOMPATIBILITY", "PERMISSION_FAILURE",
               "DISK_SPACE", "CONFIG_ERROR", "PROJECT_ERROR",
@@ -74,6 +76,20 @@ def evidence_lines(log_text, limit=8):
     return picked
 
 
+# Generic English words a package-name pattern may catch but that
+# are never distribution names (a bogus name here once pinned an
+# unrelated PyPI stub, so this list is load-bearing).
+_NON_PACKAGES = frozenset((
+    "from", "the", "a", "an", "package", "packages", "version",
+    "versions", "wheel", "wheels", "metadata", "project",
+    "projects", "distribution", "distributions", "requirement",
+    "requirements", "satisfies", "building", "build", "install",
+    "installable", "installed", "installer", "python", "file",
+    "files", "directory", "module", "modules", "library",
+    "libraries", "target", "source", "sources", "index", "cache",
+    "conflict", "candidate", "error", "errors"))
+
+
 def _find_package(lines):
     """Best-effort package name from pip/npm failure output."""
     patterns = (r"Failed to build `?([^`'\s=]+)",
@@ -90,17 +106,20 @@ def _find_package(lines):
             match = re.search(pattern, line)
             if match:
                 name = match.group(1).strip().strip("`'\"")
-                if name and name.lower() not in (
-                        "from", "the", "a", "an"):
+                if name and name.lower() not in _NON_PACKAGES:
                     return name
     return None
 
 
-def classify_failure(log_text):
+def classify_failure(log_text, context=None):
     """Classify a failure log into (category, package, evidence).
 
     Root-cause oriented: a pydantic-core build failure is a
     dependency/build-resolution event, never just "pip failed".
+    context carries runtime facts the log alone cannot prove
+    (currently {"env_had_api": bool}): an API-unset error from a
+    process that provably HAD the variable is a propagation
+    failure, not a missing setting.
     """
     text = log_text or ""
     lines = _tail(text)
@@ -174,14 +193,29 @@ def classify_failure(log_text):
     # Precise cause first: a maturin metadata step that cannot see
     # the Android API level is an environment gap, never a missing
     # Rust toolchain, even though the log names maturin/rustc.
+    # When the parent process provably HAD the variable, the same
+    # text proves the build backend never received it.
     if hit("failed to determine android api level",
            "android_api_level environment variable",
            "set the android_api_level"):
+        if (context or {}).get("env_had_api"):
+            return {"category": "ENV_PROPAGATION_FAILURE",
+                    "package": package, "evidence": evidence,
+                    "root_cause": "api level verified in the "
+                    "parent process but missing inside the build "
+                    "backend (build isolation dropped it)"}
         return {"category": "ANDROID_API_LEVEL_MISSING",
                 "package": package, "evidence": evidence,
                 "root_cause": "maturin metadata step cannot "
                 "determine the Android API level "
                 "(ANDROID_API_LEVEL unset)"}
+    if hit("android ndk", "ndk not found", "ndk-build",
+           "could not find ndk", "ndk_home", "android_ndk",
+           "no android ndk"):
+        return {"category": "ANDROID_NDK_MISSING",
+                "package": package, "evidence": evidence,
+                "root_cause": "android NDK missing for a native "
+                "link step"}
 
     # -- native build chain -----------------------------------------------
     # Rust/C markers are diagnostic on their own: a missing
