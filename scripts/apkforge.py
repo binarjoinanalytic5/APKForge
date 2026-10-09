@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""APKForge one-command bootstrap: audit → provision → configure →
-migrate → build → serve → verify (idempotent, resumable, governed).
+"""APKForge adaptive bootstrap engine: detect → classify → plan →
+verify → provision → install → validate → recover → continue.
 
 Stdlib only. Never prints or logs secrets. Run from anywhere:
   ./apkforge              full pipeline (default)
   ./apkforge --check      audit only, no changes
+  ./apkforge --plan       show bootstrap plan, no changes
   ./apkforge --status     services + state, no changes
   ./apkforge --repair     re-run pipeline, retry failed steps
   ./apkforge --reset-dev  guarded dev reset (never touches prod)
   ./apkforge --logs       tail this run's logs
   ./apkforge --stop       stop local services
+  ./apkforge gitcare ...  repository health + cleanup + recovery
 """
 import argparse
 import hashlib
@@ -30,20 +32,33 @@ import urllib.request
 import webbrowser
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from adaptive import checkpoint as _checkpoint
+from adaptive import compat as _compat
+from adaptive import env as _env
+from adaptive import gitcare as _gitcare
+from adaptive import plan as _plan
+from adaptive import recovery as _recovery
+from adaptive import tools as _tools
+
 ROOT = Path(__file__).resolve().parents[1]
 GOV = ROOT / ".governance"
 LOGS = ROOT / "logs"
 TOOLS_DIR = ROOT / ".tools"
 VENV = ROOT / ".venv"
 
-ENGINE_VERSION = "1.0.0"
+ENGINE_VERSION = "2.0.0"
 MIN_PYTHON = (3, 10)
 MIN_NODE = (20, 0)
 
-STATES = ("INIT", "ENVIRONMENT_CHECK", "TOOLS_READY", "CONFIG_READY",
-          "DATABASE_READY", "MIGRATIONS_READY", "SEED_READY",
-          "BUILD_READY", "SERVICES_READY", "HEALTHY",
-          "ADMIN_SETUP_REQUIRED", "READY", "FAILED")
+STATES = ("INIT", "ENVIRONMENT_CHECK", "ENVIRONMENT_DETECTED",
+          "TOOLS_INVENTORIED", "COMPATIBILITY_RESOLVED",
+          "PLAN_CREATED", "TOOLS_READY", "CONFIG_READY",
+          "RUNTIME_READY", "DEPENDENCIES_READY", "DATABASE_READY",
+          "MIGRATIONS_READY", "SEED_READY", "BUILD_READY",
+          "SERVICES_READY", "HEALTHY", "ADMIN_SETUP_REQUIRED",
+          "GIT_RECOVERY_REQUIRED", "RECOVERING", "BLOCKED",
+          "READY", "FAILED")
 
 SECRET_PATTERNS = (
     re.compile(r"(?i)(bearer\s+)[A-Za-z0-9._~+/-]+=*"),
@@ -73,6 +88,7 @@ class Ctx:
         self.history = []
         self.step_started = time.time()
         self.warnings = []
+        self.recovery = []
         log_path.parent.mkdir(parents=True, exist_ok=True)
         self._handle = open(log_path, "a", encoding="utf-8")
 
@@ -86,6 +102,12 @@ class Ctx:
     def warn(self, message):
         self.warnings.append(redact(message))
         self.say("WARN: " + message)
+
+    def recovered(self, strategy, detail=""):
+        self.recovery.append({"strategy": strategy,
+                              "detail": redact(detail)})
+        suffix = ": " + detail if detail else ""
+        self.say("recovered via %s%s" % (strategy, suffix))
 
     def step(self, state):
         assert state in STATES, state
@@ -111,10 +133,20 @@ def new_run_id():
 
 def save_state(ctx):
     GOV.mkdir(parents=True, exist_ok=True)
+    try:
+        previous = json.loads(
+            (GOV / "bootstrap-state.json").read_text(
+                encoding="utf-8"))
+    except (OSError, ValueError):
+        previous = {}
     payload = {"run_id": ctx.run_id, "state": ctx.state,
                "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ",
                                            time.gmtime()),
                "history": ctx.history[-40:]}
+    if isinstance(previous, dict):
+        for key in ("stages", "fingerprint_hash"):
+            if key in previous:
+                payload[key] = previous[key]
     (GOV / "bootstrap-state.json").write_text(
         json.dumps(payload, indent=2), encoding="utf-8")
 
@@ -199,10 +231,7 @@ def http_json(method, url, body=None, timeout=15):
 
 
 def parse_version(text):
-    match = re.search(r"(\d+)\.(\d+)(?:\.(\d+))?", text or "")
-    if not match:
-        return None
-    return tuple(int(group or 0) for group in match.groups())
+    return _tools.parse_version(text)
 
 
 def port_free(port):
@@ -241,37 +270,28 @@ def has_network(ctx=None, timeout=6):
 
 # -- environment audit ------------------------------------------------
 def audit_environment(ctx):
+    fp = _env.fingerprint(ROOT)
+    disk = fp.get("disk") or {}
+    network = fp.get("network") or {}
     facts = {
-        "os": platform.system(),
-        "os_release": platform.release(),
-        "arch": platform.machine(),
-        "kernel": platform.version(),
-        "cpu_count": os.cpu_count(),
-        "python": platform.python_version(),
-        "shell": os.environ.get("SHELL", ""),
-        "cwd": str(Path.cwd()),
-        "root": str(ROOT),
+        "os": fp["os"],
+        "os_release": fp["os_release"],
+        "arch": fp["arch_machine"],
+        "kernel": fp["kernel"],
+        "cpu_count": fp["arch"]["count"],
+        "python": fp["python_version"],
+        "shell": fp["shell"],
+        "cwd": fp["cwd"],
+        "root": fp["root"],
+        "ram_mb": fp["ram_mb"],
+        "disk_free_mb": disk.get("free_mb")
+        if disk.get("free_mb") is not None else -1,
+        "network": bool(network.get("reachable")),
+        "writable_root": fp["permissions"]["writable_root"],
+        "fingerprint": fp,
     }
-    try:
-        import resource  # Unix only
-        facts["ram_note"] = "see /proc/meminfo"
-    except ImportError:
-        facts["ram_note"] = "unknown"
-    for path in ("/proc/meminfo",):
-        try:
-            text = Path(path).read_text(encoding="utf-8")
-            match = re.search(r"MemTotal:\s+(\d+)\s*kB", text)
-            if match:
-                facts["ram_mb"] = int(match.group(1)) // 1024
-        except OSError:
-            pass
-    try:
-        usage = shutil.disk_usage(str(ROOT))
-        facts["disk_free_mb"] = usage.free // (1024 * 1024)
-    except OSError:
-        facts["disk_free_mb"] = -1
-    facts["network"] = has_network(ctx)
-    facts["writable_root"] = os.access(str(ROOT), os.W_OK)
+    if not facts["network"]:
+        ctx.say("network: unreachable (offline mode)")
     return facts
 
 
@@ -330,41 +350,63 @@ TOOL_MATRIX = [
      "want": "phase 2+ only",
      "detect": ["docker", "--version"], "min": None,
      "method": "not installed by this bootstrap",
-     "source": "-"},
+     "source": "-", "not_on": ["android-termux"]},
 ]
 
 
-def detect_tools(ctx):
-    rows = []
-    for entry in TOOL_MATRIX:
-        version, code = tool_version(entry["detect"])
-        if entry["tool"] == "python3":
-            version = tuple(sys.version_info[:3])
-            code = 0
-        detected = ".".join(str(part) for part in version) \
-            if version else None
-        ok = detected is not None and (
-            entry["min"] is None or version >= entry["min"])
-        status = "ok" if ok else ("missing" if not detected
-                                  else "too-old")
-        if entry["kind"] in ("optional", "not-needed-phase1") \
-                and status != "ok":
-            status = "skip-" + status
-        rows.append({"tool": entry["tool"], "kind": entry["kind"],
-                     "required_version": entry["want"],
-                     "detected_version": detected or "-",
-                     "status": status,
-                     "installation_method": entry["method"],
-                     "source": entry["source"]})
-        mark = "OK " if status == "ok" else (
-            "WARN" if status.startswith("skip") else "MISS")
+def _legacy_row(spec, fp):
+    """Re-probe exactly one tool (provisioning verification)."""
+    probed = _tools.probe(spec)
+    platform_name = "android-termux" if fp.get("termux") else None
+    status = _tools.classify(spec, probed, platform_name,
+                             fp.get("libc"))
+    role = _tools.role_of(spec["kind"])
+    if role != "REQUIRED" and status != "AVAILABLE":
+        legacy_status = "skip-" + status.lower().replace("_",
+                                                         "-")
+    else:
+        legacy_status = {"AVAILABLE": "ok", "MISSING": "missing",
+                         "OUTDATED": "too-old",
+                         "INCOMPATIBLE": "incompatible",
+                         "BROKEN": "broken",
+                         "NOT_APPLICABLE": "skip-na"}.get(
+                             status, status)
+    detected = probed["detected_text"] or "-"
+    return {
+        "tool": spec["tool"], "kind": spec["kind"], "role": role,
+        "status": legacy_status, "adaptive_status": status,
+        "required_version": spec.get("want", ""),
+        "detected_version": detected, "path": probed["path"],
+        "installation_method": spec.get("method", ""),
+        "source": spec.get("source", "")}
+
+
+def _spec_of(tool):
+    for spec in TOOL_MATRIX:
+        if spec["tool"] == tool:
+            return spec
+    raise RuntimeError("unknown tool %r" % (tool,))
+
+
+def detect_tools(ctx, fp=None):
+    """Inventory every tool exactly once (never re-scan blindly)."""
+    if fp is None:
+        fp = _env.fingerprint(ROOT, probe=False)
+    rows = [_legacy_row(spec, fp) for spec in TOOL_MATRIX]
+    for row in rows:
+        mark = "OK " if row["adaptive_status"] == "AVAILABLE" \
+            else ("WARN" if row["role"] != "REQUIRED"
+                  else "MISS")
         ctx.say("tool %-10s %-4s detected=%s want=%s" % (
-            entry["tool"], mark, detected or "-", entry["want"]))
+            row["tool"], mark, row["detected_version"],
+            row["required_version"]))
     return rows
 
 
 # -- provisioning -----------------------------------------------------
 def package_manager():
+    if _env.is_termux() and shutil.which("pkg"):
+        return "pkg", ["pkg", "install", "-y"]
     for manager, args in (("apt-get", ["apt-get", "install", "-y"]),
                           ("dnf", ["dnf", "install", "-y"]),
                           ("apk", ["apk", "add"]),
@@ -375,6 +417,8 @@ def package_manager():
 
 
 def can_elevate():
+    if _env.is_termux() and shutil.which("pkg"):
+        return True  # pkg needs no sudo
     if os.name != "posix":
         return False
     if hasattr(os, "geteuid") and os.geteuid() == 0:
@@ -397,7 +441,13 @@ def install_via_manager(ctx, package):
     if not can_elevate():
         raise RuntimeError(
             "package manager needs privileges (no passwordless sudo)")
-    prefix = [] if (hasattr(os, "geteuid") and os.geteuid() == 0) \
+    termux = manager == "pkg"
+    if termux:
+        code, _ = run(["pkg", "update"], ctx, timeout=300)
+        if code != 0:
+            ctx.warn("pkg update failed; trying install anyway")
+    prefix = [] if (termux or (hasattr(os, "geteuid")
+                              and os.geteuid() == 0)) \
         else ["sudo", "-n"]
     code, output = run(prefix + args + [package], ctx, timeout=600)
     if code != 0:
@@ -495,47 +545,84 @@ def load_local_path():
         pass
 
 
-def ensure_required_tools(ctx, offline):
-    rows = detect_tools(ctx)
-    by_name = {row["tool"]: row for row in rows}
-    if by_name["python3"]["status"] != "ok":
-        raise RuntimeError("python3 >=3.10 is the one prerequisite "
-                           "this bootstrap cannot install itself")
-    if by_name["pip"]["status"] != "ok":
-        ctx.say("pip missing → python -m ensurepip")
-        code, _ = run([sys.executable, "-m", "ensurepip",
-                       "--default-pip"], ctx, timeout=180)
-        if code != 0:
-            raise RuntimeError("ensurepip failed")
-    if by_name["node"]["status"] != "ok":
-        failure = last_failure("tools.node")
-        if failure:
-            ctx.say("last node attempt failed (%s); alternative: %s"
-                    % (failure["error"][:120], failure["alternative"]))
-        tried = []
-        if not offline and not failure:
+def _provision_pip(ctx, ledger, env_hash):
+    sig = _recovery.failure_signature("TOOLS", "MISSING", "pip",
+                                      "ensurepip", env_hash)
+    if ledger.attempted("TOOLS", sig, "ensurepip"):
+        raise RuntimeError("pip ensurepip already failed once; "
+                           "repair python, then re-run")
+    ctx.say("pip missing → python -m ensurepip")
+    code, output = run([sys.executable, "-m", "ensurepip",
+                        "--default-pip"], ctx, timeout=180)
+    ledger.record("TOOLS", sig, "ensurepip",
+                  "python -m ensurepip", env_hash,
+                  "ok" if code == 0 else "failed",
+                  "" if code == 0 else output[-300:])
+    if code != 0:
+        raise RuntimeError("ensurepip failed")
+
+
+def _provision_node(ctx, offline, ledger, env_hash):
+    tried = []
+    manager, _ = package_manager()
+    if not offline and manager is not None:
+        sig = _recovery.failure_signature("TOOLS", "MISSING",
+                                          "node", "manager",
+                                          env_hash)
+        if not ledger.attempted("TOOLS", sig, "manager"):
             try:
                 install_via_manager(ctx, "nodejs")
                 tried.append("manager:nodejs")
+                ledger.record("TOOLS", sig, "manager",
+                              "%s nodejs" % manager, env_hash,
+                              "ok")
             except RuntimeError as exc:
-                record_failure(ctx, "tools.node", "manager",
-                               str(exc), "nodejs.org tarball")
+                ledger.record("TOOLS", sig, "manager",
+                              "%s nodejs" % manager, env_hash,
+                              "failed", str(exc))
                 ctx.warn("manager node install failed: %s" % exc)
-        if tool_version(["node", "--version"])[0] is None:
-            if offline:
-                raise RuntimeError(
-                    "NETWORK REQUIRED: node >=20 missing and offline")
-            try:
-                install_node_local(ctx)
-                tried.append("tarball")
-            except RuntimeError as exc:
-                record_failure(ctx, "tools.node", "tarball", str(exc),
-                               "install node 20 manually, then re-run")
-                raise
-        ctx.say("node provisioned via %s" % "+".join(tried))
-    rows = detect_tools(ctx)
-    missing = [row["tool"] for row in rows
-               if row["kind"] == "required" and row["status"] != "ok"]
+    if _tools.probe(_spec_of("node"))["detected"] is None:
+        if offline:
+            raise RuntimeError(
+                "NETWORK REQUIRED: node >=20 missing and offline")
+        sig = _recovery.failure_signature("TOOLS", "MISSING",
+                                          "node", "tarball",
+                                          env_hash)
+        if ledger.attempted("TOOLS", sig, "tarball"):
+            raise RuntimeError(
+                "node tarball already failed once; install "
+                "node 20 manually, then re-run")
+        try:
+            install_node_local(ctx)
+            tried.append("tarball")
+            ledger.record("TOOLS", sig, "tarball",
+                          "nodejs.org tarball", env_hash, "ok")
+        except RuntimeError as exc:
+            ledger.record("TOOLS", sig, "tarball",
+                          "nodejs.org tarball", env_hash,
+                          "failed", str(exc))
+            raise
+    ctx.say("node provisioned via %s" % "+".join(tried))
+
+
+def ensure_required_tools(ctx, offline, rows, ledger, env_hash,
+                          fp):
+    """Provision from the single inventory; re-probe only touched."""
+    by_name = {row["tool"]: row for row in rows}
+    if by_name["python3"]["adaptive_status"] != "AVAILABLE":
+        raise RuntimeError("python3 >=3.10 is the one prerequisite "
+                           "this bootstrap cannot install itself")
+    if by_name["pip"]["adaptive_status"] != "AVAILABLE":
+        _provision_pip(ctx, ledger, env_hash)
+        by_name["pip"] = _legacy_row(_spec_of("pip"), fp)
+    if by_name["node"]["adaptive_status"] != "AVAILABLE":
+        _provision_node(ctx, offline, ledger, env_hash)
+        by_name["node"] = _legacy_row(_spec_of("node"), fp)
+        by_name["npm"] = _legacy_row(_spec_of("npm"), fp)
+    rows[:] = [by_name[spec["tool"]] for spec in TOOL_MATRIX]
+    missing = [name for name in
+               ("python3", "pip", "node", "npm")
+               if by_name[name]["adaptive_status"] != "AVAILABLE"]
     if missing:
         raise RuntimeError("required tools still missing: %s"
                            % ", ".join(missing))
@@ -574,34 +661,447 @@ def install_apktool(ctx):
     return str(target)
 
 
-def ensure_venv(ctx, offline):
-    python = VENV / ("Scripts" if os.name == "nt" else "bin") / \
+class RecoveryExhausted(RuntimeError):
+    """Every recovery strategy failed; carries the diagnostic."""
+
+    def __init__(self, info):
+        super().__init__("auto-recovery exhausted")
+        self.info = info
+
+
+TOOLCHAIN_PKGS = {
+    "pkg": {"c": ["clang"], "rust": ["rust"]},
+    "apt-get": {"c": ["build-essential", "python3-dev"],
+                "rust": ["rustc", "cargo"]},
+    "dnf": {"c": ["gcc", "python3-devel"],
+            "rust": ["rustc", "cargo"]},
+    "apk": {"c": ["build-base", "python3-dev"],
+            "rust": ["rust", "cargo"]},
+    "brew": {"c": [], "rust": ["rust"]},
+}
+
+
+def _venv_python():
+    return VENV / ("Scripts" if os.name == "nt" else "bin") / \
         ("python.exe" if os.name == "nt" else "python")
-    if not python.is_file():
-        ctx.say("creating virtualenv .venv")
-        code, output = run([sys.executable, "-m", "venv", str(VENV)],
-                           ctx, timeout=300)
-        if code != 0:
-            raise RuntimeError("venv failed: %s" % output[-300:])
-    else:
-        ctx.say("virtualenv exists → reuse")
-    req = ROOT / "backend" / "requirements.txt"
+
+
+def validate_venv(ctx, python):
+    """Validate an existing venv (version/pip/arch; no changes)."""
+    if not Path(python).is_file():
+        return False, "no interpreter"
+    code, _ = run([str(python), "--version"], ctx, timeout=30)
+    if code != 0:
+        return False, "interpreter broken"
+    code, _ = run([str(python), "-m", "pip", "--version"], ctx,
+                  timeout=60)
+    if code != 0:
+        return False, "pip broken"
     code, output = run(
         [str(python), "-c",
-         "import fastapi, uvicorn; print(fastapi.__version__)"],
-        ctx, timeout=60)
-    if code == 0:
-        ctx.say("backend deps present (fastapi %s) → skip install"
-                % output.strip().splitlines()[-1])
-        return python
-    if offline:
-        raise RuntimeError("NETWORK REQUIRED: backend deps missing "
-                           "and offline")
-    ctx.say("installing backend requirements")
-    code, output = run([str(python), "-m", "pip", "install", "-r",
-                        str(req)], ctx, timeout=900)
+         "import platform; print(platform.machine())"], ctx,
+        timeout=30)
+    if code == 0 and output.strip():
+        arch = output.strip().splitlines()[-1]
+        if arch and arch != platform.machine():
+            return False, "arch mismatch (%s)" % arch
+    return True, "ok"
+
+
+def _backend_imports_ok(ctx, python):
+    code, _ = run(
+        [str(python), "-c",
+         "import fastapi, uvicorn, pydantic; "
+         "print(fastapi.__version__, pydantic.VERSION)"], ctx,
+        timeout=60)
+    return code == 0
+
+
+def _write_lock(ctx, python):
+    code, output = run([str(python), "-m", "pip", "freeze",
+                        "--exclude-editable"], ctx, timeout=120)
     if code != 0:
-        raise RuntimeError("pip install failed: %s" % output[-500:])
+        ctx.warn("pip freeze failed; resolution not locked")
+        return
+    GOV.mkdir(parents=True, exist_ok=True)
+    (GOV / "requirements.lock").write_text(output,
+                                           encoding="utf-8")
+    count = len([line for line in output.splitlines()
+                 if line.strip() and not line.startswith("#")])
+    ctx.say("dependency resolution locked (%d pins)" % count)
+
+
+def _newer_with_wheels(package, fp, cache_dir):
+    """Latest release installable here (None when none/offline)."""
+    release = _compat.pypi_release(package, cache_dir=cache_dir)
+    if not release:
+        return None
+    interpreter, version = _compat.interpreter_tag(
+        fp.get("python_version", ""))
+    for item in release.get("files", []):
+        if item.get("yanked"):
+            continue
+        parsed = _compat.parse_wheel_filename(
+            item.get("filename", ""))
+        if _compat.wheel_matches(parsed, interpreter, version,
+                                 fp):
+            return release.get("version")
+    return None
+
+
+def _redetect_compilers(profile):
+    profile["compiler_c"] = shutil.which("cc") is not None or \
+        shutil.which("gcc") is not None or \
+        shutil.which("clang") is not None
+    profile["compiler_rust"] = \
+        shutil.which("rustc") is not None and \
+        shutil.which("cargo") is not None
+
+
+def _provision_toolchains(ctx, langs, ledger, env_hash, profile,
+                          offline):
+    """Install missing C/Rust toolchains (CAUTION, validated)."""
+    langs = {lang for lang in langs if lang in ("c", "rust")}
+    if not langs:
+        return False
+    if offline:
+        ctx.warn("offline: cannot provision %s toolchains"
+                 % "+".join(sorted(langs)))
+        return False
+    manager, _ = package_manager()
+    if manager is None or not can_elevate():
+        ctx.warn("no usable package manager for toolchains")
+        return False
+    names = TOOLCHAIN_PKGS.get(manager, {})
+    did = False
+    for lang in sorted(langs):
+        if lang == "c" and profile.get("compiler_c"):
+            continue
+        if lang == "rust" and profile.get("compiler_rust"):
+            continue
+        pkgs = names.get(lang, [])
+        if not pkgs:
+            ctx.warn("no %s toolchain mapping for %s"
+                     % (lang, manager))
+            continue
+        strategy = "toolchain:%s" % lang
+        sig = _recovery.failure_signature(
+            "DEPENDENCIES", "TOOLCHAIN", lang, strategy,
+            env_hash)
+        if ledger.attempted("DEPENDENCIES", sig, strategy):
+            ctx.say("toolchain %s already failed once; skip"
+                    % lang)
+            continue
+        try:
+            for pkg in pkgs:
+                install_via_manager(ctx, pkg)
+            ledger.record("DEPENDENCIES", sig, strategy,
+                          "%s %s" % (manager, " ".join(pkgs)),
+                          env_hash, "ok")
+            did = True
+        except RuntimeError as exc:
+            ledger.record("DEPENDENCIES", sig, strategy,
+                          "%s %s" % (manager, " ".join(pkgs)),
+                          env_hash, "failed", str(exc))
+            ctx.warn("toolchain %s failed: %s" % (lang, exc))
+    _redetect_compilers(profile)
+    return did
+
+
+def _write_minimal_requirements(ctx, req_path):
+    """requirements without native-heavy extras (SAFE fallback).
+
+    uvicorn[standard] extras are performance-only (uvloop,
+    httptools, watchfiles); the app is fully functional without
+    them. Written to .governance (local-only, never committed).
+    """
+    try:
+        text = Path(req_path).read_text(encoding="utf-8")
+    except OSError as exc:
+        ctx.warn("cannot read requirements: %s" % exc)
+        return None
+    minimal = _compat.strip_known_extras(text)
+    if minimal == text:
+        return None
+    GOV.mkdir(parents=True, exist_ok=True)
+    target = GOV / "requirements-minimal.txt"
+    target.write_text(minimal, encoding="utf-8")
+    return target
+
+
+def _is_extras_failure(package):
+    extra_deps = set()
+    for extras in _compat.KNOWN_EXTRAS.values():
+        for deps in extras.values():
+            extra_deps.update(deps)
+    extra_deps.discard("websockets")  # pure-python
+    return (package or "").lower().replace("_", "-") in extra_deps
+
+
+def _recovery_alternatives(category, package, profile, fp):
+    termux = bool(fp.get("termux"))
+    rust_hint = "pkg install rust, then re-run (source build " \
+        "~15 min, needs free RAM)" if termux else \
+        "install rustc+cargo via the system manager, then re-run"
+    c_hint = "pkg install clang, then re-run" if termux else \
+        "install gcc/clang + python headers, then re-run"
+    hints = {
+        "RUST_MISSING": [rust_hint,
+                         "use a Python with prebuilt %s wheels "
+                         "(see the PyPI files page)" % package],
+        "COMPILER_MISSING": [c_hint],
+        "BUILD_TOOL_MISSING": [c_hint, rust_hint],
+        "WHEEL_UNAVAILABLE": [
+            "use a Python version with %s wheels" % package,
+            c_hint + " (source build instead)"],
+        "PYTHON_INCOMPATIBILITY": [
+            "use a supported Python (see requires-python)",
+            "provision a project-local python3.12/3.13"],
+        "NETWORK_FAILURE": ["check firewall/proxy, then re-run "
+                            "(resume continues)"],
+        "DNS_FAILURE": ["check DNS, then re-run"],
+        "PERMISSION_FAILURE": ["fix .venv ownership or delete "
+                               ".venv and re-run"],
+        "DISK_SPACE": ["free disk space (pip cache purge, "
+                       "gitcare cleanup), then re-run"],
+        "PACKAGE_NOT_FOUND": ["check the spelling in "
+                              "backend/requirements.txt"],
+        "VERSION_INCOMPATIBILITY": ["relax the pin in "
+                                    "backend/requirements.txt"],
+    }
+    return hints.get(category, ["see the log tail, fix the "
+                                "cause, re-run"])
+
+
+def pip_install_with_recovery(ctx, python, req_path, fp, profile,
+                              ledger, env_hash, offline):
+    """pip install across the strategy ladder (never repeats)."""
+    LOGS.mkdir(parents=True, exist_ok=True)
+    cache_dir = ROOT / ".cache" / "apkforge"
+    attempts = []
+    last = {"category": "-", "package": None, "evidence": []}
+    retry_key = "|".join([
+        env_hash,
+        "c" if profile.get("compiler_c") else "C",
+        "r" if profile.get("compiler_rust") else "R"])
+
+    def attempt(strategy, argv, timeout=900):
+        sig = _recovery.failure_signature(
+            "DEPENDENCIES", last["category"], last["package"],
+            strategy, retry_key)
+        if ledger.attempted("DEPENDENCIES", sig, strategy):
+            ctx.say("skip %s (already failed identically)"
+                    % strategy)
+            return None
+        ctx.say("pip attempt [%s]" % strategy)
+        code, output = run([str(python), "-m", "pip"] + argv,
+                           ctx, timeout=timeout)
+        ledger.record("DEPENDENCIES", sig, strategy,
+                      "pip " + " ".join(argv), retry_key,
+                      "ok" if code == 0 else "failed",
+                      "" if code == 0 else output[-300:])
+        attempts.append(strategy)
+        if code == 0:
+            ctx.recovered(strategy, "pip install succeeded")
+            return True
+        classified = _recovery.classify_failure(output)
+        if ctx.state != "RECOVERING":
+            ctx.step("RECOVERING")
+        last.update(category=classified["category"],
+                    package=classified["package"],
+                    evidence=classified["evidence"])
+        ctx.warn("attempt %s failed: %s (%s)" % (
+            strategy, classified["root_cause"],
+            classified["category"]))
+        (LOGS / ("pip-%s-%s.log" % (
+            ctx.run_id, strategy.replace(":", "-")))
+         ).write_text(redact(output), encoding="utf-8")
+        ctx.say(_recovery.full_diagnostic({
+            "step": "DEPENDENCIES",
+            "package": classified["package"] or "-",
+            "python": fp.get("python_version", "?"),
+            "platform": profile.get("platform", "?"),
+            "arch": fp.get("arch_machine", "?"),
+            "method": "pip " + " ".join(argv),
+            "category": classified["category"],
+            "root_cause": classified["root_cause"],
+            "command": "pip " + " ".join(argv),
+            "evidence": classified["evidence"],
+            "alternatives": _recovery_alternatives(
+                classified["category"], classified["package"],
+                profile, fp),
+            "attempts": list(attempts),
+            "next_strategy": "next ladder step"}))
+        return False
+
+    if offline:
+        done = attempt("cache-only",
+                       ["install", "--no-index",
+                        "--find-links",
+                        str(cache_dir / "wheels"), "-r",
+                        str(req_path)])
+        if done:
+            return attempts
+    else:
+        if attempt("native", ["install", "-r", str(req_path)]):
+            return attempts
+    if last["category"] in ("NETWORK_FAILURE", "DNS_FAILURE"):
+        for num in (2, 3):
+            time.sleep(2 * num)
+            done = attempt("retry-%d" % num,
+                           ["install", "-r", str(req_path)])
+            if done:
+                return attempts
+            if done is None or last["category"] not in (
+                    "NETWORK_FAILURE", "DNS_FAILURE"):
+                break
+    if last["category"] in ("RUST_MISSING", "COMPILER_MISSING",
+                            "BUILD_TOOL_MISSING"):
+        need = set(_compat.NATIVE_INDEX.get(
+            (last["package"] or "").lower().replace("_", "-"),
+            {}).get("build", []))
+        if last["category"] == "RUST_MISSING":
+            need.add("rust")
+        if last["category"] == "COMPILER_MISSING":
+            need.add("c")
+        need -= {"c-optional", "unknown-toolchain"}
+        if not need:
+            need = {"c"}
+        if _provision_toolchains(ctx, need, ledger, env_hash,
+                                 profile, offline):
+            if attempt("toolchain:%s" % "+".join(sorted(need)),
+                       ["install", "-r", str(req_path)]):
+                return attempts
+    if last["package"] and not offline and last["category"] in (
+            "WHEEL_UNAVAILABLE", "PYTHON_INCOMPATIBILITY",
+            "BUILD_TOOL_MISSING", "RUST_MISSING",
+            "COMPILER_MISSING"):
+        norm = last["package"].lower().replace("_", "-")
+        newer = _newer_with_wheels(norm, fp, cache_dir)
+        if newer:
+            ctx.say("compatible release with wheels: %s==%s"
+                    % (norm, newer))
+            if attempt("compatible-bump",
+                       ["install", "%s==%s" % (norm, newer),
+                        "-r", str(req_path)]):
+                return attempts
+    if _is_extras_failure(last["package"]):
+        minimal = _write_minimal_requirements(ctx, req_path)
+        if minimal is not None and attempt(
+                "minimal-core", ["install", "-r",
+                                 str(minimal)]):
+            ctx.warn("SAFE FALLBACK active: running without "
+                     "uvicorn[standard] extras (see "
+                     ".governance/requirements-minimal.txt)")
+            return attempts
+    if last["category"] == "PERMISSION_FAILURE":
+        sig = _recovery.failure_signature(
+            "DEPENDENCIES", "PERMISSION_FAILURE", "-", "recreate",
+            env_hash)
+        if not ledger.attempted("DEPENDENCIES", sig, "recreate"):
+            ctx.warn("venv permissions broken → recreating "
+                     "(CAUTION)")
+            shutil.rmtree(VENV, ignore_errors=True)
+            code, output = run([sys.executable, "-m", "venv",
+                                str(VENV)], ctx, timeout=300)
+            ledger.record("DEPENDENCIES", sig, "recreate",
+                          "venv recreate", env_hash,
+                          "ok" if code == 0 else "failed",
+                          "" if code == 0 else output[-200:])
+            if code == 0 and attempt(
+                    "venv-recreated",
+                    ["install", "-r", str(req_path)]):
+                return attempts
+    if last["category"] == "DISK_SPACE":
+        run([str(python), "-m", "pip", "cache", "purge"], ctx,
+            timeout=120)
+        if attempt("after-purge",
+                   ["install", "-r", str(req_path)]):
+            return attempts
+    if not attempts:
+        prior = [entry for entry in ledger.entries()
+                 if entry.get("step") == "DEPENDENCIES"]
+        raise RecoveryExhausted({
+            "step": "DEPENDENCIES", "package": "-",
+            "category": last["category"],
+            "root_cause": "every strategy already failed "
+            "identically for this environment; fix the cause "
+            "below, then re-run",
+            "tried": [{"strategy": entry.get("strategy"),
+                       "result": entry.get("result")}
+                      for entry in prior[-8:]],
+            "required": "a changed environment (new toolchain, "
+            "new pins) or a manual fix",
+            "next_action": "inspect %s, fix the recorded "
+            "cause, then re-run" % ledger.path,
+            "ledger": str(ledger.path)})
+    info = {"step": "DEPENDENCIES",
+            "package": last["package"] or "-",
+            "category": last["category"],
+            "root_cause": "last attempt failed: %s" % last[
+                "category"],
+            "tried": [{"strategy": name, "result": "failed"}
+                      for name in attempts],
+            "required": "manual fix for %s" % last["category"],
+            "next_action": "; ".join(_recovery_alternatives(
+                last["category"], last["package"], profile,
+                fp)[:2]),
+            "ledger": str(ledger.path)}
+    raise RecoveryExhausted(info)
+
+
+def ensure_venv(ctx, offline, fp, profile, ledger, env_hash):
+    """Validate/create/repair the venv, then install with recovery."""
+    python = _venv_python()
+    if python.is_file():
+        ok, reason = validate_venv(ctx, python)
+        if ok and _backend_imports_ok(ctx, python):
+            ctx.say("backend deps present → skip install")
+            return python
+        if not ok:
+            sig = _recovery.failure_signature(
+                "RUNTIME", "BROKEN", "venv", "recreate",
+                env_hash)
+            if ledger.attempted("RUNTIME", sig, "recreate"):
+                raise RuntimeError(
+                    "venv recreate already failed once "
+                    "(%s); delete .venv manually" % reason)
+            ctx.warn("venv invalid (%s) → recreating (CAUTION)"
+                     % reason)
+            shutil.rmtree(VENV, ignore_errors=True)
+            ledger.record("RUNTIME", sig, "recreate",
+                          "rm -rf .venv", env_hash, "ok", reason)
+            python = _venv_python()
+        else:
+            ctx.say("venv valid but deps missing → install")
+    if not python.is_file():
+        ctx.say("creating virtualenv .venv")
+        code, output = run([sys.executable, "-m", "venv",
+                            str(VENV)], ctx, timeout=300)
+        if code != 0:
+            raise RuntimeError("venv failed: %s" % output[-300:])
+        python = _venv_python()
+    req = ROOT / "backend" / "requirements.txt"
+    lock = GOV / "requirements.lock"
+    if offline and lock.is_file():
+        ctx.say("offline: installing from locked resolution")
+        req = lock
+    pip_install_with_recovery(ctx, python, req, fp, profile,
+                              ledger, env_hash, offline)
+    if not _backend_imports_ok(ctx, python):
+        raise RecoveryExhausted({
+            "step": "DEPENDENCIES", "package": "-",
+            "category": "PROJECT_ERROR",
+            "root_cause": "pip exited 0 but app imports fail",
+            "tried": [{"strategy": "import-validation",
+                       "result": "failed"}],
+            "required": "working fastapi/uvicorn/pydantic "
+            "imports",
+            "next_action": "inspect the venv with: "
+            ".venv/bin/python -c 'import fastapi, uvicorn, "
+            "pydantic'",
+            "ledger": str(ledger.path)})
+    _write_lock(ctx, python)
     return python
 
 
@@ -763,7 +1263,8 @@ def npm_state_path():
     return GOV / "npm.json"
 
 
-def ensure_build(ctx, env, skip_build, offline):
+def ensure_build(ctx, env, skip_build, offline, ledger=None,
+                   env_hash=""):
     if skip_build:
         ctx.say("build skipped by flag (services must already exist)")
         return {"skipped": True}
@@ -794,6 +1295,26 @@ def ensure_build(ctx, env, skip_build, offline):
                 ctx.say("npm ci in offline mode (cache)")
             code, output = run(["npm"] + flags, ctx, timeout=900,
                                cwd=frontend)
+            if code != 0 and not offline and ledger is not None:
+                classified = _recovery.classify_failure(output)
+                if classified["category"] in ("NETWORK_FAILURE",
+                                             "DNS_FAILURE"):
+                    sig = _recovery.failure_signature(
+                        "BUILD", classified["category"], None,
+                        "retry", env_hash)
+                    if not ledger.attempted("BUILD", sig,
+                                            "retry"):
+                        ctx.say("npm failed on network; one "
+                                "retry with backoff")
+                        time.sleep(5)
+                        code, output = run(["npm"] + flags, ctx,
+                                           timeout=900,
+                                           cwd=frontend)
+                        ledger.record(
+                            "BUILD", sig, "retry", "npm ci",
+                            env_hash,
+                            "ok" if code == 0 else "failed",
+                            "" if code == 0 else output[-300:])
             if code != 0 and not offline:
                 record_failure(ctx, "build.npm-ci", "npm ci",
                                output[-300:], "npm ci --offline")
@@ -1152,30 +1673,154 @@ def final_report(ctx, sections, urls, healthy, failed=None):
 
 
 def print_banner(ctx, report, urls, initialized):
-    lines = ["", "=" * 52, " APKFORGE SYSTEM BOOTSTRAP", "=" * 52, "",
-             "Run ID: %s" % ctx.run_id, ""]
-    for label in ("environment", "tools", "configuration", "database",
-                  "migrations", "seed", "build", "backend", "frontend",
-                  "health", "smoke"):
-        value = report.get(label, "?")
-        if label == "health" and isinstance(value, list):
+    print("")
+    print("=" * 52)
+    print(" APKFORGE BOOTSTRAP")
+    print("=" * 52)
+    print("")
+    print("Run ID: %s" % ctx.run_id)
+    print("Engine: %s" % ENGINE_VERSION)
+    print("Environment: %s" % report.get("env_summary", "?"))
+    print("")
+    print("TOOLS")
+    for row in report.get("tools_detail", []):
+        if row.get("adaptive_status") == "AVAILABLE":
+            mark = "reused %s" % row.get("detected_version", "-")
+        elif row.get("role") == "REQUIRED":
+            mark = "!! %s" % row.get("adaptive_status")
+        else:
+            mark = "skipped (%s)" % str(
+                row.get("adaptive_status", "?")).lower().replace(
+                    "_", " ")
+        print("  %-10s %s" % (row.get("tool", "?"), mark))
+    print("")
+    for key in ("runtime", "dependencies", "database",
+                "configuration", "build", "backend", "frontend",
+                "health", "smoke"):
+        value = report.get(key, "?")
+        if isinstance(value, list):
             value = "ok" if value and all(
-                check["ok"] for check in value) else "FAIL"
-        mark = "PASS" if value in ("ok", True) else (
-            "SKIP" if value == "skipped" else "FAIL")
-        lines.append("%-15s %s" % (label.capitalize(), mark))
-    lines += ["", "Administrator:    %s" % (
-        "READY" if initialized else "REQUIRED (first-run setup)"), "",
-        "Local URL:", "  %s" % urls.get("web_url", ""), "",
-        "Admin Setup:", "  %s#/admin/setup" % urls.get("web_url", ""),
-        "", "API:", "  %s" % urls.get("api_url", ""), "", "Status:",
-        "READY" if ctx.state == "READY" else ctx.state,
-        "=" * 52, ""]
-    text = "\n".join(lines)
-    if not ctx.json_only:
-        print(text, flush=True)
-    for line in text.splitlines():
-        ctx._handle.write(line + "\n")
+                check.get("ok") for check in value) else (
+                    "?" if not value else "FAIL")
+        print("  %-12s %s" % (
+            key.upper(), value.upper()
+            if isinstance(value, str) else "?"))
+    print("")
+    recovered = report.get("recovery", [])
+    if recovered:
+        print("RECOVERY")
+        for item in recovered:
+            print("  recovered via %s: %s"
+                  % (item.get("strategy"), item.get("detail")))
+    else:
+        print("Recovery: none needed")
+    print("")
+    print("Administrator: %s" % ("READY (setup complete)"
+                                 if initialized else
+                                 "OPEN the setup URL below"))
+    print("API URL: %s" % urls.get("api_url", "?"))
+    print("Web URL: %s" % urls.get("web_url", "?"))
+    print("Status: READY")
+    print("")
+
+
+def _saved_inventory():
+    path = GOV / "tool-inventory.json"
+    try:
+        rows = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return rows if isinstance(rows, list) else None
+
+
+def verify_tools_saved():
+    rows = _saved_inventory()
+    if not rows:
+        return False
+    for row in rows:
+        if row.get("role") != "REQUIRED":
+            continue
+        if row.get("adaptive_status") != "AVAILABLE":
+            return False
+        path = row.get("path")
+        if not path or not Path(path).exists():
+            return False
+    return True
+
+
+def verify_runtime_saved():
+    python = _venv_python()
+    if not python.is_file():
+        return False
+    if not (GOV / "requirements.lock").is_file():
+        return False
+    try:
+        proc = subprocess.run(
+            [str(python), "-c",
+             "import fastapi, uvicorn, pydantic"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            timeout=60)
+    except OSError:
+        return False
+    return proc.returncode == 0
+
+
+def verify_config_saved():
+    values = parse_env_file(ROOT / ".env")
+    if not values:
+        return False
+    return not validate_config(values) and not secret_check(values)
+
+
+def verify_database_saved():
+    values = parse_env_file(ROOT / ".env")
+    db_path = values.get("APKFORGE_DB",
+                         str(ROOT / "data" / "apkforge.db"))
+    if not Path(db_path).is_file():
+        return False
+    sys.path.insert(0, str(ROOT / "backend"))
+    try:
+        from app.core.migrations import status as migration_status
+        return migration_status(db_path)["pending"] == []
+    except Exception:
+        return False
+
+
+def verify_build_saved():
+    if not (ROOT / "frontend" / "dist" / "index.html").is_file():
+        return False
+    lock = ROOT / "frontend" / "package-lock.json"
+    lock_hash = hashlib.sha256(lock.read_bytes()).hexdigest() \
+        if lock.is_file() else "none"
+    try:
+        recorded = json.loads(npm_state_path().read_text(
+            encoding="utf-8"))
+    except (OSError, ValueError):
+        return False
+    return recorded.get("lock") == lock_hash
+
+
+def _plan_state(ctx):
+    values = parse_env_file(ROOT / ".env")
+    db_path = values.get("APKFORGE_DB",
+                         str(ROOT / "data" / "apkforge.db"))
+    venv_python = _venv_python()
+    valid = validate_venv(ctx, venv_python)[0] \
+        if venv_python.is_file() else False
+    return {"venv_exists": venv_python.is_file(),
+            "venv_valid": valid,
+            "env_exists": (ROOT / ".env").is_file(),
+            "db_exists": Path(db_path).is_file()}
+
+
+def _adaptive_rows(rows):
+    """Legacy rows back to the adaptive shape (plan/profile)."""
+    return [{"tool": row["tool"],
+             "status": row.get("adaptive_status"),
+             "role": row.get("role"),
+             "detected": row.get("detected_version"),
+             "source": row.get("source", "")}
+            for row in rows]
 
 
 def run_pipeline(args):
@@ -1183,26 +1828,104 @@ def run_pipeline(args):
     ctx = Ctx(run_id, LOGS / "bootstrap" / ("%s.log" % run_id),
               json_only=args.json)
     ctx.say("apkforge bootstrap %s (run %s)" % (ENGINE_VERSION, run_id))
+    ledger = _recovery.Ledger(GOV / "recovery-ledger.jsonl")
     report = {}
     urls = {}
     failed = None
     try:
         load_local_path()
+        if (ROOT / ".git").exists():
+            gate = _gitcare.quick_gate(ROOT)
+            if gate["verdict"] == "RECOVERY_REQUIRED":
+                ctx.step("GIT_RECOVERY_REQUIRED")
+                ctx.warn("git health gate failed; build blocked "
+                         "until green")
+                result = _gitcare.auto(ROOT, run_id, LOGS,
+                                       say=ctx.say)
+                final = _gitcare.quick_gate(ROOT)
+                if final["verdict"] != "OK":
+                    record_failure(
+                        ctx, "GIT", "gitcare auto",
+                        final["verdict"],
+                        "see logs/git-recovery/%s/report.md"
+                        % run_id)
+                    ctx.step("BLOCKED")
+                    raise RecoveryExhausted({
+                        "step": "GIT", "package": "-",
+                        "category": "PROJECT_ERROR",
+                        "root_cause": "repository still "
+                        "unhealthy after auto recovery",
+                        "tried": [{"strategy": action,
+                                   "result": "done"}
+                                  for action in
+                                  result["actions"]],
+                        "required": "valid index + objects + "
+                        "required source",
+                        "next_action": "run ./apkforge gitcare "
+                        "diagnose, fix the cause, re-run",
+                        "ledger": str(ledger.path)})
+                ctx.recovered("gitcare",
+                              ", ".join(result["actions"]))
+            report["git"] = "ok"
+        else:
+            report["git"] = "no-repo"
         ctx.step("ENVIRONMENT_CHECK")
         facts = audit_environment(ctx)
+        fp = facts["fingerprint"]
+        env_hash = fp["fingerprint_hash"]
         offline = not facts["network"]
         report["environment"] = "ok"
         (LOGS / ("environment-%s.json" % run_id)).write_text(
-            json.dumps(facts, indent=2), encoding="utf-8")
+            json.dumps(fp, indent=2, default=str),
+            encoding="utf-8")
         ctx.say("os=%s arch=%s ram=%sMB disk_free=%sMB network=%s" % (
             facts["os"], facts["arch"], facts.get("ram_mb", "?"),
             facts.get("disk_free_mb", "?"), facts["network"]))
-
-        rows = ensure_required_tools(ctx, offline)
-        ctx.step("TOOLS_READY")
-        report["tools"] = "ok"
+        ctx.step("ENVIRONMENT_DETECTED")
+        previous = _checkpoint.completed_stages(GOV)
+        if previous:
+            ctx.say("checkpoints from earlier runs: %s"
+                    % ",".join(previous))
+        rows = detect_tools(ctx, fp)
+        (GOV / "tool-inventory.json").write_text(
+            json.dumps(rows, indent=2), encoding="utf-8")
         (LOGS / ("tools-%s.json" % run_id)).write_text(
             json.dumps(rows, indent=2), encoding="utf-8")
+        ctx.step("TOOLS_INVENTORIED")
+        profile = _env.capability_profile(
+            fp, _adaptive_rows(rows))
+        preflight = _compat.preflight(
+            ROOT / "backend" / "requirements.txt", fp, profile,
+            cache_dir=ROOT / ".cache" / "apkforge")
+        (GOV / "compat-matrix.json").write_text(
+            json.dumps(preflight, indent=2, default=str),
+            encoding="utf-8")
+        for blocker in preflight["blockers"]:
+            ctx.warn("preflight: %s" % blocker)
+        ctx.step("COMPATIBILITY_RESOLVED")
+        plan = _plan.build_plan(
+            fp, profile, _adaptive_rows(rows), preflight, _plan_state(ctx),
+            {"install_tools": args.install_tools,
+             "skip_build": args.skip_build, "offline": offline})
+        (GOV / "bootstrap-plan.json").write_text(
+            json.dumps(plan, indent=2), encoding="utf-8")
+        for line in _plan.render_plan(plan).splitlines():
+            ctx.say("plan | " + line)
+        ctx.step("PLAN_CREATED")
+        if _checkpoint.should_skip(GOV, "TOOLS", env_hash,
+                                   verify_tools_saved):
+            ctx.say("resume: TOOLS verified → skip provisioning")
+        else:
+            rows = ensure_required_tools(ctx, offline, rows,
+                                         ledger, env_hash, fp)
+            (GOV / "tool-inventory.json").write_text(
+                json.dumps(rows, indent=2), encoding="utf-8")
+            _checkpoint.save_stage(GOV, "TOOLS",
+                                   "required tools available",
+                                   env_hash, run_id)
+        ctx.step("TOOLS_READY")
+        report["tools"] = "ok"
+        report["tools_detail"] = rows
         if args.install_tools:
             if offline:
                 raise RuntimeError("NETWORK REQUIRED: --install-tools "
@@ -1214,14 +1937,38 @@ def run_pipeline(args):
                 write_env_file(ROOT / ".env", values)
             except RuntimeError as exc:
                 ctx.warn("apktool install failed: %s" % exc)
-
-        env = ensure_config(ctx)
+        if _checkpoint.should_skip(GOV, "CONFIG", env_hash,
+                                   verify_config_saved):
+            ctx.say("resume: CONFIG verified → skip")
+            env = parse_env_file(ROOT / ".env")
+        else:
+            env = ensure_config(ctx)
+            _checkpoint.save_stage(GOV, "CONFIG", ".env validated",
+                                   env_hash, run_id)
         ctx.step("CONFIG_READY")
         report["configuration"] = "ok"
-
-        venv_python = ensure_venv(ctx, offline)
-
-        db_report = ensure_database(ctx, env)
+        if _checkpoint.should_skip(GOV, "RUNTIME", env_hash,
+                                   verify_runtime_saved):
+            ctx.say("resume: RUNTIME verified → skip install")
+            venv_python = _venv_python()
+        else:
+            venv_python = ensure_venv(ctx, offline, fp, profile,
+                                      ledger, env_hash)
+            _checkpoint.save_stage(GOV, "RUNTIME",
+                                   "venv + deps validated",
+                                   env_hash, run_id)
+        ctx.step("RUNTIME_READY")
+        report["runtime"] = "ok"
+        ctx.step("DEPENDENCIES_READY")
+        report["dependencies"] = "ok"
+        if _checkpoint.should_skip(GOV, "DATABASE", env_hash,
+                                   verify_database_saved):
+            ctx.say("resume: DATABASE verified → skip")
+        else:
+            ensure_database(ctx, env)
+            _checkpoint.save_stage(GOV, "DATABASE",
+                                   "migrations complete",
+                                   env_hash, run_id)
         ctx.step("DATABASE_READY")
         report["database"] = "ok"
         ctx.step("MIGRATIONS_READY")
@@ -1237,30 +1984,37 @@ def run_pipeline(args):
             ctx.warn("update notice skipped: %s" % exc)
         ctx.step("SEED_READY")
         report["seed"] = "ok"
-
-        build_report = ensure_build(ctx, env, args.skip_build, offline)
+        if args.skip_build:
+            build_report = ensure_build(ctx, env, True, offline,
+                                        ledger, env_hash)
+        elif _checkpoint.should_skip(GOV, "BUILD", env_hash,
+                                     verify_build_saved):
+            ctx.say("resume: BUILD verified → skip")
+            build_report = {"skipped": False}
+        else:
+            build_report = ensure_build(ctx, env, False, offline,
+                                        ledger, env_hash)
+            _checkpoint.save_stage(GOV, "BUILD",
+                                   "frontend dist ready",
+                                   env_hash, run_id)
         ctx.step("BUILD_READY")
         report["build"] = "skipped" if build_report["skipped"] else "ok"
-
         urls = ensure_services(ctx, env, venv_python)
         ctx.step("SERVICES_READY")
         report["backend"] = "ok"
         report["frontend"] = "ok"
         report["services"] = "ok"
-
         health = health_checks(ctx, env, urls)
         report["health"] = health
         if not all(check["ok"] for check in health):
             bad = [check["name"] for check in health if not check["ok"]]
             raise RuntimeError("health FAILED: %s" % ", ".join(bad))
         ctx.step("HEALTHY")
-
         smoke = smoke_tests(ctx, env, urls)
         report["smoke"] = "ok" if all(
             check["ok"] for check in smoke) else "FAIL"
         if report["smoke"] != "ok":
             raise RuntimeError("smoke tests FAILED")
-
         _code, setup_body = http_json(
             "GET", urls["api_url"] + "/api/v1/setup/status")
         initialized = isinstance(setup_body, dict) and \
@@ -1275,12 +2029,39 @@ def run_pipeline(args):
             ctx.step("ADMIN_SETUP_REQUIRED")
             ctx.say("first run: complete admin setup in the browser")
         ctx.step("READY")
+        report["env_summary"] = "%s / %s (%s)" % (
+            profile["platform"], fp["arch_machine"], env_hash)
+        report["recovery"] = ctx.recovery
         full = final_report(ctx, report, urls, True)
         write_governance(ctx, env, urls, full)
         print_banner(ctx, report, urls, initialized)
         if args.json:
-            print(json.dumps(full, indent=2))
+            print(json.dumps(full, indent=2, default=str))
         return 0
+    except RecoveryExhausted as exc:
+        if ctx.state != "BLOCKED":
+            ctx.step("BLOCKED")
+        info = exc.info
+        block = _recovery.exhausted_report(info)
+        ctx.say(block)
+        (LOGS / "errors").mkdir(exist_ok=True)
+        (LOGS / "errors" / ("%s.log" % run_id)).write_text(
+            redact(block), encoding="utf-8")
+        record_failure(ctx, info.get("step", "?"), "pipeline",
+                       info.get("root_cause", "?"),
+                       info.get("next_action", "?"))
+        full = final_report(ctx, report, urls, False, failed="%s: %s" % (
+            info.get("step"), info.get("root_cause")))
+        try:
+            write_governance(ctx, parse_env_file(ROOT / ".env") or {},
+                             urls, full)
+        except Exception:
+            pass
+        if not ctx.json_only:
+            print(block, flush=True)
+        if args.json:
+            print(json.dumps(full, indent=2, default=str))
+        return 1
     except Exception as exc:
         failed = "%s: %s" % (ctx.state, exc)
         ctx.say("FAILED: %s" % failed)
@@ -1307,8 +2088,123 @@ def run_pipeline(args):
             print("NEXT ACTION : fix the cause above, then re-run "
                   "./apkforge (it resumes safely)", flush=True)
         if args.json:
-            print(json.dumps(full, indent=2))
+            print(json.dumps(full, indent=2, default=str))
         return 1
+    finally:
+        ctx.close()
+
+
+def cmd_plan(args):
+    run_id = new_run_id()
+    ctx = Ctx(run_id, LOGS / "bootstrap" / ("%s.log" % run_id),
+              json_only=args.json)
+    try:
+        load_local_path()
+        facts = audit_environment(ctx)
+        fp = facts["fingerprint"]
+        profile = _env.capability_profile(
+            fp, _tools.inventory(TOOL_MATRIX, fp=fp))
+        flex = _compat.preflight(
+            ROOT / "backend" / "requirements.txt", fp, profile,
+            cache_dir=ROOT / ".cache" / "apkforge")
+        plan = _plan.build_plan(
+            fp, profile, _adaptive_rows(detect_tools(ctx, fp)), flex,
+            _plan_state(ctx),
+            {"install_tools": args.install_tools,
+             "skip_build": args.skip_build,
+             "offline": not facts["network"]})
+        report = _plan.render_plan(plan)
+        print(report)
+        (LOGS / ("plan-%s.txt" % run_id)).write_text(
+            report + "\n", encoding="utf-8")
+        return 0
+    finally:
+        ctx.close()
+
+
+def cmd_gitcare(args):
+    import argparse as _ap
+    parser = _ap.ArgumentParser(prog="apkforge gitcare")
+    parser.add_argument("action", nargs="?", default="status",
+                        choices=["status", "diagnose", "cleanup",
+                                 "repair-index", "report"])
+    parser.add_argument("--yes", action="store_true")
+    parser.add_argument("--deep", action="store_true")
+    parser.add_argument("--json", action="store_true")
+    parsed = parser.parse_args(args.command_args or [])
+    run_id = new_run_id()
+    ctx = Ctx(run_id, LOGS / "bootstrap" / ("%s.log" % run_id),
+              json_only=args.json)
+    try:
+        if parsed.action == "status":
+            gate = _gitcare.quick_gate(ROOT)
+            for check in gate["checks"]:
+                mark = "ok" if check["ok"] else "FAIL"
+                detail = (" (%s)" % check["detail"]
+                          if not check["ok"] and check["detail"]
+                          else "")
+                print("%-14s %s%s" % (check["name"], mark,
+                                      detail))
+            print("verdict: %s" % gate["verdict"])
+            return 0 if gate["verdict"] == "OK" else 1
+        if parsed.action == "report":
+            repodir = LOGS / "git-recovery"
+            reports = sorted(repodir.glob("*/report.md")) \
+                if repodir.exists() else []
+            if parsed.json:
+                print(json.dumps(
+                    {"reports": [str(item) for item in reports]},
+                    indent=2))
+            elif reports:
+                print("latest: %s" % reports[-1])
+            else:
+                print("no gitcare reports yet "
+                      "(run: ./apkforge gitcare diagnose)")
+            return 0 if reports else 1
+        if parsed.action == "diagnose":
+            data = _gitcare.diagnose(ROOT)
+            if parsed.json:
+                print(json.dumps(data, indent=2, default=str))
+            else:
+                print("verdict: %s" % data["verdict"])
+                for issue in data["issues"]:
+                    print("- [%s] %s: %s"
+                          % (issue["severity"],
+                             issue["finding"], issue["detail"]))
+                if data["verdict"] == "OK":
+                    print("repository healthy")
+            return 0
+        if parsed.action == "cleanup":
+            if parsed.deep and not parsed.yes:
+                print("refusing deep cleanup without --yes")
+                return 1
+            payload = _gitcare.cleanup(ROOT, dry_run=False,
+                                       deep=parsed.deep)
+            if parsed.json:
+                print(json.dumps(payload, indent=2))
+            else:
+                print("removed %d files (%d bytes)"
+                      % (payload["removed_count"],
+                         payload["removed_bytes"]))
+                if payload["protected"]:
+                    print("protected: %s"
+                          % ", ".join(payload["protected"]))
+            return 0
+        if not parsed.yes:
+            print("refusing index repair without --yes")
+            return 1
+        try:
+            result = _gitcare.repair_index(
+                ROOT, say=lambda msg: print("gitcare: %s" % msg))
+        except _gitcare.GitCareError as exc:
+            print("gitcare: %s" % exc)
+            return 1
+        if parsed.json:
+            print(json.dumps(result, indent=2))
+        else:
+            for step in result["steps"]:
+                print("- %s" % step)
+        return 0
     finally:
         ctx.close()
 
@@ -1331,6 +2227,29 @@ def cmd_check(args):
             print("%-10s %-14s detected=%-8s want=%s" % (
                 row["tool"], row["status"], row["detected_version"],
                 row["required_version"]))
+        fp = facts["fingerprint"]
+        profile = _env.capability_profile(
+            fp, _adaptive_rows(rows))
+        flex = _compat.preflight(
+            ROOT / "backend" / "requirements.txt", fp, profile,
+            cache_dir=ROOT / ".cache" / "apkforge")
+        print("--- compatibility ---")
+        for verdict in flex["packages"]:
+            detail = verdict.get("version") or verdict.get(
+                "requested") or ""
+            print("%s %s %s" % (verdict["package"],
+                                verdict["status"],
+                                detail).rstrip())
+        for warning in flex["warnings"]:
+            print("warning: %s" % warning)
+        for blocker in flex["blockers"]:
+            print("blocker: %s" % blocker)
+        plan = _plan.build_plan(
+            fp, profile, _adaptive_rows(rows), flex, _plan_state(ctx),
+            {"install_tools": False, "skip_build": False,
+             "offline": not facts["network"]})
+        print("--- plan ---")
+        print(_plan.render_plan(plan))
         print("--- config ---")
         print(".env:", "present" if values else "missing (will create)")
         if values:
@@ -1451,6 +2370,8 @@ def build_parser():
         prog="apkforge", description="APKForge one-command bootstrap")
     parser.add_argument("--check", action="store_true",
                         help="audit only, change nothing")
+    parser.add_argument("--plan", action="store_true",
+                        help="print the adaptive plan and exit")
     parser.add_argument("--status", action="store_true",
                         help="show services + state, change nothing")
     parser.add_argument("--logs", action="store_true",
@@ -1481,6 +2402,8 @@ def build_parser():
 def main(argv=None):
     args = build_parser().parse_args(argv)
     load_local_path()
+    if args.command == "gitcare":
+        return cmd_gitcare(args)
     if args.command == "update":
         import importlib.util as _ilu
         _spec = _ilu.spec_from_file_location(
@@ -1491,9 +2414,11 @@ def main(argv=None):
         return _mod.main(args.command_args)
     if args.command is not None:
         build_parser().error(
-            "unknown command %r (try: update)" % args.command)
+            "unknown command %r (try: update, gitcare)" % args.command)
     if args.check:
         return cmd_check(args)
+    if args.plan:
+        return cmd_plan(args)
     if args.status:
         return cmd_status(args)
     if args.logs:

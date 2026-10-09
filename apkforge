@@ -2,6 +2,7 @@
 # APKForge one-command bootstrap.
 #   ./apkforge            full pipeline: provision → serve → verify
 #   ./apkforge --check    audit only · --status · --logs · --stop
+#   ./apkforge --plan     adaptive plan (read-only) · gitcare repo care
 #   ./apkforge --repair   retry · --reset-dev --yes (guarded dev reset)
 #   ./apkforge update     full update (or: update --check/--status/--rollback)
 set -eu
