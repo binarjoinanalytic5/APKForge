@@ -64,6 +64,49 @@ def test_health(client):
     assert response.json() == {"status": "ok", "api_version": "1.0.0"}
 
 
+def _mount_app(tmp_path, monkeypatch, with_dist):
+    """Build an app whose ROOT points at tmp (isolated frontend probe)."""
+    if with_dist:
+        dist = tmp_path / "frontend" / "dist"
+        dist.mkdir(parents=True)
+        (dist / "index.html").write_text(
+            "<html>APKForge</html>", encoding="utf-8")
+    monkeypatch.setenv("APKFORGE_KEY",
+                       "mount-test-key-0123456789abcdef-XYZ!")
+    monkeypatch.setenv("APKFORGE_DB", str(tmp_path / "t.db"))
+    monkeypatch.setenv("APKFORGE_BLOBS", str(tmp_path / "blobs"))
+    monkeypatch.setenv("APKFORGE_WORK", str(tmp_path / "work"))
+    monkeypatch.setenv("APKFORGE_PLUGINS", str(ROOT / "plugins"))
+    import app.main as main
+    import importlib
+    importlib.reload(main)
+    monkeypatch.setattr(main, "ROOT", tmp_path)
+    return main.create_app()
+
+
+def test_frontend_dist_mount_keeps_api_authoritative(
+        tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
+    app = _mount_app(tmp_path, monkeypatch, with_dist=True)
+    client = TestClient(app)
+    health = client.get("/api/v1/health")
+    assert health.status_code == 200
+    assert health.json() == {"status": "ok",
+                             "api_version": "1.0.0"}
+    assert client.get("/openapi.json").status_code == 200
+    index = client.get("/")
+    assert index.status_code == 200
+    assert "APKForge" in index.text
+
+
+def test_root_404_without_frontend_dist(tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
+    app = _mount_app(tmp_path, monkeypatch, with_dist=False)
+    client = TestClient(app)
+    assert client.get("/api/v1/health").status_code == 200
+    assert client.get("/").status_code == 404
+
+
 def test_auth_flow_and_errors(client):
     bad = client.post("/api/v1/auth/login",
                       json={"username": "ghost",

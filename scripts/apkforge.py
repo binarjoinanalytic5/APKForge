@@ -1030,6 +1030,20 @@ def _recovery_alternatives(category, package, profile, fp):
         "install rustc+cargo via the system manager, then re-run"
     c_hint = "pkg install clang, then re-run" if termux else \
         "install gcc/clang + python headers, then re-run"
+    if termux:
+        rust_build_hints = [
+            "on Termux, check and install the matching Rust "
+            "target standard libraries: pkg install "
+            "rust-std-aarch64-linux-android",
+            "verify rustc and the standard-library package "
+            "versions match before retrying the source build"]
+    else:
+        rust_build_hints = [
+            "the crate source failed to compile under rustc "
+            "here; try an older %s with wheels (see the PyPI "
+            "files page)" % package,
+            "free RAM and re-run (source builds need "
+            "~1 GB free)"]
     hints = {
         "RUST_MISSING": [rust_hint,
                          "use a Python with prebuilt %s wheels "
@@ -1053,12 +1067,7 @@ def _recovery_alternatives(category, package, profile, fp):
                               "backend/requirements.txt"],
         "VERSION_INCOMPATIBILITY": ["relax the pin in "
                                     "backend/requirements.txt"],
-        "RUST_BUILD_FAILURE": [
-            "on Termux, check and install the matching Rust target "
-            "standard libraries: pkg install "
-            "rust-std-aarch64-linux-android",
-            "verify rustc and the standard-library package versions "
-            "match before retrying the source build"],
+        "RUST_BUILD_FAILURE": rust_build_hints,
         "C_BUILD_FAILURE": [
             "the C extension failed to compile; try an older %s "
             "with wheels" % package,

@@ -228,7 +228,7 @@ def test_android_api_strategy_adopted(engine, ctx, tmp_path,
     kinds = {(entry.get("strategy"), entry.get("result"))
              for entry in ledger.entries()}
     assert ("native", "failed") in kinds
-    assert ("native_android_api_no_isolation (isolated)", "ok") in kinds
+    assert ("native_android_api_level (isolated)", "ok") in kinds
 
 
 # -- F. identical repeat refused ------------------------------------------

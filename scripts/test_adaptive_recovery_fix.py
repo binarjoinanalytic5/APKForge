@@ -180,6 +180,16 @@ def test_alternatives_prescribe_wheels_not_rust_install(engine):
     assert "wheel" in joined
 
 
+def test_alternatives_termux_rust_std_guidance(engine):
+    hints = engine._recovery_alternatives(
+        "RUST_BUILD_FAILURE", "pydantic-core", {},
+        {"termux": True})
+    joined = " ".join(hints)
+    assert "rust-std-aarch64-linux-android" in joined
+    assert "versions match before retrying" in joined
+    assert "reinstall" not in joined
+
+
 def test_ladder_never_repeats_identical_native(
         engine, ctx, tmp_path, monkeypatch):
     ledger = engine._recovery.Ledger(tmp_path / "ledger.jsonl")
