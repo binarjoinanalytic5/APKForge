@@ -132,10 +132,30 @@ def classify_failure(log_text, context=None):
         return any(needle.lower() in lowered
                    for needle in needles)
 
+    # -- precise local executable / toolchain failures ------------------
+    # Local build failures must win over unrelated registry text earlier
+    # in the same pip output.
+    if hit("filenotfounderror") and hit("maturin") and hit(
+            "no such file", "errno 2"):
+        return {"category": "BUILD_TOOL_MISSING", "package": package,
+                "evidence": evidence,
+                "root_cause": "maturin is installed in the candidate "
+                "environment but its executable is not reachable on "
+                "the build subprocess PATH"}
+    if hit("required to be available in rlib format") and \
+            hit("not found in this form"):
+        return {"category": "RUST_BUILD_FAILURE", "package": package,
+                "evidence": evidence,
+                "root_cause": "Rust sysroot lacks required standard "
+                "library rlibs (std/core/alloc/compiler_builtins); "
+                "rustc presence alone is insufficient"}
+
     # -- network / dns -------------------------------------------------
     if hit("nodename nor servname", "name or service not known",
-           "failed to resolve", "getaddrinfo failed", "eai_again",
-           "enotfound", "dns"):
+           "failed to resolve", "could not resolve host",
+           "getaddrinfo failed", "eai_again", "eai_noname",
+           "enotfound", "temporary failure in name resolution",
+           "dns lookup failed", "dns resolution failed"):
         return {"category": "DNS_FAILURE", "package": package,
                 "evidence": evidence,
                 "root_cause": "name resolution failed"}

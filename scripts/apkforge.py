@@ -1279,15 +1279,23 @@ def _package_in_graph(package, req_path, cache_dir):
 
 
 def _wheel_constraints(core_version, req_path, cache_dir):
-    """Constraints pinning a verified wheel + compatible pydantic.
+    """Pin a verified core wheel with Pydantic satisfying project bounds.
 
-    Returns (path|None, note). Without the pydantic pin the
-    resolver would replace the verified pydantic-core wheel with
-    a newer source-only release; both pins are validated against
-    the dependency graph, never invented.
+    An older, valid Pydantic/core pair may be needed when the newest
+    Pydantic release's core has no Android wheel yet.
     """
+    pydantic_spec = ""
+    try:
+        reqs = _compat.parse_requirements(req_path)
+    except OSError:
+        reqs = []
+    for req in reqs:
+        if _compat.normalize(req.get("name", "")) == "pydantic":
+            pydantic_spec = req.get("spec", "")
+            break
     pydantic_version = _compat.pydantic_for_core(
-        core_version, cache_dir=cache_dir)
+        core_version, cache_dir=cache_dir,
+        pydantic_spec=pydantic_spec)
     if pydantic_version is None:
         return None, ("no pydantic release accepts "
                       "pydantic-core==%s" % core_version)
@@ -1805,6 +1813,15 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                                       "python.exe" if os.name == "nt"
                                       else "python")
         merged = dict(env or {})
+        # PEP-517's no-build-isolation path invokes backend tools by name.
+        # Put the candidate venv bin/Scripts on PATH before staging or build.
+        candidate_bin = str(cand_python.parent)
+        inherited_path = (merged.get("PATH")
+                          or os.environ.get("PATH", ""))
+        path_items = [item for item in inherited_path.split(os.pathsep)
+                      if item and item != candidate_bin]
+        merged["PATH"] = os.pathsep.join([candidate_bin] + path_items)
+        merged["VIRTUAL_ENV"] = str(cand_dir)
         for spec in prepare_install:
             ctx.say("staging build requirement: %s" % spec)
             code, output = run(
@@ -1883,7 +1900,10 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                 classified["category"], probe,
                 _strategy.extract_signals(output))
             if note:
+                old_category = classified["category"]
                 classified = dict(classified, category=refined)
+                if refined != old_category:
+                    classified["root_cause"] = note
             row["probe"] = probe.get("tools", {})
             row["diagnosed_package"] = classified["package"]
             _record_attempt(ledger, row, classified["category"],
@@ -2052,16 +2072,46 @@ def pip_install_with_recovery(ctx, python, req_path, fp, profile,
                     continue
                 constraint = _pydantic_core_constraint(
                     req_path, cache_dir)
-                interpreter, _ = _compat.interpreter_tag(
-                    py_version)
+                interpreter, _ = _compat.interpreter_tag(py_version)
+                # Prefer the newest core constraint, then fall back to
+                # older verified Android wheels whose Pydantic pair is
+                # actually allowed by backend/requirements.txt.
                 candidate, reason = _compat.resolve_android_wheel(
                     constraint, interpreter,
-                    fp.get("arch_machine", ""), device_api,
-                    cache_dir)
+                    fp.get("arch_machine", ""), device_api, cache_dir)
                 if candidate is None:
-                    blocked.append(
-                        "prebuilt android wheel unavailable: %s"
-                        % reason)
+                    ctx.say("no Android wheel satisfies newest core "
+                            "constraint %s; trying compatible older "
+                            "Pydantic/core pairs" % (constraint or "(unknown)"))
+                    candidate, reason = _compat.resolve_android_wheel(
+                        "", interpreter, fp.get("arch_machine", ""),
+                        device_api, cache_dir)
+                excluded_core_versions = set()
+                pair_rejections = []
+                wconstraints = None
+                wnote = ""
+                while candidate is not None:
+                    core_version = candidate["version"]
+                    excluded_core_versions.add(core_version)
+                    wconstraints, wnote = _wheel_constraints(
+                        core_version, req_path, cache_dir)
+                    if wconstraints is not None:
+                        break
+                    pair_rejections.append("%s: %s" % (
+                        core_version, wnote))
+                    candidate, reason = _compat.resolve_android_wheel(
+                        "", interpreter, fp.get("arch_machine", ""),
+                        device_api, cache_dir,
+                        excluded_versions=excluded_core_versions)
+                if candidate is None:
+                    if pair_rejections:
+                        blocked.append(
+                            "no compatible Android wheel/Pydantic pair: "
+                            + "; ".join(pair_rejections))
+                    else:
+                        blocked.append(
+                            "prebuilt Android wheel unavailable: %s"
+                            % reason)
                     continue
                 ctx.say("android wheel selected: %s (sha256=%s, "
                         "api>=%d, %s)" % (
